@@ -96,6 +96,10 @@ func (doc *Document) MoveDown() {
 	}
 }
 
+func (doc *Document) GetBuffer() *Buffer {
+	return &doc.buffer
+}
+
 func (doc *Document) GetCursorRow() int {
 	return doc.cursorRow
 }
