@@ -32,10 +32,26 @@ Hello, world2
 あいうえお
 `
 
-	tb := tui.TextBox{}
-	tb.Init()
-	tb.Document.InsertString(msg)
-	tb.HasFocus = true
+	tb1 := tui.TextBox{}
+	tb1.Init()
+	tb1.X = 0
+	tb1.Y = 0
+	tb1.Width = 20
+	tb1.Height = 5
+	tb1.Document.InsertString(msg)
+	tb1.HasFocus = true
+
+	tb2 := tui.TextBox{}
+	tb2.Init()
+	tb2.X = 0
+	tb2.Y = 10
+	tb2.Width = 20
+	tb2.Height = 5
+	tb2.Document.InsertString(msg)
+	tb2.HasFocus = false
+
+	tb := &tb1
+	tbi := 1
 
 	s.Show()
 
@@ -44,7 +60,8 @@ Hello, world2
 	for {
 		s.Clear()
 
-		tb.Draw(s)
+		tb1.Draw(s)
+		tb2.Draw(s)
 
 		s.Show()
 
@@ -56,6 +73,19 @@ Hello, world2
 			switch e.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
 				return
+			case tcell.KeyTAB:
+				switch tbi {
+				case 1:
+					tb1.HasFocus = false
+					tb2.HasFocus = true
+					tb = &tb2
+					tbi = 2
+				case 2:
+					tb2.HasFocus = false
+					tb1.HasFocus = true
+					tb = &tb1
+					tbi = 1
+				}
 			case tcell.KeyUp:
 				tb.Document.MoveUp()
 			case tcell.KeyDown:

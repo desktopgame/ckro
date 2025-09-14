@@ -8,7 +8,7 @@ import (
 )
 
 type TextBox struct {
-	Document Document
+	Document *Document
 	X        int
 	Y        int
 	Width    int
@@ -17,11 +17,19 @@ type TextBox struct {
 }
 
 func (tb *TextBox) Init() {
+	tb.Document = &Document{}
 	tb.Document.Init()
 }
 
 func (tb *TextBox) Draw(s tcell.Screen) {
 	// バッファの内容を描画
+	clip := Clip{
+		Screen: s,
+		X:      tb.X,
+		Y:      tb.Y,
+		Width:  tb.Width,
+		Height: tb.Height,
+	}
 	def := tcell.StyleDefault
 	buf := tb.Document.GetBuffer()
 	y := 0
@@ -45,14 +53,14 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 					combining = runes[1:]
 				}
 
-				s.SetContent(x, y, mainRune, combining, def)
+				clip.SetContent(x, y, mainRune, combining, def)
 
 				// 全角文字の場合、次のセルを空にする
 				width := runewidth.RuneWidth(mainRune)
 				if width == 2 {
 					x++
 					if x < 80 { // 画面幅の制限内で
-						s.SetContent(x, y, 0, nil, def)
+						clip.SetContent(x, y, 0, nil, def)
 					}
 				}
 			}
@@ -95,14 +103,14 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 
 	// カーソル位置の文字を反転表示
 	cursorStyle := def.Reverse(true)
-	s.SetContent(screenX, cursorRow, currentRune, combining, cursorStyle)
+	clip.SetContent(screenX, cursorRow, currentRune, combining, cursorStyle)
 
 	// 全角文字の場合、隣接するセルもカーソル表示
 	if currentRune != ' ' {
 		width := runewidth.RuneWidth(currentRune)
 		if width == 2 {
 			// 隣接するセルにもカーソルを表示（空文字で反転）
-			s.SetContent(screenX+1, cursorRow, 0, nil, cursorStyle)
+			clip.SetContent(screenX+1, cursorRow, 0, nil, cursorStyle)
 		}
 	}
 
