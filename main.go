@@ -10,45 +10,6 @@ import (
 	"github.com/rivo/uniseg"
 )
 
-// Documentのカーソル位置（rune単位）を画面座標（grapheme cluster単位）に変換
-func documentToScreenPos(line string, docColumn int) int {
-	return text.DisplayPos(line, docColumn)
-}
-
-// 画面座標（grapheme cluster単位）でのカーソル位置の文字を取得
-func getCharAtScreenPos(line string, screenX int) (rune, []rune) {
-	currentX := 0
-	gr := uniseg.NewGraphemes(line)
-	for gr.Next() {
-		if currentX == screenX {
-			cluster := gr.Str()
-			runes := []rune(cluster)
-			if len(runes) > 0 {
-				mainRune := runes[0]
-				var combining []rune
-				if len(runes) > 1 {
-					combining = runes[1:]
-				}
-				return mainRune, combining
-			}
-		}
-		// 表示処理と同じように座標を進める
-		cluster := gr.Str()
-		if len(cluster) > 0 {
-			mainRune := []rune(cluster)[0]
-			width := runewidth.RuneWidth(mainRune)
-			if width == 2 {
-				currentX += 2 // 全角文字は2つ分進める
-			} else {
-				currentX++
-			}
-		} else {
-			currentX++
-		}
-	}
-	return ' ', nil
-}
-
 func main() {
 
 	s, err := tcell.NewScreen()
@@ -136,7 +97,7 @@ Hello, world2
 
 		if cursorRow < buf.GetLineCount() {
 			line := buf.GetLineAt(cursorRow).GetContent()
-			screenX = documentToScreenPos(line, cursorCol)
+			screenX = text.DisplayPos(line, cursorCol)
 
 			// カーソル位置の文字を取得（空行や行末の場合はスペース）
 			if cursorCol >= text.GraphemeLength(line) {
@@ -144,7 +105,7 @@ Hello, world2
 				currentRune = ' '
 				combining = nil
 			} else {
-				currentRune, combining = getCharAtScreenPos(line, screenX)
+				currentRune, combining = text.DisplayRunesAt(line, screenX)
 			}
 		} else {
 			// 無効な行の場合

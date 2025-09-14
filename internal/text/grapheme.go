@@ -107,3 +107,36 @@ func DisplayPos(line string, column int) int {
 	targetStr := GraphemeSubString(line, 0, column)
 	return runewidth.StringWidth(targetStr)
 }
+
+func DisplayRunesAt(line string, screenX int) (rune, []rune) {
+	currentX := 0
+	gr := uniseg.NewGraphemes(line)
+	for gr.Next() {
+		if currentX == screenX {
+			cluster := gr.Str()
+			runes := []rune(cluster)
+			if len(runes) > 0 {
+				mainRune := runes[0]
+				var combining []rune
+				if len(runes) > 1 {
+					combining = runes[1:]
+				}
+				return mainRune, combining
+			}
+		}
+		// 表示処理と同じように座標を進める
+		cluster := gr.Str()
+		if len(cluster) > 0 {
+			mainRune := []rune(cluster)[0]
+			width := runewidth.RuneWidth(mainRune)
+			if width == 2 {
+				currentX += 2 // 全角文字は2つ分進める
+			} else {
+				currentX++
+			}
+		} else {
+			currentX++
+		}
+	}
+	return ' ', nil
+}
