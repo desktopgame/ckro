@@ -5,6 +5,7 @@ import (
 
 	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/uniseg"
 )
 
 func main() {
@@ -40,8 +41,28 @@ Hello, world2
 		buf := doc.GetBuffer()
 		y := 0
 		for i := 0; i < buf.GetLineCount(); i++ {
-			for x, r := range buf.GetLineAt(i).GetContent() {
-				s.SetContent(x, y, r, nil, def)
+			line := buf.GetLineAt(i).GetContent()
+			x := 0
+
+			// unisegを使ってgrapheme clusterごとに処理
+			gr := uniseg.NewGraphemes(line)
+			for gr.Next() {
+				cluster := gr.Str()
+				runes := []rune(cluster)
+
+				if len(runes) > 0 {
+					// 最初のruneをメインとして設定
+					mainRune := runes[0]
+					var combining []rune
+
+					// 残りのruneをcombining charactersとして設定
+					if len(runes) > 1 {
+						combining = runes[1:]
+					}
+
+					s.SetContent(x, y, mainRune, combining, def)
+				}
+				x++
 			}
 			y++
 		}
