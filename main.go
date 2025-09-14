@@ -3,25 +3,15 @@ package main
 import (
 	"log"
 
+	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/gdamore/tcell/v2"
-	"github.com/mattn/go-runewidth"
 	"github.com/rivo/uniseg"
 )
 
 // Documentのカーソル位置（rune単位）を画面座標（grapheme cluster単位）に変換
 func documentToScreenPos(line string, docColumn int) int {
-	if docColumn <= 0 {
-		return 0
-	}
-
-	runes := []rune(line)
-	if docColumn >= len(runes) {
-		return runewidth.StringWidth(line)
-	}
-
-	targetStr := string(runes[:docColumn])
-	return runewidth.StringWidth(targetStr)
+	return text.DisplayPos(line, docColumn)
 }
 
 // 画面座標（grapheme cluster単位）でのカーソル位置の文字を取得

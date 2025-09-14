@@ -1,5 +1,7 @@
 package tui
 
+import "github.com/desktopgame/ckro/internal/text"
+
 type Document struct {
 	buffer       Buffer
 	cursorRow    int
@@ -14,18 +16,27 @@ func (doc *Document) Init() {
 }
 
 func (doc *Document) InsertLine() {
-	doc.buffer.InsertLine(doc.cursorRow, doc.cursorColumn)
+	currLine := doc.buffer.GetLineAt(doc.cursorRow)
+	codepointColumn := text.GraphemeToCodepointPos(currLine.GetContent(), doc.cursorColumn)
+
+	doc.buffer.InsertLine(doc.cursorRow, codepointColumn)
 	doc.cursorRow++
 	doc.cursorColumn = 0
 }
 
 func (doc *Document) InsertString(s string) {
-	at, err := doc.buffer.InsertString(doc.cursorRow, doc.cursorColumn, s)
+	currLine := doc.buffer.GetLineAt(doc.cursorRow)
+	codepointColumn := text.GraphemeToCodepointPos(currLine.GetContent(), doc.cursorColumn)
+
+	at, err := doc.buffer.InsertString(doc.cursorRow, codepointColumn, s)
 	if err != nil {
 		panic("illegal state")
 	}
-	doc.cursorRow = at.Row
-	doc.cursorColumn = at.Column
+	if at.Row < doc.buffer.GetLineCount() {
+		resultLine := doc.buffer.GetLineAt(at.Row)
+		doc.cursorRow = at.Row
+		doc.cursorColumn = text.CodepointToGraphemePos(resultLine.GetContent(), at.Column)
+	}
 }
 
 func (doc *Document) RemoveChar() {
@@ -33,19 +44,25 @@ func (doc *Document) RemoveChar() {
 	if doc.cursorRow > 0 {
 		if len(currLine.GetContent()) == 0 || doc.cursorColumn == 0 {
 			aboveLine := doc.buffer.GetLineAt(doc.cursorRow - 1)
-			cursorAt := len(aboveLine.GetContent())
+			cursorAt := text.GraphemeLength(aboveLine.GetContent())
 
 			doc.buffer.AppendString(doc.cursorRow-1, currLine.GetContent())
 			doc.buffer.RemoveLine(doc.cursorRow)
 			doc.cursorRow--
 			doc.cursorColumn = cursorAt
 		} else if doc.cursorColumn > 0 {
-			doc.buffer.RemoveString(doc.cursorRow, doc.cursorColumn-1, 1)
+			newContent := text.GraphemeRemove(currLine.GetContent(), doc.cursorColumn-1, 1)
+
+			currLine.Remove(0, len(currLine.GetContent()))
+			currLine.InsertString(0, newContent)
 			doc.cursorColumn--
 		}
 	} else {
 		if doc.cursorColumn > 0 {
-			doc.buffer.RemoveString(doc.cursorRow, doc.cursorColumn-1, 1)
+			newContent := text.GraphemeRemove(currLine.GetContent(), doc.cursorColumn-1, 1)
+
+			currLine.Remove(0, len(currLine.GetContent()))
+			currLine.InsertString(0, newContent)
 			doc.cursorColumn--
 		}
 	}
@@ -57,14 +74,14 @@ func (doc *Document) MoveLeft() {
 	} else {
 		if doc.cursorRow > 0 {
 			doc.cursorRow--
-			doc.cursorColumn = len(doc.buffer.GetLineAt(doc.cursorRow).GetContent())
+			doc.cursorColumn = text.GraphemeLength(doc.buffer.GetLineAt(doc.cursorRow).GetContent())
 		}
 	}
 }
 
 func (doc *Document) MoveRight() {
 	currLine := doc.buffer.GetLineAt(doc.cursorRow)
-	if doc.cursorColumn < len(currLine.GetContent()) {
+	if doc.cursorColumn < text.GraphemeLength(currLine.GetContent()) {
 		doc.cursorColumn++
 	} else {
 		if doc.cursorRow < doc.buffer.GetLineCount()-1 {
@@ -79,8 +96,9 @@ func (doc *Document) MoveUp() {
 		doc.cursorRow--
 
 		currLine := doc.buffer.GetLineAt(doc.cursorRow)
-		if doc.cursorColumn > len(currLine.GetContent()) {
-			doc.cursorColumn = len(currLine.GetContent())
+		lineLength := text.GraphemeLength(currLine.GetContent())
+		if doc.cursorColumn > lineLength {
+			doc.cursorColumn = lineLength
 		}
 	}
 }
@@ -90,8 +108,9 @@ func (doc *Document) MoveDown() {
 		doc.cursorRow++
 
 		currLine := doc.buffer.GetLineAt(doc.cursorRow)
-		if doc.cursorColumn > len(currLine.GetContent()) {
-			doc.cursorColumn = len(currLine.GetContent())
+		lineLength := text.GraphemeLength(currLine.GetContent())
+		if doc.cursorColumn > lineLength {
+			doc.cursorColumn = lineLength
 		}
 	}
 }
