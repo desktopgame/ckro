@@ -14,11 +14,35 @@ type TextBox struct {
 	Width    int
 	Height   int
 	HasFocus bool
+	ScrollX  int
+	ScrollY  int
 }
 
 func (tb *TextBox) Init() {
 	tb.Document = &Document{}
 	tb.Document.Init()
+}
+
+func (tb *TextBox) UpdateCursor() {
+	cursor := tb.Document.GetCursorRow()
+
+	startY := tb.ScrollY
+	endY := min(startY+tb.Height, tb.Document.GetBuffer().GetLineCount())
+
+	if cursor >= endY {
+		for cursor >= endY {
+			tb.ScrollY++
+
+			startY = tb.ScrollY
+			endY = min(startY+tb.Height, tb.Document.GetBuffer().GetLineCount())
+		}
+	} else if cursor <= startY {
+		for cursor <= startY && cursor > 0 {
+			tb.ScrollY--
+
+			startY = tb.ScrollY
+		}
+	}
 }
 
 func (tb *TextBox) Draw(s tcell.Screen) {
@@ -33,7 +57,10 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 	def := tcell.StyleDefault
 	buf := tb.Document.GetBuffer()
 	y := 0
-	for i := 0; i < buf.GetLineCount(); i++ {
+
+	startY := tb.ScrollY
+	endY := min(startY+tb.Height, buf.GetLineCount())
+	for i := startY; i < endY; i++ {
 		line := buf.GetLineAt(i).GetContent()
 		x := 0
 
@@ -103,14 +130,14 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 
 	// カーソル位置の文字を反転表示
 	cursorStyle := def.Reverse(true)
-	clip.SetContent(screenX, cursorRow, currentRune, combining, cursorStyle)
+	clip.SetContent(screenX, cursorRow-tb.ScrollY, currentRune, combining, cursorStyle)
 
 	// 全角文字の場合、隣接するセルもカーソル表示
 	if currentRune != ' ' {
 		width := runewidth.RuneWidth(currentRune)
 		if width == 2 {
 			// 隣接するセルにもカーソルを表示（空文字で反転）
-			clip.SetContent(screenX+1, cursorRow, 0, nil, cursorStyle)
+			clip.SetContent(screenX+1, cursorRow-tb.ScrollY, 0, nil, cursorStyle)
 		}
 	}
 
