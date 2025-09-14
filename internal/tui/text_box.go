@@ -4,7 +4,6 @@ import (
 	"github.com/desktopgame/ckro/internal/text"
 	"github.com/gdamore/tcell/v2"
 	"github.com/mattn/go-runewidth"
-	"github.com/rivo/uniseg"
 )
 
 type TextBox struct {
@@ -65,9 +64,8 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 		x := 0
 
 		// unisegを使ってgrapheme clusterごとに処理
-		gr := uniseg.NewGraphemes(line)
-		for gr.Next() {
-			cluster := gr.Str()
+		clusters := text.GraphemeClusters(line)
+		for _, cluster := range clusters {
 			runes := []rune(cluster)
 
 			if len(runes) > 0 {
