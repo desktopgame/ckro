@@ -32,7 +32,8 @@ func getCharAtScreenPos(line string, screenX int) (rune, []rune) {
 				return mainRune, combining
 			}
 		}
-		currentX++
+		// currentX++
+		currentX += runewidth.StringWidth(gr.Str())
 	}
 	return ' ', nil
 }
