@@ -6,6 +6,7 @@ import (
 	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/gdamore/tcell/v2"
+	"github.com/mattn/go-runewidth"
 	"github.com/rivo/uniseg"
 )
 
@@ -57,6 +58,7 @@ func main() {
 Hello, world1
 👨‍👩‍👧‍👦
 Hello, world2
+あいうえお
 `
 
 	doc := tui.Document{}
@@ -64,6 +66,8 @@ Hello, world2
 	doc.InsertString(msg)
 
 	s.Show()
+
+	inputBuffer := []rune{}
 
 	// イベントループ
 	for {
@@ -94,6 +98,15 @@ Hello, world2
 					}
 
 					s.SetContent(x, y, mainRune, combining, def)
+
+					// 全角文字の場合、次のセルを空にする
+					width := runewidth.RuneWidth(mainRune)
+					if width == 2 {
+						x++
+						if x < 80 { // 画面幅の制限内で
+							s.SetContent(x, y, 0, nil, def)
+						}
+					}
 				}
 				x++
 			}
@@ -143,7 +156,13 @@ Hello, world2
 				doc.InsertLine()
 			case tcell.KeyRune:
 				// 通常の文字入力
-				doc.InsertString(string(e.Rune()))
+				inputBuffer = append(inputBuffer, e.Rune())
+				inputString := string(inputBuffer)
+				if text.GraphemeLength(inputString) == 1 {
+					doc.InsertString(inputString)
+					inputBuffer = []rune{}
+				}
+				//doc.InsertString("あ")
 			}
 		}
 	}
