@@ -32,8 +32,19 @@ func getCharAtScreenPos(line string, screenX int) (rune, []rune) {
 				return mainRune, combining
 			}
 		}
-		// currentX++
-		currentX += runewidth.StringWidth(gr.Str())
+		// 表示処理と同じように座標を進める
+		cluster := gr.Str()
+		if len(cluster) > 0 {
+			mainRune := []rune(cluster)[0]
+			width := runewidth.RuneWidth(mainRune)
+			if width == 2 {
+				currentX += 2 // 全角文字は2つ分進める
+			} else {
+				currentX++
+			}
+		} else {
+			currentX++
+		}
 	}
 	return ' ', nil
 }
@@ -126,12 +137,34 @@ Hello, world2
 		if cursorRow < buf.GetLineCount() {
 			line := buf.GetLineAt(cursorRow).GetContent()
 			screenX = documentToScreenPos(line, cursorCol)
-			currentRune, combining = getCharAtScreenPos(line, screenX)
+
+			// カーソル位置の文字を取得（空行や行末の場合はスペース）
+			if cursorCol >= text.GraphemeLength(line) {
+				// 行末またはそれを超えた位置
+				currentRune = ' '
+				combining = nil
+			} else {
+				currentRune, combining = getCharAtScreenPos(line, screenX)
+			}
+		} else {
+			// 無効な行の場合
+			screenX = 0
+			currentRune = ' '
+			combining = nil
 		}
 
 		// カーソル位置の文字を反転表示
 		cursorStyle := def.Reverse(true)
 		s.SetContent(screenX, cursorRow, currentRune, combining, cursorStyle)
+
+		// 全角文字の場合、隣接するセルもカーソル表示
+		if currentRune != ' ' {
+			width := runewidth.RuneWidth(currentRune)
+			if width == 2 {
+				// 隣接するセルにもカーソルを表示（空文字で反転）
+				s.SetContent(screenX+1, cursorRow, 0, nil, cursorStyle)
+			}
+		}
 
 		s.Show()
 
