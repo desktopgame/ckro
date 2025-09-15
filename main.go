@@ -84,22 +84,26 @@ func main() {
 	hbox.Controls = append(hbox.Controls, &treeSeparator)
 	hbox.Controls = append(hbox.Controls, &vbox)
 
+	stack := tui.Stack{}
+	stack.Init()
+	stack.Layers = append(stack.Layers, &hbox)
+
 	focusManager := tui.FocusManager{}
-	focusManager.Traverse(&hbox)
+	stack.Traverse(&focusManager)
 
 	w, h := s.Size()
-	hbox.Layout(w, h)
+	stack.Layout(w, h)
 
 	s.Show()
 
 	for {
 		s.Clear()
 
-		mw, mh := hbox.MinimumSize(w, h)
+		mw, mh := stack.MinimumSize(w, h)
 
 		if mw <= w && mh <= h {
-			hbox.Update()
-			hbox.Draw(s)
+			stack.Update()
+			stack.Draw(s)
 		}
 
 		s.Show()
@@ -109,7 +113,7 @@ func main() {
 		case *tcell.EventResize:
 			s.Sync()
 			w, h = e.Size()
-			hbox.Layout(w, h)
+			stack.Layout(w, h)
 		case *tcell.EventKey:
 			switch e.Key() {
 			case tcell.KeyTAB:
