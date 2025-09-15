@@ -154,20 +154,20 @@ func (b *Box) Layout(width int, height int) {
 
 func (b *Box) IsFlexibleWidth() bool {
 	for _, ctrl := range b.Controls {
-		if ctrl.IsFlexibleWidth() {
-			return true
+		if !ctrl.IsFlexibleWidth() {
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 func (b *Box) IsFlexibleHeight() bool {
 	for _, ctrl := range b.Controls {
-		if ctrl.IsFlexibleHeight() {
-			return true
+		if !ctrl.IsFlexibleHeight() {
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 func (b *Box) GetOrientation() Orientation {
