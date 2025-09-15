@@ -20,6 +20,8 @@ type TextBox struct {
 func (tb *TextBox) Init() {
 	tb.Document = &Document{}
 	tb.Document.Init()
+	tb.X = 0
+	tb.Y = 0
 	tb.Width = 20
 	tb.Height = 6
 	tb.ScrollX = 0
