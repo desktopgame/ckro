@@ -34,11 +34,11 @@ func main() {
 	tree.FlexibleHeight = true
 	// tree.TextBox.TextFrame()
 
-	sep_tree := tui.Tile{}
-	sep_tree.Init()
-	sep_tree.MinimumWidth = 1
-	sep_tree.FlexibleHeight = true
-	sep_tree.TextBox.TextVertical()
+	treeSeparator := tui.Tile{}
+	treeSeparator.Init()
+	treeSeparator.MinimumWidth = 1
+	treeSeparator.FlexibleHeight = true
+	treeSeparator.TextBox.TextVertical()
 
 	textArea := tui.Tile{}
 	textArea.Init()
@@ -47,11 +47,11 @@ func main() {
 	textArea.FlexibleHeight = true
 	// textArea.TextBox.TextFrame()
 
-	sep_textArea := tui.Tile{}
-	sep_textArea.Init()
-	sep_textArea.MinimumHeight = 1
-	sep_textArea.FlexibleWidth = true
-	sep_textArea.TextBox.TextHorizontal()
+	textAreaSeparator := tui.Tile{}
+	textAreaSeparator.Init()
+	textAreaSeparator.MinimumHeight = 1
+	textAreaSeparator.FlexibleWidth = true
+	textAreaSeparator.TextBox.TextHorizontal()
 
 	modeline := tui.Tile{}
 	modeline.Init()
@@ -59,11 +59,11 @@ func main() {
 	modeline.MinimumHeight = 3
 	// modeline.TextBox.TextFrame()
 
-	sep_modeline := tui.Tile{}
-	sep_modeline.Init()
-	sep_modeline.MinimumHeight = 1
-	sep_modeline.FlexibleWidth = true
-	sep_modeline.TextBox.TextHorizontal()
+	modelineSeparator := tui.Tile{}
+	modelineSeparator.Init()
+	modelineSeparator.MinimumHeight = 1
+	modelineSeparator.FlexibleWidth = true
+	modelineSeparator.TextBox.TextHorizontal()
 
 	minibuffer := tui.Tile{}
 	minibuffer.Init()
@@ -72,13 +72,13 @@ func main() {
 	// minibuffer.TextBox.TextFrame()
 
 	vbox.Controls = append(vbox.Controls, &textArea)
-	vbox.Controls = append(vbox.Controls, &sep_textArea)
+	vbox.Controls = append(vbox.Controls, &textAreaSeparator)
 	vbox.Controls = append(vbox.Controls, &modeline)
-	vbox.Controls = append(vbox.Controls, &sep_modeline)
+	vbox.Controls = append(vbox.Controls, &modelineSeparator)
 	vbox.Controls = append(vbox.Controls, &minibuffer)
 
 	hbox.Controls = append(hbox.Controls, &tree)
-	hbox.Controls = append(hbox.Controls, &sep_tree)
+	hbox.Controls = append(hbox.Controls, &treeSeparator)
 	hbox.Controls = append(hbox.Controls, &vbox)
 
 	w, h := s.Size()
@@ -92,11 +92,11 @@ func main() {
 		s.Clear()
 
 		tree.TextBox.Draw(s)
-		sep_tree.TextBox.Draw(s)
-		sep_textArea.TextBox.Draw(s)
+		treeSeparator.TextBox.Draw(s)
+		textAreaSeparator.TextBox.Draw(s)
 		textArea.TextBox.Draw(s)
 		modeline.TextBox.Draw(s)
-		sep_modeline.TextBox.Draw(s)
+		modelineSeparator.TextBox.Draw(s)
 		minibuffer.TextBox.Draw(s)
 
 		s.Show()
@@ -112,9 +112,9 @@ func main() {
 			// textArea.TextBox.TextFrame()
 			// modeline.TextBox.TextFrame()
 			// minibuffer.TextBox.TextFrame()
-			sep_tree.TextBox.TextVertical()
-			sep_textArea.TextBox.TextHorizontal()
-			sep_modeline.TextBox.TextHorizontal()
+			treeSeparator.TextBox.TextVertical()
+			textAreaSeparator.TextBox.TextHorizontal()
+			modelineSeparator.TextBox.TextHorizontal()
 		case *tcell.EventKey:
 			switch e.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
