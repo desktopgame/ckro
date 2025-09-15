@@ -79,11 +79,11 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 				}
 				width := runewidth.RuneWidth(mainRune)
 
-				if x+width >= tb.Width {
+				if x+width > tb.Width {
 					drawY++
 					x = 0
 				}
-				if drawY > tb.Height {
+				if drawY >= tb.Height {
 					break
 				}
 
@@ -96,11 +96,11 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 				}
 			}
 			x++
-			if x >= tb.Width {
+			if x > tb.Width {
 				drawY++
 				x = 0
 			}
-			if drawY > tb.Height {
+			if drawY >= tb.Height {
 				break
 			}
 		}
