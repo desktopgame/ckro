@@ -112,35 +112,63 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 	var combining []rune
 
 	if cursorRow < buf.GetLineCount() {
-		line := buf.GetLineAt(cursorRow).GetContent()
-		screenX = text.DisplayPos(line, cursorCol)
+		// カーソル位置の文字を取得（空行や行末の場合はスペース）
+		curosrLine := ""
+		currentRow := tb.ScrollY
+		substringFrom := 0
+		substringTo := 0
 
-		if screenX >= tb.Width {
-			remain := screenX - tb.Width
-			screenX = 0
-			cursorRow++
+		for i := tb.ScrollY; i < cursorRow; i++ {
+			line := buf.GetLineAt(i).GetContent()
+			curosrLine = line
+			screenX = text.DisplayWidth(line)
+			substringFrom = 0
+			substringTo = len(curosrLine)
 
-			for remain > 0 {
-				consume := min(remain, tb.Width)
-				screenX += consume
-				remain -= consume
+			currentRow++
 
-				if screenX >= tb.Width {
-					screenX = 0
-					cursorRow++
+			if screenX >= tb.Width {
+				remain := screenX - tb.Width
+				screenX = 0
+				// cursorRow++
+				currentRow++
+
+				substringFrom = tb.Width
+
+				for remain > 0 {
+					consume := min(remain, tb.Width)
+					screenX += consume
+					remain -= consume
+					substringFrom += consume
+
+					if screenX >= tb.Width {
+						screenX = 0
+						// cursorRow++
+						currentRow++
+					}
 				}
 			}
 		}
-		// cursorCol = screenX
+		cursorRow = currentRow
+		remainCol := cursorCol
+		screenX = cursorCol
+		for remainCol >= tb.Width {
+			remainCol -= tb.Width
+			screenX = remainCol
+			cursorRow++
+		}
+		// screenX = cursorCol
 
-		// カーソル位置の文字を取得（空行や行末の場合はスペース）
-		if cursorCol >= text.GraphemeLength(line) {
+		cursorLineRange := curosrLine[substringFrom:substringTo]
+		if cursorCol >= text.GraphemeLength(cursorLineRange) {
 			// 行末またはそれを超えた位置
 			currentRune = ' '
 			combining = nil
 		} else {
-			currentRune, combining = text.DisplayRunesAt(line, screenX)
+			currentRune, combining = text.DisplayRunesAt(cursorLineRange, screenX)
 		}
+		// cursorCol = screenX
+
 	} else {
 		// 無効な行の場合
 		screenX = 0
