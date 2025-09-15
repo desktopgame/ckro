@@ -44,7 +44,34 @@ func (b *Box) Layout(width int, height int) {
 			}
 		}
 	case Vertical:
+		offsetY := b.y
 
+		staticHeight := 0
+		flexibleControls := 0
+		for _, ctrl := range b.Controls {
+			if ctrl.IsFlexibleWidth() {
+				flexibleControls++
+			} else {
+				_, h := ctrl.MinimumSize()
+				staticHeight += h
+			}
+		}
+
+		for _, ctrl := range b.Controls {
+			ctrl.Move(b.x, offsetY)
+
+			if ctrl.IsFlexibleWidth() {
+				fh := (height - staticHeight) / flexibleControls
+				ctrl.Layout(width, fh)
+
+				offsetY += fh
+			} else {
+				_, h := ctrl.MinimumSize()
+				ctrl.Layout(width, h)
+
+				offsetY += h
+			}
+		}
 	}
 }
 
