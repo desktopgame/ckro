@@ -58,7 +58,7 @@ func main() {
 	modeline := tui.Tile{}
 	modeline.Init()
 	modeline.FlexibleWidth = true
-	modeline.MinimumHeight = 3
+	modeline.MinimumHeight = 1
 	// modeline.TextBox.TextFrame()
 
 	modelineSeparator := tui.Tile{}
@@ -70,7 +70,7 @@ func main() {
 	minibuffer := tui.Tile{}
 	minibuffer.Init()
 	minibuffer.FlexibleWidth = true
-	minibuffer.MinimumHeight = 3
+	minibuffer.MinimumHeight = 1
 	// minibuffer.TextBox.TextFrame()
 
 	vbox.Controls = append(vbox.Controls, &textArea)
