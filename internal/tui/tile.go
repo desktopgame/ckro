@@ -3,10 +3,10 @@ package tui
 type Tile struct {
 	TextBox *TextBox
 
-	MinimumWidth    int
-	MinimumHeight   int
-	FlexibleWidth   bool
-	FlexibleHeigght bool
+	MinimumWidth   int
+	MinimumHeight  int
+	FlexibleWidth  bool
+	FlexibleHeight bool
 }
 
 func (t *Tile) Init() {
@@ -33,5 +33,5 @@ func (t *Tile) IsFlexibleWidth() bool {
 }
 
 func (t *Tile) IsFlexibleHeight() bool {
-	return t.FlexibleHeigght
+	return t.FlexibleHeight
 }

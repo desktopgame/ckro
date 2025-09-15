@@ -31,14 +31,14 @@ func main() {
 	tree := tui.Tile{}
 	tree.Init()
 	tree.MinimumWidth = 10
-	tree.FlexibleHeigght = true
+	tree.FlexibleHeight = true
 	tree.TextBox.TextFrame()
 
 	textArea := tui.Tile{}
 	textArea.Init()
 	textArea.MinimumWidth = 3
 	textArea.FlexibleWidth = true
-	textArea.FlexibleHeigght = true
+	textArea.FlexibleHeight = true
 	textArea.TextBox.TextFrame()
 
 	modeline := tui.Tile{}
