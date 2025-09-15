@@ -34,7 +34,11 @@ func (tb *TextBox) WrappedLineCount() int {
 		if lineWidth <= tb.Width {
 			lc++
 		} else {
-			lc += (lineWidth / tb.Width) + 1
+			lc += (lineWidth / tb.Width)
+
+			if lineWidth%tb.Width > 0 {
+				lc++
+			}
 		}
 	}
 	return lc
