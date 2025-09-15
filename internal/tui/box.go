@@ -35,7 +35,7 @@ func (b *Box) MinimumSize(width int, height int) (Width int, Height int) {
 		mw = -1
 
 		for _, ctrl := range b.Controls {
-			w, _ := ctrl.MinimumSize(width, mw)
+			w, _ := ctrl.MinimumSize(width, mh)
 
 			if w > mw {
 				mw = w
