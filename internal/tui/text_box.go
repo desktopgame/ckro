@@ -234,6 +234,10 @@ func (tb *TextBox) TextClear() {
 }
 
 func (tb *TextBox) Draw(s tcell.Screen) {
+	if tb.Width == 0 || tb.Height == 0 {
+		return
+	}
+
 	// バッファの内容を描画
 	clip := Clip{
 		Screen: s,
