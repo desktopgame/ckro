@@ -159,12 +159,32 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 			}
 		}
 		cursorRow = currentRow
-		remainCol := cursorCol
-		screenX = cursorCol
-		for remainCol >= tb.Width {
-			remainCol -= tb.Width
-			screenX = remainCol
-			cursorRow++
+		lineSub := tb.Document.GetBuffer().GetLineAt(tb.Document.GetCursorRow()).GetContent()
+		screenX = text.DisplayPos(lineSub, cursorCol)
+		if screenX >= tb.Width {
+			charOffset := 0
+			charsTotal := 0
+			for screenX >= tb.Width {
+				chars := 0
+
+				for chars < tb.Width {
+					ch := text.GraphemeSubString(lineSub, charOffset, charOffset+1)
+					chw := text.DisplayWidth(ch)
+					chars += chw
+					charOffset++
+
+					if chars > tb.Width {
+						chars -= chw
+						charOffset--
+						break
+					}
+				}
+
+				cursorRow++
+				charsTotal += chars
+				screenX -= chars
+			}
+			screenX = text.DisplayPos(lineSub, cursorCol) - charsTotal
 		}
 		// screenX = cursorCol
 
