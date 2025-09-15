@@ -122,17 +122,17 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 
 	if cursorRow < buf.GetLineCount() {
 		// カーソル位置の文字を取得（空行や行末の場合はスペース）
-		curosrLine := ""
+		cursorLine := ""
 		currentRow := tb.ScrollY
 		substringFrom := 0
 		substringTo := 0
 
 		for i := tb.ScrollY; i < cursorRow; i++ {
 			line := buf.GetLineAt(i).GetContent()
-			curosrLine = line
+			cursorLine = line
 			screenX = text.DisplayWidth(line)
 			substringFrom = 0
-			substringTo = len(curosrLine)
+			substringTo = len(cursorLine)
 
 			currentRow++
 
@@ -188,7 +188,7 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 		}
 		// screenX = cursorCol
 
-		cursorLineRange := curosrLine[substringFrom:substringTo]
+		cursorLineRange := cursorLine[substringFrom:substringTo]
 		if cursorCol >= text.GraphemeLength(cursorLineRange) {
 			// 行末またはそれを超えた位置
 			currentRune = ' '
