@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/gdamore/tcell/v2"
 )
@@ -45,6 +46,7 @@ func main() {
 	textArea.MinimumWidth = 3
 	textArea.FlexibleWidth = true
 	textArea.FlexibleHeight = true
+	textArea.TextBox.ShowCursor = true
 	// textArea.TextBox.TextFrame()
 
 	textAreaSeparator := tui.Tile{}
@@ -86,7 +88,7 @@ func main() {
 
 	s.Show()
 
-	// inputBuffer := []rune{}
+	inputBuffer := []rune{}
 
 	for {
 		s.Clear()
@@ -120,27 +122,27 @@ func main() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
 				return
 			case tcell.KeyUp:
-				// tb.Document.MoveUp()
+				textArea.TextBox.Document.MoveUp()
 			case tcell.KeyDown:
-				// tb.Document.MoveDown()
+				textArea.TextBox.Document.MoveDown()
 			case tcell.KeyLeft:
-				// tb.Document.MoveLeft()
+				textArea.TextBox.Document.MoveLeft()
 			case tcell.KeyRight:
-				// tb.Document.MoveRight()
+				textArea.TextBox.Document.MoveRight()
 			case tcell.KeyBackspace, tcell.KeyBackspace2:
-				// tb.Document.RemoveChar()
+				textArea.TextBox.Document.RemoveChar()
 			case tcell.KeyEnter:
-				// tb.Document.InsertLine()
+				textArea.TextBox.Document.InsertLine()
 			case tcell.KeyRune:
-				// inputBuffer = append(inputBuffer, e.Rune())
-				// inputString := string(inputBuffer)
-				// if text.GraphemeLength(inputString) == 1 {
-				// 	tb.Document.InsertString(inputString)
-				// 	inputBuffer = []rune{}
-				// }
+				inputBuffer = append(inputBuffer, e.Rune())
+				inputString := string(inputBuffer)
+				if text.GraphemeLength(inputString) == 1 {
+					textArea.TextBox.Document.InsertString(inputString)
+					inputBuffer = []rune{}
+				}
 			}
 		}
 
-		// tb.CursorUpdate()
+		textArea.TextBox.CursorUpdate()
 	}
 }
