@@ -30,34 +30,55 @@ func main() {
 
 	tree := tui.Tile{}
 	tree.Init()
-	tree.MinimumWidth = 10
+	tree.MinimumWidth = 20
 	tree.FlexibleHeight = true
-	tree.TextBox.TextFrame()
+	// tree.TextBox.TextFrame()
+
+	sep_tree := tui.Tile{}
+	sep_tree.Init()
+	sep_tree.MinimumWidth = 1
+	sep_tree.FlexibleHeight = true
+	sep_tree.TextBox.TextVertical()
 
 	textArea := tui.Tile{}
 	textArea.Init()
 	textArea.MinimumWidth = 3
 	textArea.FlexibleWidth = true
 	textArea.FlexibleHeight = true
-	textArea.TextBox.TextFrame()
+	// textArea.TextBox.TextFrame()
+
+	sep_textArea := tui.Tile{}
+	sep_textArea.Init()
+	sep_textArea.MinimumHeight = 1
+	sep_textArea.FlexibleWidth = true
+	sep_textArea.TextBox.TextHorizontal()
 
 	modeline := tui.Tile{}
 	modeline.Init()
 	modeline.FlexibleWidth = true
 	modeline.MinimumHeight = 3
-	modeline.TextBox.TextFrame()
+	// modeline.TextBox.TextFrame()
+
+	sep_modeline := tui.Tile{}
+	sep_modeline.Init()
+	sep_modeline.MinimumHeight = 1
+	sep_modeline.FlexibleWidth = true
+	sep_modeline.TextBox.TextHorizontal()
 
 	minibuffer := tui.Tile{}
 	minibuffer.Init()
 	minibuffer.FlexibleWidth = true
 	minibuffer.MinimumHeight = 3
-	minibuffer.TextBox.TextFrame()
+	// minibuffer.TextBox.TextFrame()
 
 	vbox.Controls = append(vbox.Controls, &textArea)
+	vbox.Controls = append(vbox.Controls, &sep_textArea)
 	vbox.Controls = append(vbox.Controls, &modeline)
+	vbox.Controls = append(vbox.Controls, &sep_modeline)
 	vbox.Controls = append(vbox.Controls, &minibuffer)
 
 	hbox.Controls = append(hbox.Controls, &tree)
+	hbox.Controls = append(hbox.Controls, &sep_tree)
 	hbox.Controls = append(hbox.Controls, &vbox)
 
 	w, h := s.Size()
@@ -71,8 +92,11 @@ func main() {
 		s.Clear()
 
 		tree.TextBox.Draw(s)
+		sep_tree.TextBox.Draw(s)
+		sep_textArea.TextBox.Draw(s)
 		textArea.TextBox.Draw(s)
 		modeline.TextBox.Draw(s)
+		sep_modeline.TextBox.Draw(s)
 		minibuffer.TextBox.Draw(s)
 
 		s.Show()
@@ -84,10 +108,13 @@ func main() {
 			w, h = s.Size()
 			hbox.Layout(w, h)
 
-			tree.TextBox.TextFrame()
-			textArea.TextBox.TextFrame()
-			modeline.TextBox.TextFrame()
-			minibuffer.TextBox.TextFrame()
+			// tree.TextBox.TextFrame()
+			// textArea.TextBox.TextFrame()
+			// modeline.TextBox.TextFrame()
+			// minibuffer.TextBox.TextFrame()
+			sep_tree.TextBox.TextVertical()
+			sep_textArea.TextBox.TextHorizontal()
+			sep_modeline.TextBox.TextHorizontal()
 		case *tcell.EventKey:
 			switch e.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
