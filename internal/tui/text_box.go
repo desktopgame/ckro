@@ -204,6 +204,30 @@ func (tb *TextBox) TextFrame() {
 	tb.Document.MoveReset()
 }
 
+func (tb *TextBox) TextVertical() {
+	tb.Document.Init()
+
+	h := tb.Height
+
+	for i := 0; i < h; i++ {
+		tb.Document.InsertString("|\n")
+	}
+	tb.Document.RemoveChar()
+	tb.Document.MoveReset()
+}
+
+func (tb *TextBox) TextHorizontal() {
+	tb.Document.Init()
+
+	w := tb.Width
+
+	for i := 0; i < w; i++ {
+		tb.Document.InsertString("-")
+	}
+	tb.Document.MoveReset()
+
+}
+
 func (tb *TextBox) TextClear() {
 	tb.Document.Init()
 }
