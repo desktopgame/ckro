@@ -167,6 +167,41 @@ func (tb *TextBox) CursorUpdate() {
 	}
 }
 
+func (tb *TextBox) TextFrame() {
+	tb.Document.Init()
+
+	w := tb.Width
+	h := tb.Height
+
+	tb.Document.InsertString("*")
+	for i := 0; i < w-2; i++ {
+		tb.Document.InsertString("-")
+	}
+	tb.Document.InsertString("*")
+	tb.Document.InsertLine()
+
+	for i := 0; i < h-2; i++ {
+		tb.Document.InsertString("|")
+		for j := 0; j < w-2; j++ {
+			tb.Document.InsertString(" ")
+		}
+		tb.Document.InsertString("|")
+		tb.Document.InsertLine()
+	}
+
+	tb.Document.InsertString("*")
+	for i := 0; i < w-2; i++ {
+		tb.Document.InsertString("-")
+	}
+	tb.Document.InsertString("*")
+
+	tb.Document.MoveReset()
+}
+
+func (tb *TextBox) TextClear() {
+	tb.Document.Init()
+}
+
 func (tb *TextBox) Draw(s tcell.Screen) {
 	// バッファの内容を描画
 	clip := Clip{

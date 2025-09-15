@@ -115,6 +115,11 @@ func (doc *Document) MoveDown() {
 	}
 }
 
+func (doc *Document) MoveReset() {
+	doc.cursorRow = 0
+	doc.cursorColumn = 0
+}
+
 func (doc *Document) GetBuffer() *Buffer {
 	return &doc.buffer
 }
