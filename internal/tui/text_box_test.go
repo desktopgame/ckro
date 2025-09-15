@@ -23,7 +23,7 @@ Hello, world2
 	tb.Width = 20
 	tb.Height = 6
 	tb.Document.InsertString(msg)
-	tb.HasFocus = true
+	tb.ShowCursor = true
 
 	cursorRow := tb.Document.GetCursorRow()
 	if cursorRow != 5 {

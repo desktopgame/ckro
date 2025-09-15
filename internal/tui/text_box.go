@@ -7,14 +7,14 @@ import (
 )
 
 type TextBox struct {
-	Document *Document
-	X        int
-	Y        int
-	Width    int
-	Height   int
-	HasFocus bool
-	ScrollX  int
-	ScrollY  int
+	Document   *Document
+	X          int
+	Y          int
+	Width      int
+	Height     int
+	ShowCursor bool
+	ScrollX    int
+	ScrollY    int
 }
 
 func (tb *TextBox) Init() {
@@ -226,7 +226,7 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 		drawY++
 	}
 
-	if !tb.HasFocus {
+	if !tb.ShowCursor {
 		return
 	}
 
