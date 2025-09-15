@@ -77,22 +77,31 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 				if len(runes) > 1 {
 					combining = runes[1:]
 				}
+				width := runewidth.RuneWidth(mainRune)
+
+				if x+width >= tb.Width {
+					drawY++
+					x = 0
+				}
+				if drawY > tb.Height {
+					break
+				}
 
 				clip.SetContent(x, drawY, mainRune, combining, def)
 
 				// 全角文字の場合、次のセルを空にする
-				width := runewidth.RuneWidth(mainRune)
 				if width == 2 {
 					x++
-					if x < tb.Width { // 画面幅の制限内で
-						clip.SetContent(x, drawY, 0, nil, def)
-					}
+					clip.SetContent(x, drawY, 0, nil, def)
 				}
 			}
 			x++
 			if x >= tb.Width {
 				drawY++
 				x = 0
+			}
+			if drawY > tb.Height {
+				break
 			}
 		}
 		drawY++
