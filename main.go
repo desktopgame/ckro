@@ -86,10 +86,10 @@ func main() {
 
 	gl := tui.GridLayout{}
 	gl.Init(2, 2)
-	gl.SetStatic(0, 0, 6, 6)
-	gl.SetStatic(0, 1, 6, 6)
-	gl.SetStatic(1, 0, 6, 6)
-	gl.SetStatic(1, 1, 6, 6)
+	gl.SetWithPresenter(0, 0, 9, 9, false, false, &presenter.EditTextPresenter{})
+	gl.SetWithPresenter(0, 1, 9, 9, false, false, &presenter.EditTextPresenter{})
+	gl.SetWithPresenter(1, 0, 9, 9, false, false, &presenter.EditTextPresenter{})
+	gl.SetWithPresenter(1, 1, 9, 9, false, false, &presenter.EditTextPresenter{})
 
 	stack := tui.Stack{}
 	stack.Init()
