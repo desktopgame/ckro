@@ -84,9 +84,18 @@ func main() {
 	hbox.Controls = append(hbox.Controls, &treeSeparator)
 	hbox.Controls = append(hbox.Controls, &vbox)
 
+	gl := tui.GridLayout{}
+	gl.Init(2, 2)
+	gl.SetStatic(0, 0, 6, 6)
+	gl.SetStatic(0, 1, 6, 6)
+	gl.SetStatic(1, 0, 6, 6)
+	gl.SetStatic(1, 1, 6, 6)
+
 	stack := tui.Stack{}
 	stack.Init()
 	stack.Layers = append(stack.Layers, &hbox)
+	stack.Layers = append(stack.Layers, gl.Build())
+	stack.Top = 1
 
 	focusManager := tui.FocusManager{}
 	stack.Traverse(&focusManager)
