@@ -146,17 +146,17 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 func (tb *TextBox) CursorUpdate() {
 	_, cursor, _, _ := tb.CursorPosition()
 	// cursor := tb.Document.GetCursorRow()
-	lc := tb.WrappedLineCount()
+	// lc := tb.WrappedLineCount()
 
 	startY := tb.ScrollY
-	endY := min(startY+tb.Height, lc)
+	endY := startY + tb.Height
 
 	if cursor >= endY {
 		for cursor >= endY {
 			tb.ScrollY++
 
 			startY = tb.ScrollY
-			endY = min(startY+tb.Height, lc)
+			endY = startY + tb.Height
 		}
 	} else if cursor <= startY {
 		for cursor <= startY && cursor > 0 {
