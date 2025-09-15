@@ -20,9 +20,9 @@ func (b *Box) Update() {
 	}
 }
 
-func (b *Box) Handle(ev tcell.Event) {
+func (b *Box) Traverse(fm *FocusManager) {
 	for _, ctrl := range b.Controls {
-		ctrl.Handle(ev)
+		ctrl.Traverse(fm)
 	}
 }
 

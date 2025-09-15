@@ -29,6 +29,12 @@ func (t *Tile) Handle(ev tcell.Event) {
 	t.TextPresenter.Handle(t.TextBox, ev)
 }
 
+func (t *Tile) Traverse(fm *FocusManager) {
+	if t.TextPresenter.IsFocusable() {
+		fm.Register(t)
+	}
+}
+
 func (t *Tile) Draw(s tcell.Screen) {
 	t.TextBox.Draw(s)
 }

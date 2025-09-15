@@ -14,6 +14,14 @@ func (h *HorizontalSeparatorTextPresenter) Present(view View) {
 func (h *HorizontalSeparatorTextPresenter) Handle(view View, ev tcell.Event) {
 }
 
+func (h *HorizontalSeparatorTextPresenter) ShowCursor() bool {
+	return false
+}
+
+func (h *HorizontalSeparatorTextPresenter) IsFocusable() bool {
+	return false
+}
+
 type VerticalSeparatorTextPresenter struct {
 }
 
@@ -22,4 +30,12 @@ func (v *VerticalSeparatorTextPresenter) Present(view View) {
 }
 
 func (v *VerticalSeparatorTextPresenter) Handle(view View, ev tcell.Event) {
+}
+
+func (v *VerticalSeparatorTextPresenter) ShowCursor() bool {
+	return false
+}
+
+func (v *VerticalSeparatorTextPresenter) IsFocusable() bool {
+	return false
 }

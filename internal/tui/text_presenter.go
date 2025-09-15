@@ -8,4 +8,6 @@ import (
 type TextPresenter interface {
 	Present(view presenter.View)
 	Handle(view presenter.View, ev tcell.Event)
+	ShowCursor() bool
+	IsFocusable() bool
 }

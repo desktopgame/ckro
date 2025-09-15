@@ -71,6 +71,14 @@ func (t *TreeTextPresenter) Handle(view View, ev tcell.Event) {
 	view.CursorUpdate()
 }
 
+func (t *TreeTextPresenter) ShowCursor() bool {
+	return false
+}
+
+func (t *TreeTextPresenter) IsFocusable() bool {
+	return true
+}
+
 func (t *TreeTextPresenter) buildTree() {
 	if t.RootDirectory == "" {
 		t.RootDirectory = "."

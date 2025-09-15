@@ -16,3 +16,11 @@ func (label *LabelTextPresenter) Present(view View) {
 
 func (label *LabelTextPresenter) Handle(view View, ev tcell.Event) {
 }
+
+func (label *LabelTextPresenter) ShowCursor() bool {
+	return false
+}
+
+func (label *LabelTextPresenter) IsFocusable() bool {
+	return false
+}

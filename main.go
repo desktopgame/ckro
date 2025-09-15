@@ -72,7 +72,7 @@ func main() {
 	minibuffer.Init()
 	minibuffer.FlexibleWidth = true
 	minibuffer.MinimumHeight = 1
-	// minibuffer.TextBox.TextFrame()
+	minibuffer.TextPresenter = &presenter.EditTextPresenter{}
 
 	vbox.Controls = append(vbox.Controls, &textArea)
 	vbox.Controls = append(vbox.Controls, &textAreaSeparator)
@@ -83,6 +83,9 @@ func main() {
 	hbox.Controls = append(hbox.Controls, &tree)
 	hbox.Controls = append(hbox.Controls, &treeSeparator)
 	hbox.Controls = append(hbox.Controls, &vbox)
+
+	focusManager := tui.FocusManager{}
+	focusManager.Traverse(&hbox)
 
 	w, h := s.Size()
 	hbox.Layout(w, h)
@@ -109,10 +112,12 @@ func main() {
 			hbox.Layout(w, h)
 		case *tcell.EventKey:
 			switch e.Key() {
+			case tcell.KeyTAB:
+				focusManager.FocusNext()
 			case tcell.KeyEscape, tcell.KeyCtrlC:
 				return
 			}
-			hbox.Handle(e)
+			focusManager.Handle(ev)
 		}
 	}
 }

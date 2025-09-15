@@ -41,3 +41,11 @@ func (edit *EditTextPresenter) Handle(view View, ev tcell.Event) {
 
 	view.CursorUpdate()
 }
+
+func (edit *EditTextPresenter) ShowCursor() bool {
+	return true
+}
+
+func (edit *EditTextPresenter) IsFocusable() bool {
+	return true
+}
