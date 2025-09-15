@@ -20,6 +20,10 @@ type TextBox struct {
 func (tb *TextBox) Init() {
 	tb.Document = &Document{}
 	tb.Document.Init()
+	tb.Width = 20
+	tb.Height = 6
+	tb.ScrollX = 0
+	tb.ScrollY = 0
 }
 
 func (tb *TextBox) WrappedLineCount() int {
