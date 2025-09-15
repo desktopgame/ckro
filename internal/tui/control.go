@@ -1,7 +1,7 @@
 package tui
 
 type Control interface {
-	MinimumSize() (Width int, Height int)
+	MinimumSize(width int, height int) (Width int, Height int)
 	Move(x int, y int)
 	Layout(w int, h int)
 

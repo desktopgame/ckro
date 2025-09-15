@@ -25,19 +25,32 @@ func main() {
 	box := tui.Box{}
 	box.Init(tui.Horizontal)
 
+	box2 := tui.Box{}
+	box2.Init(tui.Vertical)
+
 	t1 := tui.Tile{}
 	t1.Init()
 	t1.MinimumWidth = 10
 	t1.TextBox.TextFrame()
 
-	t2 := tui.Tile{}
-	t2.Init()
-	t2.MinimumWidth = 3
-	t2.FlexibleWidth = true
-	t2.TextBox.TextFrame()
+	ta := tui.Tile{}
+	ta.Init()
+	ta.MinimumWidth = 3
+	ta.FlexibleWidth = true
+	ta.FlexibleHeigght = true
+	ta.TextBox.TextFrame()
+
+	modeline := tui.Tile{}
+	modeline.Init()
+	modeline.FlexibleWidth = true
+	modeline.MinimumHeight = 6
+	modeline.TextBox.TextFrame()
+
+	box2.Controls = append(box2.Controls, &ta)
+	box2.Controls = append(box2.Controls, &modeline)
 
 	box.Controls = append(box.Controls, &t1)
-	box.Controls = append(box.Controls, &t2)
+	box.Controls = append(box.Controls, &box2)
 
 	w, h := s.Size()
 	box.Layout(w, h)
@@ -50,7 +63,8 @@ func main() {
 		s.Clear()
 
 		t1.TextBox.Draw(s)
-		t2.TextBox.Draw(s)
+		ta.TextBox.Draw(s)
+		modeline.TextBox.Draw(s)
 
 		s.Show()
 
@@ -62,7 +76,8 @@ func main() {
 			box.Layout(w, h)
 
 			t1.TextBox.TextFrame()
-			t2.TextBox.TextFrame()
+			ta.TextBox.TextFrame()
+			modeline.TextBox.TextFrame()
 		case *tcell.EventKey:
 			switch e.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:

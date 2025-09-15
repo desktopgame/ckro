@@ -14,7 +14,7 @@ func (t *Tile) Init() {
 	t.TextBox.Init()
 }
 
-func (t *Tile) MinimumSize() (Width int, Height int) {
+func (t *Tile) MinimumSize(width int, height int) (Width int, Height int) {
 	return t.MinimumWidth, t.MinimumHeight
 }
 
