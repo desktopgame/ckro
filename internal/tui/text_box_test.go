@@ -30,7 +30,7 @@ Hello, world2
 		t.Fatalf("got %q, want %q", cursorRow, 5)
 	}
 
-	tb.UpdateCursor()
+	tb.CursorUpdate()
 
 	row := tb.ScrollY
 	if row != 1 {

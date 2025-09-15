@@ -121,7 +121,7 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	return screenX, cursorRow, currentRune, combining
 }
 
-func (tb *TextBox) UpdateCursor() {
+func (tb *TextBox) CursorUpdate() {
 	// _, cursor, _, _ := tb.CursorPosition()
 	cursor := tb.Document.GetCursorRow()
 

@@ -84,6 +84,6 @@ Hello, world2
 			}
 		}
 
-		tb.UpdateCursor()
+		tb.CursorUpdate()
 	}
 }
