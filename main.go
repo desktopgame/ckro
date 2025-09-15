@@ -33,13 +33,12 @@ func main() {
 	tree.Init()
 	tree.MinimumWidth = 20
 	tree.FlexibleHeight = true
-	// tree.TextBox.TextFrame()
 
 	treeSeparator := tui.Tile{}
 	treeSeparator.Init()
 	treeSeparator.MinimumWidth = 1
 	treeSeparator.FlexibleHeight = true
-	treeSeparator.TextBox.TextVertical()
+	treeSeparator.TextPresenter = &presenter.VerticalSeparatorTextPresenter{}
 
 	textArea := tui.Tile{}
 	textArea.Init()
@@ -48,25 +47,23 @@ func main() {
 	textArea.FlexibleHeight = true
 	textArea.TextBox.ShowCursor = true
 	textArea.TextPresenter = &presenter.EditTextPresenter{}
-	// textArea.TextBox.TextFrame()
 
 	textAreaSeparator := tui.Tile{}
 	textAreaSeparator.Init()
 	textAreaSeparator.MinimumHeight = 1
 	textAreaSeparator.FlexibleWidth = true
-	textAreaSeparator.TextBox.TextHorizontal()
+	textAreaSeparator.TextPresenter = &presenter.HorizontalSeparatorTextPresenter{}
 
 	modeline := tui.Tile{}
 	modeline.Init()
 	modeline.FlexibleWidth = true
 	modeline.MinimumHeight = 1
-	// modeline.TextBox.TextFrame()
 
 	modelineSeparator := tui.Tile{}
 	modelineSeparator.Init()
 	modelineSeparator.MinimumHeight = 1
 	modelineSeparator.FlexibleWidth = true
-	modelineSeparator.TextBox.TextHorizontal()
+	modelineSeparator.TextPresenter = &presenter.HorizontalSeparatorTextPresenter{}
 
 	minibuffer := tui.Tile{}
 	minibuffer.Init()
@@ -92,8 +89,8 @@ func main() {
 	for {
 		s.Clear()
 
-		vbox.Update()
-		vbox.Draw(s)
+		hbox.Update()
+		hbox.Draw(s)
 
 		s.Show()
 
@@ -103,14 +100,6 @@ func main() {
 			s.Sync()
 			w, h = s.Size()
 			hbox.Layout(w, h)
-
-			// tree.TextBox.TextFrame()
-			// textArea.TextBox.TextFrame()
-			// modeline.TextBox.TextFrame()
-			// minibuffer.TextBox.TextFrame()
-			treeSeparator.TextBox.TextVertical()
-			textAreaSeparator.TextBox.TextHorizontal()
-			modelineSeparator.TextBox.TextHorizontal()
 		case *tcell.EventKey:
 			switch e.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
