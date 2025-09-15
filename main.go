@@ -31,7 +31,7 @@ func main() {
 
 	tree := tui.Tile{}
 	tree.Init()
-	tree.MinimumWidth = 30
+	tree.MinimumWidth = 50
 	tree.FlexibleHeight = true
 	tree.TextPresenter = &presenter.TreeTextPresenter{
 		RootDirectory: ".",
@@ -92,8 +92,12 @@ func main() {
 	for {
 		s.Clear()
 
-		hbox.Update()
-		hbox.Draw(s)
+		mw, mh := hbox.MinimumSize(w, h)
+
+		if mw <= w && mh <= h {
+			hbox.Update()
+			hbox.Draw(s)
+		}
 
 		s.Show()
 
@@ -101,7 +105,7 @@ func main() {
 		switch e := ev.(type) {
 		case *tcell.EventResize:
 			s.Sync()
-			w, h = s.Size()
+			w, h = e.Size()
 			hbox.Layout(w, h)
 		case *tcell.EventKey:
 			switch e.Key() {

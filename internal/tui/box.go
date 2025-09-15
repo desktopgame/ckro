@@ -39,32 +39,40 @@ func (b *Box) MinimumSize(width int, height int) (Width int, Height int) {
 	switch b.orientation {
 	case Horizontal:
 		mh = -1
+		totalMW := 0
 
 		for _, ctrl := range b.Controls {
-			_, h := ctrl.MinimumSize(mw, height)
+			w, h := ctrl.MinimumSize(mw, height)
 
 			if h > mh {
 				mh = h
 			}
+
+			totalMW += w
 		}
 
 		if mh == -1 {
 			mh = height
 		}
+		mw = max(mw, totalMW)
 	case Vertical:
 		mw = -1
+		totalMH := 0
 
 		for _, ctrl := range b.Controls {
-			w, _ := ctrl.MinimumSize(width, mh)
+			w, h := ctrl.MinimumSize(width, mh)
 
 			if w > mw {
 				mw = w
 			}
+
+			totalMH += h
 		}
 
 		if mw == -1 {
 			mw = width
 		}
+		mh = max(mh, totalMH)
 	}
 
 	return mw, mh
