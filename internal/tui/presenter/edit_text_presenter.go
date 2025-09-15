@@ -38,4 +38,6 @@ func (edit *EditTextPresenter) Handle(view View, ev tcell.Event) {
 			}
 		}
 	}
+
+	view.CursorUpdate()
 }

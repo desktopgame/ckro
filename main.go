@@ -110,7 +110,5 @@ func main() {
 			}
 			hbox.Handle(e)
 		}
-
-		textArea.TextBox.CursorUpdate()
 	}
 }

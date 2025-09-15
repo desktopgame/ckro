@@ -67,6 +67,8 @@ func (t *TreeTextPresenter) Handle(view View, ev tcell.Event) {
 		}
 		t.Present(view)
 	}
+
+	view.CursorUpdate()
 }
 
 func (t *TreeTextPresenter) buildTree() {

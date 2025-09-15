@@ -7,5 +7,6 @@ type View interface {
 	TextVertical()
 	TextHorizontal()
 	TextClear()
+	CursorUpdate()
 	GetDocument() *model.Document
 }
