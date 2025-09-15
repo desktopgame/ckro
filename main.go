@@ -31,6 +31,7 @@ func main() {
 	t1 := tui.Tile{}
 	t1.Init()
 	t1.MinimumWidth = 10
+	t1.FlexibleHeigght = true
 	t1.TextBox.TextFrame()
 
 	ta := tui.Tile{}
@@ -43,7 +44,7 @@ func main() {
 	modeline := tui.Tile{}
 	modeline.Init()
 	modeline.FlexibleWidth = true
-	modeline.MinimumHeight = 6
+	modeline.MinimumHeight = 3
 	modeline.TextBox.TextFrame()
 
 	box2.Controls = append(box2.Controls, &ta)
