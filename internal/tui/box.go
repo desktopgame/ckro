@@ -14,15 +14,15 @@ func (b *Box) Init(orientation Orientation) {
 	b.orientation = orientation
 }
 
-func (b *Box) Update() {
-	for _, ctrl := range b.Controls {
-		ctrl.Update()
-	}
-}
-
 func (b *Box) Traverse(fm *FocusManager) {
 	for _, ctrl := range b.Controls {
 		ctrl.Traverse(fm)
+	}
+}
+
+func (b *Box) Update() {
+	for _, ctrl := range b.Controls {
+		ctrl.Update()
 	}
 }
 
