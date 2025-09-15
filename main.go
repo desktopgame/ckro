@@ -22,24 +22,24 @@ func main() {
 	s.SetStyle(def)
 	s.Clear()
 
-	box := tui.Box{}
-	box.Init(tui.Horizontal)
+	hbox := tui.Box{}
+	hbox.Init(tui.Horizontal)
 
-	box2 := tui.Box{}
-	box2.Init(tui.Vertical)
+	vbox := tui.Box{}
+	vbox.Init(tui.Vertical)
 
-	t1 := tui.Tile{}
-	t1.Init()
-	t1.MinimumWidth = 10
-	t1.FlexibleHeigght = true
-	t1.TextBox.TextFrame()
+	tree := tui.Tile{}
+	tree.Init()
+	tree.MinimumWidth = 10
+	tree.FlexibleHeigght = true
+	tree.TextBox.TextFrame()
 
-	ta := tui.Tile{}
-	ta.Init()
-	ta.MinimumWidth = 3
-	ta.FlexibleWidth = true
-	ta.FlexibleHeigght = true
-	ta.TextBox.TextFrame()
+	textArea := tui.Tile{}
+	textArea.Init()
+	textArea.MinimumWidth = 3
+	textArea.FlexibleWidth = true
+	textArea.FlexibleHeigght = true
+	textArea.TextBox.TextFrame()
 
 	modeline := tui.Tile{}
 	modeline.Init()
@@ -47,14 +47,21 @@ func main() {
 	modeline.MinimumHeight = 3
 	modeline.TextBox.TextFrame()
 
-	box2.Controls = append(box2.Controls, &ta)
-	box2.Controls = append(box2.Controls, &modeline)
+	minibuffer := tui.Tile{}
+	minibuffer.Init()
+	minibuffer.FlexibleWidth = true
+	minibuffer.MinimumHeight = 3
+	minibuffer.TextBox.TextFrame()
 
-	box.Controls = append(box.Controls, &t1)
-	box.Controls = append(box.Controls, &box2)
+	vbox.Controls = append(vbox.Controls, &textArea)
+	vbox.Controls = append(vbox.Controls, &modeline)
+	vbox.Controls = append(vbox.Controls, &minibuffer)
+
+	hbox.Controls = append(hbox.Controls, &tree)
+	hbox.Controls = append(hbox.Controls, &vbox)
 
 	w, h := s.Size()
-	box.Layout(w, h)
+	hbox.Layout(w, h)
 
 	s.Show()
 
@@ -63,9 +70,10 @@ func main() {
 	for {
 		s.Clear()
 
-		t1.TextBox.Draw(s)
-		ta.TextBox.Draw(s)
+		tree.TextBox.Draw(s)
+		textArea.TextBox.Draw(s)
 		modeline.TextBox.Draw(s)
+		minibuffer.TextBox.Draw(s)
 
 		s.Show()
 
@@ -74,11 +82,12 @@ func main() {
 		case *tcell.EventResize:
 			s.Sync()
 			w, h = s.Size()
-			box.Layout(w, h)
+			hbox.Layout(w, h)
 
-			t1.TextBox.TextFrame()
-			ta.TextBox.TextFrame()
+			tree.TextBox.TextFrame()
+			textArea.TextBox.TextFrame()
 			modeline.TextBox.TextFrame()
+			minibuffer.TextBox.TextFrame()
 		case *tcell.EventKey:
 			switch e.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
