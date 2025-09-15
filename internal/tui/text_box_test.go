@@ -7,7 +7,6 @@ import (
 )
 
 func TestTextBox(t *testing.T) {
-	// 画面に一言
 	msg :=
 		`
 Hello, world1

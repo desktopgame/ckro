@@ -124,13 +124,12 @@ func DisplayRunesAt(line string, screenX int) (rune, []rune) {
 				return mainRune, combining
 			}
 		}
-		// 表示処理と同じように座標を進める
 		cluster := gr.Str()
 		if len(cluster) > 0 {
 			mainRune := []rune(cluster)[0]
 			width := runewidth.RuneWidth(mainRune)
 			if width == 2 {
-				currentX += 2 // 全角文字は2つ分進める
+				currentX += 2
 			} else {
 				currentX++
 			}

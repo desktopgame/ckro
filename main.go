@@ -23,7 +23,6 @@ func main() {
 	s.SetStyle(def)
 	s.Clear()
 
-	// 画面に一言
 	msg :=
 		`
 Hello, world1
@@ -55,7 +54,7 @@ Hello, world2
 		ev := s.PollEvent()
 		switch e := ev.(type) {
 		case *tcell.EventResize:
-			s.Sync() // リサイズ時に再同期
+			s.Sync()
 		case *tcell.EventKey:
 			switch e.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
@@ -73,14 +72,12 @@ Hello, world2
 			case tcell.KeyEnter:
 				tb.Document.InsertLine()
 			case tcell.KeyRune:
-				// 通常の文字入力
 				inputBuffer = append(inputBuffer, e.Rune())
 				inputString := string(inputBuffer)
 				if text.GraphemeLength(inputString) == 1 {
 					tb.Document.InsertString(inputString)
 					inputBuffer = []rune{}
 				}
-				//doc.InsertString("あ")
 			}
 		}
 
