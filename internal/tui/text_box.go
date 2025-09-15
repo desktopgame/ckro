@@ -22,6 +22,24 @@ func (tb *TextBox) Init() {
 	tb.Document.Init()
 }
 
+func (tb *TextBox) WrappedLineCount() int {
+	lc := 0
+	buf := tb.Document.GetBuffer()
+
+	for i := 0; i < buf.GetLineCount(); i++ {
+		line := buf.GetLineAt(i)
+		lineContent := line.GetContent()
+		lineWidth := text.DisplayWidth(lineContent)
+
+		if lineWidth <= tb.Width {
+			lc++
+		} else {
+			lc += (lineWidth / tb.Width) + 1
+		}
+	}
+	return lc
+}
+
 func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	// カーソルを表示
 	buf := tb.Document.GetBuffer()
@@ -122,18 +140,19 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 }
 
 func (tb *TextBox) CursorUpdate() {
-	// _, cursor, _, _ := tb.CursorPosition()
-	cursor := tb.Document.GetCursorRow()
+	_, cursor, _, _ := tb.CursorPosition()
+	// cursor := tb.Document.GetCursorRow()
+	lc := tb.WrappedLineCount()
 
 	startY := tb.ScrollY
-	endY := min(startY+tb.Height, tb.Document.GetBuffer().GetLineCount())
+	endY := min(startY+tb.Height, lc)
 
 	if cursor >= endY {
 		for cursor >= endY {
 			tb.ScrollY++
 
 			startY = tb.ScrollY
-			endY = min(startY+tb.Height, tb.Document.GetBuffer().GetLineCount())
+			endY = min(startY+tb.Height, lc)
 		}
 	} else if cursor <= startY {
 		for cursor <= startY && cursor > 0 {
