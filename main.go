@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui"
+	"github.com/desktopgame/ckro/internal/tui/presenter"
 	"github.com/gdamore/tcell/v2"
 )
 
@@ -47,6 +47,7 @@ func main() {
 	textArea.FlexibleWidth = true
 	textArea.FlexibleHeight = true
 	textArea.TextBox.ShowCursor = true
+	textArea.TextPresenter = &presenter.EditTextPresenter{}
 	// textArea.TextBox.TextFrame()
 
 	textAreaSeparator := tui.Tile{}
@@ -88,18 +89,11 @@ func main() {
 
 	s.Show()
 
-	inputBuffer := []rune{}
-
 	for {
 		s.Clear()
 
-		tree.TextBox.Draw(s)
-		treeSeparator.TextBox.Draw(s)
-		textAreaSeparator.TextBox.Draw(s)
-		textArea.TextBox.Draw(s)
-		modeline.TextBox.Draw(s)
-		modelineSeparator.TextBox.Draw(s)
-		minibuffer.TextBox.Draw(s)
+		vbox.Update()
+		vbox.Draw(s)
 
 		s.Show()
 
@@ -121,26 +115,8 @@ func main() {
 			switch e.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
 				return
-			case tcell.KeyUp:
-				textArea.TextBox.Document.MoveUp()
-			case tcell.KeyDown:
-				textArea.TextBox.Document.MoveDown()
-			case tcell.KeyLeft:
-				textArea.TextBox.Document.MoveLeft()
-			case tcell.KeyRight:
-				textArea.TextBox.Document.MoveRight()
-			case tcell.KeyBackspace, tcell.KeyBackspace2:
-				textArea.TextBox.Document.RemoveChar()
-			case tcell.KeyEnter:
-				textArea.TextBox.Document.InsertLine()
-			case tcell.KeyRune:
-				inputBuffer = append(inputBuffer, e.Rune())
-				inputString := string(inputBuffer)
-				if text.GraphemeLength(inputString) == 1 {
-					textArea.TextBox.Document.InsertString(inputString)
-					inputBuffer = []rune{}
-				}
 			}
+			vbox.Handle(e)
 		}
 
 		textArea.TextBox.CursorUpdate()

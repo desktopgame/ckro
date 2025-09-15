@@ -1,4 +1,4 @@
-package tui
+package model
 
 type Position struct {
 	Row    int

@@ -1,13 +1,13 @@
-package tui_test
+package model_test
 
 import (
 	"testing"
 
-	"github.com/desktopgame/ckro/internal/tui"
+	"github.com/desktopgame/ckro/internal/tui/model"
 )
 
 func TestLine(t *testing.T) {
-	line := tui.Line{}
+	line := model.Line{}
 	line.AppendString("Hello")
 
 	content := line.GetContent()
@@ -35,7 +35,7 @@ func TestLine(t *testing.T) {
 }
 
 func TestBuffer(t *testing.T) {
-	buf := tui.Buffer{}
+	buf := model.Buffer{}
 	buf.Init()
 	buf.InsertString(0, 0, "Line1\nLine2")
 

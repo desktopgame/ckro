@@ -1,13 +1,13 @@
-package tui_test
+package model_test
 
 import (
 	"testing"
 
-	"github.com/desktopgame/ckro/internal/tui"
+	"github.com/desktopgame/ckro/internal/tui/model"
 )
 
 func TestDocument(t *testing.T) {
-	doc := tui.Document{}
+	doc := model.Document{}
 	doc.Init()
 
 	doc.InsertString("Hello")

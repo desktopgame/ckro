@@ -2,12 +2,13 @@ package tui
 
 import (
 	"github.com/desktopgame/ckro/internal/text"
+	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/gdamore/tcell/v2"
 	"github.com/mattn/go-runewidth"
 )
 
 type TextBox struct {
-	Document   *Document
+	Document   *model.Document
 	X          int
 	Y          int
 	Width      int
@@ -18,7 +19,7 @@ type TextBox struct {
 }
 
 func (tb *TextBox) Init() {
-	tb.Document = &Document{}
+	tb.Document = &model.Document{}
 	tb.Document.Init()
 	tb.X = 0
 	tb.Y = 0
@@ -314,4 +315,8 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 		}
 	}
 
+}
+
+func (tb *TextBox) GetDocument() *model.Document {
+	return tb.Document
 }

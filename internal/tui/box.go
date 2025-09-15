@@ -1,5 +1,7 @@
 package tui
 
+import "github.com/gdamore/tcell/v2"
+
 type Box struct {
 	Controls    []Control
 	orientation Orientation
@@ -10,6 +12,24 @@ type Box struct {
 func (b *Box) Init(orientation Orientation) {
 	b.Controls = []Control{}
 	b.orientation = orientation
+}
+
+func (b *Box) Update() {
+	for _, ctrl := range b.Controls {
+		ctrl.Update()
+	}
+}
+
+func (b *Box) Handle(ev tcell.Event) {
+	for _, ctrl := range b.Controls {
+		ctrl.Handle(ev)
+	}
+}
+
+func (b *Box) Draw(s tcell.Screen) {
+	for _, ctrl := range b.Controls {
+		ctrl.Draw(s)
+	}
 }
 
 func (b *Box) MinimumSize(width int, height int) (Width int, Height int) {
