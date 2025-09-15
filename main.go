@@ -99,6 +99,7 @@ func main() {
 
 	focusManager := tui.FocusManager{}
 	stack.Traverse(&focusManager)
+	focusManager.Grab()
 
 	w, h := s.Size()
 	stack.Layout(w, h)
