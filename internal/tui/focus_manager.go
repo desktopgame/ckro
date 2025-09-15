@@ -23,6 +23,10 @@ func (fm *FocusManager) Traverse(ctrl Control) {
 }
 
 func (fm *FocusManager) FocusPrev() {
+	if len(fm.tiles) == 0 {
+		return
+	}
+
 	fm.tiles[fm.active].TextBox.ShowCursor = false
 
 	if fm.active > 0 {
@@ -36,6 +40,10 @@ func (fm *FocusManager) FocusPrev() {
 }
 
 func (fm *FocusManager) FocusNext() {
+	if len(fm.tiles) == 0 {
+		return
+	}
+
 	fm.tiles[fm.active].TextBox.ShowCursor = false
 
 	if fm.active < len(fm.tiles)-1 {
@@ -49,6 +57,10 @@ func (fm *FocusManager) FocusNext() {
 }
 
 func (fm *FocusManager) Handle(ev tcell.Event) {
+	if len(fm.tiles) == 0 {
+		return
+	}
+
 	if fm.active >= 0 {
 		fm.tiles[fm.active].Handle(ev)
 	}
