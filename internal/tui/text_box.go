@@ -22,96 +22,9 @@ func (tb *TextBox) Init() {
 	tb.Document.Init()
 }
 
-func (tb *TextBox) UpdateCursor() {
-	cursor := tb.Document.GetCursorRow()
-
-	startY := tb.ScrollY
-	endY := min(startY+tb.Height, tb.Document.GetBuffer().GetLineCount())
-
-	if cursor >= endY {
-		for cursor >= endY {
-			tb.ScrollY++
-
-			startY = tb.ScrollY
-			endY = min(startY+tb.Height, tb.Document.GetBuffer().GetLineCount())
-		}
-	} else if cursor <= startY {
-		for cursor <= startY && cursor > 0 {
-			tb.ScrollY--
-
-			startY = tb.ScrollY
-		}
-	}
-}
-
-func (tb *TextBox) Draw(s tcell.Screen) {
-	// バッファの内容を描画
-	clip := Clip{
-		Screen: s,
-		X:      tb.X,
-		Y:      tb.Y,
-		Width:  tb.Width,
-		Height: tb.Height,
-	}
-	def := tcell.StyleDefault
-	buf := tb.Document.GetBuffer()
-
-	startY := tb.ScrollY
-	endY := min(startY+tb.Height, buf.GetLineCount())
-	drawY := 0
-	for i := startY; i < endY; i++ {
-		line := buf.GetLineAt(i).GetContent()
-		x := 0
-
-		// unisegを使ってgrapheme clusterごとに処理
-		clusters := text.GraphemeClusters(line)
-		for _, cluster := range clusters {
-			runes := []rune(cluster)
-
-			if len(runes) > 0 {
-				// 最初のruneをメインとして設定
-				mainRune := runes[0]
-				var combining []rune
-
-				// 残りのruneをcombining charactersとして設定
-				if len(runes) > 1 {
-					combining = runes[1:]
-				}
-				width := runewidth.RuneWidth(mainRune)
-
-				if x+width > tb.Width {
-					drawY++
-					x = 0
-				}
-				if drawY >= tb.Height {
-					break
-				}
-
-				clip.SetContent(x, drawY, mainRune, combining, def)
-
-				// 全角文字の場合、次のセルを空にする
-				if width == 2 {
-					x++
-					clip.SetContent(x, drawY, 0, nil, def)
-				}
-			}
-			x++
-			if x > tb.Width {
-				drawY++
-				x = 0
-			}
-			if drawY >= tb.Height {
-				break
-			}
-		}
-		drawY++
-	}
-
-	if !tb.HasFocus {
-		return
-	}
-
+func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	// カーソルを表示
+	buf := tb.Document.GetBuffer()
 	cursorRow := tb.Document.GetCursorRow()
 	cursorCol := tb.Document.GetCursorColumn()
 
@@ -204,6 +117,101 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 		currentRune = ' '
 		combining = nil
 	}
+
+	return screenX, cursorRow, currentRune, combining
+}
+
+func (tb *TextBox) UpdateCursor() {
+	// _, cursor, _, _ := tb.CursorPosition()
+	cursor := tb.Document.GetCursorRow()
+
+	startY := tb.ScrollY
+	endY := min(startY+tb.Height, tb.Document.GetBuffer().GetLineCount())
+
+	if cursor >= endY {
+		for cursor >= endY {
+			tb.ScrollY++
+
+			startY = tb.ScrollY
+			endY = min(startY+tb.Height, tb.Document.GetBuffer().GetLineCount())
+		}
+	} else if cursor <= startY {
+		for cursor <= startY && cursor > 0 {
+			tb.ScrollY--
+
+			startY = tb.ScrollY
+		}
+	}
+}
+
+func (tb *TextBox) Draw(s tcell.Screen) {
+	// バッファの内容を描画
+	clip := Clip{
+		Screen: s,
+		X:      tb.X,
+		Y:      tb.Y,
+		Width:  tb.Width,
+		Height: tb.Height,
+	}
+	def := tcell.StyleDefault
+	buf := tb.Document.GetBuffer()
+
+	startY := tb.ScrollY
+	endY := min(startY+tb.Height, buf.GetLineCount())
+	drawY := 0
+	for i := startY; i < endY; i++ {
+		line := buf.GetLineAt(i).GetContent()
+		x := 0
+
+		// unisegを使ってgrapheme clusterごとに処理
+		clusters := text.GraphemeClusters(line)
+		for _, cluster := range clusters {
+			runes := []rune(cluster)
+
+			if len(runes) > 0 {
+				// 最初のruneをメインとして設定
+				mainRune := runes[0]
+				var combining []rune
+
+				// 残りのruneをcombining charactersとして設定
+				if len(runes) > 1 {
+					combining = runes[1:]
+				}
+				width := runewidth.RuneWidth(mainRune)
+
+				if x+width > tb.Width {
+					drawY++
+					x = 0
+				}
+				if drawY >= tb.Height {
+					break
+				}
+
+				clip.SetContent(x, drawY, mainRune, combining, def)
+
+				// 全角文字の場合、次のセルを空にする
+				if width == 2 {
+					x++
+					clip.SetContent(x, drawY, 0, nil, def)
+				}
+			}
+			x++
+			if x > tb.Width {
+				drawY++
+				x = 0
+			}
+			if drawY >= tb.Height {
+				break
+			}
+		}
+		drawY++
+	}
+
+	if !tb.HasFocus {
+		return
+	}
+
+	screenX, cursorRow, currentRune, combining := tb.CursorPosition()
 
 	// カーソル位置の文字を反転表示
 	cursorStyle := def.Reverse(true)
