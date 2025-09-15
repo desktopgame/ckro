@@ -31,8 +31,11 @@ func main() {
 
 	tree := tui.Tile{}
 	tree.Init()
-	tree.MinimumWidth = 20
+	tree.MinimumWidth = 30
 	tree.FlexibleHeight = true
+	tree.TextPresenter = &presenter.TreeTextPresenter{
+		RootDirectory: ".",
+	}
 
 	treeSeparator := tui.Tile{}
 	treeSeparator.Init()
@@ -105,7 +108,7 @@ func main() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
 				return
 			}
-			vbox.Handle(e)
+			hbox.Handle(e)
 		}
 
 		textArea.TextBox.CursorUpdate()
