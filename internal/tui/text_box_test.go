@@ -25,11 +25,14 @@ Hello, world2
 	tb.Document.InsertString(msg)
 	tb.ShowCursor = true
 
+	tb.CursorUpdate()
+
 	cursorRow := tb.Document.GetCursorRow()
 	if cursorRow != 5 {
 		t.Fatalf("got %q, want %q", cursorRow, 5)
 	}
 
+	tb.Document.InsertLine()
 	tb.CursorUpdate()
 
 	row := tb.ScrollY
@@ -37,4 +40,22 @@ Hello, world2
 		t.Fatalf("got %q, want %q", row, 1)
 	}
 
+}
+
+func TestCursor(t *testing.T) {
+	tb := tui.TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 20
+	tb.Height = 6
+	tb.Document.InsertString("12345678901234567890")
+	tb.ShowCursor = true
+
+	tb.CursorUpdate()
+
+	col, _, _, _ := tb.CursorPosition()
+	if col != 0 {
+		t.Fatalf("got %q, want %q", col, 0)
+	}
 }
