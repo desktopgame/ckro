@@ -12,6 +12,49 @@ func (b *Box) Init(orientation Orientation) {
 	b.orientation = orientation
 }
 
+func (b *Box) MinimumSize(width int, height int) (Width int, Height int) {
+	mw := width
+	mh := height
+
+	switch b.orientation {
+	case Horizontal:
+		mh = -1
+
+		for _, ctrl := range b.Controls {
+			_, h := ctrl.MinimumSize(mw, height)
+
+			if h > mh {
+				mh = h
+			}
+		}
+
+		if mh == -1 {
+			mh = height
+		}
+	case Vertical:
+		mw = -1
+
+		for _, ctrl := range b.Controls {
+			w, _ := ctrl.MinimumSize(width, mw)
+
+			if w > mw {
+				mw = w
+			}
+		}
+
+		if mw == -1 {
+			mw = width
+		}
+	}
+
+	return mw, mh
+}
+
+func (b *Box) Move(x int, y int) {
+	b.x = x
+	b.y = y
+}
+
 func (b *Box) Layout(width int, height int) {
 	switch b.orientation {
 	case Horizontal:
@@ -74,53 +117,6 @@ func (b *Box) Layout(width int, height int) {
 		}
 	}
 }
-
-func (b *Box) MinimumSize(width int, height int) (Width int, Height int) {
-	mw := width
-	mh := height
-
-	switch b.orientation {
-	case Horizontal:
-		mh = -1
-
-		for _, ctrl := range b.Controls {
-			_, h := ctrl.MinimumSize(mw, height)
-
-			if h > mh {
-				mh = h
-			}
-		}
-
-		if mh == -1 {
-			mh = height
-		}
-	case Vertical:
-		mw = -1
-
-		for _, ctrl := range b.Controls {
-			w, _ := ctrl.MinimumSize(width, mw)
-
-			if w > mw {
-				mw = w
-			}
-		}
-
-		if mw == -1 {
-			mw = width
-		}
-	}
-
-	return mw, mh
-}
-
-func (b *Box) Move(x int, y int) {
-	b.x = x
-	b.y = y
-}
-
-// func (b *Box) Layout(w int, h int) {
-//
-// }
 
 func (b *Box) IsFlexibleWidth() bool {
 	for _, ctrl := range b.Controls {
