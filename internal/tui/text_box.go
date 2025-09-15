@@ -55,10 +55,10 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 	}
 	def := tcell.StyleDefault
 	buf := tb.Document.GetBuffer()
-	y := 0
 
 	startY := tb.ScrollY
 	endY := min(startY+tb.Height, buf.GetLineCount())
+	drawY := 0
 	for i := startY; i < endY; i++ {
 		line := buf.GetLineAt(i).GetContent()
 		x := 0
@@ -78,20 +78,24 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 					combining = runes[1:]
 				}
 
-				clip.SetContent(x, y, mainRune, combining, def)
+				clip.SetContent(x, drawY, mainRune, combining, def)
 
 				// 全角文字の場合、次のセルを空にする
 				width := runewidth.RuneWidth(mainRune)
 				if width == 2 {
 					x++
-					if x < 80 { // 画面幅の制限内で
-						clip.SetContent(x, y, 0, nil, def)
+					if x < tb.Width { // 画面幅の制限内で
+						clip.SetContent(x, drawY, 0, nil, def)
 					}
 				}
 			}
 			x++
+			if x >= tb.Width {
+				drawY++
+				x = 0
+			}
 		}
-		y++
+		drawY++
 	}
 
 	if !tb.HasFocus {
@@ -110,6 +114,24 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 	if cursorRow < buf.GetLineCount() {
 		line := buf.GetLineAt(cursorRow).GetContent()
 		screenX = text.DisplayPos(line, cursorCol)
+
+		if screenX >= tb.Width {
+			remain := screenX - tb.Width
+			screenX = 0
+			cursorRow++
+
+			for remain > 0 {
+				consume := min(remain, tb.Width)
+				screenX += consume
+				remain -= consume
+
+				if screenX >= tb.Width {
+					screenX = 0
+					cursorRow++
+				}
+			}
+		}
+		// cursorCol = screenX
 
 		// カーソル位置の文字を取得（空行や行末の場合はスペース）
 		if cursorCol >= text.GraphemeLength(line) {

@@ -29,7 +29,7 @@ func main() {
 Hello, world1
 👨‍👩‍👧‍👦
 Hello, world2
-あいうえお
+1234567890123456789
 `
 
 	tb := tui.TextBox{}
