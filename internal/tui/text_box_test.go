@@ -72,10 +72,21 @@ func TestScroll(t *testing.T) {
 	tb.CursorUpdate()
 
 	col, row, _, _ := tb.CursorPosition()
-	if row != 1 {
+	if row-tb.ScrollY != 1 {
 		t.Fatalf("got %q, want %q", row, 1)
 	}
 	if col != 4 {
 		t.Fatalf("got %q, want %q", col, 4)
+	}
+
+	tb.Document.InsertString("0")
+	tb.CursorUpdate()
+
+	col, row, _, _ = tb.CursorPosition()
+	if row-tb.ScrollY != 1 {
+		t.Fatalf("got %q, want %q", row-tb.ScrollY, 1)
+	}
+	if col != 0 {
+		t.Fatalf("got %q, want %q", col, 0)
 	}
 }
