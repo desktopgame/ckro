@@ -21,26 +21,6 @@ func (gl *GridLayout) Init(rowCount int, columnCount int) {
 	}
 }
 
-func (gl *GridLayout) Set(row int, column int, minimunWidth int, minimumHeight int, flexibleWidth bool, flexibleHeight bool) {
-	t := &Tile{}
-	t.Init()
-	t.MinimumWidth = minimunWidth
-	t.MinimumHeight = minimumHeight
-	t.FlexibleWidth = flexibleWidth
-	t.FlexibleHeight = flexibleHeight
-	t.TextPresenter = &presenter.FrameTextPresenter{}
-	gl.controls[row][column] = t
-}
-
-func (gl *GridLayout) SetStatic(row int, column int, minimunWidth int, minimumHeight int) {
-	gl.Set(row, column, minimunWidth, minimumHeight, false, false)
-}
-
-func (gl *GridLayout) SetFlex(row int, column int) {
-	gl.Set(row, column, 0, 0, true, true)
-}
-
-// SetWithPresenter sets a tile with custom presenter
 func (gl *GridLayout) SetWithPresenter(row int, column int, minimumWidth int, minimumHeight int, flexibleWidth bool, flexibleHeight bool, presenter TextPresenter) *Tile {
 	if row < 0 || row >= gl.rowCount || column < 0 || column >= gl.columnCount {
 		return nil
@@ -59,24 +39,12 @@ func (gl *GridLayout) SetWithPresenter(row int, column int, minimumWidth int, mi
 	return t
 }
 
-// Get returns the tile at the specified position
-func (gl *GridLayout) Get(row int, column int) *Tile {
-	if row < 0 || row >= gl.rowCount || column < 0 || column >= gl.columnCount {
-		return nil
-	}
-	return gl.controls[row][column]
+func (gl *GridLayout) SetStatic(row int, column int, minimunWidth int, minimumHeight int) {
+	gl.SetWithPresenter(row, column, minimunWidth, minimumHeight, false, false, nil)
 }
 
-// SetEmpty sets an empty flexible tile at the specified position
-func (gl *GridLayout) SetEmpty(row int, column int) {
-	gl.SetFlex(row, column)
-}
-
-// Clear removes the tile at the specified position
-func (gl *GridLayout) Clear(row int, column int) {
-	if row >= 0 && row < gl.rowCount && column >= 0 && column < gl.columnCount {
-		gl.controls[row][column] = nil
-	}
+func (gl *GridLayout) SetFlex(row int, column int) {
+	gl.SetWithPresenter(row, column, 0, 0, true, true, nil)
 }
 
 func (gl *GridLayout) Build() *Box {
