@@ -247,10 +247,8 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 						combining = runes[1:]
 					}
 					width := runewidth.RuneWidth(mainRune)
-					//at := drawY - tb.ScrollY
 
 					clip.SetContent(x, y, mainRune, combining, def)
-
 					// 全角文字の場合、次のセルを空にする
 					if width == 2 {
 						x++
@@ -288,7 +286,6 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 	sb := strings.Builder{}
 
 	return func(yield func(presenter.Segment) bool) {
-
 		startY := 0
 		endY := min(tb.ScrollY+tb.Height, buf.GetLineCount())
 		drawY := 0
@@ -296,20 +293,12 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 			line := buf.GetLineAt(i).GetContent()
 			x := 0
 
-			// unisegを使ってgrapheme clusterごとに処理
 			clusters := text.GraphemeClusters(line)
 			for _, cluster := range clusters {
 				runes := []rune(cluster)
 
 				if len(runes) > 0 {
-					// 最初のruneをメインとして設定
 					mainRune := runes[0]
-					//var combining []rune
-
-					// 残りのruneをcombining charactersとして設定
-					if len(runes) > 1 {
-						//combining = runes[1:]
-					}
 					width := runewidth.RuneWidth(mainRune)
 
 					if x+width > tb.Width {
@@ -330,18 +319,9 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 					if drawY-tb.ScrollY >= tb.Height {
 						break
 					}
-
-					//if drawY >= tb.ScrollY {
-					//at := drawY - tb.ScrollY
-
-					//clip.SetContent(x, at, mainRune, combining, def)
-
-					// 全角文字の場合、次のセルを空にする
 					if width == 2 {
 						x++
-						//clip.SetContent(x, at, 0, nil, def)
 					}
-					//}
 				}
 				x++
 				if x > tb.Width {
