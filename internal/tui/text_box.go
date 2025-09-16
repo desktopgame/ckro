@@ -18,8 +18,8 @@ type TextBox struct {
 	Width      int
 	Height     int
 	ShowCursor bool
-	ScrollX    int
-	ScrollY    int
+	scrollX    int
+	scrollY    int
 }
 
 func (tb *TextBox) Init() {
@@ -29,8 +29,8 @@ func (tb *TextBox) Init() {
 	tb.Y = 0
 	tb.Width = 20
 	tb.Height = 6
-	tb.ScrollX = 0
-	tb.ScrollY = 0
+	tb.scrollX = 0
+	tb.scrollY = 0
 }
 
 func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
@@ -137,23 +137,29 @@ func (tb *TextBox) CursorUpdate() {
 	// cursor := tb.Document.GetCursorRow()
 	// lc := tb.WrappedLineCount()
 
-	startY := tb.ScrollY
+	startY := tb.scrollY
 	endY := startY + tb.Height
 
 	if cursor >= endY {
 		for cursor >= endY {
-			tb.ScrollY++
+			tb.scrollY++
 
-			startY = tb.ScrollY
+			startY = tb.scrollY
 			endY = startY + tb.Height
 		}
 	} else if cursor <= startY {
 		for cursor <= startY && cursor > 0 {
-			tb.ScrollY--
+			tb.scrollY--
 
-			startY = tb.ScrollY
+			startY = tb.scrollY
 		}
 	}
+}
+
+func (tb *TextBox) CursorReset() {
+	tb.Document.MoveReset()
+	tb.scrollX = 0
+	tb.scrollY = 0
 }
 
 func (tb *TextBox) TextFrame() {
@@ -231,10 +237,10 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 	def := tcell.StyleDefault
 
 	for seg := range tb.BreakIter() {
-		if seg.ViewLine >= tb.ScrollY {
+		if seg.ViewLine >= tb.scrollY {
 			clusters := text.GraphemeClusters(seg.Text)
 			x := 0
-			y := seg.ViewLine - tb.ScrollY
+			y := seg.ViewLine - tb.scrollY
 			for _, cluster := range clusters {
 				runes := []rune(cluster)
 
@@ -268,14 +274,14 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 
 	// カーソル位置の文字を反転表示
 	cursorStyle := def.Reverse(true)
-	clip.SetContent(screenX, cursorRow-tb.ScrollY, currentRune, combining, cursorStyle)
+	clip.SetContent(screenX, cursorRow-tb.scrollY, currentRune, combining, cursorStyle)
 
 	// 全角文字の場合、隣接するセルもカーソル表示
 	if currentRune != ' ' {
 		width := runewidth.RuneWidth(currentRune)
 		if width == 2 {
 			// 隣接するセルにもカーソルを表示（空文字で反転）
-			clip.SetContent(screenX+1, cursorRow-tb.ScrollY, 0, nil, cursorStyle)
+			clip.SetContent(screenX+1, cursorRow-tb.scrollY, 0, nil, cursorStyle)
 		}
 	}
 
@@ -287,7 +293,7 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 
 	return func(yield func(presenter.Segment) bool) {
 		startY := 0
-		endY := min(tb.ScrollY+tb.Height, buf.GetLineCount())
+		endY := min(tb.scrollY+tb.Height, buf.GetLineCount())
 		drawY := 0
 		for i := startY; i < endY; i++ {
 			line := buf.GetLineAt(i).GetContent()
@@ -316,7 +322,7 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 						x = 0
 					}
 					sb.WriteString(cluster)
-					if drawY-tb.ScrollY >= tb.Height {
+					if drawY-tb.scrollY >= tb.Height {
 						break
 					}
 					if width == 2 {
@@ -338,7 +344,7 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 					drawY++
 					x = 0
 				}
-				if drawY-tb.ScrollY >= tb.Height {
+				if drawY-tb.scrollY >= tb.Height {
 					break
 				}
 			}
@@ -353,7 +359,7 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 			sb.Reset()
 
 			drawY++
-			if drawY-tb.ScrollY >= tb.Height {
+			if drawY-tb.scrollY >= tb.Height {
 				break
 			}
 		}
@@ -384,4 +390,12 @@ func (tb *TextBox) WrappedLineCount() int {
 
 func (tb *TextBox) GetDocument() *model.Document {
 	return tb.Document
+}
+
+func (tb *TextBox) GetScrollX() int {
+	return tb.scrollX
+}
+
+func (tb *TextBox) GetScrollY() int {
+	return tb.scrollY
 }
