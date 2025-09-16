@@ -195,7 +195,28 @@ func (t *TreeTextPresenter) renderTree(view View) {
 		}
 	}
 
-	doc.MoveReset()
+	// 選択されたアイテムにカーソルを移動してTextBoxのスクロール機能を活用
+	t.moveToSelectedItem(view)
+}
+
+// moveToSelectedItem moves the document cursor to the selected item
+func (t *TreeTextPresenter) moveToSelectedItem(view View) {
+	doc := view.GetDocument()
+	// カーソルを選択されたアイテムの行に移動
+	if t.selectedIndex >= 0 && t.selectedIndex < len(t.flatNodes) {
+		// ドキュメントの先頭に移動
+		doc.MoveReset()
+
+		// 選択されたアイテムの行まで移動
+		for i := 0; i < t.selectedIndex; i++ {
+			doc.MoveDown()
+		}
+
+		// 行の先頭に移動
+		for doc.GetCursorColumn() > 0 {
+			doc.MoveLeft()
+		}
+	}
 }
 
 func (t *TreeTextPresenter) GetSelectedPath() string {
