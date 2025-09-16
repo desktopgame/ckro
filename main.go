@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
@@ -29,20 +30,6 @@ func main() {
 	vbox := tui.Box{}
 	vbox.Init(tui.Vertical)
 
-	tree := tui.Tile{}
-	tree.Init()
-	tree.MinimumWidth = 50
-	tree.FlexibleHeight = true
-	tree.TextPresenter = &presenter.TreeTextPresenter{
-		RootDirectory: ".",
-	}
-
-	treeSeparator := tui.Tile{}
-	treeSeparator.Init()
-	treeSeparator.MinimumWidth = 1
-	treeSeparator.FlexibleHeight = true
-	treeSeparator.TextPresenter = &presenter.VerticalSeparatorTextPresenter{}
-
 	textArea := tui.Tile{}
 	textArea.Init()
 	textArea.MinimumWidth = 3
@@ -50,6 +37,33 @@ func main() {
 	textArea.FlexibleHeight = true
 	textArea.TextBox.ShowCursor = true
 	textArea.TextPresenter = &presenter.EditTextPresenter{}
+
+	tree := tui.Tile{}
+	tree.Init()
+	tree.MinimumWidth = 50
+	tree.FlexibleHeight = true
+	tree.TextPresenter = &presenter.TreeTextPresenter{
+		RootDirectory: ".",
+		OnFileOpen: func(filePath string) {
+			// ファイルを読み込んでテキストエリアに表示
+			content, err := os.ReadFile(filePath)
+			if err != nil {
+				return
+			}
+
+			// テキストエリアのドキュメントをクリアして新しい内容を設定
+			doc := textArea.TextBox.GetDocument()
+			doc.Init()
+			doc.InsertString(string(content))
+			doc.MoveReset()
+		},
+	}
+
+	treeSeparator := tui.Tile{}
+	treeSeparator.Init()
+	treeSeparator.MinimumWidth = 1
+	treeSeparator.FlexibleHeight = true
+	treeSeparator.TextPresenter = &presenter.VerticalSeparatorTextPresenter{}
 
 	textAreaSeparator := tui.Tile{}
 	textAreaSeparator.Init()

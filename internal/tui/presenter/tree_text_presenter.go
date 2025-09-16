@@ -24,6 +24,7 @@ type TreeTextPresenter struct {
 	rootNode      *TreeNode
 	flatNodes     []*TreeNode
 	selectedIndex int
+	OnFileOpen    func(filePath string) // コールバック関数
 }
 
 func (t *TreeTextPresenter) Present(view View) {
@@ -46,8 +47,28 @@ func (t *TreeTextPresenter) Handle(view View, ev tcell.Event) {
 			if t.selectedIndex < len(t.flatNodes)-1 {
 				t.selectedIndex++
 			}
-		case tcell.KeyEnter, tcell.KeyRight:
-			// 展開
+		case tcell.KeyEnter:
+			// ファイルを開く、またはディレクトリを展開
+			if t.selectedIndex < len(t.flatNodes) {
+				node := t.flatNodes[t.selectedIndex]
+				if node.IsDir {
+					// ディレクトリの場合は展開/折りたたみ
+					if node.IsExpanded {
+						node.IsExpanded = false
+						node.Children = nil
+					} else {
+						node.IsExpanded = true
+						t.loadChildren(node)
+					}
+				} else {
+					// ファイルの場合はコールバックを呼び出し
+					if t.OnFileOpen != nil {
+						t.OnFileOpen(node.Path)
+					}
+				}
+			}
+		case tcell.KeyRight:
+			// ディレクトリ展開のみ
 			if t.selectedIndex < len(t.flatNodes) {
 				node := t.flatNodes[t.selectedIndex]
 				if node.IsDir && !node.IsExpanded {
