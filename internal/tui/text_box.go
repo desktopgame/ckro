@@ -65,11 +65,11 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	if cursorRow < buf.GetLineCount() {
 		// カーソル位置の文字を取得（空行や行末の場合はスペース）
 		cursorLine := ""
-		currentRow := tb.ScrollY
+		currentRow := 0
 		substringFrom := 0
 		substringTo := 0
 
-		for i := tb.ScrollY; i < cursorRow; i++ {
+		for i := 0; i < cursorRow; i++ {
 			line := buf.GetLineAt(i).GetContent()
 			cursorLine = line
 			screenX = text.DisplayWidth(line)
@@ -249,7 +249,7 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 	def := tcell.StyleDefault
 	buf := tb.Document.GetBuffer()
 
-	startY := tb.ScrollY
+	startY := 0
 	endY := min(startY+tb.Height, buf.GetLineCount())
 	drawY := 0
 	for i := startY; i < endY; i++ {
@@ -276,16 +276,20 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 					drawY++
 					x = 0
 				}
-				if drawY >= tb.Height {
+				if drawY-tb.ScrollY >= tb.Height {
 					break
 				}
 
-				clip.SetContent(x, drawY, mainRune, combining, def)
+				if drawY >= tb.ScrollY {
+					at := drawY - tb.ScrollY
 
-				// 全角文字の場合、次のセルを空にする
-				if width == 2 {
-					x++
-					clip.SetContent(x, drawY, 0, nil, def)
+					clip.SetContent(x, at, mainRune, combining, def)
+
+					// 全角文字の場合、次のセルを空にする
+					if width == 2 {
+						x++
+						clip.SetContent(x, at, 0, nil, def)
+					}
 				}
 			}
 			x++
@@ -293,7 +297,7 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 				drawY++
 				x = 0
 			}
-			if drawY >= tb.Height {
+			if drawY-tb.ScrollY >= tb.Height {
 				break
 			}
 		}
