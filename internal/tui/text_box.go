@@ -29,28 +29,6 @@ func (tb *TextBox) Init() {
 	tb.ScrollY = 0
 }
 
-func (tb *TextBox) WrappedLineCount() int {
-	lc := 0
-	buf := tb.Document.GetBuffer()
-
-	for i := 0; i < buf.GetLineCount(); i++ {
-		line := buf.GetLineAt(i)
-		lineContent := line.GetContent()
-		lineWidth := text.DisplayWidth(lineContent)
-
-		if lineWidth <= tb.Width {
-			lc++
-		} else {
-			lc += (lineWidth / tb.Width)
-
-			if lineWidth%tb.Width > 0 {
-				lc++
-			}
-		}
-	}
-	return lc
-}
-
 func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	// カーソルを表示
 	buf := tb.Document.GetBuffer()
@@ -326,6 +304,28 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 		}
 	}
 
+}
+
+func (tb *TextBox) WrappedLineCount() int {
+	lc := 0
+	buf := tb.Document.GetBuffer()
+
+	for i := 0; i < buf.GetLineCount(); i++ {
+		line := buf.GetLineAt(i)
+		lineContent := line.GetContent()
+		lineWidth := text.DisplayWidth(lineContent)
+
+		if lineWidth <= tb.Width {
+			lc++
+		} else {
+			lc += (lineWidth / tb.Width)
+
+			if lineWidth%tb.Width > 0 {
+				lc++
+			}
+		}
+	}
+	return lc
 }
 
 func (tb *TextBox) GetDocument() *model.Document {
