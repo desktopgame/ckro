@@ -110,15 +110,15 @@ func main() {
 	minibuffer.MinimumHeight = 1
 	minibuffer.TextPresenter = &presenter.EditTextPresenter{}
 
-	vbox.Controls = append(vbox.Controls, &editorBox)
+	hbox.Controls = append(hbox.Controls, &tree)
+	hbox.Controls = append(hbox.Controls, &treeSeparator)
+	hbox.Controls = append(hbox.Controls, &editorBox)
+
+	vbox.Controls = append(vbox.Controls, &hbox)
 	vbox.Controls = append(vbox.Controls, &textAreaSeparator)
 	vbox.Controls = append(vbox.Controls, &modeline)
 	vbox.Controls = append(vbox.Controls, &modelineSeparator)
 	vbox.Controls = append(vbox.Controls, &minibuffer)
-
-	hbox.Controls = append(hbox.Controls, &tree)
-	hbox.Controls = append(hbox.Controls, &treeSeparator)
-	hbox.Controls = append(hbox.Controls, &vbox)
 
 	gl := tui.GridLayout{}
 	gl.Init(2, 2)
@@ -129,7 +129,7 @@ func main() {
 
 	stack := tui.Stack{}
 	stack.Init()
-	stack.Layers = append(stack.Layers, &hbox)
+	stack.Layers = append(stack.Layers, &vbox)
 	stack.Layers = append(stack.Layers, gl.Build())
 	stack.Top = 0
 
