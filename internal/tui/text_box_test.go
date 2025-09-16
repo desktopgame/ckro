@@ -58,3 +58,24 @@ func TestCursor(t *testing.T) {
 		t.Fatalf("got %q, want %q", col, 0)
 	}
 }
+
+func TestScroll(t *testing.T) {
+	tb := tui.TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 5
+	tb.Height = 2
+	tb.Document.InsertString("123456789")
+	tb.ShowCursor = true
+
+	tb.CursorUpdate()
+
+	col, row, _, _ := tb.CursorPosition()
+	if row != 1 {
+		t.Fatalf("got %q, want %q", row, 1)
+	}
+	if col != 4 {
+		t.Fatalf("got %q, want %q", col, 4)
+	}
+}
