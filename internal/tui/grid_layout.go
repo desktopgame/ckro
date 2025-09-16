@@ -21,7 +21,7 @@ func (gl *GridLayout) Init(rowCount int, columnCount int) {
 	}
 }
 
-func (gl *GridLayout) SetWithPresenter(row int, column int, minimumWidth int, minimumHeight int, flexibleWidth bool, flexibleHeight bool, presenter TextPresenter) *Tile {
+func (gl *GridLayout) Set(row int, column int, minimumWidth int, minimumHeight int, flexibleWidth bool, flexibleHeight bool, presenter TextPresenter) *Tile {
 	if row < 0 || row >= gl.rowCount || column < 0 || column >= gl.columnCount {
 		return nil
 	}
@@ -40,11 +40,11 @@ func (gl *GridLayout) SetWithPresenter(row int, column int, minimumWidth int, mi
 }
 
 func (gl *GridLayout) SetStatic(row int, column int, minimunWidth int, minimumHeight int) {
-	gl.SetWithPresenter(row, column, minimunWidth, minimumHeight, false, false, nil)
+	gl.Set(row, column, minimunWidth, minimumHeight, false, false, nil)
 }
 
 func (gl *GridLayout) SetFlex(row int, column int) {
-	gl.SetWithPresenter(row, column, 0, 0, true, true, nil)
+	gl.Set(row, column, 0, 0, true, true, nil)
 }
 
 func (gl *GridLayout) Build() *Box {
