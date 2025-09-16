@@ -47,10 +47,17 @@ func main() {
 	}
 	// lineNumbers.TextPresenter = &presenter.FrameTextPresenter{}
 
+	gutter := tui.Tile{}
+	gutter.Init()
+	gutter.MinimumWidth = 1 // 行番号の幅（桁数に応じて調整）
+	gutter.FlexibleHeight = true
+	gutter.TextPresenter = &presenter.VerticalSeparatorTextPresenter{}
+
 	// 水平レイアウトで行番号とテキストエリアを並べる
 	editorBox := tui.Box{}
 	editorBox.Init(tui.Horizontal)
 	editorBox.Controls = append(editorBox.Controls, &lineNumbers)
+	editorBox.Controls = append(editorBox.Controls, &gutter)
 	editorBox.Controls = append(editorBox.Controls, &textArea)
 
 	tree := tui.Tile{}
