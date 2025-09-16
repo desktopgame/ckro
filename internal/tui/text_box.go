@@ -331,17 +331,17 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 						break
 					}
 
-					if drawY >= tb.ScrollY {
-						//at := drawY - tb.ScrollY
+					//if drawY >= tb.ScrollY {
+					//at := drawY - tb.ScrollY
 
-						//clip.SetContent(x, at, mainRune, combining, def)
+					//clip.SetContent(x, at, mainRune, combining, def)
 
-						// 全角文字の場合、次のセルを空にする
-						if width == 2 {
-							x++
-							//clip.SetContent(x, at, 0, nil, def)
-						}
+					// 全角文字の場合、次のセルを空にする
+					if width == 2 {
+						x++
+						//clip.SetContent(x, at, 0, nil, def)
 					}
+					//}
 				}
 				x++
 				if x > tb.Width {
