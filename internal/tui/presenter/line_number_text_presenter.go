@@ -28,13 +28,26 @@ func (ln *LineNumberTextPresenter) Present(view View) {
 	// 行番号の桁数を計算（最大行数に基づく）
 	maxDigits := len(fmt.Sprintf("%d", lineCount))
 
-	// 各行の行番号を生成
-	for i := 1; i <= lineCount; i++ {
-		lineNumber := fmt.Sprintf("%*d", maxDigits, i)
-		doc.InsertString(lineNumber)
+	// BreakIterを使って折り返しを考慮した行番号を生成
+	scrollY := ln.TargetView.GetScrollY()
+	segments := make([]Segment, 0)
 
-		if i < lineCount {
-			doc.InsertLine()
+	// 全セグメントを収集
+	for segment := range ln.TargetView.BreakIter() {
+		segments = append(segments, segment)
+	}
+
+	// スクロール範囲内のセグメントのみ処理
+	for i, segment := range segments {
+		if segment.ViewLine >= scrollY {
+			// 論理行番号を表示（1ベース）
+			lineNumber := fmt.Sprintf("%*d", maxDigits, segment.ModelLine+1)
+			doc.InsertString(lineNumber)
+
+			// 最後のセグメントでない場合は改行
+			if i < len(segments)-1 {
+				doc.InsertLine()
+			}
 		}
 	}
 
