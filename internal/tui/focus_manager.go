@@ -23,6 +23,10 @@ func (fm *FocusManager) Traverse(ctrl Control) {
 }
 
 func (fm *FocusManager) Grab() {
+	if len(fm.tiles) == 0 {
+		return
+	}
+
 	showCursor := fm.tiles[fm.active].TextPresenter.ShowCursor()
 	fm.tiles[fm.active].TextBox.ShowCursor = showCursor
 }
