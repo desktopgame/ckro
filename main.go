@@ -95,7 +95,7 @@ func main() {
 	stack.Init()
 	stack.Layers = append(stack.Layers, &hbox)
 	stack.Layers = append(stack.Layers, gl.Build())
-	stack.Top = 1
+	stack.Top = 0
 
 	focusManager := tui.FocusManager{}
 	stack.Traverse(&focusManager)
