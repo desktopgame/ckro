@@ -2,19 +2,26 @@ package tui
 
 import "github.com/gdamore/tcell/v2"
 
+type Focusable interface {
+	Handle(ev tcell.Event)
+
+	GetTextBox() *TextBox
+	GetTextPresenter() TextPresenter
+}
+
 type FocusManager struct {
-	tiles  []*Tile
+	tiles  []Focusable
 	active int
 }
 
 func (fm *FocusManager) Init() {
-	fm.tiles = []*Tile{}
+	fm.tiles = []Focusable{}
 	fm.active = 0
 }
 
-func (fm *FocusManager) Register(t *Tile) {
+func (fm *FocusManager) Register(t Focusable) {
 	fm.tiles = append(fm.tiles, t)
-	t.TextBox.ShowCursor = false
+	t.GetTextBox().ShowCursor = false
 }
 
 func (fm *FocusManager) Traverse(ctrl Control) {
@@ -27,8 +34,8 @@ func (fm *FocusManager) Grab() {
 		return
 	}
 
-	showCursor := fm.tiles[fm.active].TextPresenter.ShowCursor()
-	fm.tiles[fm.active].TextBox.ShowCursor = showCursor
+	showCursor := fm.tiles[fm.active].GetTextPresenter().ShowCursor()
+	fm.tiles[fm.active].GetTextBox().ShowCursor = showCursor
 }
 
 func (fm *FocusManager) FocusPrev() {
@@ -36,7 +43,7 @@ func (fm *FocusManager) FocusPrev() {
 		return
 	}
 
-	fm.tiles[fm.active].TextBox.ShowCursor = false
+	fm.tiles[fm.active].GetTextBox().ShowCursor = false
 
 	if fm.active > 0 {
 		fm.active--
@@ -44,8 +51,8 @@ func (fm *FocusManager) FocusPrev() {
 		fm.active = len(fm.tiles) - 1
 	}
 
-	showCursor := fm.tiles[fm.active].TextPresenter.ShowCursor()
-	fm.tiles[fm.active].TextBox.ShowCursor = showCursor
+	showCursor := fm.tiles[fm.active].GetTextPresenter().ShowCursor()
+	fm.tiles[fm.active].GetTextBox().ShowCursor = showCursor
 }
 
 func (fm *FocusManager) FocusNext() {
@@ -53,7 +60,7 @@ func (fm *FocusManager) FocusNext() {
 		return
 	}
 
-	fm.tiles[fm.active].TextBox.ShowCursor = false
+	fm.tiles[fm.active].GetTextBox().ShowCursor = false
 
 	if fm.active < len(fm.tiles)-1 {
 		fm.active++
@@ -61,8 +68,8 @@ func (fm *FocusManager) FocusNext() {
 		fm.active = 0
 	}
 
-	showCursor := fm.tiles[fm.active].TextPresenter.ShowCursor()
-	fm.tiles[fm.active].TextBox.ShowCursor = showCursor
+	showCursor := fm.tiles[fm.active].GetTextPresenter().ShowCursor()
+	fm.tiles[fm.active].GetTextBox().ShowCursor = showCursor
 }
 
 func (fm *FocusManager) Handle(ev tcell.Event) {
