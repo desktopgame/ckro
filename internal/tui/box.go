@@ -41,8 +41,23 @@ func (b *Box) MinimumSize(width int, height int) (Width int, Height int) {
 		mh = -1
 		totalMW := 0
 
+		staticWidth := 0
+		flexibleControls := 0
+		for _, ctrl := range b.Controls {
+			if ctrl.IsFlexibleWidth() {
+				flexibleControls++
+			} else {
+				w, _ := ctrl.MinimumSize(width, height)
+				staticWidth += w
+			}
+		}
+
 		for _, ctrl := range b.Controls {
 			w, h := ctrl.MinimumSize(mw, height)
+			if ctrl.IsFlexibleWidth() {
+				// w = (mw - staticWidth) / flexibleControls
+				w, h = ctrl.MinimumSize((mw-staticWidth)/flexibleControls, height)
+			}
 
 			if h > mh {
 				mh = h
@@ -59,8 +74,23 @@ func (b *Box) MinimumSize(width int, height int) (Width int, Height int) {
 		mw = -1
 		totalMH := 0
 
+		staticHeight := 0
+		flexibleControls := 0
+		for _, ctrl := range b.Controls {
+			if ctrl.IsFlexibleHeight() {
+				flexibleControls++
+			} else {
+				_, h := ctrl.MinimumSize(width, height)
+				staticHeight += h
+			}
+		}
+
 		for _, ctrl := range b.Controls {
 			w, h := ctrl.MinimumSize(width, mh)
+			if ctrl.IsFlexibleHeight() {
+				//h = (mh - staticHeight) / flexibleControls
+				w, h = ctrl.MinimumSize(width, (mh-staticHeight)/flexibleControls)
+			}
 
 			if w > mw {
 				mw = w
@@ -154,20 +184,20 @@ func (b *Box) Layout(width int, height int) {
 
 func (b *Box) IsFlexibleWidth() bool {
 	for _, ctrl := range b.Controls {
-		if !ctrl.IsFlexibleWidth() {
-			return false
+		if ctrl.IsFlexibleWidth() {
+			return true
 		}
 	}
-	return true
+	return false
 }
 
 func (b *Box) IsFlexibleHeight() bool {
 	for _, ctrl := range b.Controls {
-		if !ctrl.IsFlexibleHeight() {
-			return false
+		if ctrl.IsFlexibleHeight() {
+			return true
 		}
 	}
-	return true
+	return false
 }
 
 func (b *Box) GetOrientation() Orientation {
