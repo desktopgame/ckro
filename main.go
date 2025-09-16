@@ -120,17 +120,9 @@ func main() {
 	vbox.Controls = append(vbox.Controls, &modelineSeparator)
 	vbox.Controls = append(vbox.Controls, &minibuffer)
 
-	gl := tui.GridLayout{}
-	gl.Init(2, 2)
-	gl.Set(0, 0, 9, 9, false, false, &presenter.EditTextPresenter{})
-	gl.Set(0, 1, 9, 9, false, false, &presenter.EditTextPresenter{})
-	gl.Set(1, 0, 9, 9, false, false, &presenter.EditTextPresenter{})
-	gl.Set(1, 1, 9, 9, false, false, &presenter.EditTextPresenter{})
-
 	stack := tui.Stack{}
 	stack.Init()
 	stack.Layers = append(stack.Layers, &vbox)
-	stack.Layers = append(stack.Layers, gl.Build())
 	stack.Top = 0
 
 	focusManager := tui.FocusManager{}
