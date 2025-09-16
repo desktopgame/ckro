@@ -1,8 +1,12 @@
 package tui
 
 import (
+	"iter"
+	"strings"
+
 	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui/model"
+	"github.com/desktopgame/ckro/internal/tui/presenter"
 	"github.com/gdamore/tcell/v2"
 	"github.com/mattn/go-runewidth"
 )
@@ -225,63 +229,36 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 		Height: tb.Height,
 	}
 	def := tcell.StyleDefault
-	buf := tb.Document.GetBuffer()
 
-	startY := 0
-	endY := min(tb.ScrollY+tb.Height, buf.GetLineCount())
-	drawY := 0
-	for i := startY; i < endY; i++ {
-		line := buf.GetLineAt(i).GetContent()
-		x := 0
+	for seg := range tb.BreakIter() {
+		if seg.ViewLine >= tb.ScrollY {
+			clusters := text.GraphemeClusters(seg.Text)
+			x := 0
+			y := seg.ViewLine - tb.ScrollY
+			for _, cluster := range clusters {
+				runes := []rune(cluster)
 
-		// unisegを使ってgrapheme clusterごとに処理
-		clusters := text.GraphemeClusters(line)
-		for _, cluster := range clusters {
-			runes := []rune(cluster)
+				if len(runes) > 0 {
+					mainRune := runes[0]
+					var combining []rune
 
-			if len(runes) > 0 {
-				// 最初のruneをメインとして設定
-				mainRune := runes[0]
-				var combining []rune
+					// 残りのruneをcombining charactersとして設定
+					if len(runes) > 1 {
+						combining = runes[1:]
+					}
+					width := runewidth.RuneWidth(mainRune)
+					//at := drawY - tb.ScrollY
 
-				// 残りのruneをcombining charactersとして設定
-				if len(runes) > 1 {
-					combining = runes[1:]
-				}
-				width := runewidth.RuneWidth(mainRune)
-
-				if x+width > tb.Width {
-					drawY++
-					x = 0
-				}
-				if drawY-tb.ScrollY >= tb.Height {
-					break
-				}
-
-				if drawY >= tb.ScrollY {
-					at := drawY - tb.ScrollY
-
-					clip.SetContent(x, at, mainRune, combining, def)
+					clip.SetContent(x, y, mainRune, combining, def)
 
 					// 全角文字の場合、次のセルを空にする
 					if width == 2 {
 						x++
-						clip.SetContent(x, at, 0, nil, def)
+						clip.SetContent(x, y, 0, nil, def)
 					}
 				}
+				x++
 			}
-			x++
-			if x > tb.Width {
-				drawY++
-				x = 0
-			}
-			if drawY-tb.ScrollY >= tb.Height {
-				break
-			}
-		}
-		drawY++
-		if drawY-tb.ScrollY >= tb.Height {
-			break
 		}
 	}
 
@@ -304,6 +281,103 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 		}
 	}
 
+}
+
+func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
+	buf := tb.Document.GetBuffer()
+	sb := strings.Builder{}
+
+	return func(yield func(presenter.Segment) bool) {
+
+		startY := 0
+		endY := min(tb.ScrollY+tb.Height, buf.GetLineCount())
+		drawY := 0
+		for i := startY; i < endY; i++ {
+			line := buf.GetLineAt(i).GetContent()
+			x := 0
+
+			// unisegを使ってgrapheme clusterごとに処理
+			clusters := text.GraphemeClusters(line)
+			for _, cluster := range clusters {
+				runes := []rune(cluster)
+
+				if len(runes) > 0 {
+					// 最初のruneをメインとして設定
+					mainRune := runes[0]
+					//var combining []rune
+
+					// 残りのruneをcombining charactersとして設定
+					if len(runes) > 1 {
+						//combining = runes[1:]
+					}
+					width := runewidth.RuneWidth(mainRune)
+
+					if x+width > tb.Width {
+						seg := presenter.Segment{
+							Text:      sb.String(),
+							ModelLine: i,
+							ViewLine:  drawY,
+						}
+						if !yield(seg) {
+							return
+						}
+						sb.Reset()
+
+						drawY++
+						x = 0
+					}
+					sb.WriteString(cluster)
+					if drawY-tb.ScrollY >= tb.Height {
+						break
+					}
+
+					if drawY >= tb.ScrollY {
+						//at := drawY - tb.ScrollY
+
+						//clip.SetContent(x, at, mainRune, combining, def)
+
+						// 全角文字の場合、次のセルを空にする
+						if width == 2 {
+							x++
+							//clip.SetContent(x, at, 0, nil, def)
+						}
+					}
+				}
+				x++
+				if x > tb.Width {
+					seg := presenter.Segment{
+						Text:      sb.String(),
+						ModelLine: i,
+						ViewLine:  drawY,
+					}
+					if !yield(seg) {
+						return
+					}
+					sb.Reset()
+
+					drawY++
+					x = 0
+				}
+				if drawY-tb.ScrollY >= tb.Height {
+					break
+				}
+			}
+			seg := presenter.Segment{
+				Text:      sb.String(),
+				ModelLine: i,
+				ViewLine:  drawY,
+			}
+			if !yield(seg) {
+				return
+			}
+			sb.Reset()
+
+			drawY++
+			if drawY-tb.ScrollY >= tb.Height {
+				break
+			}
+		}
+	}
 }
 
 func (tb *TextBox) WrappedLineCount() int {

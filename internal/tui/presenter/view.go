@@ -1,6 +1,16 @@
 package presenter
 
-import "github.com/desktopgame/ckro/internal/tui/model"
+import (
+	"iter"
+
+	"github.com/desktopgame/ckro/internal/tui/model"
+)
+
+type Segment struct {
+	Text      string
+	ModelLine int
+	ViewLine  int
+}
 
 type View interface {
 	TextFrame()
@@ -8,5 +18,6 @@ type View interface {
 	TextHorizontal()
 	TextClear()
 	CursorUpdate()
+	BreakIter() iter.Seq[Segment]
 	GetDocument() *model.Document
 }
