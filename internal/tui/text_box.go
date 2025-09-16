@@ -250,7 +250,7 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 	buf := tb.Document.GetBuffer()
 
 	startY := 0
-	endY := min(startY+tb.Height, buf.GetLineCount())
+	endY := min(tb.ScrollY+tb.Height, buf.GetLineCount())
 	drawY := 0
 	for i := startY; i < endY; i++ {
 		line := buf.GetLineAt(i).GetContent()
@@ -302,6 +302,9 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 			}
 		}
 		drawY++
+		if drawY-tb.ScrollY >= tb.Height {
+			break
+		}
 	}
 
 	if !tb.ShowCursor {
