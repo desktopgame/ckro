@@ -37,6 +37,21 @@ func main() {
 	textArea.FlexibleHeight = true
 	textArea.TextBox.ShowCursor = true
 	textArea.TextPresenter = &presenter.EditTextPresenter{}
+	// 行番号エリア
+	lineNumbers := tui.Tile{}
+	lineNumbers.Init()
+	lineNumbers.MinimumWidth = 4 // 行番号の幅（桁数に応じて調整）
+	lineNumbers.FlexibleHeight = true
+	lineNumbers.TextPresenter = &presenter.LineNumberTextPresenter{
+		TargetView: textArea.TextBox, // テキストエリアを対象に設定
+	}
+	// lineNumbers.TextPresenter = &presenter.FrameTextPresenter{}
+
+	// 水平レイアウトで行番号とテキストエリアを並べる
+	editorBox := tui.Box{}
+	editorBox.Init(tui.Horizontal)
+	editorBox.Controls = append(editorBox.Controls, &lineNumbers)
+	editorBox.Controls = append(editorBox.Controls, &textArea)
 
 	tree := tui.Tile{}
 	tree.Init()
@@ -88,7 +103,7 @@ func main() {
 	minibuffer.MinimumHeight = 1
 	minibuffer.TextPresenter = &presenter.EditTextPresenter{}
 
-	vbox.Controls = append(vbox.Controls, &textArea)
+	vbox.Controls = append(vbox.Controls, &editorBox)
 	vbox.Controls = append(vbox.Controls, &textAreaSeparator)
 	vbox.Controls = append(vbox.Controls, &modeline)
 	vbox.Controls = append(vbox.Controls, &modelineSeparator)
