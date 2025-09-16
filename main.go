@@ -78,6 +78,7 @@ func main() {
 			doc.Init()
 			doc.InsertString(string(content))
 			doc.MoveReset()
+			textArea.TextBox.ScrollY = 0
 		},
 	}
 
