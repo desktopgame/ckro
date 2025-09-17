@@ -96,3 +96,18 @@ func TestGrid03(t *testing.T) {
 	assertSize(t, c00, 8, 1)
 	assertPos(t, c01, 1, 3)
 }
+
+func TestGrid04(t *testing.T) {
+	g := tui.Grid{}
+	g.Init(2, 2)
+	c00 := g.Set(0, 0, 0, 3, &presenter.FrameTextPresenter{})
+	c01 := g.Set(1, 0, 0, 0, &presenter.FrameTextPresenter{})
+	c10 := g.Set(0, 1, 0, 0, &presenter.FrameTextPresenter{})
+	c11 := g.Set(1, 1, 0, 0, &presenter.FrameTextPresenter{})
+	g.Layout(20, 20)
+
+	assertPos(t, c00, 1, 1)
+	assertPos(t, c01, 1, 11)
+	assertPos(t, c10, 11, 1)
+	assertPos(t, c11, 11, 11)
+}

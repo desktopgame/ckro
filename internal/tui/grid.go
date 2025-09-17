@@ -270,7 +270,7 @@ func (g *Grid) Layout(w int, h int) {
 	xBorders := g.columnCount + 1
 	yBorders := g.rowCount + 1
 
-	sw, sh := g.StaticSize()
+	sw, _ := g.StaticSize()
 	heightTable := g.HeightTable(h)
 
 	useHeight := 0
@@ -310,7 +310,7 @@ func (g *Grid) Layout(w int, h int) {
 			height := gc.StaticHeight
 			consumeY := 0
 			if height == 0 {
-				height = ((h - yBorders) - sh) / (g.rowCount - g.StaticRows(j))
+				height = heightTable[i]
 
 				consumeY = max(0, min(yMod, yMod/(g.rowCount-g.StaticRows(j))))
 				if consumeY == 0 && yMod > 0 {
