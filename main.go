@@ -126,10 +126,10 @@ func main() {
 	// g.Set(1, 0, 0, 0, &presenter.FrameTextPresenter{})
 
 	g.Init(2, 2)
-	g.Set(0, 0, 0, 0, &presenter.FrameTextPresenter{})
-	g.Set(1, 0, 0, 0, &presenter.FrameTextPresenter{})
-	g.Set(0, 1, 0, 0, &presenter.FrameTextPresenter{})
-	g.Set(1, 1, 0, 0, &presenter.FrameTextPresenter{})
+	g.SetTile(0, 0, 0, 0, &presenter.FrameTextPresenter{})
+	g.SetTile(1, 0, 0, 0, &presenter.FrameTextPresenter{})
+	g.SetTile(0, 1, 0, 0, &presenter.FrameTextPresenter{})
+	g.SetTile(1, 1, 0, 0, &presenter.FrameTextPresenter{})
 
 	stack := tui.Stack{}
 	stack.Init()

@@ -32,10 +32,10 @@ func assertSize(t *testing.T, gc *tui.GridCell, w int, h int) {
 func TestGrid01(t *testing.T) {
 	g := tui.Grid{}
 	g.Init(2, 2)
-	c00 := g.Set(0, 0, 0, 0, &presenter.EditTextPresenter{})
-	c01 := g.Set(0, 1, 0, 0, &presenter.EditTextPresenter{})
-	c10 := g.Set(1, 0, 0, 0, &presenter.EditTextPresenter{})
-	c11 := g.Set(1, 1, 0, 0, &presenter.EditTextPresenter{})
+	c00 := g.SetTile(0, 0, 0, 0, &presenter.EditTextPresenter{})
+	c01 := g.SetTile(0, 1, 0, 0, &presenter.EditTextPresenter{})
+	c10 := g.SetTile(1, 0, 0, 0, &presenter.EditTextPresenter{})
+	c11 := g.SetTile(1, 1, 0, 0, &presenter.EditTextPresenter{})
 	g.Layout(11, 11)
 
 	/*
@@ -61,10 +61,10 @@ func TestGrid01(t *testing.T) {
 func TestGrid02(t *testing.T) {
 	g := tui.Grid{}
 	g.Init(2, 2)
-	c00 := g.Set(0, 0, 0, 0, &presenter.EditTextPresenter{})
-	c01 := g.Set(0, 1, 0, 0, &presenter.EditTextPresenter{})
-	c10 := g.Set(1, 0, 0, 0, &presenter.EditTextPresenter{})
-	c11 := g.Set(1, 1, 0, 0, &presenter.EditTextPresenter{})
+	c00 := g.SetTile(0, 0, 0, 0, &presenter.EditTextPresenter{})
+	c01 := g.SetTile(0, 1, 0, 0, &presenter.EditTextPresenter{})
+	c10 := g.SetTile(1, 0, 0, 0, &presenter.EditTextPresenter{})
+	c11 := g.SetTile(1, 1, 0, 0, &presenter.EditTextPresenter{})
 	g.Layout(12, 12)
 
 	/*
@@ -92,8 +92,8 @@ func TestGrid02(t *testing.T) {
 func TestGrid03(t *testing.T) {
 	g := tui.Grid{}
 	g.Init(2, 1)
-	c00 := g.Set(0, 0, 0, 1, &presenter.EditTextPresenter{})
-	c01 := g.Set(1, 0, 0, 0, &presenter.EditTextPresenter{})
+	c00 := g.SetTile(0, 0, 0, 1, &presenter.EditTextPresenter{})
+	c01 := g.SetTile(1, 0, 0, 0, &presenter.EditTextPresenter{})
 	g.Layout(10, 10)
 
 	assertPos(t, c00, 1, 1)
@@ -104,10 +104,10 @@ func TestGrid03(t *testing.T) {
 func TestGrid04(t *testing.T) {
 	g := tui.Grid{}
 	g.Init(2, 2)
-	c00 := g.Set(0, 0, 0, 3, &presenter.FrameTextPresenter{})
-	c01 := g.Set(1, 0, 0, 0, &presenter.FrameTextPresenter{})
-	c10 := g.Set(0, 1, 0, 0, &presenter.FrameTextPresenter{})
-	c11 := g.Set(1, 1, 0, 0, &presenter.FrameTextPresenter{})
+	c00 := g.SetTile(0, 0, 0, 3, &presenter.FrameTextPresenter{})
+	c01 := g.SetTile(1, 0, 0, 0, &presenter.FrameTextPresenter{})
+	c10 := g.SetTile(0, 1, 0, 0, &presenter.FrameTextPresenter{})
+	c11 := g.SetTile(1, 1, 0, 0, &presenter.FrameTextPresenter{})
 	g.Layout(20, 20)
 
 	assertPos(t, c00, 1, 1)

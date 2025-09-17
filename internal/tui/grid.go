@@ -43,7 +43,7 @@ func (g *Grid) Init(rowCount int, columnCount int) {
 	}
 }
 
-func (g *Grid) Set(row int, column int, staticWidth int, staticHeight int, presenter TextPresenter) *GridCell {
+func (g *Grid) SetTile(row int, column int, staticWidth int, staticHeight int, presenter TextPresenter) *GridCell {
 	if row < 0 || row >= g.rowCount || column < 0 || column >= g.columnCount {
 		return nil
 	}
