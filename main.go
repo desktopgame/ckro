@@ -53,12 +53,19 @@ func main() {
 	gutter.FlexibleHeight = true
 	gutter.TextPresenter = &presenter.VerticalSeparatorTextPresenter{}
 
+	scrollBar := tui.NewTile(&presenter.ScrollBarTextPresenter{
+		TargetView: textArea.TextBox,
+	})
+	scrollBar.MinimumWidth = 1
+	scrollBar.FlexibleHeight = true
+
 	// 水平レイアウトで行番号とテキストエリアを並べる
 	editorBox := tui.Box{}
 	editorBox.Init(tui.Horizontal)
 	editorBox.Controls = append(editorBox.Controls, &lineNumbers)
 	editorBox.Controls = append(editorBox.Controls, &gutter)
 	editorBox.Controls = append(editorBox.Controls, &textArea)
+	editorBox.Controls = append(editorBox.Controls, scrollBar)
 
 	tree := tui.Tile{}
 	tree.Init()
@@ -160,7 +167,7 @@ func main() {
 	stack.Init()
 	stack.Layers = append(stack.Layers, &vbox)
 	stack.Layers = append(stack.Layers, &g)
-	stack.Top = 1
+	stack.Top = 0
 
 	focusManager := tui.FocusManager{}
 	stack.Traverse(&focusManager)
