@@ -90,6 +90,8 @@ func NewVBox(controls ...Control) *Box {
 func NewTextEditor() (*Tile, *Tile, *Box) {
 	textArea := NewEditTile()
 	textArea.MinimumWidth = 3
+	textArea.FlexibleWidth = true
+	textArea.FlexibleHeight = true
 	textArea.TextBox.ShowCursor = true
 
 	lineNumbers := NewTile(&presenter.LineNumberTextPresenter{
