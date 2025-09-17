@@ -81,6 +81,53 @@ func (g *Grid) Update() {
 }
 
 func (g *Grid) Draw(s tcell.Screen) {
+	xBorders := g.columnCount + 1
+	yBorders := g.rowCount + 1
+
+	offsetY := g.y + 1
+	yMod := (g.height - yBorders) % g.rowCount
+	for i := 0; i < g.rowCount; i++ {
+
+		for x := g.x; x < g.x+g.width; x++ {
+			s.SetContent(x, offsetY-1, '-', nil, tcell.StyleDefault)
+		}
+
+		consumeY := max(0, min(yMod, yMod/g.rowCount))
+		if consumeY == 0 && yMod > 0 {
+			consumeY = yMod
+		}
+
+		if consumeY < 0 {
+			consumeY = 0
+		}
+		yMod -= consumeY
+		offsetY += ((g.height - yBorders) / g.rowCount) + consumeY + 1
+	}
+
+	offsetX := g.x + 1
+	xMod := (g.width - xBorders) % g.columnCount
+	for i := 0; i < g.columnCount; i++ {
+		for j := 0; j < g.columnCount; j++ {
+			for y := g.y; y < g.y+g.height; y++ {
+				s.SetContent(offsetX-1, y, '|', nil, tcell.StyleDefault)
+			}
+
+			width := (g.width - xBorders) / g.columnCount
+
+			if xMod > 0 {
+				consumeX := max(0, min(xMod, xMod/g.columnCount))
+				if consumeX == 0 && xMod > 0 {
+					consumeX = xMod
+				}
+
+				width += consumeX
+				xMod -= consumeX
+			}
+
+			offsetX += width + 1
+		}
+	}
+
 	for _, row := range g.table {
 		for _, c := range row {
 			c.TextBox.Draw(s)
@@ -88,12 +135,10 @@ func (g *Grid) Draw(s tcell.Screen) {
 	}
 
 	for x := g.x; x < g.x+g.width; x++ {
-		s.SetContent(x, 0, '-', nil, tcell.StyleDefault)
-		s.SetContent(x, g.y+g.height-1, '@', nil, tcell.StyleDefault)
+		s.SetContent(x, g.y+g.height-1, '-', nil, tcell.StyleDefault)
 	}
 
 	for y := g.y; y < g.y+g.height; y++ {
-		s.SetContent(0, y, '|', nil, tcell.StyleDefault)
 		s.SetContent(g.width-1, y, '|', nil, tcell.StyleDefault)
 	}
 }
