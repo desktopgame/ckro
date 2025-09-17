@@ -43,12 +43,11 @@ func (fr *Frame) Move(x int, y int) {
 }
 
 func (fr *Frame) Layout(width int, height int) {
-	mw, mh := fr.Control.MinimumSize(width-2, height-2)
-	offsetX := fr.x + ((width - mw) / 2)
-	offsetY := fr.y + ((height - mh) / 2)
+	offsetX := fr.x + 1
+	offsetY := fr.y + 1
 
 	fr.Control.Move(offsetX, offsetY)
-	fr.Control.Layout(mw, mh)
+	fr.Control.Layout(width-2, height-2)
 	fr.width = width
 	fr.height = height
 }
