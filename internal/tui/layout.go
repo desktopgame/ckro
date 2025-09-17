@@ -52,6 +52,18 @@ func NewCenteredLabelTile(text string) *Tile {
 	return NewTile(&presenter.LabelTextPresenter{Text: text, AlignCenter: true})
 }
 
+func NewListTile(items []string) *Tile {
+	return NewTile(&presenter.ListTextPresenter{Items: items})
+}
+
+func NewCustomListTile(items []string, cursorChar rune, prefix string) *Tile {
+	return NewTile(&presenter.ListTextPresenter{
+		Items:      items,
+		CursorChar: cursorChar,
+		Prefix:     prefix,
+	})
+}
+
 // Separator utilities
 func NewVerticalSeparator() *Tile {
 	tile := NewTile(&presenter.VerticalSeparatorTextPresenter{})
