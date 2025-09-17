@@ -218,8 +218,10 @@ func (g *Grid) Draw(s tcell.Screen) {
 }
 
 func (g *Grid) MinimumSize(width int, height int) (Width int, Height int) {
+	xBorders := g.columnCount + 1
+	yBorders := g.rowCount + 1
 	sw, sh := g.StaticSize()
-	return max(width, sw), max(height, sh)
+	return max(width, sw+xBorders), max(height, sh+yBorders)
 }
 
 func (g *Grid) Move(x int, y int) {
