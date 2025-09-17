@@ -135,6 +135,7 @@ func (g *Grid) Draw(s tcell.Screen) {
 	}
 
 	for x := g.x; x < g.x+g.width; x++ {
+		s.SetContent(x, g.y, '-', nil, tcell.StyleDefault)
 		s.SetContent(x, g.y+g.height-1, '-', nil, tcell.StyleDefault)
 	}
 
