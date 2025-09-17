@@ -278,21 +278,22 @@ func (g *Grid) Draw(s tcell.Screen) {
 			c.Control.Draw(s)
 		}
 	}
+	/*
+		for x := g.x; x < g.x+g.width; x++ {
+			s.SetContent(x, g.y, '-', nil, tcell.StyleDefault)
+			s.SetContent(x, g.y+g.height-1, '-', nil, tcell.StyleDefault)
+		}
 
-	for x := g.x; x < g.x+g.width; x++ {
-		s.SetContent(x, g.y, '-', nil, tcell.StyleDefault)
-		s.SetContent(x, g.y+g.height-1, '-', nil, tcell.StyleDefault)
-	}
+		for y := g.y; y < g.y+g.height; y++ {
+			s.SetContent(g.x, y, '|', nil, tcell.StyleDefault)
+			s.SetContent(g.x+g.width-1, y, '|', nil, tcell.StyleDefault)
+		}
 
-	for y := g.y; y < g.y+g.height; y++ {
-		s.SetContent(g.x, y, '|', nil, tcell.StyleDefault)
-		s.SetContent(g.x+g.width-1, y, '|', nil, tcell.StyleDefault)
-	}
-
-	s.SetContent(g.x, g.y, '*', nil, tcell.StyleDefault)
-	s.SetContent(g.x+g.width-1, g.y, '*', nil, tcell.StyleDefault)
-	s.SetContent(g.x, g.y+g.height-1, '*', nil, tcell.StyleDefault)
-	s.SetContent(g.x+g.width-1, g.y+g.height-1, '*', nil, tcell.StyleDefault)
+		s.SetContent(g.x, g.y, '*', nil, tcell.StyleDefault)
+		s.SetContent(g.x+g.width-1, g.y, '*', nil, tcell.StyleDefault)
+		s.SetContent(g.x, g.y+g.height-1, '*', nil, tcell.StyleDefault)
+		s.SetContent(g.x+g.width-1, g.y+g.height-1, '*', nil, tcell.StyleDefault)
+	*/
 }
 
 func (g *Grid) MinimumSize(width int, height int) (Width int, Height int) {
