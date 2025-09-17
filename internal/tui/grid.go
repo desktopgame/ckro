@@ -128,6 +128,43 @@ func (g *Grid) StaticColumns(row int) int {
 	return c
 }
 
+func (g *Grid) HeightTable(h int) []int {
+	yBorders := g.rowCount + 1
+
+	maxStaticHeightTable := []int{}
+	divRows := 0
+	sumHeight := 0
+	for i := 0; i < g.rowCount; i++ {
+		maxStaticHeight := 0
+		dynamicCount := 0
+		for j := 0; j < g.columnCount; j++ {
+			gc := g.table[i][j]
+
+			if gc.StaticHeight > maxStaticHeight {
+				maxStaticHeight = gc.StaticHeight
+			} else if gc.StaticHeight == 0 {
+				dynamicCount++
+			}
+		}
+		if dynamicCount > 0 {
+			maxStaticHeight = 0
+			divRows++
+		}
+		maxStaticHeightTable = append(maxStaticHeightTable, maxStaticHeight)
+		sumHeight += maxStaticHeight
+	}
+
+	for i := 0; i < g.rowCount; i++ {
+		msh := maxStaticHeightTable[i]
+		div := ((h - yBorders) - sumHeight) / divRows
+
+		if div > msh {
+			maxStaticHeightTable[i] = div
+		}
+	}
+	return maxStaticHeightTable
+}
+
 func (g *Grid) Traverse(fm *FocusManager) {
 	for _, row := range g.table {
 		for _, c := range row {
@@ -234,42 +271,11 @@ func (g *Grid) Layout(w int, h int) {
 	yBorders := g.rowCount + 1
 
 	sw, sh := g.StaticSize()
-
-	maxStaticHeightTable := []int{}
-	divRows := 0
-	sumHeight := 0
-	for i := 0; i < g.rowCount; i++ {
-		maxStaticHeight := 0
-		dynamicCount := 0
-		for j := 0; j < g.columnCount; j++ {
-			gc := g.table[i][j]
-
-			if gc.StaticHeight > maxStaticHeight {
-				maxStaticHeight = gc.StaticHeight
-			} else if gc.StaticHeight == 0 {
-				dynamicCount++
-			}
-		}
-		if dynamicCount > 0 {
-			maxStaticHeight = 0
-			divRows++
-		}
-		maxStaticHeightTable = append(maxStaticHeightTable, maxStaticHeight)
-		sumHeight += maxStaticHeight
-	}
-
-	for i := 0; i < g.rowCount; i++ {
-		msh := maxStaticHeightTable[i]
-		div := ((h - yBorders) - sumHeight) / divRows
-
-		if div > msh {
-			maxStaticHeightTable[i] = div
-		}
-	}
+	heightTable := g.HeightTable(h)
 
 	yyMod := 0
 	for i := 0; i < g.rowCount; i++ {
-		yyMod += maxStaticHeightTable[i]
+		yyMod += heightTable[i]
 	}
 
 	offsetY := g.y + 1
