@@ -163,30 +163,35 @@ func main() {
 	//g.SetTile(0, 1, 0, 0, &presenter.FrameTextPresenter{})
 	//g.SetTile(1, 1, 0, 0, &presenter.FrameTextPresenter{})
 
-	stack := tui.Stack{}
-	stack.Init()
-	stack.Layers = append(stack.Layers, &vbox)
-	stack.Layers = append(stack.Layers, &g)
-	stack.Top = 0
+	// QuickCommandPaletteのテスト
+	commands := []string{
+		"File: Open",
+		"File: Save",
+		"File: Save As",
+		"Edit: Copy",
+		"Edit: Paste",
+		"Edit: Find",
+		"View: Toggle Sidebar",
+		"Help: About",
+	}
+	commandPalette := tui.QuickCommandPalette(commands, func(command string) {
+		log.Printf("Executed command: %s", command)
+	})
 
-	focusManager := tui.FocusManager{}
-	stack.Traverse(&focusManager)
-	focusManager.Grab()
+	commandPaletteUI := tui.WithCenter(tui.WithFrame(commandPalette), 80, 20)
+
+	window := tui.Window{}
+	window.Push(&vbox)
 
 	w, h := s.Size()
-	stack.Layout(w, h)
+	window.Resize(w, h)
 
 	s.Show()
 
 	for {
 		s.Clear()
 
-		mw, mh := stack.MinimumSize(w, h)
-
-		if mw <= w && mh <= h {
-			stack.Update()
-			stack.Draw(s)
-		}
+		window.Frame(s, w, h)
 
 		s.Show()
 
@@ -195,15 +200,17 @@ func main() {
 		case *tcell.EventResize:
 			s.Sync()
 			w, h = e.Size()
-			stack.Layout(w, h)
+			window.Resize(w, h)
 		case *tcell.EventKey:
+			if e.Rune() == 'p' && (e.Modifiers()&tcell.ModAlt != 0) {
+				window.Push(commandPaletteUI)
+				continue
+			}
 			switch e.Key() {
-			case tcell.KeyTAB:
-				focusManager.FocusNext()
 			case tcell.KeyEscape, tcell.KeyCtrlC:
 				return
 			}
-			focusManager.Handle(ev)
+			window.Handle(ev)
 		}
 	}
 }
