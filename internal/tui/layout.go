@@ -254,3 +254,26 @@ func HSplit(controls ...Control) *Box {
 func VSplit(controls ...Control) *Box {
 	return WithSeparators(Vertical, controls...)
 }
+
+// Command Palette utility
+func QuickCommandPalette(commands []string) (*Tile, *Tile, *Box) {
+	// 検索入力フィールド
+	searchInput := NewEditTile()
+	searchInput.FlexibleWidth = true
+	searchInput.MinimumHeight = 1
+	searchInput.TextBox.ShowCursor = true
+
+	// コマンドリスト
+	commandList := NewListTile(commands)
+	commandList.FlexibleWidth = true
+	commandList.FlexibleHeight = true
+
+	// 垂直レイアウトで組み合わせ
+	paletteBox := NewVBox(
+		searchInput,
+		NewHorizontalSeparator(),
+		commandList,
+	)
+
+	return searchInput, commandList, paletteBox
+}
