@@ -29,6 +29,10 @@ func (fr *Frame) Draw(s tcell.Screen) {
 		s.SetContent(fr.x, fr.y+i, '|', nil, tcell.StyleDefault)
 		s.SetContent(fr.x+fr.width-1, fr.y+i, '|', nil, tcell.StyleDefault)
 	}
+	s.SetContent(fr.x, fr.y, '*', nil, tcell.StyleDefault)
+	s.SetContent(fr.x, fr.y+fr.height-1, '*', nil, tcell.StyleDefault)
+	s.SetContent(fr.x+fr.width-1, fr.y, '*', nil, tcell.StyleDefault)
+	s.SetContent(fr.x+fr.width-1, fr.y+fr.height-1, '*', nil, tcell.StyleDefault)
 	fr.Control.Draw(s)
 }
 
