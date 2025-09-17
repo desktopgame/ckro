@@ -131,7 +131,7 @@ func (g *Grid) StaticColumns(row int) int {
 func (g *Grid) HeightTable(h int) []int {
 	yBorders := g.rowCount + 1
 
-	maxStaticHeightTable := []int{}
+	heightTable := []int{}
 	divRows := 0
 	sumHeight := 0
 	for i := 0; i < g.rowCount; i++ {
@@ -150,19 +150,19 @@ func (g *Grid) HeightTable(h int) []int {
 			maxStaticHeight = 0
 			divRows++
 		}
-		maxStaticHeightTable = append(maxStaticHeightTable, maxStaticHeight)
+		heightTable = append(heightTable, maxStaticHeight)
 		sumHeight += maxStaticHeight
 	}
 
 	for i := 0; i < g.rowCount; i++ {
-		msh := maxStaticHeightTable[i]
+		msh := heightTable[i]
 		div := ((h - yBorders) - sumHeight) / divRows
 
 		if div > msh {
-			maxStaticHeightTable[i] = div
+			heightTable[i] = div
 		}
 	}
-	return maxStaticHeightTable
+	return heightTable
 }
 
 func (g *Grid) Traverse(fm *FocusManager) {
