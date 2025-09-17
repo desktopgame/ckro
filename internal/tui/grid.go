@@ -6,22 +6,11 @@ import (
 )
 
 type GridCell struct {
-	TextBox       *TextBox
-	TextPresenter TextPresenter
-	StaticWidth   int
-	StaticHeight  int
-}
-
-func (gc *GridCell) Handle(ev tcell.Event) {
-	gc.TextPresenter.Handle(gc.TextBox, ev)
-}
-
-func (gc *GridCell) GetTextBox() *TextBox {
-	return gc.TextBox
-}
-
-func (gc *GridCell) GetTextPresenter() TextPresenter {
-	return gc.TextPresenter
+	Control      Control
+	StaticWidth  int
+	StaticHeight int
+	Width        int
+	Height       int
 }
 
 type Grid struct {
@@ -41,13 +30,13 @@ func (g *Grid) Init(rowCount int, columnCount int) {
 	for i := 0; i < rowCount; i++ {
 		line := []GridCell{}
 		for j := 0; j < columnCount; j++ {
-			tb := TextBox{}
-			tb.Init()
-
-			tp := presenter.FrameTextPresenter{}
+			tile := Tile{}
+			tile.Init()
+			tile.FlexibleWidth = true
+			tile.FlexibleHeight = true
+			tile.TextPresenter = &presenter.FrameTextPresenter{}
 			line = append(line, GridCell{
-				TextBox:       &tb,
-				TextPresenter: &tp,
+				Control: &tile,
 			})
 		}
 		g.table = append(g.table, line)
@@ -60,11 +49,29 @@ func (g *Grid) Set(row int, column int, staticWidth int, staticHeight int, prese
 	}
 
 	c := &g.table[row][column]
+
+	tile := Tile{}
+	tile.Init()
+	tile.MinimumWidth = max(0, staticWidth)
+	tile.MinimumHeight = max(0, staticHeight)
+	tile.FlexibleWidth = staticWidth == 0
+	tile.FlexibleHeight = staticHeight == 0
+	tile.TextPresenter = presenter
+
 	c.StaticWidth = staticWidth
 	c.StaticHeight = staticHeight
-	if presenter != nil {
-		c.TextPresenter = presenter
+	c.Control = &tile
+
+	return c
+}
+
+func (g *Grid) SetControl(row int, column int, ctrl Control) *GridCell {
+	if row < 0 || row >= g.rowCount || column < 0 || column >= g.columnCount {
+		return nil
 	}
+
+	c := &g.table[row][column]
+	c.Control = ctrl
 	return c
 }
 
@@ -168,7 +175,7 @@ func (g *Grid) HeightTable(h int) []int {
 func (g *Grid) Traverse(fm *FocusManager) {
 	for _, row := range g.table {
 		for _, c := range row {
-			fm.Register(&c)
+			c.Control.Traverse(fm)
 		}
 	}
 }
@@ -176,7 +183,7 @@ func (g *Grid) Traverse(fm *FocusManager) {
 func (g *Grid) Update() {
 	for _, row := range g.table {
 		for _, c := range row {
-			c.TextPresenter.Present(c.TextBox)
+			c.Control.Update()
 		}
 	}
 }
@@ -233,7 +240,7 @@ func (g *Grid) Draw(s tcell.Screen) {
 
 	for _, row := range g.table {
 		for _, c := range row {
-			c.TextBox.Draw(s)
+			c.Control.Draw(s)
 		}
 	}
 
@@ -270,6 +277,21 @@ func (g *Grid) Layout(w int, h int) {
 	xBorders := g.columnCount + 1
 	yBorders := g.rowCount + 1
 
+	for i := 0; i < g.rowCount; i++ {
+		for j := 0; j < g.columnCount; j++ {
+			gc := &g.table[i][j]
+			mw, mh := gc.Control.MinimumSize(w, h)
+			if gc.Control.IsFlexibleWidth() {
+				mw = 0
+			}
+			if gc.Control.IsFlexibleHeight() {
+				mh = 0
+			}
+			gc.StaticWidth = mw
+			gc.StaticHeight = mh
+		}
+	}
+
 	sw, _ := g.StaticSize()
 	heightTable := g.HeightTable(h)
 
@@ -288,8 +310,7 @@ func (g *Grid) Layout(w int, h int) {
 		maxHeight := 0
 		for j := 0; j < g.columnCount; j++ {
 			gc := g.table[i][j]
-			gc.TextBox.X = offsetX
-			gc.TextBox.Y = offsetY
+			gc.Control.Move(offsetX, offsetY)
 
 			width := gc.StaticWidth
 			if width == 0 {
@@ -305,7 +326,6 @@ func (g *Grid) Layout(w int, h int) {
 					xMod -= consumeX
 				}
 			}
-			gc.TextBox.Width = width
 
 			height := gc.StaticHeight
 			consumeY := 0
@@ -320,14 +340,17 @@ func (g *Grid) Layout(w int, h int) {
 					height += consumeY
 				}
 			}
-			gc.TextBox.Height = height
+
+			gc.Control.Layout(width, height)
+			gc.Width = width
+			gc.Height = height
 
 			if height > maxHeight {
 				maxHeight = height
 				maxConsumeY = consumeY
 			}
 
-			offsetX += gc.TextBox.Width + 1
+			offsetX += width + 1
 		}
 		if maxConsumeY < 0 {
 			maxConsumeY = 0

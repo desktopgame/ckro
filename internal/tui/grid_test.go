@@ -8,20 +8,24 @@ import (
 )
 
 func assertPos(t *testing.T, gc *tui.GridCell, x int, y int) {
-	if gc.TextBox.X != x {
-		t.Fatalf("got %d, want %d", gc.TextBox.X, x)
-	}
-	if gc.TextBox.Y != y {
-		t.Fatalf("got %d, want %d", gc.TextBox.Y, y)
+	if tile, ok := gc.Control.(*tui.Tile); ok {
+		if tile.TextBox.X != x {
+			t.Fatalf("got %d, want %d", tile.TextBox.X, x)
+		}
+		if tile.TextBox.Y != y {
+			t.Fatalf("got %d, want %d", tile.TextBox.Y, y)
+		}
 	}
 }
 
 func assertSize(t *testing.T, gc *tui.GridCell, w int, h int) {
-	if gc.TextBox.Width != w {
-		t.Fatalf("got %d, want %d", gc.TextBox.Width, w)
-	}
-	if gc.TextBox.Height != h {
-		t.Fatalf("got %d, want %d", gc.TextBox.Height, h)
+	if tile, ok := gc.Control.(*tui.Tile); ok {
+		if tile.TextBox.Width != w {
+			t.Fatalf("got %d, want %d", tile.TextBox.Width, w)
+		}
+		if tile.TextBox.Height != h {
+			t.Fatalf("got %d, want %d", tile.TextBox.Height, h)
+		}
 	}
 }
 
