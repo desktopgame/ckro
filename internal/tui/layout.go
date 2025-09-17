@@ -41,7 +41,7 @@ func NewFixedTile(presenter TextPresenter, width, height int) *Tile {
 }
 
 func NewEditTile() *Tile {
-	return NewFlexTile(&presenter.EditTextPresenter{})
+	return NewTile(&presenter.EditTextPresenter{})
 }
 
 func NewLabelTile(text string) *Tile {
@@ -143,19 +143,25 @@ func QuickEditor() (*Tile, *Box) {
 	return textArea, editorBox
 }
 
-func QuickForm(labelWidth int, pairs ...struct{ Label, Input string }) *Box {
-	vbox := NewVBox()
+func QuickForm(labelWidth int, pairs ...struct{ Label, Input string }) *Grid {
+	grid := NewGrid(len(pairs), 2)
 
-	for _, pair := range pairs {
-		label := NewFixedTile(&presenter.LabelTextPresenter{Text: pair.Label}, labelWidth, 1)
+	for i, pair := range pairs {
+		// ラベル（固定サイズ）
+		label := NewFixedTile(&presenter.LabelTextPresenter{Text: pair.Label, AlignCenter: true}, labelWidth, 5)
+		grid.SetControl(i, 0, label)
+
+		// 入力フィールド（フレーム付き、固定高さ）
 		input := NewEditTile()
-		input.MinimumHeight = 1
-
-		row := NewHBox(label, input)
-		vbox.Controls = append(vbox.Controls, row)
+		input.FlexibleWidth = true
+		input.FlexibleHeight = false
+		input.MinimumHeight = 3
+		input.TextBox.ShowCursor = true
+		framedInput := WithFrame(input)
+		grid.SetControl(i, 1, framedInput)
 	}
 
-	return vbox
+	return grid
 }
 
 func QuickDialog(title string, content Control, buttonLabels ...string) *Box {
