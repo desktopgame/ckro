@@ -191,85 +191,87 @@ func (g *Grid) Update() {
 }
 
 func (g *Grid) Draw(s tcell.Screen) {
-	xBorders := g.columnCount + 1
-	yBorders := g.rowCount + 1
+	/*
+		xBorders := g.columnCount + 1
+		yBorders := g.rowCount + 1
 
-	sw, _ := g.StaticSize()
-	heightTable := g.HeightTable(g.height)
+		sw, _ := g.StaticSize()
+		heightTable := g.HeightTable(g.height)
 
-	useHeight := 0
-	for i := 0; i < g.rowCount; i++ {
-		useHeight += heightTable[i]
-	}
-
-	offsetY := g.y + 1
-	yMod := max(0, g.height-useHeight-yBorders)
-	for i := 0; i < g.rowCount; i++ {
-		maxConsumeY := 0
-
-		maxHeight := 0
-		for j := 0; j < g.columnCount; j++ {
-			for x := g.x; x < g.x+g.width; x++ {
-				s.SetContent(x, offsetY-1, '-', nil, tcell.StyleDefault)
-			}
-			gc := g.table[i][j]
-
-			height := gc.StaticHeight
-			consumeY := 0
-			if height == 0 {
-				height = heightTable[i]
-
-				consumeY = max(0, min(yMod, yMod/(g.rowCount-g.StaticRows(j))))
-				if consumeY == 0 && yMod > 0 {
-					consumeY = yMod
-				}
-				if yMod > 0 {
-					height += consumeY
-				}
-			}
-			//gc.TextBox.Height = height
-
-			if height > maxHeight {
-				maxHeight = height
-				maxConsumeY = consumeY
-			}
-
+		useHeight := 0
+		for i := 0; i < g.rowCount; i++ {
+			useHeight += heightTable[i]
 		}
-		if maxConsumeY < 0 {
-			maxConsumeY = 0
-		}
-		yMod -= maxConsumeY
-		offsetY += maxHeight + 1
-	}
 
-	for i := 0; i < g.rowCount; i++ {
-		offsetX := g.x + 1
-		xMod := ((g.width - xBorders) - sw) % (g.columnCount - g.StaticColumns(i))
-		for j := 0; j < g.columnCount; j++ {
-			gc := g.table[i][j]
+		offsetY := g.y + 1
+		yMod := max(0, g.height-useHeight-yBorders)
+		for i := 0; i < g.rowCount; i++ {
+			maxConsumeY := 0
 
-			width := gc.StaticWidth
-			if width == 0 {
-				width = ((g.width - xBorders) - sw) / (g.columnCount - g.StaticColumns(i))
+			maxHeight := 0
+			for j := 0; j < g.columnCount; j++ {
+				for x := g.x; x < g.x+g.width; x++ {
+					s.SetContent(x, offsetY-1, '-', nil, tcell.StyleDefault)
+				}
+				gc := g.table[i][j]
 
-				if xMod > 0 {
-					consumeX := max(0, min(xMod, xMod/(g.columnCount-g.StaticColumns(i))))
-					if consumeX == 0 && xMod > 0 {
-						consumeX = xMod
+				height := gc.StaticHeight
+				consumeY := 0
+				if height == 0 {
+					height = heightTable[i]
+
+					consumeY = max(0, min(yMod, yMod/(g.rowCount-g.StaticRows(j))))
+					if consumeY == 0 && yMod > 0 {
+						consumeY = yMod
 					}
-
-					width += consumeX
-					xMod -= consumeX
+					if yMod > 0 {
+						height += consumeY
+					}
 				}
-			}
+				//gc.TextBox.Height = height
 
-			for y := g.y; y < g.y+g.height; y++ {
-				s.SetContent(offsetX-1, y, '|', nil, tcell.StyleDefault)
-			}
+				if height > maxHeight {
+					maxHeight = height
+					maxConsumeY = consumeY
+				}
 
-			//offsetX += gc.TextBox.Width + 1
+			}
+			if maxConsumeY < 0 {
+				maxConsumeY = 0
+			}
+			yMod -= maxConsumeY
+			offsetY += maxHeight + 1
 		}
-	}
+
+		for i := 0; i < g.rowCount; i++ {
+			offsetX := g.x + 1
+			xMod := ((g.width - xBorders) - sw) % (g.columnCount - g.StaticColumns(i))
+			for j := 0; j < g.columnCount; j++ {
+				gc := g.table[i][j]
+
+				width := gc.StaticWidth
+				if width == 0 {
+					width = ((g.width - xBorders) - sw) / (g.columnCount - g.StaticColumns(i))
+
+					if xMod > 0 {
+						consumeX := max(0, min(xMod, xMod/(g.columnCount-g.StaticColumns(i))))
+						if consumeX == 0 && xMod > 0 {
+							consumeX = xMod
+						}
+
+						width += consumeX
+						xMod -= consumeX
+					}
+				}
+
+				for y := g.y; y < g.y+g.height; y++ {
+					s.SetContent(offsetX-1, y, '|', nil, tcell.StyleDefault)
+				}
+
+				//offsetX += gc.TextBox.Width + 1
+			}
+		}
+	*/
 
 	for _, row := range g.table {
 		for _, c := range row {

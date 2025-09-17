@@ -121,15 +121,40 @@ func main() {
 	vbox.Controls = append(vbox.Controls, &minibuffer)
 
 	g := tui.Grid{}
-	// g.Init(2, 1)
-	// g.Set(0, 0, 0, 5, &presenter.FrameTextPresenter{})
-	// g.Set(1, 0, 0, 0, &presenter.FrameTextPresenter{})
 
-	g.Init(2, 2)
-	g.SetTile(0, 0, 0, 0, &presenter.FrameTextPresenter{})
+	ctrlLine := tui.Box{}
+	ctrlLine.Init(tui.Horizontal)
+
+	ctrl1 := tui.Tile{}
+	ctrl1.Init()
+	ctrl1.MinimumWidth = 10
+	ctrl1.MinimumHeight = 10
+	ctrl1.TextPresenter = &presenter.LabelTextPresenter{
+		Text:        "Label",
+		AlignCenter: true,
+	}
+
+	ctrl2 := tui.Tile{}
+	ctrl2.Init()
+	ctrl2.FlexibleWidth = true
+	ctrl2.MinimumHeight = 10
+	ctrl2.TextPresenter = &presenter.EditTextPresenter{}
+
+	frame := tui.Frame{}
+	frame.Control = &ctrl2
+
+	ctrlLine.Controls = append(ctrlLine.Controls, &ctrl1)
+	ctrlLine.Controls = append(ctrlLine.Controls, &frame)
+
+	g.Init(2, 1)
+	g.SetControl(0, 0, &ctrlLine)
 	g.SetTile(1, 0, 0, 0, &presenter.FrameTextPresenter{})
-	g.SetTile(0, 1, 0, 0, &presenter.FrameTextPresenter{})
-	g.SetTile(1, 1, 0, 0, &presenter.FrameTextPresenter{})
+
+	//g.Init(2, 2)
+	//g.SetTile(0, 0, 0, 0, &presenter.FrameTextPresenter{})
+	//g.SetTile(1, 0, 0, 0, &presenter.FrameTextPresenter{})
+	//g.SetTile(0, 1, 0, 0, &presenter.FrameTextPresenter{})
+	//g.SetTile(1, 1, 0, 0, &presenter.FrameTextPresenter{})
 
 	stack := tui.Stack{}
 	stack.Init()

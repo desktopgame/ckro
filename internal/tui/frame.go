@@ -54,9 +54,9 @@ func (fr *Frame) Layout(width int, height int) {
 }
 
 func (fr *Frame) IsFlexibleWidth() bool {
-	return false
+	return fr.Control.IsFlexibleWidth()
 }
 
 func (fr *Frame) IsFlexibleHeight() bool {
-	return false
+	return fr.Control.IsFlexibleHeight()
 }
