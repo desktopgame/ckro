@@ -273,13 +273,13 @@ func (g *Grid) Layout(w int, h int) {
 	sw, sh := g.StaticSize()
 	heightTable := g.HeightTable(h)
 
-	yyMod := 0
+	useHeight := 0
 	for i := 0; i < g.rowCount; i++ {
-		yyMod += heightTable[i]
+		useHeight += heightTable[i]
 	}
 
 	offsetY := g.y + 1
-	yMod := max(0, h-yyMod-yBorders)
+	yMod := max(0, h-useHeight-yBorders)
 	for i := 0; i < g.rowCount; i++ {
 		maxConsumeY := 0
 
