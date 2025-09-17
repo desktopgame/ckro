@@ -141,6 +141,11 @@ func (g *Grid) Draw(s tcell.Screen) {
 	for y := g.y; y < g.y+g.height; y++ {
 		s.SetContent(g.width-1, y, '|', nil, tcell.StyleDefault)
 	}
+
+	s.SetContent(g.x, g.y, '*', nil, tcell.StyleDefault)
+	s.SetContent(g.x+g.width-1, g.y, '*', nil, tcell.StyleDefault)
+	s.SetContent(g.x, g.y+g.height-1, '*', nil, tcell.StyleDefault)
+	s.SetContent(g.x+g.width-1, g.y+g.height-1, '*', nil, tcell.StyleDefault)
 }
 
 func (g *Grid) MinimumSize(width int, height int) (Width int, Height int) {
