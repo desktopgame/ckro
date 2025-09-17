@@ -26,7 +26,7 @@ func (c *Center) Draw(s tcell.Screen) {
 
 func (c *Center) MinimumSize(width int, height int) (Width int, Height int) {
 	mw, mh := c.Control.MinimumSize(width, height)
-	return max(mw, width), max(mh, height)
+	return max(mw, c.Width), max(mh, c.Height)
 }
 
 func (c *Center) Move(x int, y int) {

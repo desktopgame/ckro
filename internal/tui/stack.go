@@ -12,7 +12,7 @@ func (st *Stack) Init() {
 }
 
 func (st *Stack) Traverse(fm *FocusManager) {
-	st.Layers[st.Top].Traverse(fm)
+	fm.Traverse(st.Layers[st.Top])
 }
 
 func (st *Stack) Update() {
