@@ -114,7 +114,10 @@ func (g *Grid) Layout(w int, h int) {
 	offsetY := g.y + 1
 	yMod := (h - yBorders) % g.rowCount
 	for i := 0; i < g.rowCount; i++ {
-		consumeY := min(yMod, yMod/g.rowCount)
+		consumeY := max(0, min(yMod, yMod/g.rowCount))
+		if consumeY == 0 && yMod > 0 {
+			consumeY = yMod
+		}
 
 		offsetX := g.x + 1
 		xMod := (w - xBorders) % g.columnCount
@@ -126,7 +129,11 @@ func (g *Grid) Layout(w int, h int) {
 			gc.TextBox.Height = (h - yBorders) / g.rowCount
 
 			if xMod > 0 {
-				consumeX := min(xMod, xMod/g.columnCount)
+				consumeX := max(0, min(xMod, xMod/g.columnCount))
+				if consumeX == 0 && xMod > 0 {
+					consumeX = xMod
+				}
+
 				gc.TextBox.Width += consumeX
 				xMod -= consumeX
 			}
@@ -136,6 +143,9 @@ func (g *Grid) Layout(w int, h int) {
 			}
 
 			offsetX += gc.TextBox.Width + 1
+		}
+		if consumeY < 0 {
+			consumeY = 0
 		}
 		yMod -= consumeY
 		offsetY += ((h - yBorders) / g.rowCount) + consumeY + 1
