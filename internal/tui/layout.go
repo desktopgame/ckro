@@ -100,10 +100,17 @@ func NewTextEditor() (*Tile, *Tile, *Box) {
 	lineNumbers.MinimumWidth = 4
 	lineNumbers.FlexibleHeight = true
 
+	scrollBar := NewTile(&presenter.ScrollBarTextPresenter{
+		TargetView: textArea.TextBox,
+	})
+	scrollBar.MinimumWidth = 1
+	scrollBar.FlexibleHeight = true
+
 	editorBox := NewHBox(
 		lineNumbers,
 		NewVerticalSeparator(),
 		textArea,
+		scrollBar,
 	)
 
 	return textArea, lineNumbers, editorBox
