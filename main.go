@@ -121,11 +121,15 @@ func main() {
 	vbox.Controls = append(vbox.Controls, &minibuffer)
 
 	g := tui.Grid{}
+	// g.Init(2, 1)
+	// g.Set(0, 0, 0, 5, &presenter.FrameTextPresenter{})
+	// g.Set(1, 0, 0, 0, &presenter.FrameTextPresenter{})
+
 	g.Init(2, 2)
-	g.Set(0, 0, &presenter.FrameTextPresenter{})
-	g.Set(0, 1, &presenter.FrameTextPresenter{})
-	g.Set(1, 0, &presenter.FrameTextPresenter{})
-	g.Set(1, 1, &presenter.FrameTextPresenter{})
+	g.Set(0, 0, 0, 0, &presenter.FrameTextPresenter{})
+	g.Set(1, 0, 0, 0, &presenter.FrameTextPresenter{})
+	g.Set(0, 1, 0, 0, &presenter.FrameTextPresenter{})
+	g.Set(1, 1, 0, 0, &presenter.FrameTextPresenter{})
 
 	stack := tui.Stack{}
 	stack.Init()
