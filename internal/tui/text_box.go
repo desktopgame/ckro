@@ -392,6 +392,14 @@ func (tb *TextBox) GetDocument() *model.Document {
 	return tb.Document
 }
 
+func (tb *TextBox) GetWidth() int {
+	return tb.Width
+}
+
+func (tb *TextBox) GetHeight() int {
+	return tb.Height
+}
+
 func (tb *TextBox) GetScrollX() int {
 	return tb.scrollX
 }
