@@ -37,8 +37,8 @@ func (c *Center) Move(x int, y int) {
 func (c *Center) Layout(width int, height int) {
 	mw, mh := c.Control.MinimumSize(c.Width, c.Height)
 	c.Control.Move(
-		c.x+(width-c.Width)/2,
-		c.y+(height-c.Height)/2,
+		c.x+(width-mw)/2,
+		c.y+(height-mh)/2,
 	)
 	c.Control.Layout(mw, mh)
 }
