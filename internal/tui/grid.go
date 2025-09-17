@@ -162,11 +162,13 @@ func (g *Grid) HeightTable(h int) []int {
 	}
 
 	for i := 0; i < g.rowCount; i++ {
-		msh := heightTable[i]
-		div := ((h - yBorders) - sumHeight) / divRows
+		if divRows > 0 {
+			msh := heightTable[i]
+			div := ((h - yBorders) - sumHeight) / divRows
 
-		if div > msh {
-			heightTable[i] = div
+			if div > msh {
+				heightTable[i] = div
+			}
 		}
 	}
 	return heightTable
@@ -282,13 +284,15 @@ func (g *Grid) Layout(w int, h int) {
 			gc := &g.table[i][j]
 			mw, mh := gc.Control.MinimumSize(w, h)
 			if gc.Control.IsFlexibleWidth() {
-				mw = 0
+				gc.StaticWidth = 0
+			} else {
+				gc.StaticWidth = mw
 			}
 			if gc.Control.IsFlexibleHeight() {
-				mh = 0
+				gc.StaticHeight = 0
+			} else {
+				gc.StaticHeight = mh
 			}
-			gc.StaticWidth = mw
-			gc.StaticHeight = mh
 		}
 	}
 
@@ -306,7 +310,10 @@ func (g *Grid) Layout(w int, h int) {
 		maxConsumeY := 0
 
 		offsetX := g.x + 1
-		xMod := ((w - xBorders) - sw) % (g.columnCount - g.StaticColumns(i))
+		xMod := 0
+		if g.columnCount != g.StaticColumns(i) {
+			xMod = ((w - xBorders) - sw) % (g.columnCount - g.StaticColumns(i))
+		}
 		maxHeight := 0
 		for j := 0; j < g.columnCount; j++ {
 			gc := g.table[i][j]
@@ -364,9 +371,9 @@ func (g *Grid) Layout(w int, h int) {
 }
 
 func (g *Grid) IsFlexibleWidth() bool {
-	return false
+	return true
 }
 
 func (g *Grid) IsFlexibleHeight() bool {
-	return false
+	return true
 }
