@@ -148,10 +148,18 @@ func (tb *TextBox) CursorUpdate() {
 			endY = startY + tb.Height
 		}
 	} else if cursor <= startY {
-		for cursor <= startY && cursor > 0 {
-			tb.scrollY--
+		if cursor == 0 {
+			tb.scrollY = 0
+		} else {
+			for cursor <= startY && cursor > 0 {
+				tb.scrollY--
 
-			startY = tb.scrollY
+				startY = tb.scrollY
+			}
+		}
+	} else if cursor > startY && cursor < endY {
+		if cursor < tb.Height {
+			tb.scrollY = 0
 		}
 	}
 }
@@ -303,7 +311,27 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 			for _, cluster := range clusters {
 				runes := []rune(cluster)
 
-				if len(runes) > 0 {
+				if cluster == "\t" {
+					if x+4 > tb.Width {
+						seg := presenter.Segment{
+							Text:      sb.String(),
+							ModelLine: i,
+							ViewLine:  drawY,
+						}
+						if !yield(seg) {
+							return
+						}
+						sb.Reset()
+
+						drawY++
+						x = 0
+					}
+					sb.WriteString(cluster)
+					if drawY-tb.scrollY >= tb.Height {
+						break
+					}
+					x += 3
+				} else if len(runes) > 0 {
 					mainRune := runes[0]
 					width := runewidth.RuneWidth(mainRune)
 
