@@ -47,8 +47,6 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	if cursorRow < buf.GetLineCount() {
 		// カーソル位置の文字を取得（空行や行末の場合はスペース）
 		currentRow := 0
-		substringFrom := 0
-		substringTo := 0
 
 		for i := 0; i < cursorRow; i++ {
 			line := buf.GetLineAt(i).GetContent()
@@ -57,14 +55,15 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 			for w := range text.DisplayIter(line) {
 				screenX += w
 
-				if screenX > tb.Width {
-					screenX = w
+				if screenX >= tb.Width {
+					screenX = 0
 					currentRow++
 				}
 			}
 		}
 		cursorRow = currentRow
 		cursorLine := tb.Document.GetBuffer().GetLineAt(tb.Document.GetCursorRow()).GetContent()
+		cursorLineRange := cursorLine
 		screenX = text.DisplayPos(cursorLine, cursorCol)
 
 		if screenX >= tb.Width {
@@ -81,8 +80,8 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 				padChars++
 				padLen++
 
-				if padLeft > tb.Width {
-					padLeft = w
+				if padLeft >= tb.Width {
+					padLeft = 0
 					padStart = padChars
 					padLen = 1
 					cursorRow++
@@ -92,16 +91,16 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 			padX := 0
 			padWidth := 0
 			for w := range text.DisplayIter(cursorLine) {
-				padX++
 
-				if padX >= padStart {
+				if padX >= padStart && padX < padStart+padLen {
 					padWidth += w
 				}
+				padX++
 			}
 			screenX = padWidth
 		}
 
-		cursorLineRange := cursorLine[substringFrom:substringTo]
+		//cursorLineRange := cursorLine[substringFrom:substringTo]
 		if cursorCol >= text.GraphemeLength(cursorLineRange) {
 			// 行末またはそれを超えた位置
 			currentRune = ' '
@@ -282,14 +281,14 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 
 	// カーソル位置の文字を反転表示
 	cursorStyle := def.Reverse(true)
-	clip.SetContent(screenX, cursorRow-tb.scrollY, currentRune, combining, cursorStyle)
+	clip.SetContent(screenX, cursorRow, currentRune, combining, cursorStyle)
 
 	// 全角文字の場合、隣接するセルもカーソル表示
 	if currentRune != ' ' {
 		width := runewidth.RuneWidth(currentRune)
 		if width == 2 {
 			// 隣接するセルにもカーソルを表示（空文字で反転）
-			clip.SetContent(screenX+1, cursorRow-tb.scrollY, 0, nil, cursorStyle)
+			clip.SetContent(screenX+1, cursorRow, 0, nil, cursorStyle)
 		}
 	}
 
