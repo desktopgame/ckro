@@ -46,71 +46,60 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 
 	if cursorRow < buf.GetLineCount() {
 		// カーソル位置の文字を取得（空行や行末の場合はスペース）
-		cursorLine := ""
 		currentRow := 0
 		substringFrom := 0
 		substringTo := 0
 
 		for i := 0; i < cursorRow; i++ {
 			line := buf.GetLineAt(i).GetContent()
-			cursorLine = line
-			screenX = text.DisplayWidth(line)
-			substringFrom = 0
-			substringTo = len(cursorLine)
-
 			currentRow++
+			screenX = 0
+			for w := range text.DisplayIter(line) {
+				screenX += w
 
-			if screenX >= tb.Width {
-				remain := screenX - tb.Width
-				screenX = 0
-				// cursorRow++
-				currentRow++
-
-				substringFrom = tb.Width
-
-				for remain > 0 {
-					consume := min(remain, tb.Width)
-					screenX += consume
-					remain -= consume
-					substringFrom += consume
-
-					if screenX >= tb.Width {
-						screenX = 0
-						// cursorRow++
-						currentRow++
-					}
+				if screenX > tb.Width {
+					screenX = w
+					currentRow++
 				}
 			}
 		}
 		cursorRow = currentRow
-		lineSub := tb.Document.GetBuffer().GetLineAt(tb.Document.GetCursorRow()).GetContent()
-		screenX = text.DisplayPos(lineSub, cursorCol)
+		cursorLine := tb.Document.GetBuffer().GetLineAt(tb.Document.GetCursorRow()).GetContent()
+		screenX = text.DisplayPos(cursorLine, cursorCol)
+
 		if screenX >= tb.Width {
-			charOffset := 0
-			charsTotal := 0
-			for screenX >= tb.Width {
-				chars := 0
-
-				for chars < tb.Width {
-					ch := text.GraphemeSubString(lineSub, charOffset, charOffset+1)
-					chw := text.DisplayWidth(ch)
-					chars += chw
-					charOffset++
-
-					if chars > tb.Width {
-						chars -= chw
-						charOffset--
-						break
-					}
+			padLeft := 0
+			padChars := 0
+			padStart := 0
+			padLen := 0
+			for w := range text.DisplayIter(cursorLine) {
+				if padChars == cursorCol {
+					break
 				}
 
-				cursorRow++
-				charsTotal += chars
-				screenX -= chars
+				padLeft += w
+				padChars++
+				padLen++
+
+				if padLeft > tb.Width {
+					padLeft = w
+					padStart = padChars
+					padLen = 1
+					cursorRow++
+				}
 			}
-			screenX = text.DisplayPos(lineSub, cursorCol) - charsTotal
+
+			padX := 0
+			padWidth := 0
+			for w := range text.DisplayIter(cursorLine) {
+				padX++
+
+				if padX >= padStart {
+					padWidth += w
+				}
+			}
+			screenX = padWidth
 		}
-		// screenX = cursorCol
 
 		cursorLineRange := cursorLine[substringFrom:substringTo]
 		if cursorCol >= text.GraphemeLength(cursorLineRange) {
@@ -120,6 +109,7 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 		} else {
 			currentRune, combining = text.DisplayRunesAt(cursorLineRange, screenX)
 		}
+		//currentRune = ' '
 		// cursorCol = screenX
 
 	} else {

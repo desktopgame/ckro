@@ -1,6 +1,7 @@
 package text
 
 import (
+	"iter"
 	"slices"
 	"strings"
 
@@ -88,6 +89,25 @@ func GraphemeInsert(s string, graphemePos int, insertString string) string {
 		before := strings.Join(clusters[:graphemePos], "")
 		after := strings.Join(clusters[graphemePos:], "")
 		return before + insertString + after
+	}
+}
+
+func DisplayIter(s string) iter.Seq2[int, string] {
+	return func(yield func(int, string) bool) {
+		x := 0
+		for _, cluster := range GraphemeClusters(s) {
+			w := 0
+			if cluster == "\t" {
+				w = TabWidth - (x % TabWidth)
+				x += w
+			} else {
+				w = runewidth.StringWidth(cluster)
+				x += w
+			}
+			if !yield(w, cluster) {
+				return
+			}
+		}
 	}
 }
 
