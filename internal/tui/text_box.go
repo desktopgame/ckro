@@ -90,13 +90,15 @@ func (tb *TextBox) calculateCursorPosition(line string, cursorCol int) (screenX 
 	if cursorCol >= len(clusters) {
 		// 全ての文字を処理してから、カーソル位置を決定
 		for _, cluster := range clusters {
-			clusterWidth := text.DisplayWidth(cluster)
+			clusterWidth := tb.calculateClusterWidth(cluster, currentX)
 
 			// 現在の行に収まるかチェック
 			if currentX+clusterWidth > tb.Width {
 				// 次の行に移動
 				currentRow++
 				currentX = 0
+				// 行が変わったので幅を再計算
+				clusterWidth = tb.calculateClusterWidth(cluster, currentX)
 			}
 
 			currentX += clusterWidth
@@ -114,19 +116,42 @@ func (tb *TextBox) calculateCursorPosition(line string, cursorCol int) (screenX 
 	// 通常の処理：指定された位置まで
 	for i := 0; i < cursorCol; i++ {
 		cluster := clusters[i]
-		clusterWidth := text.DisplayWidth(cluster)
+		clusterWidth := tb.calculateClusterWidth(cluster, currentX)
 
 		// 現在の行に収まるかチェック
 		if currentX+clusterWidth > tb.Width {
 			// 次の行に移動
 			currentRow++
 			currentX = 0
+			// 行が変わったので幅を再計算
+			clusterWidth = tb.calculateClusterWidth(cluster, currentX)
 		}
 
 		currentX += clusterWidth
 	}
 
+	// カーソルが特定の文字（タブなど）の上にある場合の特別処理
+	if cursorCol < len(clusters) {
+		cluster := clusters[cursorCol]
+		if cluster == "\t" {
+			// タブの場合、タブが次の行に移動するかチェック
+			clusterWidth := tb.calculateClusterWidth(cluster, currentX)
+			if currentX+clusterWidth > tb.Width {
+				// タブが次の行に移動する場合、次の行の先頭を返す
+				return 0, currentRow + 1
+			}
+		}
+	}
+
 	return currentX, currentRow
+}
+
+// calculateClusterWidth calculates the display width of a cluster considering tabs
+func (tb *TextBox) calculateClusterWidth(cluster string, currentX int) int {
+	if cluster == "\t" {
+		return text.TabWidth - (currentX % text.TabWidth)
+	}
+	return text.DisplayWidth(cluster)
 }
 
 // calculateWrappedLines calculates how many screen lines a text line takes
@@ -135,12 +160,26 @@ func (tb *TextBox) calculateWrappedLines(line string) int {
 		return 1
 	}
 
-	lineWidth := text.DisplayWidth(line)
-	if lineWidth <= tb.Width {
-		return 1
+	currentX := 0
+	currentRow := 1
+	clusters := text.GraphemeClusters(line)
+
+	for _, cluster := range clusters {
+		clusterWidth := tb.calculateClusterWidth(cluster, currentX)
+
+		// 現在の行に収まるかチェック
+		if currentX+clusterWidth > tb.Width {
+			// 次の行に移動
+			currentRow++
+			currentX = 0
+			// 行が変わったので幅を再計算
+			clusterWidth = tb.calculateClusterWidth(cluster, currentX)
+		}
+
+		currentX += clusterWidth
 	}
 
-	return (lineWidth + tb.Width - 1) / tb.Width // 切り上げ除算
+	return currentRow
 }
 
 func (tb *TextBox) CursorUpdate() {
