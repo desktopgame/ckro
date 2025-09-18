@@ -127,8 +127,6 @@ func main() {
 	vbox.Controls = append(vbox.Controls, &modelineSeparator)
 	vbox.Controls = append(vbox.Controls, &minibuffer)
 
-	g := tui.Grid{}
-
 	ctrlLine := tui.Box{}
 	ctrlLine.Init(tui.Horizontal)
 
@@ -152,16 +150,6 @@ func main() {
 
 	ctrlLine.Controls = append(ctrlLine.Controls, &ctrl1)
 	ctrlLine.Controls = append(ctrlLine.Controls, &frame)
-
-	g.Init(2, 1)
-	g.SetControl(0, 0, &ctrlLine)
-	g.SetTile(1, 0, 0, 0, &presenter.FrameTextPresenter{})
-
-	//g.Init(2, 2)
-	//g.SetTile(0, 0, 0, 0, &presenter.FrameTextPresenter{})
-	//g.SetTile(1, 0, 0, 0, &presenter.FrameTextPresenter{})
-	//g.SetTile(0, 1, 0, 0, &presenter.FrameTextPresenter{})
-	//g.SetTile(1, 1, 0, 0, &presenter.FrameTextPresenter{})
 
 	// QuickCommandPaletteのテスト
 	commands := []string{
