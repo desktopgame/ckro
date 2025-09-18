@@ -32,7 +32,6 @@ func (cp *CommandPalette) Init(commands []string, onExecute func(string)) {
 	cp.searchInput = NewEditTile()
 	cp.searchInput.FlexibleWidth = true
 	cp.searchInput.MinimumHeight = 1
-	cp.searchInput.TextBox.ShowCursor = true
 
 	// コマンドリスト
 	cp.commandList = NewListTile(cp.filteredCommands)
@@ -180,6 +179,7 @@ func (cp *CommandPalette) Traverse(fm *FocusManager) {
 }
 
 func (cp *CommandPalette) Focus(on bool) {
+	cp.searchInput.TextBox.ShowCursor = true
 }
 
 func (cp *CommandPalette) SubFocusFirst() {
