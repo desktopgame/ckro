@@ -84,6 +84,7 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 
 				if padLeft >= tb.Width {
 					padLeft = 0
+					padLen = 0
 					if padLeft > tb.Width {
 						padLeft = w
 					}
