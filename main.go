@@ -210,9 +210,11 @@ func main() {
 				}
 				continue
 			}
-			switch e.Key() {
-			case tcell.KeyTab:
+			if e.Key() == tcell.KeyBacktab {
 				window.FocusNext()
+				continue
+			}
+			switch e.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
 				return
 			}
