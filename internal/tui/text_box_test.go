@@ -111,3 +111,31 @@ func TestWrap(t *testing.T) {
 		t.Fatalf("got %q, want %q", col, 2)
 	}
 }
+
+func TestWrapWithTab(t *testing.T) {
+	tb := tui.TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 5
+	tb.Height = 2
+	tb.Document.InsertString("12345\t")
+	tb.ShowCursor = true
+
+	tb.CursorUpdate()
+
+	col, _, _, _ := tb.CursorPosition()
+	if col != 4 {
+		t.Fatalf("got %q, want %q", col, 4)
+	}
+
+	tb.Document.MoveLeft()
+
+	tb.CursorUpdate()
+
+	col, _, _, _ = tb.CursorPosition()
+	if col != 0 {
+		t.Fatalf("got %q, want %q", col, 0)
+	}
+
+}
