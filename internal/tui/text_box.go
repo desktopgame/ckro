@@ -151,7 +151,7 @@ func (tb *TextBox) calculateClusterWidth(cluster string, currentX int) int {
 	if cluster == "\t" {
 		return text.TabWidth - (currentX % text.TabWidth)
 	}
-	return text.DisplayWidth(cluster)
+	return runewidth.StringWidth(cluster)
 }
 
 // calculateWrappedLines calculates how many screen lines a text line takes

@@ -137,5 +137,4 @@ func TestWrapWithTab(t *testing.T) {
 	if col != 0 {
 		t.Fatalf("got %q, want %q", col, 0)
 	}
-
 }
