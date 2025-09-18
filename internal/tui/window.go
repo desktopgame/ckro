@@ -40,6 +40,14 @@ func (w *Window) Frame(s tcell.Screen, width int, height int) {
 	}
 }
 
+func (w *Window) FocusPrev() {
+	w.focusManager.FocusPrev()
+}
+
+func (w *Window) FocusNext() {
+	w.focusManager.FocusNext()
+}
+
 func (w *Window) Resize(width int, height int) {
 	if width > 0 && height > 0 {
 		w.stack.Layout(width, height)
