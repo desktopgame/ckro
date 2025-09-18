@@ -38,6 +38,10 @@ func (w *Window) Top() Control {
 	return nil
 }
 
+func (w *Window) GetLayerCount() int {
+	return len(w.stack.Layers)
+}
+
 func (w *Window) Frame(s tcell.Screen, width int, height int) {
 	mw, mh := w.stack.MinimumSize(width, height)
 

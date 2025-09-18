@@ -203,10 +203,16 @@ func main() {
 			window.Resize(w, h)
 		case *tcell.EventKey:
 			if e.Rune() == 'p' && (e.Modifiers()&tcell.ModAlt != 0) {
-				window.Push(commandPaletteUI)
+				if window.Top() == commandPaletteUI {
+					window.Pop()
+				} else if window.GetLayerCount() == 1 {
+					window.Push(commandPaletteUI)
+				}
 				continue
 			}
 			switch e.Key() {
+			case tcell.KeyTab:
+				window.FocusNext()
 			case tcell.KeyEscape, tcell.KeyCtrlC:
 				return
 			}
