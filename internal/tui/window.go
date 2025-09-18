@@ -31,6 +31,13 @@ func (w *Window) Pop() {
 	}
 }
 
+func (w *Window) Top() Control {
+	if w.stack.Top >= 0 {
+		return w.stack.Layers[w.stack.Top]
+	}
+	return nil
+}
+
 func (w *Window) Frame(s tcell.Screen, width int, height int) {
 	mw, mh := w.stack.MinimumSize(width, height)
 
