@@ -250,26 +250,36 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 			x := 0
 			y := seg.ViewLine - tb.scrollY
 			for _, cluster := range clusters {
-				runes := []rune(cluster)
 
-				if len(runes) > 0 {
-					mainRune := runes[0]
-					var combining []rune
-
-					// 残りのruneをcombining charactersとして設定
-					if len(runes) > 1 {
-						combining = runes[1:]
+				if cluster == "\t" {
+					spaces := text.TabWidth - (x % text.TabWidth)
+					for i := 0; i < spaces; i++ {
+						clip.SetContent(x+i, y, ' ', nil, def)
 					}
-					width := runewidth.RuneWidth(mainRune)
+					x += spaces
 
-					clip.SetContent(x, y, mainRune, combining, def)
-					// 全角文字の場合、次のセルを空にする
-					if width == 2 {
-						x++
-						clip.SetContent(x, y, 0, nil, def)
+				} else {
+					runes := []rune(cluster)
+
+					if len(runes) > 0 {
+						mainRune := runes[0]
+						var combining []rune
+
+						// 残りのruneをcombining charactersとして設定
+						if len(runes) > 1 {
+							combining = runes[1:]
+						}
+						width := runewidth.RuneWidth(mainRune)
+
+						clip.SetContent(x, y, mainRune, combining, def)
+						// 全角文字の場合、次のセルを空にする
+						if width == 2 {
+							x++
+							clip.SetContent(x, y, 0, nil, def)
+						}
 					}
+					x++
 				}
-				x++
 			}
 		}
 	}
@@ -312,7 +322,7 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 				runes := []rune(cluster)
 
 				if cluster == "\t" {
-					if x+4 > tb.Width {
+					if x+text.TabWidth > tb.Width {
 						seg := presenter.Segment{
 							Text:      sb.String(),
 							ModelLine: i,

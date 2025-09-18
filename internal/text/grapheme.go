@@ -92,7 +92,15 @@ func GraphemeInsert(s string, graphemePos int, insertString string) string {
 }
 
 func DisplayWidth(s string) int {
-	return runewidth.StringWidth(s)
+	w := 0
+	for _, cluster := range GraphemeClusters(s) {
+		if cluster == "\t" {
+			w += TabWidth - (w % TabWidth)
+		} else {
+			w += runewidth.StringWidth(cluster)
+		}
+	}
+	return w
 }
 
 func DisplayPos(line string, column int) int {
@@ -101,11 +109,11 @@ func DisplayPos(line string, column int) int {
 	}
 
 	if column >= GraphemeLength(line) {
-		return runewidth.StringWidth(line)
+		return DisplayWidth(line)
 	}
 
 	targetStr := GraphemeSubString(line, 0, column)
-	return runewidth.StringWidth(targetStr)
+	return DisplayWidth(targetStr)
 }
 
 func DisplayRunesAt(line string, screenX int) (rune, []rune) {

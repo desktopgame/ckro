@@ -29,6 +29,8 @@ func (edit *EditTextPresenter) Handle(view View, ev tcell.Event) {
 			doc.RemoveChar()
 		case tcell.KeyEnter:
 			doc.InsertLine()
+		case tcell.KeyTAB:
+			doc.InsertString("\t")
 		case tcell.KeyRune:
 			edit.inputBuffer = append(edit.inputBuffer, e.Rune())
 			inputString := string(edit.inputBuffer)
