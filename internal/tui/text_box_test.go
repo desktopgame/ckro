@@ -90,3 +90,24 @@ func TestScroll(t *testing.T) {
 		t.Fatalf("got %q, want %q", col, 0)
 	}
 }
+
+func TestWrap(t *testing.T) {
+	tb := tui.TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 5
+	tb.Height = 2
+	tb.Document.InsertString("1234あ")
+	tb.ShowCursor = true
+
+	tb.CursorUpdate()
+
+	col, row, _, _ := tb.CursorPosition()
+	if row-tb.GetScrollY() != 1 {
+		t.Fatalf("got %q, want %q", row-tb.GetScrollY(), 1)
+	}
+	if col != 2 {
+		t.Fatalf("got %q, want %q", col, 2)
+	}
+}
