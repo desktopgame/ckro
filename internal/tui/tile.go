@@ -25,12 +25,12 @@ func (t *Tile) Handle(ev tcell.Event) {
 	t.TextPresenter.Handle(t.TextBox, ev)
 }
 
-func (t *Tile) GetTextBox() *TextBox {
-	return t.TextBox
-}
-
-func (t *Tile) GetTextPresenter() TextPresenter {
-	return t.TextPresenter
+func (t *Tile) Focus(on bool) {
+	if on {
+		t.TextBox.ShowCursor = t.TextPresenter.ShowCursor()
+	} else {
+		t.TextBox.ShowCursor = false
+	}
 }
 
 func (t *Tile) Traverse(fm *FocusManager) {

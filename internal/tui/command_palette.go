@@ -94,19 +94,6 @@ func (cp *CommandPalette) Handle(ev tcell.Event) {
 				}
 				return // イベントを消費
 			}
-		case tcell.KeyTab:
-			// フォーカス切り替え
-			cp.inputFocused = !cp.inputFocused
-			if cp.inputFocused {
-				cp.searchInput.TextBox.ShowCursor = true
-			} else {
-				cp.searchInput.TextBox.ShowCursor = false
-				// リストの最初の項目を選択
-				if listPresenter, ok := cp.commandList.TextPresenter.(*presenter.ListTextPresenter); ok {
-					listPresenter.SelectedIndex = 0
-				}
-			}
-			return // イベントを消費
 		case tcell.KeyEnter:
 			if !cp.inputFocused {
 				// コマンド実行
@@ -192,23 +179,29 @@ func (cp *CommandPalette) Traverse(fm *FocusManager) {
 	// 子コントロールは登録しない（CommandPaletteが全てのイベントを処理）
 }
 
-// Focusableインターフェースの実装
-func (cp *CommandPalette) GetTextBox() *TextBox {
-	// 現在フォーカスされているコントロールのTextBoxを返す
-	if cp.inputFocused {
-		return cp.searchInput.TextBox
-	} else {
-		return cp.commandList.TextBox
-	}
+func (cp *CommandPalette) Focus(on bool) {
 }
 
-func (cp *CommandPalette) GetTextPresenter() TextPresenter {
-	// 現在フォーカスされているコントロールのTextPresenterを返す
-	if cp.inputFocused {
-		return cp.searchInput.TextPresenter
-	} else {
-		return cp.commandList.TextPresenter
+func (cp *CommandPalette) SubFocusFirst() {
+	cp.inputFocused = true
+}
+
+func (cp *CommandPalette) SubFocusPrev() bool {
+	if !cp.inputFocused {
+		cp.inputFocused = true
 	}
+	return false
+}
+
+func (cp *CommandPalette) SubFocusNext() bool {
+	if cp.inputFocused {
+		cp.inputFocused = false
+	}
+	return false
+}
+
+func (cp *CommandPalette) SubFocusLast() {
+	cp.inputFocused = false
 }
 
 func (cp *CommandPalette) IsFocusable() bool {

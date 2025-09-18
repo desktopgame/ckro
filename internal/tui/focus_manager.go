@@ -4,14 +4,22 @@ import "github.com/gdamore/tcell/v2"
 
 type Focusable interface {
 	Handle(ev tcell.Event)
+	Focus(on bool)
+}
 
-	GetTextBox() *TextBox
-	GetTextPresenter() TextPresenter
+type FocusableTree interface {
+	Focusable
+
+	SubFocusFirst()
+	SubFocusPrev() bool
+	SubFocusNext() bool
+	SubFocusLast()
 }
 
 type FocusManager struct {
 	tiles  []Focusable
 	active int
+	tree   FocusableTree
 }
 
 func (fm *FocusManager) Init() {
@@ -21,7 +29,8 @@ func (fm *FocusManager) Init() {
 
 func (fm *FocusManager) Register(t Focusable) {
 	fm.tiles = append(fm.tiles, t)
-	t.GetTextBox().ShowCursor = false
+	// t.GetTextBox().ShowCursor = false
+	t.Focus(false)
 }
 
 func (fm *FocusManager) Traverse(ctrl Control) {
@@ -34,8 +43,9 @@ func (fm *FocusManager) Grab() {
 		return
 	}
 
-	showCursor := fm.tiles[fm.active].GetTextPresenter().ShowCursor()
-	fm.tiles[fm.active].GetTextBox().ShowCursor = showCursor
+	// showCursor := fm.tiles[fm.active].GetTextPresenter().ShowCursor()
+	// fm.tiles[fm.active].GetTextBox().ShowCursor = showCursor
+	fm.tiles[fm.active].Focus(true)
 }
 
 func (fm *FocusManager) FocusPrev() {
@@ -43,7 +53,15 @@ func (fm *FocusManager) FocusPrev() {
 		return
 	}
 
-	fm.tiles[fm.active].GetTextBox().ShowCursor = false
+	if fm.tree != nil {
+		if !fm.tree.SubFocusPrev() {
+			fm.tree = nil
+		}
+		return
+	}
+
+	// fm.tiles[fm.active].GetTextBox().ShowCursor = false
+	fm.tiles[fm.active].Focus(false)
 
 	if fm.active > 0 {
 		fm.active--
@@ -51,8 +69,14 @@ func (fm *FocusManager) FocusPrev() {
 		fm.active = len(fm.tiles) - 1
 	}
 
-	showCursor := fm.tiles[fm.active].GetTextPresenter().ShowCursor()
-	fm.tiles[fm.active].GetTextBox().ShowCursor = showCursor
+	// showCursor := fm.tiles[fm.active].GetTextPresenter().ShowCursor()
+	// fm.tiles[fm.active].GetTextBox().ShowCursor = showCursor
+	fm.tiles[fm.active].Focus(true)
+
+	if tree, ok := fm.tiles[fm.active].(FocusableTree); ok {
+		tree.SubFocusLast()
+		fm.tree = tree
+	}
 }
 
 func (fm *FocusManager) FocusNext() {
@@ -60,7 +84,15 @@ func (fm *FocusManager) FocusNext() {
 		return
 	}
 
-	fm.tiles[fm.active].GetTextBox().ShowCursor = false
+	if fm.tree != nil {
+		if !fm.tree.SubFocusNext() {
+			fm.tree = nil
+		}
+		return
+	}
+
+	// fm.tiles[fm.active].GetTextBox().ShowCursor = false
+	fm.tiles[fm.active].Focus(false)
 
 	if fm.active < len(fm.tiles)-1 {
 		fm.active++
@@ -68,8 +100,14 @@ func (fm *FocusManager) FocusNext() {
 		fm.active = 0
 	}
 
-	showCursor := fm.tiles[fm.active].GetTextPresenter().ShowCursor()
-	fm.tiles[fm.active].GetTextBox().ShowCursor = showCursor
+	// showCursor := fm.tiles[fm.active].GetTextPresenter().ShowCursor()
+	// fm.tiles[fm.active].GetTextBox().ShowCursor = showCursor
+	fm.tiles[fm.active].Focus(true)
+
+	if tree, ok := fm.tiles[fm.active].(FocusableTree); ok {
+		tree.SubFocusFirst()
+		fm.tree = tree
+	}
 }
 
 func (fm *FocusManager) Handle(ev tcell.Event) {
