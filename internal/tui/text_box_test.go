@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/desktopgame/ckro/internal/tui"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTextBox(t *testing.T) {
@@ -27,18 +28,13 @@ Hello, world2
 	tb.CursorUpdate()
 
 	cursorRow := tb.Document.GetCursorRow()
-	if cursorRow != 5 {
-		t.Fatalf("got %q, want %q", cursorRow, 5)
-	}
+	assert.Equal(t, cursorRow, 5)
 
 	tb.Document.InsertLine()
 	tb.CursorUpdate()
 
 	row := tb.GetScrollY()
-	if row != 1 {
-		t.Fatalf("got %q, want %q", row, 1)
-	}
-
+	assert.Equal(t, row, 1)
 }
 
 func TestCursor(t *testing.T) {
@@ -54,9 +50,7 @@ func TestCursor(t *testing.T) {
 	tb.CursorUpdate()
 
 	col, _, _, _ := tb.CursorPosition()
-	if col != 0 {
-		t.Fatalf("got %q, want %q", col, 0)
-	}
+	assert.Equal(t, col, 0)
 }
 
 func TestScroll(t *testing.T) {
@@ -72,23 +66,15 @@ func TestScroll(t *testing.T) {
 	tb.CursorUpdate()
 
 	col, row, _, _ := tb.CursorPosition()
-	if row-tb.GetScrollY() != 1 {
-		t.Fatalf("got %q, want %q", row, 1)
-	}
-	if col != 4 {
-		t.Fatalf("got %q, want %q", col, 4)
-	}
+	assert.Equal(t, row-tb.GetScrollY(), 1)
+	assert.Equal(t, col, 4)
 
 	tb.Document.InsertString("0")
 	tb.CursorUpdate()
 
 	col, row, _, _ = tb.CursorPosition()
-	if row-tb.GetScrollY() != 1 {
-		t.Fatalf("got %q, want %q", row-tb.GetScrollY(), 1)
-	}
-	if col != 0 {
-		t.Fatalf("got %q, want %q", col, 0)
-	}
+	assert.Equal(t, row-tb.GetScrollY(), 1)
+	assert.Equal(t, col, 0)
 }
 
 func TestWrap(t *testing.T) {
@@ -104,12 +90,8 @@ func TestWrap(t *testing.T) {
 	tb.CursorUpdate()
 
 	col, row, _, _ := tb.CursorPosition()
-	if row-tb.GetScrollY() != 1 {
-		t.Fatalf("got %q, want %q", row-tb.GetScrollY(), 1)
-	}
-	if col != 2 {
-		t.Fatalf("got %q, want %q", col, 2)
-	}
+	assert.Equal(t, row-tb.GetScrollY(), 1)
+	assert.Equal(t, col, 2)
 }
 
 func TestWrapWithTab(t *testing.T) {
@@ -125,16 +107,12 @@ func TestWrapWithTab(t *testing.T) {
 	tb.CursorUpdate()
 
 	col, _, _, _ := tb.CursorPosition()
-	if col != 4 {
-		t.Fatalf("got %q, want %q", col, 4)
-	}
+	assert.Equal(t, col, 4)
 
 	tb.Document.MoveLeft()
 
 	tb.CursorUpdate()
 
 	col, _, _, _ = tb.CursorPosition()
-	if col != 0 {
-		t.Fatalf("got %q, want %q", col, 0)
-	}
+	assert.Equal(t, col, 0)
 }
