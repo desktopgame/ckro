@@ -18,6 +18,39 @@ func WithCenter(ctrl Control, width int, height int) *Center {
 	return &c
 }
 
+// Layout composition helpers
+func WithSeparators(orientation Orientation, controls ...Control) *Box {
+	if len(controls) == 0 {
+		return NewHBox()
+	}
+
+	var box *Box
+	var separator *Tile
+
+	if orientation == Horizontal {
+		box = NewHBox()
+		separator = NewVerticalSeparator()
+	} else {
+		box = NewVBox()
+		separator = NewHorizontalSeparator()
+	}
+
+	for i, ctrl := range controls {
+		if i > 0 {
+			// Clone separator for each use
+			sep := NewTile(separator.TextPresenter)
+			sep.MinimumWidth = separator.MinimumWidth
+			sep.MinimumHeight = separator.MinimumHeight
+			sep.FlexibleWidth = separator.FlexibleWidth
+			sep.FlexibleHeight = separator.FlexibleHeight
+			box.Controls = append(box.Controls, sep)
+		}
+		box.Controls = append(box.Controls, ctrl)
+	}
+
+	return box
+}
+
 // Tile creation utilities
 func NewTile(presenter TextPresenter) *Tile {
 	tile := &Tile{}
@@ -156,103 +189,6 @@ func NewStack(controls ...Control) *Stack {
 		stack.Top = len(controls) - 1
 	}
 	return stack
-}
-
-// Quick layout builders
-func QuickEditor() (*Tile, *Box) {
-	textArea, _, editorBox := NewTextEditor()
-	return textArea, editorBox
-}
-
-func QuickForm(labelWidth int, pairs ...struct{ Label, Input string }) *Grid {
-	grid := NewGrid(len(pairs), 2)
-
-	for i, pair := range pairs {
-		// ラベル（固定サイズ）
-		label := NewFixedTile(&presenter.LabelTextPresenter{Text: pair.Label, AlignCenter: true}, labelWidth, 5)
-		grid.SetControl(i, 0, label)
-
-		// 入力フィールド（フレーム付き、固定高さ）
-		input := NewEditTile()
-		input.FlexibleWidth = true
-		input.FlexibleHeight = false
-		input.MinimumHeight = 3
-		input.TextBox.ShowCursor = true
-		framedInput := WithFrame(input)
-		grid.SetControl(i, 1, framedInput)
-	}
-
-	return grid
-}
-
-func QuickDialog(title string, content Control, buttonLabels ...string) *Box {
-	titleTile := NewCenteredLabelTile(title)
-	titleTile.FlexibleWidth = true
-	titleTile.MinimumHeight = 1
-
-	buttons := NewHBox()
-	for _, label := range buttonLabels {
-		btn := NewFixedTile(&presenter.LabelTextPresenter{
-			Text:        label,
-			AlignCenter: true,
-		}, len(label)+4, 3)
-		buttons.Controls = append(buttons.Controls, btn)
-		if len(buttons.Controls) > 1 {
-			// Add spacing between buttons
-			buttons.Controls = append(buttons.Controls[:len(buttons.Controls)-1],
-				NewFixedTile(&presenter.FrameTextPresenter{}, 2, 1),
-				buttons.Controls[len(buttons.Controls)-1])
-		}
-	}
-
-	return NewVBox(
-		titleTile,
-		NewHorizontalSeparator(),
-		content,
-		NewHorizontalSeparator(),
-		buttons,
-	)
-}
-
-// Layout composition helpers
-func WithSeparators(orientation Orientation, controls ...Control) *Box {
-	if len(controls) == 0 {
-		return NewHBox()
-	}
-
-	var box *Box
-	var separator *Tile
-
-	if orientation == Horizontal {
-		box = NewHBox()
-		separator = NewVerticalSeparator()
-	} else {
-		box = NewVBox()
-		separator = NewHorizontalSeparator()
-	}
-
-	for i, ctrl := range controls {
-		if i > 0 {
-			// Clone separator for each use
-			sep := NewTile(separator.TextPresenter)
-			sep.MinimumWidth = separator.MinimumWidth
-			sep.MinimumHeight = separator.MinimumHeight
-			sep.FlexibleWidth = separator.FlexibleWidth
-			sep.FlexibleHeight = separator.FlexibleHeight
-			box.Controls = append(box.Controls, sep)
-		}
-		box.Controls = append(box.Controls, ctrl)
-	}
-
-	return box
-}
-
-func HSplit(controls ...Control) *Box {
-	return WithSeparators(Horizontal, controls...)
-}
-
-func VSplit(controls ...Control) *Box {
-	return WithSeparators(Vertical, controls...)
 }
 
 // Command Palette utility
