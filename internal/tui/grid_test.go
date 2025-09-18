@@ -5,27 +5,20 @@ import (
 
 	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
+	"github.com/stretchr/testify/assert"
 )
 
 func assertPos(t *testing.T, gc *tui.GridCell, x int, y int) {
 	if tile, ok := gc.Control.(*tui.Tile); ok {
-		if tile.TextBox.X != x {
-			t.Fatalf("got %d, want %d", tile.TextBox.X, x)
-		}
-		if tile.TextBox.Y != y {
-			t.Fatalf("got %d, want %d", tile.TextBox.Y, y)
-		}
+		assert.Equal(t, tile.TextBox.X, x)
+		assert.Equal(t, tile.TextBox.Y, y)
 	}
 }
 
 func assertSize(t *testing.T, gc *tui.GridCell, w int, h int) {
 	if tile, ok := gc.Control.(*tui.Tile); ok {
-		if tile.TextBox.Width != w {
-			t.Fatalf("got %d, want %d", tile.TextBox.Width, w)
-		}
-		if tile.TextBox.Height != h {
-			t.Fatalf("got %d, want %d", tile.TextBox.Height, h)
-		}
+		assert.Equal(t, tile.TextBox.Width, w)
+		assert.Equal(t, tile.TextBox.Height, h)
 	}
 }
 
