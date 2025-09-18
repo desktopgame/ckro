@@ -184,11 +184,13 @@ func (cp *CommandPalette) Focus(on bool) {
 
 func (cp *CommandPalette) SubFocusFirst() {
 	cp.inputFocused = true
+	cp.searchInput.TextBox.ShowCursor = true
 }
 
 func (cp *CommandPalette) SubFocusPrev() bool {
 	if !cp.inputFocused {
 		cp.inputFocused = true
+		cp.searchInput.TextBox.ShowCursor = true
 	}
 	return false
 }
@@ -196,12 +198,14 @@ func (cp *CommandPalette) SubFocusPrev() bool {
 func (cp *CommandPalette) SubFocusNext() bool {
 	if cp.inputFocused {
 		cp.inputFocused = false
+		cp.searchInput.TextBox.ShowCursor = false
 	}
 	return false
 }
 
 func (cp *CommandPalette) SubFocusLast() {
 	cp.inputFocused = false
+	cp.searchInput.TextBox.ShowCursor = false
 }
 
 func (cp *CommandPalette) IsFocusable() bool {
