@@ -16,24 +16,22 @@ type CommandPalette struct {
 	commandList *tui.Tile
 	paletteBox  *tui.Box
 
-	allCommands      []string
-	filteredCommands []string
+	allCommands      []Command
+	filteredCommands []Command
 	inputFocused     bool
-	onCommandExecute func(string)
 }
 
-func NewCommandPalette(commands []string, onExecute func(string)) *CommandPalette {
+func NewCommandPalette(commands []Command) *CommandPalette {
 	palette := &CommandPalette{}
-	palette.Init(commands, onExecute)
+	palette.Init(commands)
 	return palette
 }
 
-func (cp *CommandPalette) Init(commands []string, onExecute func(string)) {
+func (cp *CommandPalette) Init(commands []Command) {
 	cp.allCommands = commands
-	cp.filteredCommands = make([]string, len(commands))
+	cp.filteredCommands = make([]Command, len(commands))
 	copy(cp.filteredCommands, commands)
 	cp.inputFocused = true
-	cp.onCommandExecute = onExecute
 
 	// 検索入力フィールド
 	cp.searchInput = tui.NewEditTile()
@@ -41,7 +39,7 @@ func (cp *CommandPalette) Init(commands []string, onExecute func(string)) {
 	cp.searchInput.MinimumHeight = 1
 
 	// コマンドリスト
-	cp.commandList = tui.NewListTile(cp.filteredCommands)
+	cp.commandList = tui.NewListTile(cp.GetLabels())
 	cp.commandList.FlexibleWidth = true
 	cp.commandList.FlexibleHeight = true
 
@@ -104,9 +102,9 @@ func (cp *CommandPalette) Handle(ev tcell.Event) {
 			if !cp.inputFocused {
 				// コマンド実行
 				if listPresenter, ok := cp.commandList.TextPresenter.(*presenter.ListTextPresenter); ok {
-					selectedCommand := listPresenter.GetSelectedItem()
-					if cp.onCommandExecute != nil && selectedCommand != "" {
-						cp.onCommandExecute(selectedCommand)
+					selectedIndex := listPresenter.GetSelectedIndex()
+					if selectedIndex >= 0 {
+						cp.filteredCommands[selectedIndex].Execute()
 					}
 				}
 				return // イベントを消費
@@ -165,16 +163,24 @@ func (cp *CommandPalette) filterCommands() {
 	cp.filteredCommands = nil
 
 	for _, command := range cp.allCommands {
-		if strings.Contains(strings.ToLower(command), query) {
+		if strings.Contains(strings.ToLower(command.GetLabel()), query) {
 			cp.filteredCommands = append(cp.filteredCommands, command)
 		}
 	}
 
 	// リストを更新
 	if listPresenter, ok := cp.commandList.TextPresenter.(*presenter.ListTextPresenter); ok {
-		listPresenter.Items = cp.filteredCommands
+		listPresenter.Items = cp.GetLabels()
 		listPresenter.SelectedIndex = 0
 	}
+}
+
+func (cp *CommandPalette) GetLabels() []string {
+	var labels []string
+	for i := 0; i < len(cp.filteredCommands); i++ {
+		labels = append(labels, cp.filteredCommands[i].GetLabel())
+	}
+	return labels
 }
 
 func (cp *CommandPalette) Traverse(fm *tui.FocusManager) {

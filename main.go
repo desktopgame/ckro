@@ -153,19 +153,13 @@ func main() {
 	ctrlLine.Controls = append(ctrlLine.Controls, &frame)
 
 	// QuickCommandPaletteのテスト
-	commands := []string{
-		"File: Open",
-		"File: Save",
-		"File: Save As",
-		"Edit: Copy",
-		"Edit: Paste",
-		"Edit: Find",
-		"View: Toggle Sidebar",
-		"Help: About",
+	commands := []controls.Command{
+		&controls.DelegateCommand{
+			Label: "File: Open",
+			Func:  func() {},
+		},
 	}
-	commandPalette := controls.NewCommandPalette(commands, func(command string) {
-		log.Printf("Executed command: %s", command)
-	})
+	commandPalette := controls.NewCommandPalette(commands)
 
 	commandPaletteUI := tui.WithCenter(tui.WithFrame(commandPalette), 80, 20)
 
