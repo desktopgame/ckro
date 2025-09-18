@@ -190,10 +190,3 @@ func NewStack(controls ...Control) *Stack {
 	}
 	return stack
 }
-
-// Command Palette utility
-func QuickCommandPalette(commands []string, onExecute func(string)) *CommandPalette {
-	palette := &CommandPalette{}
-	palette.Init(commands, onExecute)
-	return palette
-}

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/desktopgame/ckro/internal/tui"
+	"github.com/desktopgame/ckro/internal/tui/controls"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
 	"github.com/gdamore/tcell/v2"
 )
@@ -162,7 +163,7 @@ func main() {
 		"View: Toggle Sidebar",
 		"Help: About",
 	}
-	commandPalette := tui.QuickCommandPalette(commands, func(command string) {
+	commandPalette := controls.NewCommandPalette(commands, func(command string) {
 		log.Printf("Executed command: %s", command)
 	})
 

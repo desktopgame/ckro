@@ -1,8 +1,9 @@
-package tui
+package controls
 
 import (
 	"strings"
 
+	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
 	"github.com/gdamore/tcell/v2"
 )
@@ -11,14 +12,20 @@ type CommandPalette struct {
 	x, y          int
 	Width, Height int
 
-	searchInput *Tile
-	commandList *Tile
-	paletteBox  *Box
+	searchInput *tui.Tile
+	commandList *tui.Tile
+	paletteBox  *tui.Box
 
 	allCommands      []string
 	filteredCommands []string
 	inputFocused     bool
 	onCommandExecute func(string)
+}
+
+func NewCommandPalette(commands []string, onExecute func(string)) *CommandPalette {
+	palette := &CommandPalette{}
+	palette.Init(commands, onExecute)
+	return palette
 }
 
 func (cp *CommandPalette) Init(commands []string, onExecute func(string)) {
@@ -29,19 +36,19 @@ func (cp *CommandPalette) Init(commands []string, onExecute func(string)) {
 	cp.onCommandExecute = onExecute
 
 	// 検索入力フィールド
-	cp.searchInput = NewEditTile()
+	cp.searchInput = tui.NewEditTile()
 	cp.searchInput.FlexibleWidth = true
 	cp.searchInput.MinimumHeight = 1
 
 	// コマンドリスト
-	cp.commandList = NewListTile(cp.filteredCommands)
+	cp.commandList = tui.NewListTile(cp.filteredCommands)
 	cp.commandList.FlexibleWidth = true
 	cp.commandList.FlexibleHeight = true
 
 	// 垂直レイアウトで組み合わせ
-	cp.paletteBox = NewVBox(
+	cp.paletteBox = tui.NewVBox(
 		cp.searchInput,
-		NewHorizontalSeparator(),
+		tui.NewHorizontalSeparator(),
 		cp.commandList,
 	)
 }
@@ -170,7 +177,7 @@ func (cp *CommandPalette) filterCommands() {
 	}
 }
 
-func (cp *CommandPalette) Traverse(fm *FocusManager) {
+func (cp *CommandPalette) Traverse(fm *tui.FocusManager) {
 	// CommandPalette自体をFocusableとして登録
 	if cp.IsFocusable() {
 		fm.Register(cp)
