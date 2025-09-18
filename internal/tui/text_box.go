@@ -57,6 +57,9 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 
 				if screenX >= tb.Width {
 					screenX = 0
+					if screenX > tb.Width {
+						screenX = w
+					}
 					currentRow++
 				}
 			}
@@ -77,15 +80,17 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 				}
 
 				padLeft += w
-				padChars++
 				padLen++
 
 				if padLeft >= tb.Width {
 					padLeft = 0
+					if padLeft > tb.Width {
+						padLeft = w
+					}
 					padStart = padChars
-					padLen = 1
 					cursorRow++
 				}
+				padChars++
 			}
 
 			padX := 0
@@ -281,14 +286,14 @@ func (tb *TextBox) Draw(s tcell.Screen) {
 
 	// カーソル位置の文字を反転表示
 	cursorStyle := def.Reverse(true)
-	clip.SetContent(screenX, cursorRow, currentRune, combining, cursorStyle)
+	clip.SetContent(screenX, cursorRow-tb.scrollY, currentRune, combining, cursorStyle)
 
 	// 全角文字の場合、隣接するセルもカーソル表示
 	if currentRune != ' ' {
 		width := runewidth.RuneWidth(currentRune)
 		if width == 2 {
 			// 隣接するセルにもカーソルを表示（空文字で反転）
-			clip.SetContent(screenX+1, cursorRow, 0, nil, cursorStyle)
+			clip.SetContent(screenX+1, cursorRow-tb.scrollY, 0, nil, cursorStyle)
 		}
 	}
 
