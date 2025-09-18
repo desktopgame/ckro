@@ -34,97 +34,113 @@ func (tb *TextBox) Init() {
 }
 
 func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
-	// カーソルを表示
 	buf := tb.Document.GetBuffer()
 	cursorRow := tb.Document.GetCursorRow()
 	cursorCol := tb.Document.GetCursorColumn()
 
-	// Documentのカーソル位置を画面座標に変換
-	var screenX int
+	if cursorRow >= buf.GetLineCount() {
+		return 0, 0, ' ', nil
+	}
+
+	// カーソルがある行までの画面行数を計算
+	screenY := 0
+	for i := 0; i < cursorRow; i++ {
+		line := buf.GetLineAt(i).GetContent()
+		screenY += tb.calculateWrappedLines(line)
+	}
+
+	// カーソルがある行での位置を正確に計算
+	cursorLine := buf.GetLineAt(cursorRow).GetContent()
+	screenX, additionalRows := tb.calculateCursorPosition(cursorLine, cursorCol)
+	screenY += additionalRows
+
+	// カーソル位置の文字を取得
 	var currentRune rune = ' '
 	var combining []rune
 
-	if cursorRow < buf.GetLineCount() {
-		// カーソル位置の文字を取得（空行や行末の場合はスペース）
-		currentRow := 0
-
-		for i := 0; i < cursorRow; i++ {
-			line := buf.GetLineAt(i).GetContent()
-			currentRow++
-			screenX = 0
-			for w := range text.DisplayIter(line) {
-				screenX += w
-
-				if screenX >= tb.Width {
-					screenX = 0
-					if screenX > tb.Width {
-						screenX = w
-					}
-					currentRow++
+	if cursorCol < text.GraphemeLength(cursorLine) {
+		// カーソル位置に文字がある場合
+		clusters := text.GraphemeClusters(cursorLine)
+		if cursorCol < len(clusters) {
+			cluster := clusters[cursorCol]
+			runes := []rune(cluster)
+			if len(runes) > 0 {
+				currentRune = runes[0]
+				if len(runes) > 1 {
+					combining = runes[1:]
 				}
 			}
 		}
-		cursorRow = currentRow
-		cursorLine := tb.Document.GetBuffer().GetLineAt(tb.Document.GetCursorRow()).GetContent()
-		cursorLineRange := cursorLine
-		screenX = text.DisplayPos(cursorLine, cursorCol)
-
-		if screenX >= tb.Width {
-			padLeft := 0
-			padChars := 0
-			padStart := 0
-			padLen := 0
-			for w := range text.DisplayIter(cursorLine) {
-				if padChars == cursorCol {
-					break
-				}
-
-				padLeft += w
-				padLen++
-
-				if padLeft >= tb.Width {
-					padLeft = 0
-					padLen = 0
-					if padLeft > tb.Width {
-						padLeft = w
-					}
-					padStart = padChars
-					cursorRow++
-				}
-				padChars++
-			}
-
-			padX := 0
-			padWidth := 0
-			for w := range text.DisplayIter(cursorLine) {
-
-				if padX >= padStart && padX < padStart+padLen {
-					padWidth += w
-				}
-				padX++
-			}
-			screenX = padWidth
-		}
-
-		//cursorLineRange := cursorLine[substringFrom:substringTo]
-		if cursorCol >= text.GraphemeLength(cursorLineRange) {
-			// 行末またはそれを超えた位置
-			currentRune = ' '
-			combining = nil
-		} else {
-			currentRune, combining = text.DisplayRunesAt(cursorLineRange, screenX)
-		}
-		//currentRune = ' '
-		// cursorCol = screenX
-
-	} else {
-		// 無効な行の場合
-		screenX = 0
-		currentRune = ' '
-		combining = nil
 	}
 
-	return screenX, cursorRow, currentRune, combining
+	return screenX, screenY, currentRune, combining
+}
+
+// calculateCursorPosition calculates the exact screen position considering line wrapping
+func (tb *TextBox) calculateCursorPosition(line string, cursorCol int) (screenX int, additionalRows int) {
+	if tb.Width <= 0 {
+		return 0, 0
+	}
+
+	currentX := 0
+	currentRow := 0
+	clusters := text.GraphemeClusters(line)
+
+	// カーソルが行末を超えている場合の処理
+	if cursorCol >= len(clusters) {
+		// 全ての文字を処理してから、カーソル位置を決定
+		for _, cluster := range clusters {
+			clusterWidth := text.DisplayWidth(cluster)
+
+			// 現在の行に収まるかチェック
+			if currentX+clusterWidth > tb.Width {
+				// 次の行に移動
+				currentRow++
+				currentX = 0
+			}
+
+			currentX += clusterWidth
+		}
+
+		// 行末の場合、最後の文字の後の位置
+		if currentX >= tb.Width {
+			currentRow++
+			currentX = 0
+		}
+
+		return currentX, currentRow
+	}
+
+	// 通常の処理：指定された位置まで
+	for i := 0; i < cursorCol; i++ {
+		cluster := clusters[i]
+		clusterWidth := text.DisplayWidth(cluster)
+
+		// 現在の行に収まるかチェック
+		if currentX+clusterWidth > tb.Width {
+			// 次の行に移動
+			currentRow++
+			currentX = 0
+		}
+
+		currentX += clusterWidth
+	}
+
+	return currentX, currentRow
+}
+
+// calculateWrappedLines calculates how many screen lines a text line takes
+func (tb *TextBox) calculateWrappedLines(line string) int {
+	if tb.Width <= 0 {
+		return 1
+	}
+
+	lineWidth := text.DisplayWidth(line)
+	if lineWidth <= tb.Width {
+		return 1
+	}
+
+	return (lineWidth + tb.Width - 1) / tb.Width // 切り上げ除算
 }
 
 func (tb *TextBox) CursorUpdate() {
@@ -406,17 +422,7 @@ func (tb *TextBox) WrappedLineCount() int {
 	for i := 0; i < buf.GetLineCount(); i++ {
 		line := buf.GetLineAt(i)
 		lineContent := line.GetContent()
-		lineWidth := text.DisplayWidth(lineContent)
-
-		if lineWidth <= tb.Width {
-			lc++
-		} else {
-			lc += (lineWidth / tb.Width)
-
-			if lineWidth%tb.Width > 0 {
-				lc++
-			}
-		}
+		lc += tb.calculateWrappedLines(lineContent)
 	}
 	return lc
 }
