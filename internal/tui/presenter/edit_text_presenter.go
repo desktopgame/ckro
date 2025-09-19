@@ -7,6 +7,13 @@ import (
 
 type EditTextPresenter struct {
 	inputBuffer []rune
+	OnModified  func()
+}
+
+func (edit *EditTextPresenter) modify() {
+	if edit.OnModified != nil {
+		edit.OnModified()
+	}
 }
 
 func (edit *EditTextPresenter) Present(view View) {
@@ -29,14 +36,17 @@ func (edit *EditTextPresenter) Handle(view View, ev tcell.Event) {
 			doc.RemoveChar()
 		case tcell.KeyEnter:
 			doc.InsertLine()
+			edit.modify()
 		case tcell.KeyTAB:
 			doc.InsertString("\t")
+			edit.modify()
 		case tcell.KeyRune:
 			edit.inputBuffer = append(edit.inputBuffer, e.Rune())
 			inputString := string(edit.inputBuffer)
 			if text.GraphemeLength(inputString) == 1 {
 				doc.InsertString(inputString)
 				edit.inputBuffer = []rune{}
+				edit.modify()
 			}
 		}
 	}
