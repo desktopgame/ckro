@@ -10,8 +10,15 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
-func main() {
+type Application struct {
+	screen         tcell.Screen
+	commandPalette tui.Control
+	window         tui.Window
+	width          int
+	height         int
+}
 
+func (app *Application) Init() {
 	s, err := tcell.NewScreen()
 	if err != nil {
 		log.Fatal(err)
@@ -19,7 +26,6 @@ func main() {
 	if err = s.Init(); err != nil {
 		log.Fatal(err)
 	}
-	defer s.Fini()
 
 	def := tcell.StyleDefault
 	s.SetStyle(def)
@@ -200,41 +206,48 @@ func main() {
 		},
 	}
 	commandPalette := controls.NewCommandPalette(commands)
-	commandPaletteUI := tui.WithCenter(tui.WithFrame(commandPalette), 80, 20)
+	app.commandPalette = tui.WithCenter(tui.WithFrame(commandPalette), 80, 20)
 
-	window := tui.Window{}
 	w, h := s.Size()
-	window.Init(s, w, h)
-	window.Push(tui.Layer{
+	app.screen = s
+	app.window.Init(s, w, h)
+	app.window.Push(tui.Layer{
 		Control: &vbox,
 	})
+	app.width = w
+	app.height = h
 
-	s.Show()
+}
+
+func (app *Application) Run() {
+	defer app.screen.Fini()
+	app.screen.Show()
 
 	for {
-		s.Clear()
+		app.screen.Clear()
+		app.window.Blit(app.width, app.height)
+		app.screen.Show()
 
-		window.Blit(w, h)
+		ev := app.screen.PollEvent()
 
-		s.Show()
-
-		ev := s.PollEvent()
 		switch e := ev.(type) {
 		case *tcell.EventResize:
-			s.Sync()
-			w, h = e.Size()
-			window.Resize(w, h)
+			app.screen.Sync()
+			w, h := e.Size()
+			app.window.Resize(w, h)
+			app.width = w
+			app.height = h
 		case *tcell.EventKey:
 			if e.Rune() == 'p' && (e.Modifiers()&tcell.ModAlt != 0) {
-				if window.GetLayerCount() == 1 {
-					window.Push(tui.Layer{
-						Control: commandPaletteUI,
+				if app.window.GetLayerCount() == 1 {
+					app.window.Push(tui.Layer{
+						Control: app.commandPalette,
 					})
 				}
 				continue
 			}
 			if e.Key() == tcell.KeyBacktab {
-				window.FocusNext()
+				app.window.FocusNext()
 				continue
 			}
 			switch e.Key() {
@@ -242,8 +255,8 @@ func main() {
 				return
 			}
 			tuiEvent := tui.Event{}
-			tuiEvent.Init(&window, ev)
-			window.Handle(tuiEvent)
+			tuiEvent.Init(&app.window, ev)
+			app.window.Handle(tuiEvent)
 		}
 	}
 }
