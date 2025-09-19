@@ -72,6 +72,26 @@ func (app *Application) saveFile() error {
 	return err
 }
 
+func (app *Application) saveFileAs(filePath string) error {
+	sb := strings.Builder{}
+	buf := app.textArea.TextBox.GetDocument().GetBuffer()
+
+	for i := 0; i < buf.GetLineCount(); i++ {
+		sb.WriteString(buf.GetLineAt(i).GetContent())
+
+		if i < buf.GetLineCount()-1 {
+			sb.WriteRune('\n')
+		}
+	}
+
+	err := os.WriteFile(filePath, []byte(sb.String()), 0644)
+	if err == nil {
+		app.filePath = filePath
+		app.modified = false
+	}
+	return err
+}
+
 func (app *Application) Init() {
 	s, err := tcell.NewScreen()
 	if err != nil {
@@ -216,6 +236,14 @@ func (app *Application) Init() {
 		&controls.DelegateCommand{
 			Label: "File: Open",
 			Func:  FileOpenCommand(app),
+		},
+		&controls.DelegateCommand{
+			Label: "File: Save",
+			Func:  FileSaveCommand(app),
+		},
+		&controls.DelegateCommand{
+			Label: "File: Save As",
+			Func:  FileSaveAsCommand(app),
 		},
 	}
 	commandPalette := controls.NewCommandPalette(commands)

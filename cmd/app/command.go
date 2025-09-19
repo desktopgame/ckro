@@ -76,6 +76,57 @@ func FileOpenCommand(app *Application) func(cp *controls.CommandPalette, stackab
 	}
 }
 
+func FileSaveCommand(app *Application) func(cp *controls.CommandPalette, stackable base.Stackable) {
+	return func(cp *controls.CommandPalette, stackable base.Stackable) {
+		if app.filePath != "" {
+			app.saveFile()
+			stackable.Pop(-1)
+			return
+		}
+		// ファイルパスが設定されていない場合は「名前を付けて保存」と同じ動作
+		showSaveAsDialog(app, stackable)
+	}
+}
+
+func FileSaveAsCommand(app *Application) func(cp *controls.CommandPalette, stackable base.Stackable) {
+	return func(cp *controls.CommandPalette, stackable base.Stackable) {
+		showSaveAsDialog(app, stackable)
+	}
+}
+
+func showSaveAsDialog(app *Application, stackable tui.Stackable) {
+	// デフォルトのファイル名を設定
+	defaultFileName := "untitled.txt"
+	if app.filePath != "" {
+		// 既存のファイルパスがある場合はそのファイル名を使用
+		defaultFileName = app.filePath
+	}
+
+	// 入力ダイアログを作成
+	inputDialog := controls.NewInputDialog(
+		"Save As",
+		"Enter filename:",
+		defaultFileName,
+		func(stackable base.Stackable, filename string) {
+			// OKが選択された場合
+			if filename != "" {
+				app.saveFileAs(filename)
+				stackable.Pop(-1) // ダイアログを閉じる
+				stackable.Pop(-1) // コマンドパレットも閉じる
+			}
+		},
+		func(stackable base.Stackable) {
+			// キャンセルが選択された場合
+			stackable.Pop(-1) // ダイアログを閉じる
+		},
+	)
+	inputDialogUI := tui.WithCenter(tui.WithFrame(inputDialog), 70, 12)
+
+	stackable.Push(tui.Layer{
+		Control: inputDialogUI,
+	})
+}
+
 func openFileChooser(app *Application, stackable tui.Stackable) {
 	// 現在のディレクトリを取得
 	currentDir, err := os.Getwd()
