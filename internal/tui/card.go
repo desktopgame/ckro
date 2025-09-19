@@ -15,6 +15,20 @@ func (c *Card) Target() Control {
 	return c.Controls[c.Index]
 }
 
+func (c *Card) Prev() {
+	c.Index--
+	if c.Index < 0 {
+		c.Index = len(c.Controls) - 1
+	}
+}
+
+func (c *Card) Next() {
+	c.Index++
+	if c.Index >= len(c.Controls) {
+		c.Index = 0
+	}
+}
+
 func (c *Card) Traverse(fm *FocusManager) {
 	c.Target().Traverse(fm)
 }
