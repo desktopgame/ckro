@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
@@ -91,6 +92,65 @@ func FileSaveCommand(app *Application) func(cp *controls.CommandPalette, stackab
 func FileSaveAsCommand(app *Application) func(cp *controls.CommandPalette, stackable base.Stackable) {
 	return func(cp *controls.CommandPalette, stackable base.Stackable) {
 		showSaveAsDialog(app, stackable)
+	}
+}
+
+func ChatMessage(app *Application) func(cp *controls.CommandPalette, stackable base.Stackable) {
+	return func(cp *controls.CommandPalette, stackable base.Stackable) {
+
+		inputDialog := controls.NewInputDialog(
+			"Chat",
+			"Enter prompt:",
+			"",
+			func(stackable base.Stackable, prompt string) {
+				// OKが選択された場合
+				if prompt != "" {
+					go func() {
+						message, err := app.chatManager.Post(context.TODO(), prompt)
+						if err == nil {
+							// 確認ダイアログを表示
+							confirmDialog := controls.NewConfirmationDialog(
+								"Response",
+								message,
+								func(stackable base.Stackable) {
+									stackable.Pop(-1) // ダイアログを閉じる
+								},
+								func(stackable base.Stackable) {
+									// Noが選択された場合 - 保存せずにファイルを開く
+									stackable.Pop(-1) // ダイアログを閉じる
+								},
+							)
+							confirmDialogUI := tui.WithCenter(tui.WithFrame(confirmDialog), 60, 15)
+
+							stackable.Push(tui.Layer{
+								Control: confirmDialogUI,
+								OnPop: func(returnCode int) {
+									stackable.Pop(0)
+								},
+							})
+						} else {
+							stackable.Pop(0) // ダイアログを閉じる
+						}
+					}()
+				} else {
+					stackable.Pop(0) // ダイアログを閉じる
+				}
+			},
+			func(stackable base.Stackable) {
+				// キャンセルが選択された場合
+				stackable.Pop(1) // ダイアログを閉じる
+			},
+		)
+		inputDialogUI := tui.WithCenter(tui.WithFrame(inputDialog), 70, 12)
+
+		stackable.Push(tui.Layer{
+			Control: inputDialogUI,
+			OnPop: func(returnCode int) {
+				if returnCode == 0 {
+					stackable.Pop(-1) // コマンドパレットも閉じる
+				}
+			},
+		})
 	}
 }
 

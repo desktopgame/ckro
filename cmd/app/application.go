@@ -6,15 +6,19 @@ import (
 	"os"
 	"strings"
 
+	"github.com/desktopgame/ckro/internal/llm"
 	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/desktopgame/ckro/internal/tui/base"
 	"github.com/desktopgame/ckro/internal/tui/controls"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
 	"github.com/gdamore/tcell/v2"
+	"github.com/openai/openai-go/v2"
+	"github.com/openai/openai-go/v2/option"
 )
 
 type Application struct {
 	screen         tcell.Screen
+	chatManager    llm.ChatManager
 	textArea       *tui.Tile
 	filePath       string
 	modified       bool
@@ -245,6 +249,10 @@ func (app *Application) Init() {
 			Label: "File: Save As",
 			Func:  FileSaveAsCommand(app),
 		},
+		&controls.DelegateCommand{
+			Label: "Chat: Message",
+			Func:  ChatMessage(app),
+		},
 	}
 	commandPalette := controls.NewCommandPalette(commands)
 	app.commandPalette = tui.WithCenter(tui.WithFrame(commandPalette), 80, 20)
@@ -261,6 +269,12 @@ func (app *Application) Init() {
 	app.width = w
 	app.height = h
 
+	client := openai.NewClient(
+		option.WithAPIKey("lmstudio"),
+		option.WithBaseURL("http://localhost:1234/v1"),
+	)
+	app.chatManager.Init(&client, "openai/gpt-oss-20b", "あなたは親切なアシスタントです。")
+	app.chatManager.Setup()
 }
 
 func (app *Application) Run() {
