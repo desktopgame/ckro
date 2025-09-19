@@ -52,20 +52,7 @@ func openFileChooser(app *Application, stackable tui.Stackable) {
 	fileChooser := controls.NewFileChooser(
 		currentDir,
 		func(stackable tui.Stackable, selectedFile string) {
-			// ファイルが選択された時の処理
-			content, err := os.ReadFile(selectedFile)
-			if err != nil {
-				log.Printf("Error reading file: %v", err)
-				return
-			}
-
-			// テキストエリアにファイル内容を表示
-			doc := app.textArea.TextBox.GetDocument()
-			doc.Init()
-			doc.InsertString(string(content))
-			app.filePath = selectedFile
-			app.modified = false
-			app.textArea.TextBox.CursorReset()
+			app.openFile(selectedFile)
 
 			// ファイルチューザーを閉じる
 			stackable.Pop(0)

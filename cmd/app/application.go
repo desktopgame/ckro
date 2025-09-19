@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/desktopgame/ckro/internal/tui"
+	"github.com/desktopgame/ckro/internal/tui/base"
 	"github.com/desktopgame/ckro/internal/tui/controls"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
 	"github.com/gdamore/tcell/v2"
@@ -19,6 +20,24 @@ type Application struct {
 	window         tui.Window
 	width          int
 	height         int
+}
+
+func (app *Application) openFile(filePath string) error {
+	// ファイルを読み込んでテキストエリアに表示
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	app.filePath = filePath
+	app.modified = false
+
+	// テキストエリアのドキュメントをクリアして新しい内容を設定
+	doc := app.textArea.TextBox.GetDocument()
+	doc.Init()
+	doc.InsertString(string(content))
+	app.textArea.TextBox.CursorReset()
+	return nil
 }
 
 func (app *Application) Init() {
@@ -88,17 +107,32 @@ func (app *Application) Init() {
 	tree.TextPresenter = &presenter.TreeTextPresenter{
 		RootDirectory: ".",
 		OnFileOpen: func(filePath string) {
-			// ファイルを読み込んでテキストエリアに表示
-			content, err := os.ReadFile(filePath)
-			if err != nil {
+			if app.modified {
+				// 確認ダイアログを表示
+				confirmDialog := controls.NewConfirmationDialog(
+					"Unsaved Changes",
+					"You have unsaved changes.\nDo you want to save before opening a new file?",
+					func(stackable base.Stackable) {
+						// Yesが選択された場合 - 保存してからファイルを開く
+						// TODO: 保存処理を実装
+						log.Println("Save and open new file")
+						stackable.Pop(-1) // ダイアログを閉じる
+						app.openFile(filePath)
+					},
+					func(stackable base.Stackable) {
+						// Noが選択された場合 - 保存せずにファイルを開く
+						stackable.Pop(-1) // ダイアログを閉じる
+						app.openFile(filePath)
+					},
+				)
+				confirmDialogUI := tui.WithCenter(tui.WithFrame(confirmDialog), 60, 15)
+
+				app.window.Push(tui.Layer{
+					Control: confirmDialogUI,
+				})
 				return
 			}
-
-			// テキストエリアのドキュメントをクリアして新しい内容を設定
-			doc := textArea.TextBox.GetDocument()
-			doc.Init()
-			doc.InsertString(string(content))
-			textArea.TextBox.CursorReset()
+			app.openFile(filePath)
 		},
 	}
 
