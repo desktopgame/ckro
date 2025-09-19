@@ -5,6 +5,7 @@ go 1.25.0
 require (
 	github.com/gdamore/tcell/v2 v2.9.0
 	github.com/mattn/go-runewidth v0.0.16
+	github.com/openai/openai-go/v2 v2.5.0
 	github.com/rivo/uniseg v0.4.7
 	github.com/stretchr/testify v1.11.1
 )
@@ -13,7 +14,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gdamore/encoding v1.0.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
-	github.com/openai/openai-go/v2 v2.5.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/tidwall/gjson v1.14.4 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
