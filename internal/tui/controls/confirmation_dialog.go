@@ -120,11 +120,6 @@ func (cd *ConfirmationDialog) Draw(g *base.Graphics) {
 func (cd *ConfirmationDialog) Handle(ev base.Event) {
 	if keyEvent, ok := ev.GetSource().(*tcell.EventKey); ok {
 		switch keyEvent.Key() {
-		case tcell.KeyLeft, tcell.KeyRight, tcell.KeyTab:
-			// ボタン間の移動
-			cd.selectedButton = 1 - cd.selectedButton // 0と1を切り替え
-			cd.updateButtonStyles()
-			return
 		case tcell.KeyEnter:
 			// 選択されたボタンを実行
 			if cd.selectedButton == 0 {

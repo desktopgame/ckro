@@ -136,28 +136,6 @@ func (id *InputDialog) Draw(g *base.Graphics) {
 func (id *InputDialog) Handle(ev base.Event) {
 	if keyEvent, ok := ev.GetSource().(*tcell.EventKey); ok {
 		switch keyEvent.Key() {
-		case tcell.KeyTab:
-			// Tabキーでフォーカス切り替え
-			if id.inputField.TextBox.ShowCursor {
-				// 入力フィールドからボタンへ
-				id.inputField.TextBox.ShowCursor = false
-				id.selectedButton = 0
-				id.updateButtonStyles()
-			} else {
-				// ボタンから入力フィールドへ
-				id.inputField.TextBox.ShowCursor = true
-			}
-			return
-		case tcell.KeyLeft, tcell.KeyRight:
-			// ボタンフォーカス時のみボタン間移動
-			if !id.inputField.TextBox.ShowCursor {
-				id.selectedButton = 1 - id.selectedButton // 0と1を切り替え
-				id.updateButtonStyles()
-			} else {
-				// 入力フィールドフォーカス時は入力フィールドに転送
-				id.inputField.Handle(ev)
-			}
-			return
 		case tcell.KeyEnter:
 			if id.inputField.TextBox.ShowCursor {
 				// 入力フィールドフォーカス時はOKボタンと同じ動作
@@ -187,6 +165,12 @@ func (id *InputDialog) Handle(ev base.Event) {
 				id.onCancel(ev.GetStackable())
 			}
 			return
+		case tcell.KeyLeft, tcell.KeyRight:
+			// 入力フィールドフォーカス時は入力フィールドに転送
+			if id.inputField.TextBox.ShowCursor {
+				id.inputField.Handle(ev)
+				return
+			}
 		default:
 			// 入力フィールドフォーカス時は文字入力を転送
 			if id.inputField.TextBox.ShowCursor {

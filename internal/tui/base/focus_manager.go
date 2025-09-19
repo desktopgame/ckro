@@ -44,6 +44,11 @@ func (fm *FocusManager) Grab() {
 	// showCursor := fm.tiles[fm.active].GetTextPresenter().ShowCursor()
 	// fm.tiles[fm.active].GetTextBox().ShowCursor = showCursor
 	fm.tiles[fm.active].Focus(true)
+
+	if tree, ok := fm.tiles[fm.active].(FocusableTree); ok {
+		tree.SubFocusFirst()
+		fm.tree = tree
+	}
 }
 
 func (fm *FocusManager) FocusPrev() {
