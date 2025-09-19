@@ -22,6 +22,7 @@ type Application struct {
 	card           tui.Card
 	textEdior      TextEditor
 	modeLine       ModeLine
+	miniBuffer     MiniBuffer
 	filePath       string
 	modified       bool
 	commandPalette tui.Control
@@ -125,6 +126,7 @@ func (app *Application) Init() {
 		app.modified = true
 	})
 	app.modeLine.Init()
+	app.miniBuffer.Init()
 
 	tree := tui.Tile{}
 	tree.Init()
@@ -180,12 +182,6 @@ func (app *Application) Init() {
 	modelineSeparator.FlexibleWidth = true
 	modelineSeparator.TextPresenter = &presenter.HorizontalSeparatorTextPresenter{}
 
-	minibuffer := tui.Tile{}
-	minibuffer.Init()
-	minibuffer.FlexibleWidth = true
-	minibuffer.MinimumHeight = 1
-	minibuffer.TextPresenter = &presenter.EditTextPresenter{}
-
 	editorWithSide := tui.Box{}
 	editorWithSide.Init(tui.Horizontal)
 
@@ -202,7 +198,7 @@ func (app *Application) Init() {
 	vbox.Controls = append(vbox.Controls, &textAreaSeparator)
 	vbox.Controls = append(vbox.Controls, &app.modeLine)
 	vbox.Controls = append(vbox.Controls, &modelineSeparator)
-	vbox.Controls = append(vbox.Controls, &minibuffer)
+	vbox.Controls = append(vbox.Controls, &app.miniBuffer)
 
 	// QuickCommandPaletteのテスト
 	commands := []controls.Command{
