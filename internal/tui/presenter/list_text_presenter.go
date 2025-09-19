@@ -62,6 +62,8 @@ func (lp *ListTextPresenter) setCursorToSelectedItem(view View) {
 	for doc.GetCursorColumn() > 0 {
 		doc.MoveLeft()
 	}
+
+	view.CursorUpdate()
 }
 
 func (lp *ListTextPresenter) Handle(view View, ev tcell.Event) {

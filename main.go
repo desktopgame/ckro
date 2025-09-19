@@ -188,10 +188,42 @@ func main() {
 		},
 	}
 	commandPalette := controls.NewCommandPalette(commands)
-
 	commandPaletteUI := tui.WithCenter(tui.WithFrame(commandPalette), 80, 20)
 
+	// 現在のディレクトリを取得
+	currentDir, err := os.Getwd()
+	if err != nil {
+		currentDir = "."
+	}
+
 	window := tui.Window{}
+
+	// ファイルチューザーを作成
+	fileChooser := controls.NewFileChooser(
+		currentDir,
+		func(selectedFile string) {
+			// ファイルが選択された時の処理
+			content, err := os.ReadFile(selectedFile)
+			if err != nil {
+				log.Printf("Error reading file: %v", err)
+				return
+			}
+
+			// テキストエリアにファイル内容を表示
+			doc := textArea.TextBox.GetDocument()
+			doc.Init()
+			doc.InsertString(string(content))
+			textArea.TextBox.CursorReset()
+
+			// ファイルチューザーを閉じる
+			window.Pop()
+		},
+		func() {
+			// キャンセル時の処理
+			window.Pop()
+		},
+	)
+	fileChooserUI := tui.WithCenter(tui.WithFrame(fileChooser), 80, 20)
 	window.Push(tui.Layer{
 		Control: &vbox,
 	})
@@ -219,6 +251,17 @@ func main() {
 				if window.GetLayerCount() == 1 {
 					window.Push(tui.Layer{
 						Control: commandPaletteUI,
+					})
+				}
+				continue
+			}
+
+			if e.Key() == tcell.KeyCtrlO {
+				// Ctrl+O でファイルチューザーを開く
+				if window.GetLayerCount() == 1 {
+					window.Push(tui.Layer{
+						Control:         fileChooserUI,
+						ClearBackground: true,
 					})
 				}
 				continue
