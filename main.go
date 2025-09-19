@@ -157,29 +157,41 @@ func main() {
 		&controls.DelegateCommand{
 			Label: "File: Open",
 			Func: func(cp *controls.CommandPalette, stackable tui.Stackable) {
-				hbox := tui.Box{}
-				hbox.Init(tui.Horizontal)
+				// 現在のディレクトリを取得
+				currentDir, err := os.Getwd()
+				if err != nil {
+					currentDir = "."
+				}
 
-				edit1 := tui.Tile{}
-				edit1.Init()
-				edit1.MinimumWidth = 20
-				edit1.MinimumHeight = 20
-				edit1.TextPresenter = &presenter.EditTextPresenter{}
+				// ファイルチューザーを作成
+				fileChooser := controls.NewFileChooser(
+					currentDir,
+					func(stackable tui.Stackable, selectedFile string) {
+						// ファイルが選択された時の処理
+						content, err := os.ReadFile(selectedFile)
+						if err != nil {
+							log.Printf("Error reading file: %v", err)
+							return
+						}
 
-				edit2 := tui.Tile{}
-				edit2.Init()
-				edit2.FlexibleWidth = true
-				edit2.MinimumHeight = 20
-				edit2.TextPresenter = &presenter.EditTextPresenter{}
+						// テキストエリアにファイル内容を表示
+						doc := textArea.TextBox.GetDocument()
+						doc.Init()
+						doc.InsertString(string(content))
+						textArea.TextBox.CursorReset()
 
-				hbox.Controls = append(hbox.Controls, tui.WithFrame(&edit1))
-				hbox.Controls = append(hbox.Controls, tui.WithFrame(&edit2))
-
-				//center := tui.WithCenter(&hbox, 60, 30)
+						// ファイルチューザーを閉じる
+						stackable.Pop()
+					},
+					func(stackable tui.Stackable) {
+						// キャンセル時の処理
+						stackable.Pop()
+					},
+				)
+				fileChooserUI := tui.WithCenter(tui.WithFrame(fileChooser), 80, 20)
 
 				stackable.Push(tui.Layer{
-					Control:         &hbox,
-					ClearBackground: true,
+					Control: fileChooserUI,
 					OnPop: func() {
 						stackable.Pop()
 					},
@@ -190,38 +202,6 @@ func main() {
 	commandPalette := controls.NewCommandPalette(commands)
 	commandPaletteUI := tui.WithCenter(tui.WithFrame(commandPalette), 80, 20)
 
-	// 現在のディレクトリを取得
-	currentDir, err := os.Getwd()
-	if err != nil {
-		currentDir = "."
-	}
-
-	// ファイルチューザーを作成
-	fileChooser := controls.NewFileChooser(
-		currentDir,
-		func(stackable tui.Stackable, selectedFile string) {
-			// ファイルが選択された時の処理
-			content, err := os.ReadFile(selectedFile)
-			if err != nil {
-				log.Printf("Error reading file: %v", err)
-				return
-			}
-
-			// テキストエリアにファイル内容を表示
-			doc := textArea.TextBox.GetDocument()
-			doc.Init()
-			doc.InsertString(string(content))
-			textArea.TextBox.CursorReset()
-
-			// ファイルチューザーを閉じる
-			stackable.Pop()
-		},
-		func(stackable tui.Stackable) {
-			// キャンセル時の処理
-			stackable.Pop()
-		},
-	)
-	fileChooserUI := tui.WithCenter(tui.WithFrame(fileChooser), 80, 20)
 	window := tui.Window{}
 	w, h := s.Size()
 	window.Init(s, w, h)
@@ -249,16 +229,6 @@ func main() {
 				if window.GetLayerCount() == 1 {
 					window.Push(tui.Layer{
 						Control: commandPaletteUI,
-					})
-				}
-				continue
-			}
-
-			if e.Key() == tcell.KeyCtrlO {
-				// Ctrl+O でファイルチューザーを開く
-				if window.GetLayerCount() == 1 {
-					window.Push(tui.Layer{
-						Control: fileChooserUI,
 					})
 				}
 				continue
