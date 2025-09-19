@@ -20,7 +20,7 @@ type Application struct {
 	screen         tcell.Screen
 	chatManager    llm.ChatManager
 	card           tui.Card
-	textArea       *tui.Tile
+	textEdior      TextEditor
 	filePath       string
 	modified       bool
 	commandPalette tui.Control
@@ -32,9 +32,9 @@ type Application struct {
 func (app *Application) newFile() {
 	app.filePath = ""
 	app.modified = false
-	doc := app.textArea.TextBox.GetDocument()
+	doc := app.textEdior.TextArea.TextBox.GetDocument()
 	doc.Init()
-	app.textArea.TextBox.CursorReset()
+	app.textEdior.TextArea.TextBox.CursorReset()
 }
 
 func (app *Application) openFile(filePath string) error {
@@ -48,10 +48,10 @@ func (app *Application) openFile(filePath string) error {
 	app.modified = false
 
 	// テキストエリアのドキュメントをクリアして新しい内容を設定
-	doc := app.textArea.TextBox.GetDocument()
+	doc := app.textEdior.TextArea.TextBox.GetDocument()
 	doc.Init()
 	doc.InsertString(string(content))
-	app.textArea.TextBox.CursorReset()
+	app.textEdior.TextArea.TextBox.CursorReset()
 	return nil
 }
 
@@ -60,7 +60,7 @@ func (app *Application) saveFile() error {
 		return errors.New("filePath is empty")
 	}
 	sb := strings.Builder{}
-	buf := app.textArea.TextBox.GetDocument().GetBuffer()
+	buf := app.textEdior.TextArea.TextBox.GetDocument().GetBuffer()
 
 	for i := 0; i < buf.GetLineCount(); i++ {
 		sb.WriteString(buf.GetLineAt(i).GetContent())
@@ -79,7 +79,7 @@ func (app *Application) saveFile() error {
 
 func (app *Application) saveFileAs(filePath string) error {
 	sb := strings.Builder{}
-	buf := app.textArea.TextBox.GetDocument().GetBuffer()
+	buf := app.textEdior.TextArea.TextBox.GetDocument().GetBuffer()
 
 	for i := 0; i < buf.GetLineCount(); i++ {
 		sb.WriteString(buf.GetLineAt(i).GetContent())
@@ -120,46 +120,9 @@ func (app *Application) Init() {
 	vbox := tui.Box{}
 	vbox.Init(tui.Vertical)
 
-	textArea := tui.Tile{}
-	textArea.Init()
-	textArea.MinimumWidth = 3
-	textArea.FlexibleWidth = true
-	textArea.FlexibleHeight = true
-	textArea.TextBox.ShowCursor = true
-	textArea.TextPresenter = &presenter.EditTextPresenter{
-		OnModified: func() {
-			app.modified = true
-		},
-	}
-	// 行番号エリア
-	lineNumbers := tui.Tile{}
-	lineNumbers.Init()
-	lineNumbers.MinimumWidth = 4 // 行番号の幅（桁数に応じて調整）
-	lineNumbers.FlexibleHeight = true
-	lineNumbers.TextPresenter = &presenter.LineNumberTextPresenter{
-		TargetView: textArea.TextBox, // テキストエリアを対象に設定
-	}
-	// lineNumbers.TextPresenter = &presenter.FrameTextPresenter{}
-
-	gutter := tui.Tile{}
-	gutter.Init()
-	gutter.MinimumWidth = 1 // 行番号の幅（桁数に応じて調整）
-	gutter.FlexibleHeight = true
-	gutter.TextPresenter = &presenter.VerticalSeparatorTextPresenter{}
-
-	scrollBar := tui.NewTile(&presenter.ScrollBarTextPresenter{
-		TargetView: textArea.TextBox,
+	app.textEdior.Init(func() {
+		app.modified = true
 	})
-	scrollBar.MinimumWidth = 1
-	scrollBar.FlexibleHeight = true
-
-	// 水平レイアウトで行番号とテキストエリアを並べる
-	editorBox := tui.Box{}
-	editorBox.Init(tui.Horizontal)
-	editorBox.Controls = append(editorBox.Controls, &lineNumbers)
-	editorBox.Controls = append(editorBox.Controls, &gutter)
-	editorBox.Controls = append(editorBox.Controls, &textArea)
-	editorBox.Controls = append(editorBox.Controls, scrollBar)
 
 	tree := tui.Tile{}
 	tree.Init()
@@ -231,7 +194,7 @@ func (app *Application) Init() {
 
 	app.card.Controls = append(app.card.Controls, &tui.Blank{})
 
-	editorWithSide.Controls = append(editorWithSide.Controls, &editorBox)
+	editorWithSide.Controls = append(editorWithSide.Controls, &app.textEdior)
 	editorWithSide.Controls = append(editorWithSide.Controls, &app.card)
 
 	hbox.Controls = append(hbox.Controls, &tree)
@@ -282,7 +245,6 @@ func (app *Application) Init() {
 	app.screen = s
 	app.filePath = ""
 	app.modified = false
-	app.textArea = &textArea
 	app.window.Init(s, w, h)
 	app.window.Push(tui.Layer{
 		Control: &vbox,
