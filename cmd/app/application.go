@@ -187,19 +187,21 @@ func (app *Application) Init() {
 						textArea.TextBox.CursorReset()
 
 						// ファイルチューザーを閉じる
-						stackable.Pop()
+						stackable.Pop(0)
 					},
 					func(stackable tui.Stackable) {
 						// キャンセル時の処理
-						stackable.Pop()
+						stackable.Pop(1)
 					},
 				)
 				fileChooserUI := tui.WithCenter(tui.WithFrame(fileChooser), 80, 20)
 
 				stackable.Push(tui.Layer{
 					Control: fileChooserUI,
-					OnPop: func() {
-						stackable.Pop()
+					OnPop: func(returnCode int) {
+						if returnCode == 0 {
+							stackable.Pop(-1)
+						}
 					},
 				})
 			},

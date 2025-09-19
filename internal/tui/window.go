@@ -30,7 +30,7 @@ func (w *Window) Push(layer Layer) {
 	w.focusManager.Grab()
 }
 
-func (w *Window) Pop() {
+func (w *Window) Pop(returnCode int) {
 	if len(w.stack.Layers) > 0 {
 		l := w.stack.Layers[len(w.stack.Layers)-1]
 		w.stack.Layers = w.stack.Layers[:len(w.stack.Layers)-1]
@@ -39,7 +39,7 @@ func (w *Window) Pop() {
 
 		callable := l.OnPop
 		if callable != nil {
-			callable()
+			callable(returnCode)
 		}
 
 		w.focusManager.Grab()

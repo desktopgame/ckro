@@ -3,10 +3,10 @@ package base
 type Layer struct {
 	Control         Control
 	ClearBackground bool
-	OnPop           func()
+	OnPop           func(returnCode int)
 }
 
 type Stackable interface {
 	Push(layer Layer)
-	Pop()
+	Pop(returnCode int)
 }

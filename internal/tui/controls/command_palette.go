@@ -118,7 +118,7 @@ func (cp *CommandPalette) Handle(ev base.Event) {
 				return // イベントを消費
 			}
 		case tcell.KeyEscape:
-			ev.GetStackable().Pop()
+			ev.GetStackable().Pop(-1)
 		default:
 			// 文字入力
 			if cp.inputFocused && keyEvent.Rune() != 0 {
