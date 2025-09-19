@@ -41,16 +41,16 @@ func (g *Graphics) ForceDraw(x int, y int, primary rune, combine []rune, style t
 	g.bitmap[y][x] = true
 }
 
-// Glass is mark the specified cell as used.
-func (g *Graphics) Glass(x int, y int) {
+// Empty is mark the specified cell as used.
+func (g *Graphics) Empty(x int, y int) {
 	g.bitmap[y][x] = true
 }
 
-// GlassRange is mark the cells within specified range as used.
-func (g *Graphics) GlassRange(x int, y int, width int, height int) {
+// EmptyRange is mark the cells within specified range as used.
+func (g *Graphics) EmptyRange(x int, y int, width int, height int) {
 	for i := 0; i < height; i++ {
 		for j := 0; j < width; j++ {
-			g.Glass(x+j, y+i)
+			g.Empty(x+j, y+i)
 		}
 	}
 }

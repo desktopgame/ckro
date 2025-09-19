@@ -34,7 +34,7 @@ func (fr *Frame) Draw(g *Graphics) {
 	g.Draw(fr.x+fr.width-1, fr.y, '*', nil, tcell.StyleDefault)
 	g.Draw(fr.x+fr.width-1, fr.y+fr.height-1, '*', nil, tcell.StyleDefault)
 	fr.Control.Draw(g)
-	g.GlassRange(fr.x, fr.y, fr.width, fr.height)
+	g.EmptyRange(fr.x, fr.y, fr.width, fr.height)
 }
 
 func (fr *Frame) MinimumSize(width int, height int) (Width int, Height int) {
