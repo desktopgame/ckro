@@ -177,16 +177,3 @@ func NewGrid(rows, cols int) *Grid {
 	grid.Init(rows, cols)
 	return grid
 }
-
-// Stack utilities
-func NewStack(controls ...Control) *Stack {
-	stack := &Stack{}
-	stack.Init()
-	for _, ctrl := range controls {
-		stack.Layers = append(stack.Layers, ctrl)
-	}
-	if len(controls) > 0 {
-		stack.Top = len(controls) - 1
-	}
-	return stack
-}

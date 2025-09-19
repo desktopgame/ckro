@@ -1,9 +1,7 @@
-package tui
-
-import "github.com/gdamore/tcell/v2"
+package base
 
 type Focusable interface {
-	Handle(ev tcell.Event)
+	Handle(ev Event)
 	Focus(on bool)
 }
 
@@ -110,7 +108,7 @@ func (fm *FocusManager) FocusNext() {
 	}
 }
 
-func (fm *FocusManager) Handle(ev tcell.Event) {
+func (fm *FocusManager) Handle(ev Event) {
 	if len(fm.tiles) == 0 {
 		return
 	}

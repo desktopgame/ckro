@@ -9,8 +9,8 @@ type Window struct {
 	height       int
 }
 
-func (w *Window) Push(ctrl Control) {
-	w.stack.Layers = append(w.stack.Layers, ctrl)
+func (w *Window) Push(layer Layer) {
+	w.stack.Layers = append(w.stack.Layers, layer)
 	w.stack.Top = len(w.stack.Layers) - 1
 	w.stack.Traverse(&w.focusManager)
 
@@ -23,6 +23,11 @@ func (w *Window) Push(ctrl Control) {
 
 func (w *Window) Pop() {
 	if len(w.stack.Layers) > 0 {
+		callable := w.stack.Layers[len(w.stack.Layers)-1].OnPop
+		if callable != nil {
+			callable(w)
+		}
+
 		w.stack.Layers = w.stack.Layers[:len(w.stack.Layers)-1]
 		w.stack.Top--
 		w.stack.Traverse(&w.focusManager)
@@ -33,7 +38,7 @@ func (w *Window) Pop() {
 
 func (w *Window) Top() Control {
 	if w.stack.Top >= 0 {
-		return w.stack.Layers[w.stack.Top]
+		return w.stack.Layers[w.stack.Top].Control
 	}
 	return nil
 }
@@ -67,6 +72,6 @@ func (w *Window) Resize(width int, height int) {
 	w.height = height
 }
 
-func (w *Window) Handle(ev tcell.Event) {
+func (w *Window) Handle(ev Event) {
 	w.focusManager.Handle(ev)
 }

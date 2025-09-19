@@ -21,8 +21,8 @@ func (t *Tile) Init() {
 	t.TextPresenter = &presenter.LabelTextPresenter{}
 }
 
-func (t *Tile) Handle(ev tcell.Event) {
-	t.TextPresenter.Handle(t.TextBox, ev)
+func (t *Tile) Handle(ev Event) {
+	t.TextPresenter.Handle(t.TextBox, ev.GetSource())
 }
 
 func (t *Tile) Focus(on bool) {

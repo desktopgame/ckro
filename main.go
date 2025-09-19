@@ -156,7 +156,7 @@ func main() {
 	commands := []controls.Command{
 		&controls.DelegateCommand{
 			Label: "File: Open",
-			Func:  func() {},
+			Func:  func(cp *controls.CommandPalette, stackable tui.Stackable) {},
 		},
 	}
 	commandPalette := controls.NewCommandPalette(commands)
@@ -164,7 +164,9 @@ func main() {
 	commandPaletteUI := tui.WithCenter(tui.WithFrame(commandPalette), 80, 20)
 
 	window := tui.Window{}
-	window.Push(&vbox)
+	window.Push(tui.Layer{
+		Control: &vbox,
+	})
 
 	w, h := s.Size()
 	window.Resize(w, h)
@@ -186,10 +188,10 @@ func main() {
 			window.Resize(w, h)
 		case *tcell.EventKey:
 			if e.Rune() == 'p' && (e.Modifiers()&tcell.ModAlt != 0) {
-				if window.Top() == commandPaletteUI {
-					window.Pop()
-				} else if window.GetLayerCount() == 1 {
-					window.Push(commandPaletteUI)
+				if window.GetLayerCount() == 1 {
+					window.Push(tui.Layer{
+						Control: commandPaletteUI,
+					})
 				}
 				continue
 			}
@@ -198,10 +200,12 @@ func main() {
 				continue
 			}
 			switch e.Key() {
-			case tcell.KeyEscape, tcell.KeyCtrlC:
+			case tcell.KeyCtrlC:
 				return
 			}
-			window.Handle(ev)
+			tuiEvent := tui.Event{}
+			tuiEvent.Init(&window, ev)
+			window.Handle(tuiEvent)
 		}
 	}
 }

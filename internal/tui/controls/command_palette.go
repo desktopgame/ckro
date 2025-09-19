@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/desktopgame/ckro/internal/tui"
+	"github.com/desktopgame/ckro/internal/tui/base"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
 	"github.com/gdamore/tcell/v2"
 )
@@ -75,8 +76,8 @@ func (cp *CommandPalette) Draw(screen tcell.Screen) {
 	cp.paletteBox.Draw(screen)
 }
 
-func (cp *CommandPalette) Handle(ev tcell.Event) {
-	if keyEvent, ok := ev.(*tcell.EventKey); ok {
+func (cp *CommandPalette) Handle(ev base.Event) {
+	if keyEvent, ok := ev.GetSource().(*tcell.EventKey); ok {
 		switch keyEvent.Key() {
 		case tcell.KeyUp:
 			if !cp.inputFocused {
@@ -104,7 +105,7 @@ func (cp *CommandPalette) Handle(ev tcell.Event) {
 				if listPresenter, ok := cp.commandList.TextPresenter.(*presenter.ListTextPresenter); ok {
 					selectedIndex := listPresenter.GetSelectedIndex()
 					if selectedIndex >= 0 {
-						cp.filteredCommands[selectedIndex].Execute()
+						cp.filteredCommands[selectedIndex].Execute(cp, ev.GetStackable())
 					}
 				}
 				return // イベントを消費
@@ -116,6 +117,8 @@ func (cp *CommandPalette) Handle(ev tcell.Event) {
 				cp.filterCommands()
 				return // イベントを消費
 			}
+		case tcell.KeyEscape:
+			ev.GetStackable().Pop()
 		default:
 			// 文字入力
 			if cp.inputFocused && keyEvent.Rune() != 0 {

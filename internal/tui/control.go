@@ -1,16 +1,9 @@
 package tui
 
-import "github.com/gdamore/tcell/v2"
+import "github.com/desktopgame/ckro/internal/tui/base"
 
-type Control interface {
-	Traverse(fm *FocusManager)
-	Update()
-	Draw(s tcell.Screen)
-
-	MinimumSize(width int, height int) (Width int, Height int)
-	Move(x int, y int)
-	Layout(w int, h int)
-
-	IsFlexibleWidth() bool
-	IsFlexibleHeight() bool
-}
+type Control = base.Control
+type FocusManager = base.FocusManager
+type Event = base.Event
+type Layer = base.Layer
+type Stackable = base.Stackable
