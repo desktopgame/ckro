@@ -19,11 +19,11 @@ type ConfirmationDialog struct {
 	dialogBox    *tui.Box
 
 	selectedButton int // 0: Yes, 1: No
-	onYes          func(base.Stackable)
-	onNo           func(base.Stackable)
+	onYes          func(base.Runtime)
+	onNo           func(base.Runtime)
 }
 
-func NewConfirmationDialog(title, message string, onYes, onNo func(base.Stackable)) *ConfirmationDialog {
+func NewConfirmationDialog(title, message string, onYes, onNo func(base.Runtime)) *ConfirmationDialog {
 	cd := &ConfirmationDialog{
 		selectedButton: 0, // デフォルトでYesを選択
 		onYes:          onYes,
@@ -125,19 +125,19 @@ func (cd *ConfirmationDialog) Handle(ev base.Event) {
 			if cd.selectedButton == 0 {
 				// Yesボタン
 				if cd.onYes != nil {
-					cd.onYes(ev.GetStackable())
+					cd.onYes(ev.GetRuntime())
 				}
 			} else {
 				// Noボタン
 				if cd.onNo != nil {
-					cd.onNo(ev.GetStackable())
+					cd.onNo(ev.GetRuntime())
 				}
 			}
 			return
 		case tcell.KeyEscape:
 			// Escapeキーでキャンセル（Noと同じ動作）
 			if cd.onNo != nil {
-				cd.onNo(ev.GetStackable())
+				cd.onNo(ev.GetRuntime())
 			}
 			return
 		}
@@ -145,13 +145,13 @@ func (cd *ConfirmationDialog) Handle(ev base.Event) {
 		// Y/Nキーでの直接選択
 		if keyEvent.Rune() == 'y' || keyEvent.Rune() == 'Y' {
 			if cd.onYes != nil {
-				cd.onYes(ev.GetStackable())
+				cd.onYes(ev.GetRuntime())
 			}
 			return
 		}
 		if keyEvent.Rune() == 'n' || keyEvent.Rune() == 'N' {
 			if cd.onNo != nil {
-				cd.onNo(ev.GetStackable())
+				cd.onNo(ev.GetRuntime())
 			}
 			return
 		}

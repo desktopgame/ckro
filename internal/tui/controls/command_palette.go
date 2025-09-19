@@ -105,7 +105,7 @@ func (cp *CommandPalette) Handle(ev base.Event) {
 				if listPresenter, ok := cp.commandList.TextPresenter.(*presenter.ListTextPresenter); ok {
 					selectedIndex := listPresenter.GetSelectedIndex()
 					if selectedIndex >= 0 {
-						cp.filteredCommands[selectedIndex].Execute(cp, ev.GetStackable())
+						cp.filteredCommands[selectedIndex].Execute(ev.GetRuntime(), cp)
 					}
 				}
 				return // イベントを消費
@@ -118,7 +118,7 @@ func (cp *CommandPalette) Handle(ev base.Event) {
 				return // イベントを消費
 			}
 		case tcell.KeyEscape:
-			ev.GetStackable().Pop(-1)
+			ev.GetRuntime().Pop(-1)
 		default:
 			// 文字入力
 			if cp.inputFocused && keyEvent.Rune() != 0 {

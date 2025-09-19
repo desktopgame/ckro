@@ -23,8 +23,8 @@ type FileChooser struct {
 	currentPath   string
 	entries       []FileEntry
 	selectedIndex int
-	onFileSelect  func(base.Stackable, string)
-	onCancel      func(base.Stackable)
+	onFileSelect  func(base.Runtime, string)
+	onCancel      func(base.Runtime)
 }
 
 type FileEntry struct {
@@ -34,7 +34,7 @@ type FileEntry struct {
 	Size  int64
 }
 
-func NewFileChooser(initialPath string, onFileSelect func(base.Stackable, string), onCancel func(base.Stackable)) *FileChooser {
+func NewFileChooser(initialPath string, onFileSelect func(base.Runtime, string), onCancel func(base.Runtime)) *FileChooser {
 	fc := &FileChooser{
 		currentPath:  initialPath,
 		onFileSelect: onFileSelect,
@@ -199,14 +199,14 @@ func (fc *FileChooser) Handle(ev base.Event) {
 				} else {
 					// ファイルの場合は選択
 					if fc.onFileSelect != nil {
-						fc.onFileSelect(ev.GetStackable(), selectedEntry.Path)
+						fc.onFileSelect(ev.GetRuntime(), selectedEntry.Path)
 					}
 				}
 			}
 			return
 		case tcell.KeyEscape:
 			if fc.onCancel != nil {
-				fc.onCancel(ev.GetStackable())
+				fc.onCancel(ev.GetRuntime())
 			}
 			return
 		case tcell.KeyBackspace, tcell.KeyBackspace2:

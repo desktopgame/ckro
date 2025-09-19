@@ -20,12 +20,12 @@ type InputDialog struct {
 	dialogBox    *tui.Box
 
 	selectedButton int // 0: OK, 1: Cancel
-	onOK           func(base.Stackable, string)
-	onCancel       func(base.Stackable)
+	onOK           func(base.Runtime, string)
+	onCancel       func(base.Runtime)
 	initialValue   string
 }
 
-func NewInputDialog(title, prompt, initialValue string, onOK func(base.Stackable, string), onCancel func(base.Stackable)) *InputDialog {
+func NewInputDialog(title, prompt, initialValue string, onOK func(base.Runtime, string), onCancel func(base.Runtime)) *InputDialog {
 	id := &InputDialog{
 		selectedButton: 0, // デフォルトでOKを選択
 		onOK:           onOK,
@@ -151,7 +151,7 @@ func (id *InputDialog) Handle(ev base.Event) {
 				// 入力フィールドフォーカス時はOKボタンと同じ動作
 				if id.onOK != nil {
 					inputValue := id.getInputValue()
-					id.onOK(ev.GetStackable(), inputValue)
+					id.onOK(ev.GetRuntime(), inputValue)
 				}
 			} else {
 				// ボタンフォーカス時は選択されたボタンを実行
@@ -159,12 +159,12 @@ func (id *InputDialog) Handle(ev base.Event) {
 					// OKボタン
 					if id.onOK != nil {
 						inputValue := id.getInputValue()
-						id.onOK(ev.GetStackable(), inputValue)
+						id.onOK(ev.GetRuntime(), inputValue)
 					}
 				} else {
 					// Cancelボタン
 					if id.onCancel != nil {
-						id.onCancel(ev.GetStackable())
+						id.onCancel(ev.GetRuntime())
 					}
 				}
 			}
@@ -172,7 +172,7 @@ func (id *InputDialog) Handle(ev base.Event) {
 		case tcell.KeyEscape:
 			// Escapeキーでキャンセル
 			if id.onCancel != nil {
-				id.onCancel(ev.GetStackable())
+				id.onCancel(ev.GetRuntime())
 			}
 			return
 		case tcell.KeyLeft, tcell.KeyRight:

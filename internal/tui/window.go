@@ -5,11 +5,12 @@ import (
 )
 
 type Window struct {
-	g            Graphics
-	stack        Stack
-	focusManager FocusManager
-	width        int
-	height       int
+	g               Graphics
+	stack           Stack
+	focusManager    FocusManager
+	width           int
+	height          int
+	backgroundTasks int
 }
 
 func (w *Window) Init(s tcell.Screen, width int, height int) {
@@ -45,6 +46,16 @@ func (w *Window) Pop(returnCode int) {
 		}
 	}
 }
+
+func (w *Window) BeginBackground() {
+	w.backgroundTasks++
+}
+
+func (w *Window) EndBackground() {
+	w.backgroundTasks--
+}
+
+func (w *Window) Repaint() {}
 
 func (w *Window) Top() Control {
 	if w.stack.Top >= 0 {

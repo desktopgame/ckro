@@ -168,16 +168,16 @@ func (app *Application) Init() {
 				confirmDialog := controls.NewConfirmationDialog(
 					"Unsaved Changes",
 					"You have unsaved changes.\nDo you want to save before opening a new file?",
-					func(stackable base.Stackable) {
+					func(runtime base.Runtime) {
 						// Yesが選択された場合 - 保存してからファイルを開く
 						// TODO: 保存処理を実装
 						log.Println("Save and open new file")
-						stackable.Pop(-1) // ダイアログを閉じる
+						runtime.Pop(-1) // ダイアログを閉じる
 						app.openFile(filePath)
 					},
-					func(stackable base.Stackable) {
+					func(runtime base.Runtime) {
 						// Noが選択された場合 - 保存せずにファイルを開く
-						stackable.Pop(-1) // ダイアログを閉じる
+						runtime.Pop(-1) // ダイアログを閉じる
 						app.openFile(filePath)
 					},
 				)
