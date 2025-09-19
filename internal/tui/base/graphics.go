@@ -30,6 +30,11 @@ func (g *Graphics) Draw(x int, y int, primary rune, combine []rune, style tcell.
 	}
 }
 
+func (g *Graphics) ForceDraw(x int, y int, primary rune, combine []rune, style tcell.Style) {
+	g.screen.SetContent(x, y, primary, combine, style)
+	g.bitmap[y][x] = true
+}
+
 func (g *Graphics) Glass(x int, y int) {
 	g.bitmap[y][x] = true
 }

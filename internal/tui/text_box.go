@@ -342,14 +342,14 @@ func (tb *TextBox) Draw(g *Graphics) {
 
 	// カーソル位置の文字を反転表示
 	cursorStyle := def.Reverse(true)
-	clip.SetContent(screenX, cursorRow-tb.scrollY, currentRune, combining, cursorStyle)
+	clip.SetCursor(screenX, cursorRow-tb.scrollY, currentRune, combining, cursorStyle)
 
 	// 全角文字の場合、隣接するセルもカーソル表示
 	if currentRune != ' ' {
 		width := runewidth.RuneWidth(currentRune)
 		if width == 2 {
 			// 隣接するセルにもカーソルを表示（空文字で反転）
-			clip.SetContent(screenX+1, cursorRow-tb.scrollY, 0, nil, cursorStyle)
+			clip.SetCursor(screenX+1, cursorRow-tb.scrollY, 0, nil, cursorStyle)
 		}
 	}
 
