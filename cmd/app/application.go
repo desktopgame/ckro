@@ -231,13 +231,25 @@ func (app *Application) Init() {
 
 	app.card.Controls = append(app.card.Controls, &tui.Blank{})
 
-	side := tui.Tile{}
-	side.Init()
-	side.MinimumWidth = 30
-	side.FlexibleHeight = true
-	side.TextPresenter = &presenter.FrameTextPresenter{}
+	sideBox := tui.Box{}
+	sideBox.Init(tui.Vertical)
 
-	app.card.Controls = append(app.card.Controls, &side)
+	sideText := tui.Tile{}
+	sideText.Init()
+	sideText.MinimumWidth = 30
+	sideText.FlexibleHeight = true
+	sideText.TextPresenter = &presenter.EditTextPresenter{}
+
+	sideInput := tui.Tile{}
+	sideInput.Init()
+	sideInput.MinimumWidth = 30
+	sideInput.MinimumHeight = 3
+	sideInput.TextPresenter = &presenter.EditTextPresenter{}
+
+	sideBox.Controls = append(sideBox.Controls, tui.WithFrame(&sideText))
+	sideBox.Controls = append(sideBox.Controls, tui.WithFrame(&sideInput))
+
+	app.card.Controls = append(app.card.Controls, &sideBox)
 
 	editorWithSide.Controls = append(editorWithSide.Controls, &editorBox)
 	editorWithSide.Controls = append(editorWithSide.Controls, &app.card)
