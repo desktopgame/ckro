@@ -252,9 +252,10 @@ func (app *Application) Run() {
 				app.window.FocusNext()
 				continue
 			}
-			switch e.Key() {
-			case tcell.KeyCtrlC:
-				return
+			if e.Key() == tcell.KeyCtrlC {
+				if app.window.GetLayerCount() == 1 {
+					return
+				}
 			}
 			tuiEvent := tui.Event{}
 			tuiEvent.Init(&app.window, ev)
