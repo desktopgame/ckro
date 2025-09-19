@@ -186,6 +186,10 @@ func (app *Application) Init() {
 	// QuickCommandPaletteのテスト
 	commands := []controls.Command{
 		&controls.DelegateCommand{
+			Label: "File: New",
+			Func:  FileNewCommand(app),
+		},
+		&controls.DelegateCommand{
 			Label: "File: Open",
 			Func:  FileOpenCommand(app),
 		},
