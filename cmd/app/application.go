@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/desktopgame/ckro/internal/tui/base"
@@ -46,6 +48,28 @@ func (app *Application) openFile(filePath string) error {
 	doc.InsertString(string(content))
 	app.textArea.TextBox.CursorReset()
 	return nil
+}
+
+func (app *Application) saveFile() error {
+	if app.filePath == "" {
+		return errors.New("filePath is empty")
+	}
+	sb := strings.Builder{}
+	buf := app.textArea.TextBox.GetDocument().GetBuffer()
+
+	for i := 0; i < buf.GetLineCount(); i++ {
+		sb.WriteString(buf.GetLineAt(i).GetContent())
+
+		if i < buf.GetLineCount()-1 {
+			sb.WriteRune('\n')
+		}
+	}
+
+	err := os.WriteFile(app.filePath, []byte(sb.String()), 0644)
+	if err == nil {
+		app.modified = false
+	}
+	return err
 }
 
 func (app *Application) Init() {
