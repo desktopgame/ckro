@@ -111,19 +111,23 @@ func showSaveAsDialog(app *Application, stackable tui.Stackable) {
 			// OKが選択された場合
 			if filename != "" {
 				app.saveFileAs(filename)
-				stackable.Pop(-1) // ダイアログを閉じる
-				stackable.Pop(-1) // コマンドパレットも閉じる
+				stackable.Pop(0) // ダイアログを閉じる
 			}
 		},
 		func(stackable base.Stackable) {
 			// キャンセルが選択された場合
-			stackable.Pop(-1) // ダイアログを閉じる
+			stackable.Pop(1) // ダイアログを閉じる
 		},
 	)
 	inputDialogUI := tui.WithCenter(tui.WithFrame(inputDialog), 70, 12)
 
 	stackable.Push(tui.Layer{
 		Control: inputDialogUI,
+		OnPop: func(returnCode int) {
+			if returnCode == 0 {
+				stackable.Pop(-1) // コマンドパレットも閉じる
+			}
+		},
 	})
 }
 
