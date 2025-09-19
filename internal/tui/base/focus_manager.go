@@ -41,7 +41,6 @@ func (fm *FocusManager) Init() {
 // Register is Focusable entry add  to table.
 func (fm *FocusManager) Register(t Focusable) {
 	fm.tiles = append(fm.tiles, t)
-	// t.GetTextBox().ShowCursor = false
 	t.Focus(false)
 }
 
@@ -57,8 +56,6 @@ func (fm *FocusManager) Grab() {
 		return
 	}
 
-	// showCursor := fm.tiles[fm.active].GetTextPresenter().ShowCursor()
-	// fm.tiles[fm.active].GetTextBox().ShowCursor = showCursor
 	fm.tiles[fm.active].Focus(true)
 
 	if tree, ok := fm.tiles[fm.active].(FocusableTree); ok {
@@ -80,7 +77,6 @@ func (fm *FocusManager) FocusPrev() {
 		return
 	}
 
-	// fm.tiles[fm.active].GetTextBox().ShowCursor = false
 	fm.tiles[fm.active].Focus(false)
 
 	if fm.active > 0 {
@@ -89,8 +85,6 @@ func (fm *FocusManager) FocusPrev() {
 		fm.active = len(fm.tiles) - 1
 	}
 
-	// showCursor := fm.tiles[fm.active].GetTextPresenter().ShowCursor()
-	// fm.tiles[fm.active].GetTextBox().ShowCursor = showCursor
 	fm.tiles[fm.active].Focus(true)
 
 	if tree, ok := fm.tiles[fm.active].(FocusableTree); ok {
@@ -112,7 +106,6 @@ func (fm *FocusManager) FocusNext() {
 		return
 	}
 
-	// fm.tiles[fm.active].GetTextBox().ShowCursor = false
 	fm.tiles[fm.active].Focus(false)
 
 	if fm.active < len(fm.tiles)-1 {
@@ -121,8 +114,6 @@ func (fm *FocusManager) FocusNext() {
 		fm.active = 0
 	}
 
-	// showCursor := fm.tiles[fm.active].GetTextPresenter().ShowCursor()
-	// fm.tiles[fm.active].GetTextBox().ShowCursor = showCursor
 	fm.tiles[fm.active].Focus(true)
 
 	if tree, ok := fm.tiles[fm.active].(FocusableTree); ok {
