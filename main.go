@@ -196,8 +196,6 @@ func main() {
 		currentDir = "."
 	}
 
-	window := tui.Window{}
-
 	// ファイルチューザーを作成
 	fileChooser := controls.NewFileChooser(
 		currentDir,
@@ -224,19 +222,19 @@ func main() {
 		},
 	)
 	fileChooserUI := tui.WithCenter(tui.WithFrame(fileChooser), 80, 20)
+	window := tui.Window{}
+	w, h := s.Size()
+	window.Init(s, w, h)
 	window.Push(tui.Layer{
 		Control: &vbox,
 	})
-
-	w, h := s.Size()
-	window.Resize(w, h)
 
 	s.Show()
 
 	for {
 		s.Clear()
 
-		window.Frame(s, w, h)
+		window.Blit(w, h)
 
 		s.Show()
 
@@ -260,8 +258,7 @@ func main() {
 				// Ctrl+O でファイルチューザーを開く
 				if window.GetLayerCount() == 1 {
 					window.Push(tui.Layer{
-						Control:         fileChooserUI,
-						ClearBackground: true,
+						Control: fileChooserUI,
 					})
 				}
 				continue

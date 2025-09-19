@@ -2,7 +2,6 @@ package tui
 
 import (
 	"github.com/desktopgame/ckro/internal/tui/presenter"
-	"github.com/gdamore/tcell/v2"
 )
 
 type Tile struct {
@@ -43,8 +42,8 @@ func (t *Tile) Update() {
 	t.TextPresenter.Present(t.TextBox)
 }
 
-func (t *Tile) Draw(s tcell.Screen) {
-	t.TextBox.Draw(s)
+func (t *Tile) Draw(g *Graphics) {
+	t.TextBox.Draw(g)
 }
 
 func (t *Tile) MinimumSize(width int, height int) (Width int, Height int) {

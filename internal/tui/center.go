@@ -1,9 +1,5 @@
 package tui
 
-import (
-	"github.com/gdamore/tcell/v2"
-)
-
 type Center struct {
 	Control Control
 	Width   int
@@ -20,8 +16,8 @@ func (c *Center) Update() {
 	c.Control.Update()
 }
 
-func (c *Center) Draw(s tcell.Screen) {
-	c.Control.Draw(s)
+func (c *Center) Draw(g *Graphics) {
+	c.Control.Draw(g)
 }
 
 func (c *Center) MinimumSize(width int, height int) (Width int, Height int) {

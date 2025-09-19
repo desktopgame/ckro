@@ -2,7 +2,6 @@ package tui
 
 import (
 	"github.com/desktopgame/ckro/internal/tui/presenter"
-	"github.com/gdamore/tcell/v2"
 )
 
 type GridCell struct {
@@ -190,7 +189,7 @@ func (g *Grid) Update() {
 	}
 }
 
-func (g *Grid) Draw(s tcell.Screen) {
+func (g *Grid) Draw(gg *Graphics) {
 	/*
 		xBorders := g.columnCount + 1
 		yBorders := g.rowCount + 1
@@ -275,7 +274,7 @@ func (g *Grid) Draw(s tcell.Screen) {
 
 	for _, row := range g.table {
 		for _, c := range row {
-			c.Control.Draw(s)
+			c.Control.Draw(gg)
 		}
 	}
 	/*

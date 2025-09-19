@@ -279,18 +279,18 @@ func (tb *TextBox) TextClear() {
 	tb.Document.Init()
 }
 
-func (tb *TextBox) Draw(s tcell.Screen) {
+func (tb *TextBox) Draw(g *Graphics) {
 	if tb.Width == 0 || tb.Height == 0 {
 		return
 	}
 
 	// バッファの内容を描画
 	clip := Clip{
-		Screen: s,
-		X:      tb.X,
-		Y:      tb.Y,
-		Width:  tb.Width,
-		Height: tb.Height,
+		Graphics: g,
+		X:        tb.X,
+		Y:        tb.Y,
+		Width:    tb.Width,
+		Height:   tb.Height,
 	}
 	def := tcell.StyleDefault
 

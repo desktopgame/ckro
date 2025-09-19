@@ -1,7 +1,5 @@
 package tui
 
-import "github.com/gdamore/tcell/v2"
-
 type Box struct {
 	Controls    []Control
 	orientation Orientation
@@ -26,9 +24,9 @@ func (b *Box) Update() {
 	}
 }
 
-func (b *Box) Draw(s tcell.Screen) {
+func (b *Box) Draw(g *Graphics) {
 	for _, ctrl := range b.Controls {
-		ctrl.Draw(s)
+		ctrl.Draw(g)
 	}
 }
 

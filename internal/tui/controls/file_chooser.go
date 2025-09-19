@@ -170,8 +170,8 @@ func (fc *FileChooser) Update() {
 	fc.chooserBox.Update()
 }
 
-func (fc *FileChooser) Draw(screen tcell.Screen) {
-	fc.chooserBox.Draw(screen)
+func (fc *FileChooser) Draw(g *base.Graphics) {
+	fc.chooserBox.Draw(g)
 }
 
 func (fc *FileChooser) Handle(ev base.Event) {

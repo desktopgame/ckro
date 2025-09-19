@@ -1,7 +1,5 @@
 package tui
 
-import "github.com/gdamore/tcell/v2"
-
 type Stack struct {
 	Layers []Layer
 	Top    int
@@ -25,12 +23,12 @@ func (st *Stack) Update() {
 	}
 }
 
-func (st *Stack) Draw(s tcell.Screen) {
+func (st *Stack) Draw(g *Graphics) {
 	if st.Top > 0 && st.Layers[st.Top].ClearBackground {
-		st.Layers[st.Top].Control.Draw(s)
+		st.Layers[st.Top].Control.Draw(g)
 	} else {
-		for i := 0; i <= st.Top; i++ {
-			st.Layers[i].Control.Draw(s)
+		for i := st.Top; i >= 0; i-- {
+			st.Layers[i].Control.Draw(g)
 		}
 	}
 }

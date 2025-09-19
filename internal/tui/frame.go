@@ -20,20 +20,21 @@ func (fr *Frame) Update() {
 	fr.Control.Update()
 }
 
-func (fr *Frame) Draw(s tcell.Screen) {
+func (fr *Frame) Draw(g *Graphics) {
 	for i := 0; i < fr.width; i++ {
-		s.SetContent(fr.x+i, fr.y, '-', nil, tcell.StyleDefault)
-		s.SetContent(fr.x+i, fr.y+fr.height-1, '-', nil, tcell.StyleDefault)
+		g.Draw(fr.x+i, fr.y, '-', nil, tcell.StyleDefault)
+		g.Draw(fr.x+i, fr.y+fr.height-1, '-', nil, tcell.StyleDefault)
 	}
 	for i := 0; i < fr.height; i++ {
-		s.SetContent(fr.x, fr.y+i, '|', nil, tcell.StyleDefault)
-		s.SetContent(fr.x+fr.width-1, fr.y+i, '|', nil, tcell.StyleDefault)
+		g.Draw(fr.x, fr.y+i, '|', nil, tcell.StyleDefault)
+		g.Draw(fr.x+fr.width-1, fr.y+i, '|', nil, tcell.StyleDefault)
 	}
-	s.SetContent(fr.x, fr.y, '*', nil, tcell.StyleDefault)
-	s.SetContent(fr.x, fr.y+fr.height-1, '*', nil, tcell.StyleDefault)
-	s.SetContent(fr.x+fr.width-1, fr.y, '*', nil, tcell.StyleDefault)
-	s.SetContent(fr.x+fr.width-1, fr.y+fr.height-1, '*', nil, tcell.StyleDefault)
-	fr.Control.Draw(s)
+	g.Draw(fr.x, fr.y, '*', nil, tcell.StyleDefault)
+	g.Draw(fr.x, fr.y+fr.height-1, '*', nil, tcell.StyleDefault)
+	g.Draw(fr.x+fr.width-1, fr.y, '*', nil, tcell.StyleDefault)
+	g.Draw(fr.x+fr.width-1, fr.y+fr.height-1, '*', nil, tcell.StyleDefault)
+	fr.Control.Draw(g)
+	g.GlassRange(fr.x, fr.y, fr.width, fr.height)
 }
 
 func (fr *Frame) MinimumSize(width int, height int) (Width int, Height int) {

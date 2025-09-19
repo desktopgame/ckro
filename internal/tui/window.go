@@ -1,12 +1,21 @@
 package tui
 
-import "github.com/gdamore/tcell/v2"
+import (
+	"github.com/gdamore/tcell/v2"
+)
 
 type Window struct {
+	g            Graphics
 	stack        Stack
 	focusManager FocusManager
 	width        int
 	height       int
+}
+
+func (w *Window) Init(s tcell.Screen, width int, height int) {
+	w.g = Graphics{}
+	w.g.Init(s)
+	w.g.Resize(width, height)
 }
 
 func (w *Window) Push(layer Layer) {
@@ -47,12 +56,13 @@ func (w *Window) GetLayerCount() int {
 	return len(w.stack.Layers)
 }
 
-func (w *Window) Frame(s tcell.Screen, width int, height int) {
+func (w *Window) Blit(width int, height int) {
 	mw, mh := w.stack.MinimumSize(width, height)
 
 	if mw <= width && mh <= height {
+		w.g.Clear()
 		w.stack.Update()
-		w.stack.Draw(s)
+		w.stack.Draw(&w.g)
 	}
 }
 
@@ -65,6 +75,7 @@ func (w *Window) FocusNext() {
 }
 
 func (w *Window) Resize(width int, height int) {
+	w.g.Resize(width, height)
 	if width > 0 && height > 0 {
 		w.stack.Layout(width, height)
 	}

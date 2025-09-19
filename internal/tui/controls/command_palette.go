@@ -72,8 +72,8 @@ func (cp *CommandPalette) Update() {
 	cp.paletteBox.Update()
 }
 
-func (cp *CommandPalette) Draw(screen tcell.Screen) {
-	cp.paletteBox.Draw(screen)
+func (cp *CommandPalette) Draw(g *base.Graphics) {
+	cp.paletteBox.Draw(g)
 }
 
 func (cp *CommandPalette) Handle(ev base.Event) {
