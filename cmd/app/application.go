@@ -126,7 +126,7 @@ func (app *Application) Init() {
 		app.modified = true
 	})
 	app.modeLine.Init()
-	app.miniBuffer.Init()
+	app.miniBuffer.Init(func(s string) {})
 
 	tree := tui.Tile{}
 	tree.Init()
