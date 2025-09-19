@@ -11,6 +11,10 @@ import (
 
 func FileOpenCommand(app *Application) func(cp *controls.CommandPalette, stackable base.Stackable) {
 	return func(cp *controls.CommandPalette, stackable tui.Stackable) {
+		if app.modified {
+			stackable.Pop(1)
+			return
+		}
 		// 現在のディレクトリを取得
 		currentDir, err := os.Getwd()
 		if err != nil {
@@ -32,6 +36,8 @@ func FileOpenCommand(app *Application) func(cp *controls.CommandPalette, stackab
 				doc := app.textArea.TextBox.GetDocument()
 				doc.Init()
 				doc.InsertString(string(content))
+				app.filePath = selectedFile
+				app.modified = false
 				app.textArea.TextBox.CursorReset()
 
 				// ファイルチューザーを閉じる

@@ -13,6 +13,8 @@ import (
 type Application struct {
 	screen         tcell.Screen
 	textArea       *tui.Tile
+	filePath       string
+	modified       bool
 	commandPalette tui.Control
 	window         tui.Window
 	width          int
@@ -44,7 +46,11 @@ func (app *Application) Init() {
 	textArea.FlexibleWidth = true
 	textArea.FlexibleHeight = true
 	textArea.TextBox.ShowCursor = true
-	textArea.TextPresenter = &presenter.EditTextPresenter{}
+	textArea.TextPresenter = &presenter.EditTextPresenter{
+		OnModified: func() {
+			app.modified = true
+		},
+	}
 	// 行番号エリア
 	lineNumbers := tui.Tile{}
 	lineNumbers.Init()
@@ -147,6 +153,8 @@ func (app *Application) Init() {
 
 	w, h := s.Size()
 	app.screen = s
+	app.filePath = ""
+	app.modified = false
 	app.textArea = &textArea
 	app.window.Init(s, w, h)
 	app.window.Push(tui.Layer{
