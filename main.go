@@ -201,7 +201,7 @@ func main() {
 	// ファイルチューザーを作成
 	fileChooser := controls.NewFileChooser(
 		currentDir,
-		func(selectedFile string) {
+		func(stackable tui.Stackable, selectedFile string) {
 			// ファイルが選択された時の処理
 			content, err := os.ReadFile(selectedFile)
 			if err != nil {
@@ -216,11 +216,11 @@ func main() {
 			textArea.TextBox.CursorReset()
 
 			// ファイルチューザーを閉じる
-			window.Pop()
+			stackable.Pop()
 		},
-		func() {
+		func(stackable tui.Stackable) {
 			// キャンセル時の処理
-			window.Pop()
+			stackable.Pop()
 		},
 	)
 	fileChooserUI := tui.WithCenter(tui.WithFrame(fileChooser), 80, 20)
