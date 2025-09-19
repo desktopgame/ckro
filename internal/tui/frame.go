@@ -21,11 +21,11 @@ func (fr *Frame) Update() {
 }
 
 func (fr *Frame) Draw(g *Graphics) {
-	for i := 0; i < fr.width; i++ {
+	for i := 1; i < fr.width-1; i++ {
 		g.Draw(fr.x+i, fr.y, '-', nil, tcell.StyleDefault)
 		g.Draw(fr.x+i, fr.y+fr.height-1, '-', nil, tcell.StyleDefault)
 	}
-	for i := 0; i < fr.height; i++ {
+	for i := 1; i < fr.height-1; i++ {
 		g.Draw(fr.x, fr.y+i, '|', nil, tcell.StyleDefault)
 		g.Draw(fr.x+fr.width-1, fr.y+i, '|', nil, tcell.StyleDefault)
 	}
