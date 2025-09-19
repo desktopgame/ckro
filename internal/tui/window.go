@@ -6,6 +6,7 @@ import (
 
 type Window struct {
 	g               Graphics
+	screen          tcell.Screen
 	stack           Stack
 	focusManager    FocusManager
 	width           int
@@ -15,6 +16,7 @@ type Window struct {
 
 func (w *Window) Init(s tcell.Screen, width int, height int) {
 	w.g = Graphics{}
+	w.screen = s
 	w.g.Init(s)
 	w.g.Resize(width, height)
 }
@@ -55,7 +57,13 @@ func (w *Window) EndBackground() {
 	w.backgroundTasks--
 }
 
-func (w *Window) Repaint() {}
+func (w *Window) Repaint() {
+	w.screen.PostEvent(tcell.NewEventInterrupt(RepaintMessage{}))
+}
+
+func (w *Window) DoInBackground() bool {
+	return w.backgroundTasks > 0
+}
 
 func (w *Window) Top() Control {
 	if w.stack.Top >= 0 {

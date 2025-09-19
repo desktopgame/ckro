@@ -105,6 +105,7 @@ func ChatMessage(app *Application) func(runtime base.Runtime, cp *controls.Comma
 			func(runtime base.Runtime, prompt string) {
 				// OKが選択された場合
 				if prompt != "" {
+					runtime.BeginBackground()
 					go func() {
 						message, err := app.chatManager.Post(context.TODO(), prompt)
 						if err == nil {
@@ -128,8 +129,12 @@ func ChatMessage(app *Application) func(runtime base.Runtime, cp *controls.Comma
 									runtime.Pop(0)
 								},
 							})
+							runtime.EndBackground()
+							runtime.Repaint()
 						} else {
 							runtime.Pop(0) // ダイアログを閉じる
+							runtime.EndBackground()
+							runtime.Repaint()
 						}
 					}()
 				} else {

@@ -288,6 +288,16 @@ func (app *Application) Run() {
 
 		ev := app.screen.PollEvent()
 
+		if intr, ok := ev.(*tcell.EventInterrupt); ok {
+			if _, ok := intr.Data().(tui.RepaintMessage); ok {
+				continue
+			}
+		}
+
+		if app.window.DoInBackground() {
+			continue
+		}
+
 		switch e := ev.(type) {
 		case *tcell.EventResize:
 			app.screen.Sync()
