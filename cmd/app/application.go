@@ -135,30 +135,6 @@ func (app *Application) Init() {
 	vbox.Controls = append(vbox.Controls, &modelineSeparator)
 	vbox.Controls = append(vbox.Controls, &minibuffer)
 
-	ctrlLine := tui.Box{}
-	ctrlLine.Init(tui.Horizontal)
-
-	ctrl1 := tui.Tile{}
-	ctrl1.Init()
-	ctrl1.MinimumWidth = 10
-	ctrl1.MinimumHeight = 10
-	ctrl1.TextPresenter = &presenter.LabelTextPresenter{
-		Text:        "Label",
-		AlignCenter: true,
-	}
-
-	ctrl2 := tui.Tile{}
-	ctrl2.Init()
-	ctrl2.FlexibleWidth = true
-	ctrl2.MinimumHeight = 10
-	ctrl2.TextPresenter = &presenter.EditTextPresenter{}
-
-	frame := tui.Frame{}
-	frame.Control = &ctrl2
-
-	ctrlLine.Controls = append(ctrlLine.Controls, &ctrl1)
-	ctrlLine.Controls = append(ctrlLine.Controls, &frame)
-
 	// QuickCommandPaletteのテスト
 	commands := []controls.Command{
 		&controls.DelegateCommand{
