@@ -21,6 +21,7 @@ type Application struct {
 	chatManager    llm.ChatManager
 	card           tui.Card
 	textEdior      TextEditor
+	modeLine       ModeLine
 	filePath       string
 	modified       bool
 	commandPalette tui.Control
@@ -123,6 +124,7 @@ func (app *Application) Init() {
 	app.textEdior.Init(func() {
 		app.modified = true
 	})
+	app.modeLine.Init()
 
 	tree := tui.Tile{}
 	tree.Init()
@@ -172,11 +174,6 @@ func (app *Application) Init() {
 	textAreaSeparator.FlexibleWidth = true
 	textAreaSeparator.TextPresenter = &presenter.HorizontalSeparatorTextPresenter{}
 
-	modeline := tui.Tile{}
-	modeline.Init()
-	modeline.FlexibleWidth = true
-	modeline.MinimumHeight = 1
-
 	modelineSeparator := tui.Tile{}
 	modelineSeparator.Init()
 	modelineSeparator.MinimumHeight = 1
@@ -203,7 +200,7 @@ func (app *Application) Init() {
 
 	vbox.Controls = append(vbox.Controls, &hbox)
 	vbox.Controls = append(vbox.Controls, &textAreaSeparator)
-	vbox.Controls = append(vbox.Controls, &modeline)
+	vbox.Controls = append(vbox.Controls, &app.modeLine)
 	vbox.Controls = append(vbox.Controls, &modelineSeparator)
 	vbox.Controls = append(vbox.Controls, &minibuffer)
 
