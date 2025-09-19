@@ -11,6 +11,9 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
+// TextBox is editable text widget.
+// TextBox has region of rect, rendering text within that range.
+// long line is always wrap at right end of region.
 type TextBox struct {
 	Document   *model.Document
 	X          int
@@ -22,6 +25,7 @@ type TextBox struct {
 	scrollY    int
 }
 
+// Init is initialize TextBox.
 func (tb *TextBox) Init() {
 	tb.Document = &model.Document{}
 	tb.Document.Init()
@@ -33,6 +37,8 @@ func (tb *TextBox) Init() {
 	tb.scrollY = 0
 }
 
+// CursorPosition returns position of cursor.
+// TODO: refactor
 func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	buf := tb.Document.GetBuffer()
 	cursorRow := tb.Document.GetCursorRow()
@@ -76,7 +82,7 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	return screenX, screenY, currentRune, combining
 }
 
-// calculateCursorPosition calculates the exact screen position considering line wrapping
+// calculateCursorPosition is calculates the exact screen position considering line wrapping
 func (tb *TextBox) calculateCursorPosition(line string, cursorCol int) (screenX int, additionalRows int) {
 	if tb.Width <= 0 {
 		return 0, 0
@@ -146,7 +152,7 @@ func (tb *TextBox) calculateCursorPosition(line string, cursorCol int) (screenX 
 	return currentX, currentRow
 }
 
-// calculateClusterWidth calculates the display width of a cluster considering tabs
+// calculateClusterWidth is calculates the display width of a cluster considering tabs
 func (tb *TextBox) calculateClusterWidth(cluster string, currentX int) int {
 	if cluster == "\t" {
 		return text.TabWidth - (currentX % text.TabWidth)
@@ -154,7 +160,7 @@ func (tb *TextBox) calculateClusterWidth(cluster string, currentX int) int {
 	return runewidth.StringWidth(cluster)
 }
 
-// calculateWrappedLines calculates how many screen lines a text line takes
+// calculateWrappedLines is calculates how many screen lines a text line takes
 func (tb *TextBox) calculateWrappedLines(line string) int {
 	if tb.Width <= 0 {
 		return 1
@@ -182,6 +188,7 @@ func (tb *TextBox) calculateWrappedLines(line string) int {
 	return currentRow
 }
 
+// CursorUpdate is scroll to until cursor visible
 func (tb *TextBox) CursorUpdate() {
 	_, cursor, _, _ := tb.CursorPosition()
 	// cursor := tb.Document.GetCursorRow()
@@ -214,12 +221,14 @@ func (tb *TextBox) CursorUpdate() {
 	}
 }
 
+// CursorReset is reset cursor position and scroll.
 func (tb *TextBox) CursorReset() {
 	tb.Document.MoveReset()
 	tb.scrollX = 0
 	tb.scrollY = 0
 }
 
+// TextFrame is print a frame of TextBox region.
 func (tb *TextBox) TextFrame() {
 	tb.Document.Init()
 
@@ -251,6 +260,7 @@ func (tb *TextBox) TextFrame() {
 	tb.Document.MoveReset()
 }
 
+// TextVertical is print vertical line.
 func (tb *TextBox) TextVertical() {
 	tb.Document.Init()
 
@@ -263,6 +273,7 @@ func (tb *TextBox) TextVertical() {
 	tb.Document.MoveReset()
 }
 
+// TextHorizontal is print horizontal line.
 func (tb *TextBox) TextHorizontal() {
 	tb.Document.Init()
 
@@ -275,10 +286,12 @@ func (tb *TextBox) TextHorizontal() {
 
 }
 
+// TextClear is do reset to content.
 func (tb *TextBox) TextClear() {
 	tb.Document.Init()
 }
 
+// Draw is render content.
 func (tb *TextBox) Draw(g *Graphics) {
 	if tb.Width == 0 || tb.Height == 0 {
 		return
@@ -355,6 +368,7 @@ func (tb *TextBox) Draw(g *Graphics) {
 
 }
 
+// BreakIter returns segment array by line, in consideration a wrap.
 func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 	buf := tb.Document.GetBuffer()
 	sb := strings.Builder{}
@@ -454,6 +468,7 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 	}
 }
 
+// WrappedLineCount returns count of lines, in consideration a wrap.
 func (tb *TextBox) WrappedLineCount() int {
 	lc := 0
 	buf := tb.Document.GetBuffer()
@@ -466,22 +481,27 @@ func (tb *TextBox) WrappedLineCount() int {
 	return lc
 }
 
+// GetDocument returns Document.
 func (tb *TextBox) GetDocument() *model.Document {
 	return tb.Document
 }
 
+// GetWidth returns width of TextBox region.
 func (tb *TextBox) GetWidth() int {
 	return tb.Width
 }
 
+// GetHeight returns height of TextBox region.
 func (tb *TextBox) GetHeight() int {
 	return tb.Height
 }
 
+// GetScrollX returns scroll amount by horizontal.
 func (tb *TextBox) GetScrollX() int {
 	return tb.scrollX
 }
 
+// GetScrollY returns scroll amount by vertical.
 func (tb *TextBox) GetScrollY() int {
 	return tb.scrollY
 }
