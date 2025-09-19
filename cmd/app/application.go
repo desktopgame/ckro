@@ -21,6 +21,7 @@ type Application struct {
 	chatManager    llm.ChatManager
 	card           tui.Card
 	textArea       *tui.Tile
+	chatSidebar    *ChatSidebar
 	filePath       string
 	modified       bool
 	commandPalette tui.Control
@@ -231,25 +232,17 @@ func (app *Application) Init() {
 
 	app.card.Controls = append(app.card.Controls, &tui.Blank{})
 
-	sideBox := tui.Box{}
-	sideBox.Init(tui.Vertical)
+	// ChatSidebarを作成
+	app.chatSidebar = NewChatSidebar(func(message string) {
+		// メッセージ送信時の処理
+		// TODO: LLMとの会話処理を実装
+		log.Printf("Chat message: %s", message)
 
-	sideText := tui.Tile{}
-	sideText.Init()
-	sideText.MinimumWidth = 30
-	sideText.FlexibleHeight = true
-	sideText.TextPresenter = &presenter.EditTextPresenter{}
+		// とりあえずエコーバックとして返答を追加
+		app.chatSidebar.AddMessage("assistant", "Echo: "+message)
+	})
 
-	sideInput := tui.Tile{}
-	sideInput.Init()
-	sideInput.MinimumWidth = 30
-	sideInput.MinimumHeight = 3
-	sideInput.TextPresenter = &presenter.EditTextPresenter{}
-
-	sideBox.Controls = append(sideBox.Controls, tui.WithFrame(&sideText))
-	sideBox.Controls = append(sideBox.Controls, tui.WithFrame(&sideInput))
-
-	app.card.Controls = append(app.card.Controls, &sideBox)
+	app.card.Controls = append(app.card.Controls, app.chatSidebar)
 
 	editorWithSide.Controls = append(editorWithSide.Controls, &editorBox)
 	editorWithSide.Controls = append(editorWithSide.Controls, &app.card)
@@ -291,7 +284,7 @@ func (app *Application) Init() {
 			Func:  DebugCardPrev(app),
 		},
 		&controls.DelegateCommand{
-			Label: "Card: Card next",
+			Label: "Debug: Card next",
 			Func:  DebugCardNext(app),
 		},
 	}
