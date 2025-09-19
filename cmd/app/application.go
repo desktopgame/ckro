@@ -21,7 +21,6 @@ type Application struct {
 	chatManager    llm.ChatManager
 	card           tui.Card
 	textArea       *tui.Tile
-	chatSidebar    *ChatSidebar
 	filePath       string
 	modified       bool
 	commandPalette tui.Control
@@ -231,18 +230,6 @@ func (app *Application) Init() {
 	editorWithSide.Init(tui.Horizontal)
 
 	app.card.Controls = append(app.card.Controls, &tui.Blank{})
-
-	// ChatSidebarを作成
-	app.chatSidebar = NewChatSidebar(func(message string) {
-		// メッセージ送信時の処理
-		// TODO: LLMとの会話処理を実装
-		log.Printf("Chat message: %s", message)
-
-		// とりあえずエコーバックとして返答を追加
-		app.chatSidebar.AddMessage("assistant", "Echo: "+message)
-	})
-
-	app.card.Controls = append(app.card.Controls, app.chatSidebar)
 
 	editorWithSide.Controls = append(editorWithSide.Controls, &editorBox)
 	editorWithSide.Controls = append(editorWithSide.Controls, &app.card)
