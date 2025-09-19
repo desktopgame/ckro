@@ -89,22 +89,32 @@ func (id *InputDialog) Init(title, prompt string) {
 }
 
 func (id *InputDialog) updateButtonStyles() {
-	// 選択されたボタンをハイライト表示
-	if id.selectedButton == 0 {
-		// OKボタンを選択状態に
-		if labelPresenter, ok := id.okButton.TextPresenter.(*presenter.LabelTextPresenter); ok {
-			labelPresenter.Text = "> OK <"
-		}
-		if labelPresenter, ok := id.cancelButton.TextPresenter.(*presenter.LabelTextPresenter); ok {
-			labelPresenter.Text = "[ Cancel ]"
+	// ボタンフォーカス時のみ選択されたボタンをハイライト表示
+	if !id.inputField.TextBox.ShowCursor {
+		if id.selectedButton == 0 {
+			// OKボタンを選択状態に
+			if labelPresenter, ok := id.okButton.TextPresenter.(*presenter.LabelTextPresenter); ok {
+				labelPresenter.Text = "> OK <"
+			}
+			if labelPresenter, ok := id.cancelButton.TextPresenter.(*presenter.LabelTextPresenter); ok {
+				labelPresenter.Text = "[ Cancel ]"
+			}
+		} else {
+			// Cancelボタンを選択状態に
+			if labelPresenter, ok := id.okButton.TextPresenter.(*presenter.LabelTextPresenter); ok {
+				labelPresenter.Text = "[ OK ]"
+			}
+			if labelPresenter, ok := id.cancelButton.TextPresenter.(*presenter.LabelTextPresenter); ok {
+				labelPresenter.Text = "> Cancel <"
+			}
 		}
 	} else {
-		// Cancelボタンを選択状態に
+		// 入力フィールドフォーカス時は通常表示
 		if labelPresenter, ok := id.okButton.TextPresenter.(*presenter.LabelTextPresenter); ok {
 			labelPresenter.Text = "[ OK ]"
 		}
 		if labelPresenter, ok := id.cancelButton.TextPresenter.(*presenter.LabelTextPresenter); ok {
-			labelPresenter.Text = "> Cancel <"
+			labelPresenter.Text = "[ Cancel ]"
 		}
 	}
 }
@@ -210,34 +220,46 @@ func (id *InputDialog) SubFocusFirst() {
 
 func (id *InputDialog) SubFocusPrev() bool {
 	if id.inputField.TextBox.ShowCursor {
+		// 入力フィールドからCancelボタンへ
 		id.inputField.TextBox.ShowCursor = false
 		id.selectedButton = 1 // Cancelボタン
 		id.updateButtonStyles()
+		return true
 	} else {
-		if id.selectedButton == 0 {
-			id.inputField.TextBox.ShowCursor = true
-		} else {
+		if id.selectedButton == 1 {
+			// CancelボタンからOKボタンへ
 			id.selectedButton = 0
 			id.updateButtonStyles()
+			return true
+		} else {
+			// OKボタンから入力フィールドへ
+			id.inputField.TextBox.ShowCursor = true
+			id.updateButtonStyles()
+			return true
 		}
 	}
-	return false
 }
 
 func (id *InputDialog) SubFocusNext() bool {
 	if id.inputField.TextBox.ShowCursor {
+		// 入力フィールドからOKボタンへ
 		id.inputField.TextBox.ShowCursor = false
 		id.selectedButton = 0 // OKボタン
 		id.updateButtonStyles()
+		return true
 	} else {
-		if id.selectedButton == 1 {
-			id.inputField.TextBox.ShowCursor = true
-		} else {
+		if id.selectedButton == 0 {
+			// OKボタンからCancelボタンへ
 			id.selectedButton = 1
 			id.updateButtonStyles()
+			return true
+		} else {
+			// Cancelボタンから入力フィールドへ
+			id.inputField.TextBox.ShowCursor = true
+			id.updateButtonStyles()
+			return true
 		}
 	}
-	return false
 }
 
 func (id *InputDialog) SubFocusLast() {
