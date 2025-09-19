@@ -16,7 +16,7 @@ func (st *Stack) Traverse(fm *FocusManager) {
 }
 
 func (st *Stack) Update() {
-	if st.Top > 1 && st.Layers[st.Top].ClearBackground {
+	if st.Top > 0 && st.Layers[st.Top].ClearBackground {
 		st.Layers[st.Top].Control.Update()
 	} else {
 		for i := 0; i <= st.Top; i++ {
@@ -26,7 +26,7 @@ func (st *Stack) Update() {
 }
 
 func (st *Stack) Draw(s tcell.Screen) {
-	if st.Top > 1 && st.Layers[st.Top].ClearBackground {
+	if st.Top > 0 && st.Layers[st.Top].ClearBackground {
 		st.Layers[st.Top].Control.Draw(s)
 	} else {
 		for i := 0; i <= st.Top; i++ {
