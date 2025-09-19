@@ -22,6 +22,14 @@ type Application struct {
 	height         int
 }
 
+func (app *Application) newFile() {
+	app.filePath = ""
+	app.modified = false
+	doc := app.textArea.TextBox.GetDocument()
+	doc.Init()
+	app.textArea.TextBox.CursorReset()
+}
+
 func (app *Application) openFile(filePath string) error {
 	// ファイルを読み込んでテキストエリアに表示
 	content, err := os.ReadFile(filePath)
