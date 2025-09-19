@@ -19,6 +19,7 @@ import (
 type Application struct {
 	screen         tcell.Screen
 	chatManager    llm.ChatManager
+	card           tui.Card
 	textArea       *tui.Tile
 	filePath       string
 	modified       bool
@@ -94,6 +95,10 @@ func (app *Application) saveFileAs(filePath string) error {
 		app.modified = false
 	}
 	return err
+}
+
+func (app *Application) doLayout() {
+	app.window.Resize(app.width, app.height)
 }
 
 func (app *Application) Init() {
@@ -221,9 +226,25 @@ func (app *Application) Init() {
 	minibuffer.MinimumHeight = 1
 	minibuffer.TextPresenter = &presenter.EditTextPresenter{}
 
+	editorWithSide := tui.Box{}
+	editorWithSide.Init(tui.Horizontal)
+
+	app.card.Controls = append(app.card.Controls, &tui.Blank{})
+
+	side := tui.Tile{}
+	side.Init()
+	side.MinimumWidth = 30
+	side.FlexibleHeight = true
+	side.TextPresenter = &presenter.FrameTextPresenter{}
+
+	app.card.Controls = append(app.card.Controls, &side)
+
+	editorWithSide.Controls = append(editorWithSide.Controls, &editorBox)
+	editorWithSide.Controls = append(editorWithSide.Controls, &app.card)
+
 	hbox.Controls = append(hbox.Controls, &tree)
 	hbox.Controls = append(hbox.Controls, &treeSeparator)
-	hbox.Controls = append(hbox.Controls, &editorBox)
+	hbox.Controls = append(hbox.Controls, &editorWithSide)
 
 	vbox.Controls = append(vbox.Controls, &hbox)
 	vbox.Controls = append(vbox.Controls, &textAreaSeparator)
@@ -252,6 +273,14 @@ func (app *Application) Init() {
 		&controls.DelegateCommand{
 			Label: "Chat: Message",
 			Func:  ChatMessage(app),
+		},
+		&controls.DelegateCommand{
+			Label: "Debug: Card prev",
+			Func:  DebugCardPrev(app),
+		},
+		&controls.DelegateCommand{
+			Label: "Card: Card next",
+			Func:  DebugCardNext(app),
 		},
 	}
 	commandPalette := controls.NewCommandPalette(commands)

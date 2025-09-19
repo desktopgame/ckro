@@ -159,6 +159,22 @@ func ChatMessage(app *Application) func(runtime base.Runtime, cp *controls.Comma
 	}
 }
 
+func DebugCardPrev(app *Application) func(runtime base.Runtime, cp *controls.CommandPalette) {
+	return func(runtime base.Runtime, cp *controls.CommandPalette) {
+		app.card.Prev()
+		runtime.Pop(-1)
+		app.doLayout()
+	}
+}
+
+func DebugCardNext(app *Application) func(runtime base.Runtime, cp *controls.CommandPalette) {
+	return func(runtime base.Runtime, cp *controls.CommandPalette) {
+		app.card.Next()
+		runtime.Pop(-1)
+		app.doLayout()
+	}
+}
+
 func showSaveAsDialog(app *Application, runtime base.Runtime) {
 	// デフォルトのファイル名を設定
 	defaultFileName := "untitled.txt"
