@@ -1,8 +1,9 @@
 package base
 
 type Layer struct {
-	Control Control
-	OnPop   func(stackable Stackable)
+	Control         Control
+	ClearBackground bool
+	OnPop           func()
 }
 
 type Stackable interface {

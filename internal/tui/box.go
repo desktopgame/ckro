@@ -134,7 +134,11 @@ func (b *Box) Layout(width int, height int) {
 
 			if ctrl.IsFlexibleWidth() {
 				fw := (width - staticWidth) / flexibleControls
-				ctrl.Layout(fw, height)
+				_, h := ctrl.MinimumSize(width, height)
+				if ctrl.IsFlexibleHeight() {
+					h = height
+				}
+				ctrl.Layout(fw, h)
 
 				offsetX += fw
 			} else {
@@ -166,7 +170,11 @@ func (b *Box) Layout(width int, height int) {
 
 			if ctrl.IsFlexibleHeight() {
 				fh := (height - staticHeight) / flexibleControls
-				ctrl.Layout(width, fh)
+				w, _ := ctrl.MinimumSize(width, height)
+				if ctrl.IsFlexibleWidth() {
+					w = width
+				}
+				ctrl.Layout(w, fh)
 
 				offsetY += fh
 			} else {

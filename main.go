@@ -156,7 +156,35 @@ func main() {
 	commands := []controls.Command{
 		&controls.DelegateCommand{
 			Label: "File: Open",
-			Func:  func(cp *controls.CommandPalette, stackable tui.Stackable) {},
+			Func: func(cp *controls.CommandPalette, stackable tui.Stackable) {
+				hbox := tui.Box{}
+				hbox.Init(tui.Horizontal)
+
+				edit1 := tui.Tile{}
+				edit1.Init()
+				edit1.MinimumWidth = 20
+				edit1.MinimumHeight = 20
+				edit1.TextPresenter = &presenter.EditTextPresenter{}
+
+				edit2 := tui.Tile{}
+				edit2.Init()
+				edit2.FlexibleWidth = true
+				edit2.MinimumHeight = 20
+				edit2.TextPresenter = &presenter.EditTextPresenter{}
+
+				hbox.Controls = append(hbox.Controls, tui.WithFrame(&edit1))
+				hbox.Controls = append(hbox.Controls, tui.WithFrame(&edit2))
+
+				//center := tui.WithCenter(&hbox, 60, 30)
+
+				stackable.Push(tui.Layer{
+					Control:         &hbox,
+					ClearBackground: true,
+					OnPop: func() {
+						stackable.Pop()
+					},
+				})
+			},
 		},
 	}
 	commandPalette := controls.NewCommandPalette(commands)

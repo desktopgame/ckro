@@ -25,7 +25,7 @@ func (w *Window) Pop() {
 	if len(w.stack.Layers) > 0 {
 		callable := w.stack.Layers[len(w.stack.Layers)-1].OnPop
 		if callable != nil {
-			callable(w)
+			callable()
 		}
 
 		w.stack.Layers = w.stack.Layers[:len(w.stack.Layers)-1]
