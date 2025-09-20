@@ -8,15 +8,20 @@ import (
 
 type ChatEvent struct {
 	EventBase[*openai.ChatCompletion]
-	client    *openai.Client
-	inputList []openai.ChatCompletionMessageParamUnion
-	model     string
+	client     *openai.Client
+	inputList  []openai.ChatCompletionMessageParamUnion
+	model      string
+	toolParams []openai.ChatCompletionToolUnionParam
 }
 
 func (c *ChatEvent) Consume(ctx context.Context) {
 	chatCompletion, err := c.client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: c.inputList,
 		Model:    c.model,
+		Tools:    c.toolParams,
+		ToolChoice: openai.ChatCompletionToolChoiceOptionUnionParam{
+			OfAuto: openai.String("auto"),
+		},
 	})
 	if err == nil {
 		c.result = chatCompletion

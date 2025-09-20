@@ -19,20 +19,53 @@ type ChatManager struct {
 	backgroundToken chan int
 	backgroundDone  bool
 
-	tools2client map[string]*McpClient
-	tools        []string
-	allowTools   []string
+	mcpClients  map[string]*McpClient
+	tool2client map[string]*McpClient
+	tools       []string
+	toolParams  []openai.ChatCompletionToolUnionParam
+	allowTools  []string
 }
 
-func (cm *ChatManager) Init(client *openai.Client, model string, systemPrompt string) {
+func (cm *ChatManager) Init(client *openai.Client, model string, systemPrompt string, mcpClients map[string]*McpClient) {
 	cm.client = client
 	cm.model = model
 	cm.systemPrompt = systemPrompt
+	cm.mcpClients = mcpClients
 	cm.backgroundToken = make(chan int)
 	cm.backgroundDone = false
 }
 
 func (cm *ChatManager) background(ctx context.Context) error {
+	// register tools
+	for _, mcpClient := range cm.mcpClients {
+		for tool := range mcpClient.session.Tools(ctx, &mcp.ListToolsParams{}) {
+			cm.tools = append(cm.tools, tool.Name)
+			cm.tool2client[tool.Name] = mcpClient
+
+			bytes, err := tool.InputSchema.MarshalJSON()
+
+			if err == nil {
+				var data map[string]interface{}
+				err = json.Unmarshal(bytes, &data)
+
+				if err == nil {
+					t := openai.ChatCompletionFunctionToolParam{
+						Function: openai.FunctionDefinitionParam{
+							Name:        tool.Name,
+							Description: openai.String(tool.Description),
+							Parameters:  data,
+						},
+					}
+					tUnion := openai.ChatCompletionToolUnionParam{
+						OfFunction: &t,
+					}
+					cm.toolParams = append(cm.toolParams, tUnion)
+				}
+			}
+		}
+	}
+
+	// initialize conversation
 	cm.inputList = nil
 	cm.inputList = append(cm.inputList, openai.SystemMessage(cm.systemPrompt))
 
@@ -50,6 +83,9 @@ func (cm *ChatManager) background(ctx context.Context) error {
 
 func (cm *ChatManager) Setup() {
 	cm.backgroundDone = false
+	cm.tools = nil
+	cm.tool2client = map[string]*McpClient{}
+
 	go cm.background(context.TODO())
 }
 
@@ -66,9 +102,10 @@ func (cm *ChatManager) toolUse(ctx context.Context, response *mcp.CallToolResult
 	}
 	cm.inputList = append(cm.inputList, openai.ToolMessage(sb.String(), toolCall.ID))
 	return ChatEvent{
-		client:    cm.client,
-		inputList: cm.inputList,
-		model:     cm.model,
+		client:     cm.client,
+		inputList:  cm.inputList,
+		model:      cm.model,
+		toolParams: cm.toolParams,
 		EventBase: EventBase[*openai.ChatCompletion]{
 			ch: input,
 		},
@@ -85,7 +122,7 @@ func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion
 			var args interface{}
 			err := json.Unmarshal([]byte(fn.Arguments), &args)
 			if err == nil {
-				if client, ok := cm.tools2client[fn.Name]; ok {
+				if client, ok := cm.tool2client[fn.Name]; ok {
 					confirmEvent := ConfirmEvent{
 						EventBase: EventBase[struct{}]{
 							ch: input,
@@ -121,9 +158,10 @@ func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion
 							cm.inputList = append(cm.inputList, openai.UserMessage(message))
 
 							chatEvent := ChatEvent{
-								client:    cm.client,
-								inputList: cm.inputList,
-								model:     cm.model,
+								client:     cm.client,
+								inputList:  cm.inputList,
+								model:      cm.model,
+								toolParams: cm.toolParams,
 								EventBase: EventBase[*openai.ChatCompletion]{
 									ch: input,
 								},
@@ -141,9 +179,10 @@ func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion
 					cm.inputList = append(cm.inputList, openai.SystemMessage(message))
 
 					chatEvent := ChatEvent{
-						client:    cm.client,
-						inputList: cm.inputList,
-						model:     cm.model,
+						client:     cm.client,
+						inputList:  cm.inputList,
+						model:      cm.model,
+						toolParams: cm.toolParams,
 						EventBase: EventBase[*openai.ChatCompletion]{
 							ch: input,
 						},
@@ -178,9 +217,10 @@ func (cm *ChatManager) Post(ctx context.Context, message string, output chan Eve
 	defer close(input)
 
 	chatEvent := ChatEvent{
-		client:    cm.client,
-		inputList: cm.inputList,
-		model:     cm.model,
+		client:     cm.client,
+		inputList:  cm.inputList,
+		model:      cm.model,
+		toolParams: cm.toolParams,
 		EventBase: EventBase[*openai.ChatCompletion]{
 			ch: input,
 		},
