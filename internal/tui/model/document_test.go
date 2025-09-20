@@ -115,9 +115,9 @@ Line 5: Finally, end with a closing statement or marker like END_OF_TEXT.
 `
 
 	doc.MoveReset()
-	//if doc.FindNext(firstLine) {
-	doc.Replace(len(firstLine), content)
-	//}
+	if doc.FindNext(firstLine) {
+		doc.Replace(len(firstLine), content)
+	}
 
 	lines := strings.Split(content, "\n")
 	for i := 0; i < len(lines); i++ {
