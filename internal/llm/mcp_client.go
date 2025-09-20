@@ -2,6 +2,7 @@ package llm
 
 import (
 	"context"
+	"log"
 	"os/exec"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -23,8 +24,10 @@ func (m *McpClient) Connect(ctx context.Context, name string, args ...string) er
 
 		if err == nil {
 			m.session = session
+			session.InitializeResult()
 			return nil
 		}
+		log.Fatal(err)
 		return err
 	}
 	return nil

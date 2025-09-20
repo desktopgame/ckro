@@ -3,7 +3,6 @@ package llm
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -38,28 +37,33 @@ func (cm *ChatManager) Init(client *openai.Client, model string, systemPrompt st
 func (cm *ChatManager) background(ctx context.Context) error {
 	// register tools
 	for _, mcpClient := range cm.mcpClients {
-		for tool := range mcpClient.session.Tools(ctx, &mcp.ListToolsParams{}) {
-			cm.tools = append(cm.tools, tool.Name)
-			cm.tool2client[tool.Name] = mcpClient
+		if mcpClient.session == nil {
+			continue
+		}
+		tools, err := mcpClient.session.ListTools(ctx, &mcp.ListToolsParams{})
+		if err == nil {
+			for _, tool := range tools.Tools {
+				cm.tools = append(cm.tools, tool.Name)
+				cm.tool2client[tool.Name] = mcpClient
 
-			bytes, err := tool.InputSchema.MarshalJSON()
-
-			if err == nil {
-				var data map[string]interface{}
-				err = json.Unmarshal(bytes, &data)
+				bytes, err := tool.InputSchema.MarshalJSON()
 
 				if err == nil {
-					t := openai.ChatCompletionFunctionToolParam{
-						Function: openai.FunctionDefinitionParam{
-							Name:        tool.Name,
-							Description: openai.String(tool.Description),
-							Parameters:  data,
-						},
+					var data map[string]interface{}
+					err = json.Unmarshal(bytes, &data)
+					if err == nil {
+						t := openai.ChatCompletionFunctionToolParam{
+							Function: openai.FunctionDefinitionParam{
+								Name:        tool.Name,
+								Description: openai.String(tool.Description),
+								Parameters:  data,
+							},
+						}
+						tUnion := openai.ChatCompletionToolUnionParam{
+							OfFunction: &t,
+						}
+						cm.toolParams = append(cm.toolParams, tUnion)
 					}
-					tUnion := openai.ChatCompletionToolUnionParam{
-						OfFunction: &t,
-					}
-					cm.toolParams = append(cm.toolParams, tUnion)
 				}
 			}
 		}
@@ -206,7 +210,7 @@ func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion
 	}
 }
 
-func (cm *ChatManager) Post(ctx context.Context, message string, output chan Event) (string, error) {
+func (cm *ChatManager) Post(ctx context.Context, message string, output chan Event) {
 	if !cm.backgroundDone {
 		<-cm.backgroundToken
 		cm.backgroundDone = true
@@ -229,8 +233,7 @@ func (cm *ChatManager) Post(ctx context.Context, message string, output chan Eve
 
 	status := <-input
 	if status == Cancel {
-		return "", errors.New("chat is cancelled")
+		return
 	}
 	cm.turn(ctx, chatEvent.result, input, output)
-	return "", nil
 }

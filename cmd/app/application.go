@@ -142,19 +142,32 @@ func (app *Application) Init() {
 		doc.InsertLine()
 		doc.InsertString(marker)
 		doc.InsertLine()
-		log.Printf("User: %s\n", s)
 
 		app.miniBuffer.ReadOnly()
 		go func() {
 			ctx := context.Background()
-			response, err := app.chatManager.Post(ctx, s)
-			log.Printf("Assistant: %s\n", response)
-			if err == nil {
-				app.textEdior.TextArea.TextBox.CursorReset()
-				if doc.FindNext(marker) {
-					doc.Replace(len(marker), response)
+			pipe := make(chan llm.Event)
+			app.chatManager.Post(ctx, s, pipe)
+
+			for {
+				ev := <-pipe
+
+				if conf, ok := ev.(*llm.ConfirmEvent); ok {
+					conf.Approve = true
+				}
+
+				ev.Consume(ctx)
+
+				if msg, ok := ev.(*llm.MessageEvent); ok {
+					response := msg.GetResult().Choices[0].Message.Content
+					app.textEdior.TextArea.TextBox.CursorReset()
+					if doc.FindNext(marker) {
+						doc.Replace(len(marker), response)
+					}
+					break
 				}
 			}
+
 			app.miniBuffer.Editable()
 			app.window.Repaint()
 		}()
@@ -287,11 +300,18 @@ func (app *Application) Init() {
 	app.width = w
 	app.height = h
 
+	mcpClient := llm.McpClient{}
+	mcpClient.Init()
+	mcpClient.Connect(context.Background(), "uvx", "mcp-server-time")
+
+	mcpClients := map[string]*llm.McpClient{}
+	mcpClients["time"] = &mcpClient
+
 	client := openai.NewClient(
 		option.WithAPIKey("lmstudio"),
 		option.WithBaseURL("http://localhost:1234/v1"),
 	)
-	app.chatManager.Init(&client, "openai/gpt-oss-20b", "あなたは親切なアシスタントです。")
+	app.chatManager.Init(&client, "openai/gpt-oss-20b", "あなたは親切なアシスタントです。", mcpClients)
 	app.chatManager.Setup()
 
 	app.vaultManager.Init()
