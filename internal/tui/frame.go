@@ -4,6 +4,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+// Frame is decorate to sub control by ascii frame.
 type Frame struct {
 	Control Control
 	x       int
@@ -12,14 +13,17 @@ type Frame struct {
 	height  int
 }
 
+// Traverse is delegate to sub control.
 func (fr *Frame) Traverse(fm *FocusManager) {
 	fr.Control.Traverse(fm)
 }
 
+// Update is delegate to sub control.
 func (fr *Frame) Update() {
 	fr.Control.Update()
 }
 
+// Draw is draw sub control with ascii frame.
 func (fr *Frame) Draw(g *Graphics) {
 	for i := 1; i < fr.width-1; i++ {
 		g.Draw(fr.x+i, fr.y, '-', nil, tcell.StyleDefault)
@@ -42,11 +46,13 @@ func (fr *Frame) MinimumSize(width int, height int) (Width int, Height int) {
 	return mw + 2, mh + 2
 }
 
+// Move is move the base point of Frame.
 func (fr *Frame) Move(x int, y int) {
 	fr.x = x
 	fr.y = y
 }
 
+// Layout is offset the sub control by ascii frame.
 func (fr *Frame) Layout(width int, height int) {
 	offsetX := fr.x + 1
 	offsetY := fr.y + 1
@@ -57,10 +63,12 @@ func (fr *Frame) Layout(width int, height int) {
 	fr.height = height
 }
 
+// IsFlexibleWidth is delegate to sub control.
 func (fr *Frame) IsFlexibleWidth() bool {
 	return fr.Control.IsFlexibleWidth()
 }
 
+// IsFlexibleHeight is delegate to sub control.
 func (fr *Frame) IsFlexibleHeight() bool {
 	return fr.Control.IsFlexibleHeight()
 }
