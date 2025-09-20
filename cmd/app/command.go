@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/desktopgame/ckro/internal/tui/base"
@@ -98,6 +99,62 @@ func FileSaveAsCommand(app *Application) func(runtime base.Runtime, cp *controls
 func FileOpenFolderCommand(app *Application) func(runtime base.Runtime, cp *controls.CommandPalette) {
 	return func(runtime base.Runtime, cp *controls.CommandPalette) {
 		openFolderChooser(app, runtime)
+	}
+}
+
+func VaultInitCommand(app *Application) func(runtime base.Runtime, cp *controls.CommandPalette) {
+	return func(runtime base.Runtime, cp *controls.CommandPalette) {
+		wd, err := os.Getwd()
+		if err == nil {
+			vault := filepath.Join(wd, ".vault")
+			os.WriteFile(vault, []byte{}, 0644)
+
+			messageDialog := controls.NewMessageDialog(
+				"Info",
+				".vault is created at current directory",
+				func(r base.Runtime) {
+					r.Pop(-1)
+				},
+			)
+
+			messageDialogUI := tui.WithCenter(tui.WithFrame(messageDialog), 80, 12)
+
+			runtime.Push(tui.Layer{
+				Control: messageDialogUI,
+				OnPop: func(returnCode int) {
+					runtime.Pop(-1)
+				},
+			})
+		}
+	}
+}
+
+func VaultOpenCommand(app *Application) func(runtime base.Runtime, cp *controls.CommandPalette) {
+	return func(runtime base.Runtime, cp *controls.CommandPalette) {
+		root := app.vaultManager.GetRoot()
+		if root != "" {
+			os.Chdir(root)
+			app.vaultManager.Index()
+			app.treePresenter.Reset(root)
+			runtime.Pop(-1)
+			return
+		}
+		messageDialog := controls.NewMessageDialog(
+			"Error",
+			"Vault is not found",
+			func(r base.Runtime) {
+				r.Pop(-1)
+			},
+		)
+
+		messageDialogUI := tui.WithCenter(tui.WithFrame(messageDialog), 80, 12)
+
+		runtime.Push(tui.Layer{
+			Control: messageDialogUI,
+			OnPop: func(returnCode int) {
+				runtime.Pop(-1)
+			},
+		})
 	}
 }
 

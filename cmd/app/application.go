@@ -257,6 +257,14 @@ func (app *Application) Init() {
 			Func:  FileOpenFolderCommand(app),
 		},
 		&controls.DelegateCommand{
+			Label: "Vault: Init",
+			Func:  VaultInitCommand(app),
+		},
+		&controls.DelegateCommand{
+			Label: "Vault: Open",
+			Func:  VaultOpenCommand(app),
+		},
+		&controls.DelegateCommand{
 			Label: "Chat: Message",
 			Func:  ChatMessage(app),
 		},
