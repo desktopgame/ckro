@@ -198,11 +198,16 @@ func (doc *Document) FindNext(searchStr string) bool {
 
 // Replace deletes the specified number of characters from the current cursor position
 // and inserts the replacement string at that position.
+// After replacement, the cursor is moved to the end of the inserted text.
 // Returns true if the operation was successful, false otherwise.
 func (doc *Document) Replace(deleteCount int, replaceStr string) bool {
 	if deleteCount < 0 {
 		return false
 	}
+
+	// Save the starting position for cursor positioning after insertion
+	startRow := doc.cursorRow
+	startCol := doc.cursorColumn
 
 	// If deleteCount is 0, just insert the string
 	if deleteCount == 0 {
@@ -242,7 +247,12 @@ func (doc *Document) Replace(deleteCount int, replaceStr string) bool {
 		}
 	}
 
+	// Reset cursor to the start position before insertion
+	doc.cursorRow = startRow
+	doc.cursorColumn = startCol
+
 	// Insert replacement string at the current position
+	// InsertString will automatically move the cursor to the end of inserted text
 	doc.InsertString(replaceStr)
 
 	return true

@@ -131,17 +131,20 @@ func (app *Application) Init() {
 	app.modeLine.Init()
 	app.miniBuffer.Init(func(s string) {
 		doc := app.textEdior.TextArea.TextBox.GetDocument()
+		marker := fmt.Sprintf("<chat_response_is_here:%d>", app.chatResponseId)
 		doc.InsertLine()
-		doc.InsertString(fmt.Sprintf("<chat_response_is_here:%d>", app.chatResponseId))
+		doc.InsertString(marker)
 		doc.InsertLine()
 
 		app.miniBuffer.ReadOnly()
-		// chatResponseId := app.chatManager
 		go func() {
 			ctx := context.Background()
 			response, err := app.chatManager.Post(ctx, s)
 			if err == nil {
-				doc.InsertString(response)
+				app.textEdior.TextArea.TextBox.CursorReset()
+				if doc.FindNext(marker) {
+					doc.Replace(len(marker), response)
+				}
 			}
 			app.miniBuffer.Editable()
 			app.window.Repaint()
