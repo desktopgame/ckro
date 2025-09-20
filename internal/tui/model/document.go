@@ -1,6 +1,10 @@
 package model
 
-import "github.com/desktopgame/ckro/internal/text"
+import (
+	"strings"
+
+	"github.com/desktopgame/ckro/internal/text"
+)
 
 // Document is wrapper of Buffer.
 // track a current cursor position.
@@ -72,6 +76,124 @@ func (doc *Document) RemoveChar() {
 			doc.cursorColumn--
 		}
 	}
+}
+
+// FindPrev is searches for the specified string backward from the current cursor position
+// and moves the cursor to the beginning of the found string.
+// Returns true if found, false otherwise.
+func (doc *Document) FindPrev(searchStr string) bool {
+	if searchStr == "" {
+		return false
+	}
+
+	// Start searching from current position
+	startRow := doc.cursorRow
+	startCol := doc.cursorColumn
+
+	// Search in current line from beginning to current position
+	if startRow < doc.buffer.GetLineCount() && startCol > 0 {
+		currentLine := doc.buffer.GetLineAt(startRow).GetContent()
+		searchText := currentLine[:startCol]
+		if index := strings.LastIndex(searchText, searchStr); index != -1 {
+			doc.cursorColumn = index
+			return true
+		}
+	}
+
+	// Search in previous lines (from bottom to top)
+	for row := startRow - 1; row >= 0; row-- {
+		line := doc.buffer.GetLineAt(row).GetContent()
+		if index := strings.LastIndex(line, searchStr); index != -1 {
+			doc.cursorRow = row
+			doc.cursorColumn = index
+			return true
+		}
+	}
+
+	// Wrap around: search from end to current position
+	for row := doc.buffer.GetLineCount() - 1; row >= startRow; row-- {
+		line := doc.buffer.GetLineAt(row).GetContent()
+		var searchText string
+		if row == startRow {
+			if startCol < len(line) {
+				searchText = line[startCol:]
+			}
+		} else {
+			searchText = line
+		}
+
+		if len(searchText) > 0 {
+			if index := strings.LastIndex(searchText, searchStr); index != -1 {
+				if row == startRow {
+					doc.cursorColumn = startCol + index
+				} else {
+					doc.cursorRow = row
+					doc.cursorColumn = index
+				}
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// FindNext is searches for the specified string forward from the current cursor position
+// and moves the cursor to the beginning of the found string.
+// Returns true if found, false otherwise.
+func (doc *Document) FindNext(searchStr string) bool {
+	if searchStr == "" {
+		return false
+	}
+
+	// Start searching from current position
+	startRow := doc.cursorRow
+	startCol := doc.cursorColumn
+
+	// Search in current line from current position
+	if startRow < doc.buffer.GetLineCount() {
+		currentLine := doc.buffer.GetLineAt(startRow).GetContent()
+		// Search from current column + 1 to avoid finding the same occurrence
+		searchStart := startCol + 1
+		if searchStart < len(currentLine) {
+			if index := strings.Index(currentLine[searchStart:], searchStr); index != -1 {
+				doc.cursorColumn = searchStart + index
+				return true
+			}
+		}
+	}
+
+	// Search in subsequent lines
+	for row := startRow + 1; row < doc.buffer.GetLineCount(); row++ {
+		line := doc.buffer.GetLineAt(row).GetContent()
+		if index := strings.Index(line, searchStr); index != -1 {
+			doc.cursorRow = row
+			doc.cursorColumn = index
+			return true
+		}
+	}
+
+	// Wrap around: search from beginning to current position
+	for row := 0; row <= startRow; row++ {
+		line := doc.buffer.GetLineAt(row).GetContent()
+		var searchEnd int
+		if row == startRow {
+			searchEnd = startCol
+		} else {
+			searchEnd = len(line)
+		}
+
+		if searchEnd > 0 {
+			searchText := line[:searchEnd]
+			if index := strings.Index(searchText, searchStr); index != -1 {
+				doc.cursorRow = row
+				doc.cursorColumn = index
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 // MoveLeft is move cursor to left.
