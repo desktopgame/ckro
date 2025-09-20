@@ -24,7 +24,7 @@ type TreeTextPresenter struct {
 	rootNode      *TreeNode
 	flatNodes     []*TreeNode
 	selectedIndex int
-	OnFileOpen    func(filePath string) // コールバック関数
+	OnFileOpen    func(filePath string)
 }
 
 func (t *TreeTextPresenter) Present(view View) {
@@ -48,11 +48,11 @@ func (t *TreeTextPresenter) Handle(view View, ev tcell.Event) {
 				t.selectedIndex++
 			}
 		case tcell.KeyEnter:
-			// ファイルを開く、またはディレクトリを展開
+			// open file or expand tree
 			if t.selectedIndex < len(t.flatNodes) {
 				node := t.flatNodes[t.selectedIndex]
 				if node.IsDir {
-					// ディレクトリの場合は展開/折りたたみ
+					// expand or collapse
 					if node.IsExpanded {
 						node.IsExpanded = false
 						node.Children = nil
@@ -61,14 +61,13 @@ func (t *TreeTextPresenter) Handle(view View, ev tcell.Event) {
 						t.loadChildren(node)
 					}
 				} else {
-					// ファイルの場合はコールバックを呼び出し
 					if t.OnFileOpen != nil {
 						t.OnFileOpen(node.Path)
 					}
 				}
 			}
 		case tcell.KeyRight:
-			// ディレクトリ展開のみ
+			// expand
 			if t.selectedIndex < len(t.flatNodes) {
 				node := t.flatNodes[t.selectedIndex]
 				if node.IsDir && !node.IsExpanded {
@@ -77,7 +76,7 @@ func (t *TreeTextPresenter) Handle(view View, ev tcell.Event) {
 				}
 			}
 		case tcell.KeyLeft:
-			// 折りたたみ
+			// collapse
 			if t.selectedIndex < len(t.flatNodes) {
 				node := t.flatNodes[t.selectedIndex]
 				if node.IsDir && node.IsExpanded {
@@ -129,7 +128,6 @@ func (t *TreeTextPresenter) loadChildren(node *TreeNode) {
 		return
 	}
 
-	// ディレクトリを先に、ファイルを後にソート
 	sort.Slice(entries, func(i, j int) bool {
 		if entries[i].IsDir() != entries[j].IsDir() {
 			return entries[i].IsDir()
@@ -139,7 +137,7 @@ func (t *TreeTextPresenter) loadChildren(node *TreeNode) {
 
 	node.Children = make([]*TreeNode, 0, len(entries))
 	for _, entry := range entries {
-		// 隠しファイルをスキップ
+		// skip the hidden files.
 		if strings.HasPrefix(entry.Name(), ".") {
 			continue
 		}
@@ -177,10 +175,9 @@ func (t *TreeTextPresenter) renderTree(view View) {
 	doc := view.GetDocument()
 
 	for i, node := range t.flatNodes {
-		// インデント
 		indent := strings.Repeat("  ", node.Level)
 
-		// 展開/折りたたみアイコン
+		// icon for expand or collapse
 		var icon string
 		if node.IsDir {
 			if node.IsExpanded {
@@ -192,7 +189,7 @@ func (t *TreeTextPresenter) renderTree(view View) {
 			icon = "  "
 		}
 
-		// 選択インジケーター
+		// cursor
 		var prefix string
 		if i == t.selectedIndex {
 			prefix = "> "
@@ -200,7 +197,7 @@ func (t *TreeTextPresenter) renderTree(view View) {
 			prefix = "  "
 		}
 
-		// ファイル/ディレクトリアイコン
+		// icon for file or directory
 		var typeIcon string
 		if node.IsDir {
 			typeIcon = "📁 "
@@ -216,24 +213,19 @@ func (t *TreeTextPresenter) renderTree(view View) {
 		}
 	}
 
-	// 選択されたアイテムにカーソルを移動してTextBoxのスクロール機能を活用
 	t.moveToSelectedItem(view)
 }
 
-// moveToSelectedItem moves the document cursor to the selected item
+// moveToSelectedItem is moves the document cursor to the selected item
 func (t *TreeTextPresenter) moveToSelectedItem(view View) {
 	doc := view.GetDocument()
-	// カーソルを選択されたアイテムの行に移動
 	if t.selectedIndex >= 0 && t.selectedIndex < len(t.flatNodes) {
-		// ドキュメントの先頭に移動
 		doc.MoveReset()
 
-		// 選択されたアイテムの行まで移動
 		for i := 0; i < t.selectedIndex; i++ {
 			doc.MoveDown()
 		}
 
-		// 行の先頭に移動
 		for doc.GetCursorColumn() > 0 {
 			doc.MoveLeft()
 		}
