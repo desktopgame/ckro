@@ -20,19 +20,24 @@ import (
 
 type Application struct {
 	screen         tcell.Screen
-	chatManager    llm.ChatManager
 	card           tui.Card
 	textEdior      TextEditor
 	treePresenter  *presenter.TreeTextPresenter
 	modeLine       ModeLine
 	miniBuffer     MiniBuffer
-	filePath       string
-	modified       bool
 	commandPalette tui.Control
-	window         tui.Window
-	width          int
-	height         int
+
+	window tui.Window
+	width  int
+	height int
+
+	filePath string
+	modified bool
+
+	chatManager    llm.ChatManager
 	chatResponseId int
+
+	vaultManager VaultManager
 }
 
 func (app *Application) newFile() {
@@ -280,6 +285,8 @@ func (app *Application) Init() {
 	)
 	app.chatManager.Init(&client, "openai/gpt-oss-20b", "あなたは親切なアシスタントです。")
 	app.chatManager.Setup()
+
+	app.vaultManager.Init()
 }
 
 func (app *Application) Run() {
