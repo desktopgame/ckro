@@ -239,6 +239,11 @@ func (t *TreeTextPresenter) GetSelectedPath() string {
 	return ""
 }
 
+func (t *TreeTextPresenter) Reset(rootDirectory string) {
+	t.rootNode = nil
+	t.RootDirectory = rootDirectory
+}
+
 // Reload reloads the children of all expanded nodes in the tree
 func (t *TreeTextPresenter) Reload() {
 	if t.rootNode != nil {
