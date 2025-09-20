@@ -23,6 +23,7 @@ type Application struct {
 	chatManager    llm.ChatManager
 	card           tui.Card
 	textEdior      TextEditor
+	treePresenter  *presenter.TreeTextPresenter
 	modeLine       ModeLine
 	miniBuffer     MiniBuffer
 	filePath       string
@@ -98,6 +99,7 @@ func (app *Application) saveFileAs(filePath string) error {
 	if err == nil {
 		app.filePath = filePath
 		app.modified = false
+		app.treePresenter.Reload()
 	}
 	return err
 }
@@ -158,7 +160,7 @@ func (app *Application) Init() {
 	tree.Init()
 	tree.MinimumWidth = 50
 	tree.FlexibleHeight = true
-	tree.TextPresenter = &presenter.TreeTextPresenter{
+	app.treePresenter = &presenter.TreeTextPresenter{
 		RootDirectory: ".",
 		OnFileOpen: func(filePath string) {
 			if app.modified {
@@ -189,6 +191,7 @@ func (app *Application) Init() {
 			app.openFile(filePath)
 		},
 	}
+	tree.TextPresenter = app.treePresenter
 
 	treeSeparator := tui.Tile{}
 	treeSeparator.Init()

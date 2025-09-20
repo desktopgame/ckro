@@ -238,3 +238,77 @@ func (t *TreeTextPresenter) GetSelectedPath() string {
 	}
 	return ""
 }
+
+// Reload reloads the children of all expanded nodes in the tree
+func (t *TreeTextPresenter) Reload() {
+	if t.rootNode != nil {
+		t.reloadNode(t.rootNode)
+	}
+}
+
+// ReloadSelected reloads the children of the currently selected node if it's a directory
+func (t *TreeTextPresenter) ReloadSelected() {
+	if t.selectedIndex < len(t.flatNodes) {
+		node := t.flatNodes[t.selectedIndex]
+		if node.IsDir {
+			t.reloadNode(node)
+		}
+	}
+}
+
+// ReloadPath reloads the children of the node at the specified path if it exists and is expanded
+func (t *TreeTextPresenter) ReloadPath(path string) {
+	if t.rootNode != nil {
+		node := t.findNodeByPath(t.rootNode, path)
+		if node != nil && node.IsDir {
+			t.reloadNode(node)
+		}
+	}
+}
+
+// reloadNode reloads the children of a specific node if it's expanded
+func (t *TreeTextPresenter) reloadNode(node *TreeNode) {
+	if !node.IsDir || !node.IsExpanded {
+		return
+	}
+
+	// Store the expanded state of current children
+	expandedPaths := make(map[string]bool)
+	if node.Children != nil {
+		for _, child := range node.Children {
+			if child.IsExpanded {
+				expandedPaths[child.Path] = true
+			}
+		}
+	}
+
+	// Reload children from filesystem
+	t.loadChildren(node)
+
+	// Restore expanded state and recursively reload expanded children
+	if node.Children != nil {
+		for _, child := range node.Children {
+			if expandedPaths[child.Path] {
+				child.IsExpanded = true
+				t.reloadNode(child) // Recursively reload expanded children
+			}
+		}
+	}
+}
+
+// findNodeByPath finds a node by its path in the tree
+func (t *TreeTextPresenter) findNodeByPath(node *TreeNode, path string) *TreeNode {
+	if node.Path == path {
+		return node
+	}
+
+	if node.Children != nil {
+		for _, child := range node.Children {
+			if found := t.findNodeByPath(child, path); found != nil {
+				return found
+			}
+		}
+	}
+
+	return nil
+}
