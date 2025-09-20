@@ -35,3 +35,23 @@ func TestBuffer(t *testing.T) {
 	lc := buf.GetLineCount()
 	assert.Equal(t, lc, 2)
 }
+
+func TestInsert(t *testing.T) {
+	buf := model.Buffer{}
+	buf.Init()
+	buf.InsertString(0, 0, "123456789")
+	at, err := buf.InsertString(0, 5, "Hello\nHello")
+	assert.Nil(t, err)
+	assert.Equal(t, at.Row, 1)
+	assert.Equal(t, at.Column, 5)
+}
+
+func TestInsertEmptyLine(t *testing.T) {
+	buf := model.Buffer{}
+	buf.Init()
+	buf.InsertString(0, 0, "123456789")
+	at, err := buf.InsertString(0, 5, "Hello\n\n")
+	assert.Nil(t, err)
+	assert.Equal(t, at.Row, 2)
+	assert.Equal(t, at.Column, 0)
+}
