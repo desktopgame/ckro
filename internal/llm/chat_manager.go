@@ -25,7 +25,7 @@ func (cm *ChatManager) Init(client *openai.Client, model string, systemPrompt st
 
 func (cm *ChatManager) background(ctx context.Context) error {
 	cm.inputList = nil
-	cm.inputList = append(cm.inputList, openai.UserMessage(cm.systemPrompt))
+	cm.inputList = append(cm.inputList, openai.SystemMessage(cm.systemPrompt))
 
 	chatCompletion, err := cm.client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: cm.inputList,
