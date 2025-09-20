@@ -135,11 +135,13 @@ func (app *Application) Init() {
 		doc.InsertLine()
 		doc.InsertString(marker)
 		doc.InsertLine()
+		log.Printf("User: %s\n", s)
 
 		app.miniBuffer.ReadOnly()
 		go func() {
 			ctx := context.Background()
 			response, err := app.chatManager.Post(ctx, s)
+			log.Printf("Assistant: %s\n", response)
 			if err == nil {
 				app.textEdior.TextArea.TextBox.CursorReset()
 				if doc.FindNext(marker) {
