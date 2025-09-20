@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"os"
 	"path/filepath"
@@ -153,70 +152,6 @@ func VaultOpenCommand(app *Application) func(runtime base.Runtime, cp *controls.
 			Control: messageDialogUI,
 			OnPop: func(returnCode int) {
 				runtime.Pop(-1)
-			},
-		})
-	}
-}
-
-func ChatMessage(app *Application) func(runtime base.Runtime, cp *controls.CommandPalette) {
-	return func(runtime base.Runtime, cp *controls.CommandPalette) {
-
-		inputDialog := controls.NewInputDialog(
-			"Chat",
-			"Enter prompt:",
-			"",
-			func(runtime base.Runtime, prompt string) {
-				// OKが選択された場合
-				if prompt != "" {
-					runtime.BeginBackground()
-					go func() {
-						message, err := app.chatManager.Post(context.TODO(), prompt)
-						if err == nil {
-							// 確認ダイアログを表示
-							confirmDialog := controls.NewConfirmationDialog(
-								"Response",
-								message,
-								func(runtime base.Runtime) {
-									runtime.Pop(-1) // ダイアログを閉じる
-								},
-								func(runtime base.Runtime) {
-									// Noが選択された場合 - 保存せずにファイルを開く
-									runtime.Pop(-1) // ダイアログを閉じる
-								},
-							)
-							confirmDialogUI := tui.WithCenter(tui.WithFrame(confirmDialog), 60, 15)
-
-							runtime.Push(tui.Layer{
-								Control: confirmDialogUI,
-								OnPop: func(returnCode int) {
-									runtime.Pop(0)
-								},
-							})
-							runtime.EndBackground()
-							runtime.Repaint()
-						} else {
-							runtime.Pop(0) // ダイアログを閉じる
-							runtime.EndBackground()
-							runtime.Repaint()
-						}
-					}()
-				} else {
-					runtime.Pop(0) // ダイアログを閉じる
-				}
-			},
-			func(runtime base.Runtime) {
-				// キャンセルが選択された場合
-				runtime.Pop(1) // ダイアログを閉じる
-			},
-		)
-		inputDialogUI := tui.WithCenter(tui.WithFrame(inputDialog), 70, 12)
-
-		runtime.Push(tui.Layer{
-			Control: inputDialogUI,
-			OnPop: func(returnCode int) {
-				if returnCode == 0 {
-					runtime.Pop(-1) // コマンドパレットも閉じる
-				}
 			},
 		})
 	}

@@ -265,10 +265,6 @@ func (app *Application) Init() {
 			Func:  VaultOpenCommand(app),
 		},
 		&controls.DelegateCommand{
-			Label: "Chat: Message",
-			Func:  ChatMessage(app),
-		},
-		&controls.DelegateCommand{
 			Label: "Debug: Card prev",
 			Func:  DebugCardPrev(app),
 		},
