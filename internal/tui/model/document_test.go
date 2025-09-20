@@ -124,3 +124,13 @@ Line 5: Finally, end with a closing statement or marker like END_OF_TEXT.
 		assert.Equal(t, lines[i], doc.GetBuffer().GetLineAt(i).GetContent(), "%d", i)
 	}
 }
+
+func TestEmptyLine(t *testing.T) {
+	doc := model.Document{}
+	doc.Init()
+
+	doc.InsertString("\n\n\n")
+
+	assert.Equal(t, doc.GetCursorRow(), 3)
+	assert.Equal(t, doc.GetCursorColumn(), 0)
+}
