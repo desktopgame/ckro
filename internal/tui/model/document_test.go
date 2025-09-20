@@ -1,6 +1,7 @@
 package model_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/desktopgame/ckro/internal/tui/model"
@@ -42,7 +43,8 @@ func TestTooManyLines(t *testing.T) {
 	doc := model.Document{}
 	doc.Init()
 
-	doc.InsertString("こんにちは！今日はどんなご用件でしょうか？😊")
+	firstLine := "こんにちは！今日はどんなご用件でしょうか？😊"
+	doc.InsertString(firstLine)
 	doc.InsertLine()
 
 	content := `以下は、デバッグやテストに使えるサンプルとして、複数行にわたるテキストです。  
@@ -67,4 +69,15 @@ Line 5: Finally, end with a closing statement or marker like END_OF_TEXT.
 `
 
 	doc.InsertString(content)
+
+	lines := strings.Split(firstLine+"\n"+content, "\n")
+	buf := doc.GetBuffer()
+	assert.Equal(t, lines[0], firstLine)
+	assert.Equal(t, lines[0], buf.GetLineAt(0).GetContent())
+	assert.Equal(t, lines[1], "以下は、デバッグやテストに使えるサンプルとして、複数行にわたるテキストです。  ")
+	assert.Equal(t, lines[1], buf.GetLineAt(1).GetContent())
+
+	for i := 0; i < buf.GetLineCount(); i++ {
+		assert.Equal(t, lines[i], buf.GetLineAt(i).GetContent(), "%d", i)
+	}
 }

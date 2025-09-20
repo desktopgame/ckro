@@ -65,7 +65,11 @@ func (buf *Buffer) InsertLine(row int, column int) *Line {
 		if len(buf.lines) == 1 {
 			buf.lines = append(buf.lines, newLine)
 		} else {
-			buf.lines = slices.Insert(buf.lines, row, newLine)
+			if row == len(buf.lines)-1 {
+				buf.lines = append(buf.lines, newLine)
+			} else {
+				buf.lines = slices.Insert(buf.lines, row, newLine)
+			}
 		}
 		return newLine
 	} else if column == len(buf.lines[row].GetContent()) {
