@@ -4,6 +4,7 @@ import (
 	"github.com/desktopgame/ckro/internal/tui/presenter"
 )
 
+// GridCell is information of cell of grid.
 type GridCell struct {
 	Control      Control
 	StaticWidth  int
@@ -12,6 +13,7 @@ type GridCell struct {
 	Height       int
 }
 
+// Grid is layout sub controls into by lattice.
 type Grid struct {
 	rowCount    int
 	columnCount int
@@ -22,6 +24,7 @@ type Grid struct {
 	height      int
 }
 
+// Init is initialize Grid.
 func (g *Grid) Init(rowCount int, columnCount int) {
 	g.rowCount = rowCount
 	g.columnCount = columnCount
@@ -42,6 +45,7 @@ func (g *Grid) Init(rowCount int, columnCount int) {
 	}
 }
 
+// SetTile is set the Tile at specified cell.
 func (g *Grid) SetTile(row int, column int, staticWidth int, staticHeight int, presenter TextPresenter) *GridCell {
 	if row < 0 || row >= g.rowCount || column < 0 || column >= g.columnCount {
 		return nil
@@ -64,6 +68,7 @@ func (g *Grid) SetTile(row int, column int, staticWidth int, staticHeight int, p
 	return c
 }
 
+// SetControl is set the Control at specified cell.
 func (g *Grid) SetControl(row int, column int, ctrl Control) *GridCell {
 	if row < 0 || row >= g.rowCount || column < 0 || column >= g.columnCount {
 		return nil
@@ -74,6 +79,8 @@ func (g *Grid) SetControl(row int, column int, ctrl Control) *GridCell {
 	return c
 }
 
+// StaticSize returns static size.
+// the static size is total size of not flexible controls.
 func (g *Grid) StaticSize() (Width int, Height int) {
 	sw := 0
 	for i := 0; i < g.columnCount; i++ {
@@ -90,6 +97,7 @@ func (g *Grid) StaticSize() (Width int, Height int) {
 	return sw, sh
 }
 
+// MaxStaticWidth returns maximum static width of specified column.
 func (g *Grid) MaxStaticWidth(column int) int {
 	w := 0
 	for i := 0; i < g.rowCount; i++ {
@@ -102,6 +110,7 @@ func (g *Grid) MaxStaticWidth(column int) int {
 	return w
 }
 
+// MaxStaticHeight returns maximum static height of specified column.
 func (g *Grid) MaxStaticHeight(row int) int {
 	h := 0
 	for i := 0; i < g.columnCount; i++ {
@@ -114,6 +123,7 @@ func (g *Grid) MaxStaticHeight(row int) int {
 	return h
 }
 
+// StaticRows returns count of rows have to static height.
 func (g *Grid) StaticRows(column int) int {
 	c := 0
 	for i := 0; i < g.rowCount; i++ {
@@ -124,6 +134,7 @@ func (g *Grid) StaticRows(column int) int {
 	return c
 }
 
+// StaticColumns returns count of columns have to static width.
 func (g *Grid) StaticColumns(row int) int {
 	c := 0
 	for i := 0; i < g.columnCount; i++ {
@@ -134,6 +145,7 @@ func (g *Grid) StaticColumns(row int) int {
 	return c
 }
 
+// HeightTable returns height table by rows.
 func (g *Grid) HeightTable(h int) []int {
 	yBorders := g.rowCount + 1
 
@@ -173,6 +185,7 @@ func (g *Grid) HeightTable(h int) []int {
 	return heightTable
 }
 
+// Traverse is register sub controls into FocusManager by the array order.
 func (g *Grid) Traverse(fm *FocusManager) {
 	for _, row := range g.table {
 		for _, c := range row {
@@ -181,6 +194,7 @@ func (g *Grid) Traverse(fm *FocusManager) {
 	}
 }
 
+// Update is delegate to sub controls.
 func (g *Grid) Update() {
 	for _, row := range g.table {
 		for _, c := range row {
@@ -189,6 +203,7 @@ func (g *Grid) Update() {
 	}
 }
 
+// Draw is delegate to sub controls.
 func (g *Grid) Draw(gg *Graphics) {
 	for _, row := range g.table {
 		for _, c := range row {
@@ -197,6 +212,7 @@ func (g *Grid) Draw(gg *Graphics) {
 	}
 }
 
+// MinimumSize returns size with border.
 func (g *Grid) MinimumSize(width int, height int) (Width int, Height int) {
 	xBorders := g.columnCount + 1
 	yBorders := g.rowCount + 1
@@ -204,11 +220,13 @@ func (g *Grid) MinimumSize(width int, height int) (Width int, Height int) {
 	return max(width, sw+xBorders), max(height, sh+yBorders)
 }
 
+// Move is move the base point of Grid.
 func (g *Grid) Move(x int, y int) {
 	g.x = x
 	g.y = y
 }
 
+// Layout is layout sub controls into by lattice.
 func (g *Grid) Layout(w int, h int) {
 	xBorders := g.columnCount + 1
 	yBorders := g.rowCount + 1
@@ -304,10 +322,12 @@ func (g *Grid) Layout(w int, h int) {
 	g.height = h
 }
 
+// IsFlexibleWidth returns true.
 func (g *Grid) IsFlexibleWidth() bool {
 	return true
 }
 
+// IsFlexibleHeight returns false.
 func (g *Grid) IsFlexibleHeight() bool {
 	return true
 }
