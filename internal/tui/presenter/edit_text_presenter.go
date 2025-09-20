@@ -24,14 +24,23 @@ func (edit *EditTextPresenter) Handle(view View, ev tcell.Event) {
 	switch e := ev.(type) {
 	case *tcell.EventKey:
 		switch e.Key() {
-		case tcell.KeyUp:
+		case tcell.KeyUp, tcell.KeyCtrlP:
 			doc.MoveUp()
-		case tcell.KeyDown:
+		case tcell.KeyDown, tcell.KeyCtrlN:
 			doc.MoveDown()
-		case tcell.KeyLeft:
+		case tcell.KeyLeft, tcell.KeyCtrlB:
 			doc.MoveLeft()
-		case tcell.KeyRight:
+		case tcell.KeyRight, tcell.KeyCtrlF:
 			doc.MoveRight()
+		case tcell.KeyCtrlA:
+			for doc.GetCursorColumn() > 0 {
+				doc.MoveLeft()
+			}
+		case tcell.KeyCtrlE:
+			line := doc.GetBuffer().GetLineAt(doc.GetCursorRow()).GetContent()
+			for doc.GetCursorColumn() < text.GraphemeLength(line) {
+				doc.MoveRight()
+			}
 		case tcell.KeyBackspace, tcell.KeyBackspace2:
 			doc.RemoveChar()
 		case tcell.KeyEnter:
