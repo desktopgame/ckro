@@ -8,6 +8,7 @@ import (
 type EditTextPresenter struct {
 	inputBuffer []rune
 	OnModified  func()
+	ReadOnly    bool
 }
 
 func (edit *EditTextPresenter) modify() {
@@ -50,12 +51,14 @@ func (edit *EditTextPresenter) Handle(view View, ev tcell.Event) {
 			doc.InsertString("\t")
 			edit.modify()
 		case tcell.KeyRune:
-			edit.inputBuffer = append(edit.inputBuffer, e.Rune())
-			inputString := string(edit.inputBuffer)
-			if text.GraphemeLength(inputString) == 1 {
-				doc.InsertString(inputString)
-				edit.inputBuffer = []rune{}
-				edit.modify()
+			if !edit.ReadOnly {
+				edit.inputBuffer = append(edit.inputBuffer, e.Rune())
+				inputString := string(edit.inputBuffer)
+				if text.GraphemeLength(inputString) == 1 {
+					doc.InsertString(inputString)
+					edit.inputBuffer = []rune{}
+					edit.modify()
+				}
 			}
 		}
 	}
