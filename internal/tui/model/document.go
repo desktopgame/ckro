@@ -153,7 +153,7 @@ func (doc *Document) FindNext(searchStr string) bool {
 	// Search in current line from current position
 	if startRow < doc.buffer.GetLineCount() {
 		currentLine := doc.buffer.GetLineAt(startRow).GetContent()
-		// Search from current column + 1 to avoid finding the same occurrence
+		// Search from current column + 0 to avoid finding the same occurrence
 		searchStart := startCol + 0
 		if searchStart < len(currentLine) {
 			if index := strings.Index(currentLine[searchStart:], searchStr); index != -1 {
