@@ -99,7 +99,7 @@ func (buf *Buffer) InsertString(row int, column int, s string) (Position, error)
 			Column: column,
 		}
 
-		if len(insertLines) == 0 {
+		if len(insertLines) == 1 {
 			line.InsertString(column, s)
 			position.Column += len(s)
 		} else {
