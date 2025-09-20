@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -29,6 +31,7 @@ type Application struct {
 	window         tui.Window
 	width          int
 	height         int
+	chatResponseId int
 }
 
 func (app *Application) newFile() {
@@ -126,7 +129,25 @@ func (app *Application) Init() {
 		app.modified = true
 	})
 	app.modeLine.Init()
-	app.miniBuffer.Init(func(s string) {})
+	app.miniBuffer.Init(func(s string) {
+		doc := app.textEdior.TextArea.TextBox.GetDocument()
+		doc.InsertLine()
+		doc.InsertString(fmt.Sprintf("<chat_response_is_here:%d>", app.chatResponseId))
+		doc.InsertLine()
+
+		app.miniBuffer.ReadOnly()
+		// chatResponseId := app.chatManager
+		go func() {
+			ctx := context.Background()
+			response, err := app.chatManager.Post(ctx, s)
+			if err == nil {
+				doc.InsertString(response)
+			}
+			app.miniBuffer.Editable()
+			app.window.Repaint()
+		}()
+		app.chatResponseId++
+	})
 
 	tree := tui.Tile{}
 	tree.Init()

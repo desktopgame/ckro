@@ -20,15 +20,29 @@ func (m *MiniBuffer) Init(onSubmit func(string)) {
 	m.OnSubmit = onSubmit
 }
 
+func (m *MiniBuffer) SetEditable(edidtable bool) {
+	if edit, ok := m.tile.TextPresenter.(*presenter.EditTextPresenter); ok {
+		edit.ReadOnly = !edidtable
+	}
+}
+
+func (m *MiniBuffer) Editable() {
+	m.SetEditable(true)
+}
+
+func (m *MiniBuffer) ReadOnly() {
+	m.SetEditable(false)
+}
+
 func (m *MiniBuffer) Handle(ev tui.Event) {
 	switch e := ev.GetSource().(type) {
 	case *tcell.EventKey:
 		switch e.Key() {
 		case tcell.KeyEnter:
 			if m.OnSubmit != nil {
+				m.OnSubmit(m.tile.TextBox.GetDocument().GetBuffer().GetLineAt(0).GetContent())
 				m.tile.TextBox.Document.Init()
 				m.tile.TextBox.CursorReset()
-				m.OnSubmit(m.tile.TextBox.GetDocument().GetBuffer().GetLineAt(0).GetContent())
 			}
 			return
 		}
