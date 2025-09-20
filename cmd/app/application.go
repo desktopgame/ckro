@@ -253,6 +253,10 @@ func (app *Application) Init() {
 			Func:  FileSaveAsCommand(app),
 		},
 		&controls.DelegateCommand{
+			Label: "File: Open folder",
+			Func:  FileOpenFolderCommand(app),
+		},
+		&controls.DelegateCommand{
 			Label: "Chat: Message",
 			Func:  ChatMessage(app),
 		},

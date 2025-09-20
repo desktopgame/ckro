@@ -95,6 +95,12 @@ func FileSaveAsCommand(app *Application) func(runtime base.Runtime, cp *controls
 	}
 }
 
+func FileOpenFolderCommand(app *Application) func(runtime base.Runtime, cp *controls.CommandPalette) {
+	return func(runtime base.Runtime, cp *controls.CommandPalette) {
+		openFolderChooser(app, runtime)
+	}
+}
+
 func ChatMessage(app *Application) func(runtime base.Runtime, cp *controls.CommandPalette) {
 	return func(runtime base.Runtime, cp *controls.CommandPalette) {
 
@@ -224,6 +230,41 @@ func openFileChooser(app *Application, runtime base.Runtime) {
 		currentDir,
 		func(runtime base.Runtime, selectedFile string) {
 			app.openFile(selectedFile)
+
+			// ファイルチューザーを閉じる
+			runtime.Pop(0)
+		},
+		func(runtime base.Runtime) {
+			// キャンセル時の処理
+			runtime.Pop(1)
+		},
+	)
+	fileChooserUI := tui.WithCenter(tui.WithFrame(fileChooser), 80, 20)
+
+	runtime.Push(tui.Layer{
+		Control: fileChooserUI,
+		OnPop: func(returnCode int) {
+			if returnCode == 0 {
+				runtime.Pop(-1)
+			}
+		},
+	})
+}
+
+func openFolderChooser(app *Application, runtime base.Runtime) {
+	// 現在のディレクトリを取得
+	currentDir, err := os.Getwd()
+	if err != nil {
+		currentDir = "."
+	}
+
+	// ファイルチューザーを作成
+	fileChooser := controls.NewFolderChooser(
+		currentDir,
+		func(runtime base.Runtime, selectedFolder string) {
+			os.Chdir(selectedFolder)
+			app.vaultManager.Index()
+			app.treePresenter.Reset(selectedFolder)
 
 			// ファイルチューザーを閉じる
 			runtime.Pop(0)
