@@ -190,109 +190,11 @@ func (g *Grid) Update() {
 }
 
 func (g *Grid) Draw(gg *Graphics) {
-	/*
-		xBorders := g.columnCount + 1
-		yBorders := g.rowCount + 1
-
-		sw, _ := g.StaticSize()
-		heightTable := g.HeightTable(g.height)
-
-		useHeight := 0
-		for i := 0; i < g.rowCount; i++ {
-			useHeight += heightTable[i]
-		}
-
-		offsetY := g.y + 1
-		yMod := max(0, g.height-useHeight-yBorders)
-		for i := 0; i < g.rowCount; i++ {
-			maxConsumeY := 0
-
-			maxHeight := 0
-			for j := 0; j < g.columnCount; j++ {
-				for x := g.x; x < g.x+g.width; x++ {
-					s.SetContent(x, offsetY-1, '-', nil, tcell.StyleDefault)
-				}
-				gc := g.table[i][j]
-
-				height := gc.StaticHeight
-				consumeY := 0
-				if height == 0 {
-					height = heightTable[i]
-
-					consumeY = max(0, min(yMod, yMod/(g.rowCount-g.StaticRows(j))))
-					if consumeY == 0 && yMod > 0 {
-						consumeY = yMod
-					}
-					if yMod > 0 {
-						height += consumeY
-					}
-				}
-				//gc.TextBox.Height = height
-
-				if height > maxHeight {
-					maxHeight = height
-					maxConsumeY = consumeY
-				}
-
-			}
-			if maxConsumeY < 0 {
-				maxConsumeY = 0
-			}
-			yMod -= maxConsumeY
-			offsetY += maxHeight + 1
-		}
-
-		for i := 0; i < g.rowCount; i++ {
-			offsetX := g.x + 1
-			xMod := ((g.width - xBorders) - sw) % (g.columnCount - g.StaticColumns(i))
-			for j := 0; j < g.columnCount; j++ {
-				gc := g.table[i][j]
-
-				width := gc.StaticWidth
-				if width == 0 {
-					width = ((g.width - xBorders) - sw) / (g.columnCount - g.StaticColumns(i))
-
-					if xMod > 0 {
-						consumeX := max(0, min(xMod, xMod/(g.columnCount-g.StaticColumns(i))))
-						if consumeX == 0 && xMod > 0 {
-							consumeX = xMod
-						}
-
-						width += consumeX
-						xMod -= consumeX
-					}
-				}
-
-				for y := g.y; y < g.y+g.height; y++ {
-					s.SetContent(offsetX-1, y, '|', nil, tcell.StyleDefault)
-				}
-
-				//offsetX += gc.TextBox.Width + 1
-			}
-		}
-	*/
-
 	for _, row := range g.table {
 		for _, c := range row {
 			c.Control.Draw(gg)
 		}
 	}
-	/*
-		for x := g.x; x < g.x+g.width; x++ {
-			s.SetContent(x, g.y, '-', nil, tcell.StyleDefault)
-			s.SetContent(x, g.y+g.height-1, '-', nil, tcell.StyleDefault)
-		}
-
-		for y := g.y; y < g.y+g.height; y++ {
-			s.SetContent(g.x, y, '|', nil, tcell.StyleDefault)
-			s.SetContent(g.x+g.width-1, y, '|', nil, tcell.StyleDefault)
-		}
-
-		s.SetContent(g.x, g.y, '*', nil, tcell.StyleDefault)
-		s.SetContent(g.x+g.width-1, g.y, '*', nil, tcell.StyleDefault)
-		s.SetContent(g.x, g.y+g.height-1, '*', nil, tcell.StyleDefault)
-		s.SetContent(g.x+g.width-1, g.y+g.height-1, '*', nil, tcell.StyleDefault)
-	*/
 }
 
 func (g *Grid) MinimumSize(width int, height int) (Width int, Height int) {
