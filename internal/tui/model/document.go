@@ -196,6 +196,58 @@ func (doc *Document) FindNext(searchStr string) bool {
 	return false
 }
 
+// Replace deletes the specified number of characters from the current cursor position
+// and inserts the replacement string at that position.
+// Returns true if the operation was successful, false otherwise.
+func (doc *Document) Replace(deleteCount int, replaceStr string) bool {
+	if deleteCount < 0 {
+		return false
+	}
+
+	// If deleteCount is 0, just insert the string
+	if deleteCount == 0 {
+		doc.InsertString(replaceStr)
+		return true
+	}
+
+	// Delete characters
+	for i := 0; i < deleteCount; i++ {
+		// Check if we're at the end of document
+		if doc.cursorRow >= doc.buffer.GetLineCount() {
+			break
+		}
+
+		currLine := doc.buffer.GetLineAt(doc.cursorRow)
+		lineLength := text.GraphemeLength(currLine.GetContent())
+
+		// If we're at the end of current line
+		if doc.cursorColumn >= lineLength {
+			// If there's a next line, move to it and continue deleting
+			if doc.cursorRow < doc.buffer.GetLineCount()-1 {
+				// Delete the line break (merge with next line)
+				nextLine := doc.buffer.GetLineAt(doc.cursorRow + 1)
+				doc.buffer.AppendString(doc.cursorRow, nextLine.GetContent())
+				doc.buffer.RemoveLine(doc.cursorRow + 1)
+				// Stay at current position to continue deleting
+			} else {
+				// We're at the end of document, stop deleting
+				break
+			}
+		} else {
+			// Delete character at current position
+			newContent := text.GraphemeRemove(currLine.GetContent(), doc.cursorColumn, 1)
+			currLine.Remove(0, len(currLine.GetContent()))
+			currLine.InsertString(0, newContent)
+			// Don't move cursor position as we're deleting forward
+		}
+	}
+
+	// Insert replacement string at the current position
+	doc.InsertString(replaceStr)
+
+	return true
+}
+
 // MoveLeft is move cursor to left.
 func (doc *Document) MoveLeft() {
 	if doc.cursorColumn > 0 {
