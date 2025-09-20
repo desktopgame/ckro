@@ -85,7 +85,6 @@ func (lp *ListTextPresenter) Handle(view View, ev tcell.Event) {
 		}
 	}
 
-	// カーソル更新
 	view.CursorUpdate()
 }
 
@@ -127,7 +126,6 @@ func (lp *ListTextPresenter) RemoveItem(index int) {
 	if index >= 0 && index < len(lp.Items) {
 		lp.Items = append(lp.Items[:index], lp.Items[index+1:]...)
 
-		// 選択インデックスを調整
 		if lp.SelectedIndex >= len(lp.Items) && len(lp.Items) > 0 {
 			lp.SelectedIndex = len(lp.Items) - 1
 		} else if len(lp.Items) == 0 {
