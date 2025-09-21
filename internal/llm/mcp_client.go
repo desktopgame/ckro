@@ -65,7 +65,7 @@ func toMap(v any) (map[string]any, error) {
 		return nil, err
 	}
 	dec := json.NewDecoder(bytes.NewReader(b))
-	dec.UseNumber() // 数値を json.Number で保持（必要に応じて）
+	dec.UseNumber()
 	var m map[string]any
 	if err := dec.Decode(&m); err != nil {
 		return nil, err
