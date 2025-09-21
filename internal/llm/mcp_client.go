@@ -1,11 +1,19 @@
 package llm
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"os/exec"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
+
+type McpTool struct {
+	Name        string
+	Description string
+	Parameters  map[string]interface{}
+}
 
 type McpClient struct {
 	client  *mcp.Client
@@ -51,8 +59,45 @@ func (m *McpClient) ConnectLocal(ctx context.Context, server *mcp.Server) error 
 	return nil
 }
 
-func (m *McpClient) Tools(ctx context.Context) (*mcp.ListToolsResult, error) {
-	return m.session.ListTools(ctx, &mcp.ListToolsParams{})
+func toMap(v any) (map[string]any, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	dec := json.NewDecoder(bytes.NewReader(b))
+	dec.UseNumber() // 数値を json.Number で保持（必要に応じて）
+	var m map[string]any
+	if err := dec.Decode(&m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (m *McpClient) Tools(ctx context.Context) ([]McpTool, error) {
+	result, err := m.session.ListTools(ctx, &mcp.ListToolsParams{})
+	if err != nil {
+		return nil, err
+	}
+	tools := make([]McpTool, len(result.Tools))
+	for i := 0; i < len(result.Tools); i++ {
+		params, err := toMap(result.Tools[i].InputSchema)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if _, ok := params["properties"]; !ok {
+			params["properties"] = map[string]interface{}{}
+		}
+
+		tool := McpTool{
+			Name:        result.Tools[i].Name,
+			Description: result.Tools[i].Description,
+			Parameters:  params,
+		}
+		tools = append(tools, tool)
+	}
+	return tools, nil
 }
 
 func (m *McpClient) Call(ctx context.Context, toolName string, args interface{}) (*mcp.CallToolResult, error) {

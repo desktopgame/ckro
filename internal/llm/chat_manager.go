@@ -1,7 +1,6 @@
 package llm
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -34,19 +33,7 @@ func (cm *ChatManager) Init(client *openai.Client, model string, systemPrompt st
 	cm.backgroundToken = make(chan int)
 	cm.backgroundDone = false
 }
-func ToMap(v any) (map[string]any, error) {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return nil, err
-	}
-	dec := json.NewDecoder(bytes.NewReader(b))
-	dec.UseNumber() // 数値を json.Number で保持（必要に応じて）
-	var m map[string]any
-	if err := dec.Decode(&m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
+
 func (cm *ChatManager) background(ctx context.Context) error {
 	// register tools
 	for _, mcpClient := range cm.mcpClients {
@@ -55,29 +42,21 @@ func (cm *ChatManager) background(ctx context.Context) error {
 		}
 		tools, err := mcpClient.Tools(ctx)
 		if err == nil {
-			for _, tool := range tools.Tools {
+			for _, tool := range tools {
 				cm.tools = append(cm.tools, tool.Name)
 				cm.tool2client[tool.Name] = mcpClient
 
-				data, err := ToMap(tool.InputSchema)
-
-				if _, ok := data["properties"]; !ok {
-					data["properties"] = map[string]interface{}{}
+				t := openai.ChatCompletionFunctionToolParam{
+					Function: openai.FunctionDefinitionParam{
+						Name:        tool.Name,
+						Description: openai.String(tool.Description),
+						Parameters:  tool.Parameters,
+					},
 				}
-
-				if err == nil {
-					t := openai.ChatCompletionFunctionToolParam{
-						Function: openai.FunctionDefinitionParam{
-							Name:        tool.Name,
-							Description: openai.String(tool.Description),
-							Parameters:  data,
-						},
-					}
-					tUnion := openai.ChatCompletionToolUnionParam{
-						OfFunction: &t,
-					}
-					cm.toolParams = append(cm.toolParams, tUnion)
+				tUnion := openai.ChatCompletionToolUnionParam{
+					OfFunction: &t,
 				}
+				cm.toolParams = append(cm.toolParams, tUnion)
 			}
 		}
 	}
