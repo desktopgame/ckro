@@ -51,6 +51,10 @@ func (m *McpClient) ConnectLocal(ctx context.Context, server *mcp.Server) error 
 	return nil
 }
 
+func (m *McpClient) Tools(ctx context.Context) (*mcp.ListToolsResult, error) {
+	return m.session.ListTools(ctx, &mcp.ListToolsParams{})
+}
+
 func (m *McpClient) Call(ctx context.Context, toolName string, args interface{}) (*mcp.CallToolResult, error) {
 	params := &mcp.CallToolParams{
 		Name:      toolName,

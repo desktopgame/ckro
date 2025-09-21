@@ -53,7 +53,7 @@ func (cm *ChatManager) background(ctx context.Context) error {
 		if mcpClient.session == nil {
 			continue
 		}
-		tools, err := mcpClient.session.ListTools(ctx, &mcp.ListToolsParams{})
+		tools, err := mcpClient.Tools(ctx)
 		if err == nil {
 			for _, tool := range tools.Tools {
 				cm.tools = append(cm.tools, tool.Name)
