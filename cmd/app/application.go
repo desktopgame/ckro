@@ -40,6 +40,7 @@ type Application struct {
 	chatResponseId int
 
 	vaultManager VaultManager
+	config       Config
 }
 
 func (app *Application) newFile() {
@@ -270,6 +271,7 @@ func (app *Application) initView() {
 func (app *Application) initSystem() {
 	// Vaultの初期化
 	app.vaultManager.Init()
+	app.config.Update(&app.vaultManager)
 	// MCP関連の初期化
 	servers := map[string]*mcp.Server{}
 	servers["time"] = NewTimeMcp()
@@ -292,10 +294,10 @@ func (app *Application) initSystem() {
 	waitGroup.Wait()
 
 	client := openai.NewClient(
-		option.WithAPIKey("lmstudio"),
-		option.WithBaseURL("http://localhost:1234/v1"),
+		option.WithAPIKey(app.config.ApiKey),
+		option.WithBaseURL(app.config.BaseUrl),
 	)
-	app.chatManager.Init(&client, "openai/gpt-oss-20b", "あなたは親切なアシスタントです。", mcpClients)
+	app.chatManager.Init(&client, app.config.Model, "あなたは親切なアシスタントです。", mcpClients)
 	app.chatManager.Setup()
 }
 
