@@ -17,6 +17,7 @@ type ChatManager struct {
 	inputList       []openai.ChatCompletionMessageParamUnion
 	backgroundToken chan int
 	backgroundDone  bool
+	startupError    error
 
 	mcpClients  map[string]*McpClient
 	tool2client map[string]*McpClient
@@ -74,13 +75,15 @@ func (cm *ChatManager) background(ctx context.Context) error {
 		cm.backgroundToken <- 0
 		return nil
 	}
+	cm.startupError = err
 	return err
 }
 
 func (cm *ChatManager) Setup() {
-	cm.backgroundDone = false
 	cm.tools = nil
 	cm.tool2client = map[string]*McpClient{}
+	cm.backgroundDone = false
+	cm.startupError = nil
 
 	go cm.background(context.TODO())
 }
@@ -220,6 +223,10 @@ func (cm *ChatManager) Post(ctx context.Context, message string, output chan Eve
 	if !cm.backgroundDone {
 		<-cm.backgroundToken
 		cm.backgroundDone = true
+	}
+	if cm.startupError != nil {
+		output <- &ErrorEvent{e: cm.startupError}
+		return cm.startupError
 	}
 	cm.inputList = append(cm.inputList, openai.UserMessage(message))
 
