@@ -76,6 +76,7 @@ func (cm *ChatManager) background(ctx context.Context) error {
 		return nil
 	}
 	cm.startupError = err
+	cm.backgroundToken <- 0
 	return err
 }
 
