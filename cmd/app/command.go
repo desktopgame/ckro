@@ -19,10 +19,23 @@ func FileNewCommand(app *Application) func(runtime base.Runtime, cp *controls.Co
 				"You have unsaved changes.\nDo you want to save before creating a new file?",
 				func(runtime base.Runtime) {
 					// Yesが選択された場合 - 保存してからファイルを開く
-					// TODO: 保存処理を実装
-					log.Println("Save and open new file")
-					runtime.Pop(-1) // ダイアログを閉じる
-					app.newFile()
+					if app.filePath == "" {
+						// 名前のないファイルの場合は「名前を付けて保存」
+						showSaveAsDialogAndThen(app, runtime, func() {
+							app.newFile()
+							runtime.Pop(-1) // ダイアログを閉じる
+						}, func() {
+							runtime.Pop(-1) // ダイアログを閉じる
+						})
+					} else {
+						// 既存ファイルの場合は直接保存
+						err := app.saveFile()
+						if err != nil {
+							log.Printf("Failed to save file: %v", err)
+						}
+						app.newFile()
+						runtime.Pop(-1) // ダイアログを閉じる
+					}
 				},
 				func(runtime base.Runtime) {
 					// Noが選択された場合 - 保存せずにファイルを開く
@@ -54,10 +67,23 @@ func FileOpenCommand(app *Application) func(runtime base.Runtime, cp *controls.C
 				"You have unsaved changes.\nDo you want to save before opening a new file?",
 				func(runtime base.Runtime) {
 					// Yesが選択された場合 - 保存してからファイルを開く
-					// TODO: 保存処理を実装
-					log.Println("Save and open new file")
-					runtime.Pop(-1) // ダイアログを閉じる
-					openFileChooser(app, runtime)
+					if app.filePath == "" {
+						// 名前のないファイルの場合は「名前を付けて保存」
+						showSaveAsDialogAndThen(app, runtime, func() {
+							runtime.Pop(-1) // ダイアログを閉じる
+							openFileChooser(app, runtime)
+						}, func() {
+							runtime.Pop(-1) // ダイアログを閉じる
+						})
+					} else {
+						// 既存ファイルの場合は直接保存
+						err := app.saveFile()
+						if err != nil {
+							log.Printf("Failed to save file: %v", err)
+						}
+						openFileChooser(app, runtime)
+						runtime.Pop(-1) // ダイアログを閉じる
+					}
 				},
 				func(runtime base.Runtime) {
 					// Noが選択された場合 - 保存せずにファイルを開く
@@ -171,6 +197,41 @@ func DebugCardNext(app *Application) func(runtime base.Runtime, cp *controls.Com
 		runtime.Pop(-1)
 		app.doLayout()
 	}
+}
+
+func showSaveAsDialogAndThen(app *Application, runtime base.Runtime, onOK func(), onCancel func()) {
+	// デフォルトのファイル名を設定
+	defaultFileName := "untitled.txt"
+	if app.filePath != "" {
+		// 既存のファイルパスがある場合はそのファイル名を使用
+		defaultFileName = app.filePath
+	}
+
+	// 入力ダイアログを作成
+	inputDialog := controls.NewInputDialog(
+		"Save As",
+		"Enter filename:",
+		defaultFileName,
+		func(runtime base.Runtime, filename string) {
+			// OKが選択された場合
+			if filename != "" {
+				err := app.saveFileAs(filename)
+				if err != nil {
+					log.Printf("Failed to save file: %v", err)
+				}
+				runtime.Pop(0) // ダイアログを閉じる
+				onOK()         // コールバック実行
+			}
+		},
+		func(runtime base.Runtime) {
+			// キャンセルが選択された場合
+			runtime.Pop(1) // ダイアログを閉じる
+			onCancel()
+		},
+	)
+	inputDialogUI := tui.WithCenter(tui.WithFrame(inputDialog), 70, 12)
+
+	runtime.Push(tui.Layer{Control: inputDialogUI})
 }
 
 func showSaveAsDialog(app *Application, runtime base.Runtime) {
