@@ -371,6 +371,7 @@ func (app *Application) loopMiniBuffer() {
 		doc.InsertLine()
 		doc.InsertString(marker)
 		doc.InsertLine()
+		app.modified = true
 		app.window.Repaint()
 
 		app.miniBuffer.ReadOnly()
