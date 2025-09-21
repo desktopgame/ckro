@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -24,8 +23,6 @@ func NewFileSystemMcp() *mcp.Server {
 		if err != nil {
 			return nil, nil, err
 		}
-
-		log.Println(in.RelativePath)
 
 		dir := wd
 		if in.RelativePath != "." {
