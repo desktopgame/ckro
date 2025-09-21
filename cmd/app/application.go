@@ -154,7 +154,6 @@ func (app *Application) Init() {
 					conf.Approve = true
 				}
 
-				log.Println("Consume")
 				ev.Consume(context.Background())
 
 				if msg, ok := ev.(*llm.MessageEvent); ok {
@@ -162,6 +161,13 @@ func (app *Application) Init() {
 					app.textEdior.TextArea.TextBox.CursorReset()
 					if doc.FindNext(marker) {
 						doc.Replace(len(marker), response)
+					}
+					break
+				}
+
+				if e, ok := ev.(*llm.ErrorEvent); ok {
+					if doc.FindNext(marker) {
+						doc.Replace(len(marker), e.GetError().Error())
 					}
 					break
 				}
@@ -299,12 +305,17 @@ func (app *Application) Init() {
 	app.width = w
 	app.height = h
 
-	mcpClient := llm.McpClient{}
-	mcpClient.Init()
-	mcpClient.ConnectLocal(context.Background(), NewTimeMcp())
+	timeMcp := llm.McpClient{}
+	timeMcp.Init()
+	timeMcp.ConnectLocal(context.Background(), NewTimeMcp())
+
+	fsMcp := llm.McpClient{}
+	fsMcp.Init()
+	fsMcp.ConnectLocal(context.Background(), NewFileSystemMcp())
 
 	mcpClients := map[string]*llm.McpClient{}
-	mcpClients["time"] = &mcpClient
+	mcpClients["time"] = &timeMcp
+	mcpClients["file_system"] = &fsMcp
 
 	client := openai.NewClient(
 		option.WithAPIKey("lmstudio"),
