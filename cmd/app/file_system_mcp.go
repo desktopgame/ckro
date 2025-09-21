@@ -11,11 +11,11 @@ import (
 )
 
 func NewFileSystemMcp() *mcp.Server {
+	server := mcp.NewServer(&mcp.Implementation{Name: "file-system-server", Version: "v0.1.0"}, nil)
+
 	type ListArgs struct {
 		RelativePath string `json:"relativePath" jsonschema:"Relative path from current working directory; set '.' for root"`
 	}
-
-	server := mcp.NewServer(&mcp.Implementation{Name: "file-system-server", Version: "v0.1.0"}, nil)
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_entries",
 		Description: "Return entries at specified location",
