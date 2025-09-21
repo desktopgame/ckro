@@ -25,6 +25,8 @@ func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
 
 	app := Application{}
+	defer app.Close()
+
 	app.Init()
 	app.Run()
 }

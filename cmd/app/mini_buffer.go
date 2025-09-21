@@ -7,17 +7,22 @@ import (
 )
 
 type MiniBuffer struct {
-	tile     tui.Tile
-	OnSubmit func(string)
+	tile tui.Tile
+	ch   chan string
 }
 
-func (m *MiniBuffer) Init(onSubmit func(string)) {
+func (m *MiniBuffer) Init() {
+	m.Close()
 	m.tile = tui.Tile{}
 	m.tile.Init()
 	m.tile.FlexibleWidth = true
 	m.tile.MinimumHeight = 1
 	m.tile.TextPresenter = &presenter.EditTextPresenter{}
-	m.OnSubmit = onSubmit
+	m.ch = make(chan string)
+}
+
+func (m *MiniBuffer) onSubmit(s string) {
+	m.ch <- s
 }
 
 func (m *MiniBuffer) SetEditable(edidtable bool) {
@@ -34,16 +39,21 @@ func (m *MiniBuffer) ReadOnly() {
 	m.SetEditable(false)
 }
 
+func (m *MiniBuffer) Close() {
+	if m.ch != nil {
+		close(m.ch)
+		m.ch = nil
+	}
+}
+
 func (m *MiniBuffer) Handle(ev tui.Event) {
 	switch e := ev.GetSource().(type) {
 	case *tcell.EventKey:
 		switch e.Key() {
 		case tcell.KeyEnter:
-			if m.OnSubmit != nil {
-				m.OnSubmit(m.tile.TextBox.GetDocument().GetBuffer().GetLineAt(0).GetContent())
-				m.tile.TextBox.Document.Init()
-				m.tile.TextBox.CursorReset()
-			}
+			m.onSubmit(m.tile.TextBox.GetDocument().GetBuffer().GetLineAt(0).GetContent())
+			m.tile.TextBox.Document.Init()
+			m.tile.TextBox.CursorReset()
 			return
 		}
 	}
