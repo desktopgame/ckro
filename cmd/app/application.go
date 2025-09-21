@@ -172,6 +172,7 @@ func (app *Application) Init() {
 					break
 				}
 			}
+			close(pipe)
 
 			app.miniBuffer.Editable()
 			app.window.Repaint()
