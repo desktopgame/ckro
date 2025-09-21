@@ -112,6 +112,42 @@ func (app *Application) saveFileAs(filePath string) error {
 	return err
 }
 
+func showSaveAsDialogAndThenForTree(app *Application, runtime base.Runtime, callback func()) {
+	// デフォルトのファイル名を設定
+	defaultFileName := "untitled.txt"
+	if app.filePath != "" {
+		// 既存のファイルパスがある場合はそのファイル名を使用
+		defaultFileName = app.filePath
+	}
+
+	// 入力ダイアログを作成
+	inputDialog := controls.NewInputDialog(
+		"Save As",
+		"Enter filename:",
+		defaultFileName,
+		func(runtime base.Runtime, filename string) {
+			// OKが選択された場合
+			if filename != "" {
+				err := app.saveFileAs(filename)
+				if err != nil {
+					log.Printf("Failed to save file: %v", err)
+				}
+				runtime.Pop(0) // ダイアログを閉じる
+				callback()     // コールバック実行
+			}
+		},
+		func(runtime base.Runtime) {
+			// キャンセルが選択された場合
+			runtime.Pop(1) // ダイアログを閉じる
+		},
+	)
+	inputDialogUI := tui.WithCenter(tui.WithFrame(inputDialog), 70, 12)
+
+	runtime.Push(tui.Layer{
+		Control: inputDialogUI,
+	})
+}
+
 func (app *Application) doLayout() {
 	app.window.Resize(app.width, app.height)
 }
@@ -444,42 +480,6 @@ func (app *Application) Run() {
 			app.window.Handle(tuiEvent)
 		}
 	}
-}
-
-func showSaveAsDialogAndThenForTree(app *Application, runtime base.Runtime, callback func()) {
-	// デフォルトのファイル名を設定
-	defaultFileName := "untitled.txt"
-	if app.filePath != "" {
-		// 既存のファイルパスがある場合はそのファイル名を使用
-		defaultFileName = app.filePath
-	}
-
-	// 入力ダイアログを作成
-	inputDialog := controls.NewInputDialog(
-		"Save As",
-		"Enter filename:",
-		defaultFileName,
-		func(runtime base.Runtime, filename string) {
-			// OKが選択された場合
-			if filename != "" {
-				err := app.saveFileAs(filename)
-				if err != nil {
-					log.Printf("Failed to save file: %v", err)
-				}
-				runtime.Pop(0) // ダイアログを閉じる
-				callback()     // コールバック実行
-			}
-		},
-		func(runtime base.Runtime) {
-			// キャンセルが選択された場合
-			runtime.Pop(1) // ダイアログを閉じる
-		},
-	)
-	inputDialogUI := tui.WithCenter(tui.WithFrame(inputDialog), 70, 12)
-
-	runtime.Push(tui.Layer{
-		Control: inputDialogUI,
-	})
 }
 
 func (app *Application) Close() {
