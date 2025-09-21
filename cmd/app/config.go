@@ -8,10 +8,10 @@ import (
 )
 
 type Config struct {
-	ApiKey       string
-	BaseUrl      string
-	Model        string
-	SystemPrompt string
+	ApiKey       string `yaml:"ApiKey"`
+	BaseUrl      string `yaml:"BaseUrl"`
+	Model        string `yaml:"Model"`
+	SystemPrompt string `yaml:"SystemPrompt"`
 }
 
 func (c *Config) Reset() {
