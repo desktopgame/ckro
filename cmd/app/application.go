@@ -270,7 +270,7 @@ func (app *Application) initView() {
 func (app *Application) initMcp() {
 	servers := map[string]*mcp.Server{}
 	servers["time"] = NewTimeMcp()
-	servers["file_system"] = NewTimeMcp()
+	servers["file_system"] = NewFileSystemMcp()
 
 	mcpClients := map[string]*llm.McpClient{}
 	waitGroup := sync.WaitGroup{}
