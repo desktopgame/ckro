@@ -140,7 +140,8 @@ func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion
 							output <- &toolEvent
 
 							status = <-input
-							if status == Complete {
+							switch status {
+							case Complete:
 								chatEvent := cm.toolUse(ctx, toolEvent.result, toolCall, input)
 								output <- &chatEvent
 
@@ -151,6 +152,8 @@ func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion
 								case Error:
 									return chatEvent.GetError()
 								}
+							case Error:
+								return toolEvent.GetError()
 							}
 						} else {
 							message := fmt.Sprintf("user rejected a %s execute", fn.Name)
@@ -237,5 +240,10 @@ func (cm *ChatManager) Post(ctx context.Context, message string, output chan Eve
 	if status == Cancel {
 		return nil
 	}
-	return cm.turn(ctx, chatEvent.result, input, output)
+
+	err := cm.turn(ctx, chatEvent.result, input, output)
+	if err != nil {
+		output <- &ErrorEvent{e: err}
+	}
+	return err
 }
