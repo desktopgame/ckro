@@ -279,6 +279,10 @@ func (app *Application) initView() {
 			Func:  FileSaveAsCommand(app),
 		},
 		&controls.DelegateCommand{
+			Label: "File: Delete",
+			Func:  FileDeleteCommand(app),
+		},
+		&controls.DelegateCommand{
 			Label: "File: Open folder",
 			Func:  FileOpenFolderCommand(app),
 		},

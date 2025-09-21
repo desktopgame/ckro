@@ -121,6 +121,12 @@ func FileSaveAsCommand(app *Application) func(runtime base.Runtime, cp *controls
 	}
 }
 
+func FileDeleteCommand(app *Application) func(runtime base.Runtime, cp *controls.CommandPalette) {
+	return func(runtime base.Runtime, cp *controls.CommandPalette) {
+		openFileChooserForDelete(app, runtime)
+	}
+}
+
 func FileOpenFolderCommand(app *Application) func(runtime base.Runtime, cp *controls.CommandPalette) {
 	return func(runtime base.Runtime, cp *controls.CommandPalette) {
 		openFolderChooser(app, runtime)
@@ -286,6 +292,100 @@ func openFileChooser(app *Application, runtime base.Runtime) {
 
 			// ファイルチューザーを閉じる
 			runtime.Pop(0)
+		},
+		func(runtime base.Runtime) {
+			// キャンセル時の処理
+			runtime.Pop(1)
+		},
+	)
+	fileChooserUI := tui.WithCenter(tui.WithFrame(fileChooser), 80, 20)
+
+	runtime.Push(tui.Layer{
+		Control: fileChooserUI,
+		OnPop: func(returnCode int) {
+			if returnCode == 0 {
+				runtime.Pop(-1)
+			}
+		},
+	})
+}
+
+func openFileChooserForDelete(app *Application, runtime base.Runtime) {
+	// 現在のディレクトリを取得
+	currentDir, err := os.Getwd()
+	if err != nil {
+		currentDir = "."
+	}
+
+	// ファイルチューザーを作成
+	fileChooser := controls.NewFileChooser(
+		currentDir,
+		func(runtime base.Runtime, selectedFile string) {
+			// 削除確認ダイアログを表示
+			confirmDialog := controls.NewConfirmationDialog(
+				"Delete File",
+				"Are you sure you want to delete this file?\n"+selectedFile,
+				func(runtime base.Runtime) {
+					// Yesが選択された場合 - ファイルを削除
+					err := os.Remove(selectedFile)
+					if err != nil {
+						log.Printf("Failed to delete file: %v", err)
+						// エラーメッセージダイアログを表示
+						messageDialog := controls.NewMessageDialog(
+							"Error",
+							"Failed to delete file: "+err.Error(),
+							func(r base.Runtime) {
+								r.Pop(-1)
+							},
+						)
+						messageDialogUI := tui.WithCenter(tui.WithFrame(messageDialog), 80, 12)
+						runtime.Push(tui.Layer{
+							Control: messageDialogUI,
+							OnPop: func(returnCode int) {
+								runtime.Pop(-1) // 確認ダイアログを閉じる
+							},
+						})
+					} else {
+						// 削除成功
+						// 現在開いているファイルが削除されたファイルと同じかチェック
+						if app.filePath == selectedFile {
+							// 現在開いているファイルが削除された場合、新規ファイル状態にする
+							app.newFile()
+						}
+						// ツリーを更新
+						app.treePresenter.Reload()
+
+						// 成功メッセージダイアログを表示
+						messageDialog := controls.NewMessageDialog(
+							"Success",
+							"File deleted successfully",
+							func(r base.Runtime) {
+								r.Pop(-1)
+							},
+						)
+						messageDialogUI := tui.WithCenter(tui.WithFrame(messageDialog), 80, 12)
+						runtime.Push(tui.Layer{
+							Control: messageDialogUI,
+							OnPop: func(returnCode int) {
+								runtime.Pop(-1) // 確認ダイアログを閉じる
+							},
+						})
+					}
+				},
+				func(runtime base.Runtime) {
+					// Noが選択された場合 - 削除をキャンセル
+					runtime.Pop(-1) // 確認ダイアログを閉じる
+				},
+			)
+			confirmDialogUI := tui.WithCenter(tui.WithFrame(confirmDialog), 60, 15)
+
+			runtime.Push(tui.Layer{
+				Control: confirmDialogUI,
+				OnPop: func(returnCode int) {
+					// ファイルチューザーを閉じる
+					runtime.Pop(0)
+				},
+			})
 		},
 		func(runtime base.Runtime) {
 			// キャンセル時の処理
