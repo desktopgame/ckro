@@ -297,7 +297,7 @@ func (app *Application) initSystem() {
 		option.WithAPIKey(app.config.ApiKey),
 		option.WithBaseURL(app.config.BaseUrl),
 	)
-	app.chatManager.Init(&client, app.config.Model, "あなたは親切なアシスタントです。", mcpClients)
+	app.chatManager.Init(&client, app.config.Model, app.config.SystemPrompt, mcpClients)
 	app.chatManager.Setup()
 }
 
