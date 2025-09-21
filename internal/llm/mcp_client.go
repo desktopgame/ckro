@@ -21,7 +21,7 @@ type McpClient struct {
 }
 
 func (m *McpClient) Init() {
-	m.client = mcp.NewClient(&mcp.Implementation{Name: "ckro", Version: "v0.1.0"}, nil)
+	m.client = mcp.NewClient(&mcp.Implementation{Name: "ckro", Version: "v0.2.0"}, nil)
 }
 
 func (m *McpClient) Connect(ctx context.Context, name string, args ...string) error {
