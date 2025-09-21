@@ -312,6 +312,7 @@ func (app *Application) Run() {
 			go app.chatManager.Post(context.Background(), s, pipe)
 			go func() {
 				defer close(pipe)
+				defer close(done)
 
 				for {
 					ev := <-pipe
@@ -354,7 +355,6 @@ func (app *Application) Run() {
 
 				app.miniBuffer.Editable()
 				app.window.Repaint()
-				close(done)
 			}()
 
 			<-done
