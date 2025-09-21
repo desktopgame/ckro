@@ -113,7 +113,7 @@ func (app *Application) doLayout() {
 	app.window.Resize(app.width, app.height)
 }
 
-func (app *Application) Init() {
+func (app *Application) initView() {
 	s, err := tcell.NewScreen()
 	if err != nil {
 		log.Fatal(err)
@@ -263,7 +263,9 @@ func (app *Application) Init() {
 	})
 	app.width = w
 	app.height = h
+}
 
+func (app *Application) initMcp() {
 	timeMcp := llm.McpClient{}
 	timeMcp.Init()
 	timeMcp.ConnectLocal(context.Background(), NewTimeMcp())
@@ -282,8 +284,16 @@ func (app *Application) Init() {
 	)
 	app.chatManager.Init(&client, "openai/gpt-oss-20b", "あなたは親切なアシスタントです。", mcpClients)
 	app.chatManager.Setup()
+}
 
+func (app *Application) initSystem() {
 	app.vaultManager.Init()
+}
+
+func (app *Application) Init() {
+	app.initView()
+	app.initMcp()
+	app.initSystem()
 }
 
 func (app *Application) Run() {
