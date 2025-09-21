@@ -161,6 +161,7 @@ func (app *Application) Init() {
 					app.textEdior.TextArea.TextBox.CursorReset()
 					if doc.FindNext(marker) {
 						doc.Replace(len(marker), response)
+						doc.MoveRight()
 					}
 					break
 				}
@@ -168,6 +169,7 @@ func (app *Application) Init() {
 				if e, ok := ev.(*llm.ErrorEvent); ok {
 					if doc.FindNext(marker) {
 						doc.Replace(len(marker), e.GetError().Error())
+						doc.MoveRight()
 					}
 					break
 				}
