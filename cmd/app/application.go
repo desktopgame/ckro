@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/desktopgame/ckro/internal/llm"
 	"github.com/desktopgame/ckro/internal/tui"
@@ -14,6 +15,7 @@ import (
 	"github.com/desktopgame/ckro/internal/tui/controls"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
 	"github.com/gdamore/tcell/v2"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
 )
@@ -266,17 +268,25 @@ func (app *Application) initView() {
 }
 
 func (app *Application) initMcp() {
-	timeMcp := llm.McpClient{}
-	timeMcp.Init()
-	timeMcp.ConnectLocal(context.Background(), NewTimeMcp())
-
-	fsMcp := llm.McpClient{}
-	fsMcp.Init()
-	fsMcp.ConnectLocal(context.Background(), NewFileSystemMcp())
+	servers := map[string]*mcp.Server{}
+	servers["time"] = NewTimeMcp()
+	servers["file_system"] = NewTimeMcp()
 
 	mcpClients := map[string]*llm.McpClient{}
-	mcpClients["time"] = &timeMcp
-	mcpClients["file_system"] = &fsMcp
+	waitGroup := sync.WaitGroup{}
+	for name, server := range servers {
+		mcpClient := llm.McpClient{}
+		mcpClient.Init()
+
+		waitGroup.Add(1)
+		go func() {
+			mcpClient.ConnectLocal(context.Background(), server)
+			mcpClients[name] = &mcpClient
+			waitGroup.Done()
+		}()
+	}
+
+	waitGroup.Wait()
 
 	client := openai.NewClient(
 		option.WithAPIKey("lmstudio"),
