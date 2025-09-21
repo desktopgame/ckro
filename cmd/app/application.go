@@ -267,7 +267,10 @@ func (app *Application) initView() {
 	app.height = h
 }
 
-func (app *Application) initMcp() {
+func (app *Application) initSystem() {
+	// Vaultの初期化
+	app.vaultManager.Init()
+	// MCP関連の初期化
 	servers := map[string]*mcp.Server{}
 	servers["time"] = NewTimeMcp()
 	servers["file_system"] = NewFileSystemMcp()
@@ -296,13 +299,8 @@ func (app *Application) initMcp() {
 	app.chatManager.Setup()
 }
 
-func (app *Application) initSystem() {
-	app.vaultManager.Init()
-}
-
 func (app *Application) Init() {
 	app.initView()
-	app.initMcp()
 	app.initSystem()
 }
 
