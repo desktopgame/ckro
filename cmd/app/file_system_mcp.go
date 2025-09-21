@@ -56,5 +56,30 @@ func NewFileSystemMcp() *mcp.Server {
 		}
 		return &res, nil, nil
 	})
+
+	type ReadFileArgs struct {
+		RelativePath string `json:"relativePath" jsonschema:"Relative path from current working directory"`
+	}
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "read_file",
+		Description: "Return content from specified file",
+	}, func(ctx context.Context, req *mcp.CallToolRequest, in ReadFileArgs) (*mcp.CallToolResult, any, error) {
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, nil, err
+		}
+
+		file := filepath.Join(wd, in.RelativePath)
+		bytes, err := os.ReadFile(file)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		res := mcp.CallToolResult{}
+		res.Content = []mcp.Content{
+			&mcp.TextContent{Text: string(bytes)},
+		}
+		return &res, nil, nil
+	})
 	return server
 }
