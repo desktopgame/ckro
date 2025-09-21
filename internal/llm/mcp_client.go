@@ -33,6 +33,27 @@ func (m *McpClient) Connect(ctx context.Context, name string, args ...string) er
 	return nil
 }
 
+func (m *McpClient) ConnectLocal(ctx context.Context, server *mcp.Server) error {
+	if m.session == nil {
+		t1, t2 := mcp.NewInMemoryTransports()
+		_, err := server.Connect(ctx, t1, nil)
+
+		if err == nil {
+			session, err := m.client.Connect(ctx, t2, nil)
+
+			if err == nil {
+				m.session = session
+				session.InitializeResult()
+				return nil
+			}
+			return err
+		}
+		log.Fatal(err)
+		return err
+	}
+	return nil
+}
+
 func (m *McpClient) Call(ctx context.Context, toolName string, args interface{}) (*mcp.CallToolResult, error) {
 	params := &mcp.CallToolParams{
 		Name:      toolName,

@@ -1,9 +1,11 @@
 package llm
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -33,7 +35,19 @@ func (cm *ChatManager) Init(client *openai.Client, model string, systemPrompt st
 	cm.backgroundToken = make(chan int)
 	cm.backgroundDone = false
 }
-
+func ToMap(v any) (map[string]any, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	dec := json.NewDecoder(bytes.NewReader(b))
+	dec.UseNumber() // 数値を json.Number で保持（必要に応じて）
+	var m map[string]any
+	if err := dec.Decode(&m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
 func (cm *ChatManager) background(ctx context.Context) error {
 	// register tools
 	for _, mcpClient := range cm.mcpClients {
@@ -46,24 +60,27 @@ func (cm *ChatManager) background(ctx context.Context) error {
 				cm.tools = append(cm.tools, tool.Name)
 				cm.tool2client[tool.Name] = mcpClient
 
-				bytes, err := tool.InputSchema.MarshalJSON()
+				data, err := ToMap(tool.InputSchema)
+
+				if _, ok := data["properties"]; !ok {
+					data["properties"] = map[string]interface{}{}
+				}
+
+				jbyts, _ := json.Marshal(data)
+				log.Println(string(jbyts))
 
 				if err == nil {
-					var data map[string]interface{}
-					err = json.Unmarshal(bytes, &data)
-					if err == nil {
-						t := openai.ChatCompletionFunctionToolParam{
-							Function: openai.FunctionDefinitionParam{
-								Name:        tool.Name,
-								Description: openai.String(tool.Description),
-								Parameters:  data,
-							},
-						}
-						tUnion := openai.ChatCompletionToolUnionParam{
-							OfFunction: &t,
-						}
-						cm.toolParams = append(cm.toolParams, tUnion)
+					t := openai.ChatCompletionFunctionToolParam{
+						Function: openai.FunctionDefinitionParam{
+							Name:        tool.Name,
+							Description: openai.String(tool.Description),
+							Parameters:  data,
+						},
 					}
+					tUnion := openai.ChatCompletionToolUnionParam{
+						OfFunction: &t,
+					}
+					cm.toolParams = append(cm.toolParams, tUnion)
 				}
 			}
 		}
@@ -229,8 +246,10 @@ func (cm *ChatManager) Post(ctx context.Context, message string, output chan Eve
 			ch: input,
 		},
 	}
+	log.Println("Send")
 	output <- &chatEvent
 
+	log.Println("Recv")
 	status := <-input
 	if status == Cancel {
 		return
