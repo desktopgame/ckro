@@ -357,6 +357,7 @@ func (app *Application) loopMiniBuffer() {
 					if doc.FindNext(marker) {
 						doc.Replace(len(marker), response)
 						doc.MoveRight()
+						app.textEdior.TextArea.TextBox.CursorUpdate()
 					}
 					break
 				}
@@ -365,6 +366,7 @@ func (app *Application) loopMiniBuffer() {
 					if doc.FindNext(marker) {
 						doc.Replace(len(marker), e.GetError().Error())
 						doc.MoveRight()
+						app.textEdior.TextArea.TextBox.CursorUpdate()
 					}
 					break
 				}
