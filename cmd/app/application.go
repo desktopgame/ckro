@@ -296,81 +296,83 @@ func (app *Application) Init() {
 	app.initSystem()
 }
 
+func (app *Application) loopMiniBuffer() {
+	for {
+		s, ok := <-app.miniBuffer.ch
+
+		if !ok {
+			break
+		}
+
+		log.Println(s)
+
+		doc := app.textEdior.TextArea.TextBox.GetDocument()
+		marker := fmt.Sprintf("<chat_response_is_here:%d>", app.chatResponseId)
+		doc.InsertLine()
+		doc.InsertString(marker)
+		doc.InsertLine()
+
+		app.miniBuffer.ReadOnly()
+		pipe := make(chan llm.Event)
+		done := make(chan struct{})
+		go app.chatManager.Post(context.Background(), s, pipe)
+		go func() {
+			defer close(pipe)
+			defer close(done)
+
+			for {
+				ev := <-pipe
+
+				if conf, ok := ev.(*llm.ConfirmEvent); ok {
+					message := fmt.Sprintf("want to use tool of `%s`, are you ok? [y/n]", conf.ToolName)
+					app.modeLine.Text(message)
+
+					app.miniBuffer.Editable()
+					app.window.Repaint()
+
+					s = <-app.miniBuffer.ch
+
+					app.modeLine.Text("")
+					app.miniBuffer.ReadOnly()
+					app.window.Repaint()
+					conf.Approve = s == "y" || s == "Y"
+				}
+
+				ev.Consume(context.Background())
+
+				if msg, ok := ev.(*llm.MessageEvent); ok {
+					response := msg.GetResult().Choices[0].Message.Content
+					app.textEdior.TextArea.TextBox.CursorReset()
+					if doc.FindNext(marker) {
+						doc.Replace(len(marker), response)
+						doc.MoveRight()
+					}
+					break
+				}
+
+				if e, ok := ev.(*llm.ErrorEvent); ok {
+					if doc.FindNext(marker) {
+						doc.Replace(len(marker), e.GetError().Error())
+						doc.MoveRight()
+					}
+					break
+				}
+			}
+
+			app.miniBuffer.Editable()
+			app.window.Repaint()
+		}()
+
+		<-done
+		app.chatResponseId++
+	}
+}
+
 func (app *Application) Run() {
 	defer app.screen.Fini()
 	app.screen.Show()
 
-	go func() {
-		for {
-			s, ok := <-app.miniBuffer.ch
-
-			if !ok {
-				break
-			}
-
-			log.Println(s)
-
-			doc := app.textEdior.TextArea.TextBox.GetDocument()
-			marker := fmt.Sprintf("<chat_response_is_here:%d>", app.chatResponseId)
-			doc.InsertLine()
-			doc.InsertString(marker)
-			doc.InsertLine()
-
-			app.miniBuffer.ReadOnly()
-			pipe := make(chan llm.Event)
-			done := make(chan struct{})
-			go app.chatManager.Post(context.Background(), s, pipe)
-			go func() {
-				defer close(pipe)
-				defer close(done)
-
-				for {
-					ev := <-pipe
-
-					if conf, ok := ev.(*llm.ConfirmEvent); ok {
-						message := fmt.Sprintf("want to use tool of `%s`, are you ok? [y/n]", conf.ToolName)
-						app.modeLine.Text(message)
-
-						app.miniBuffer.Editable()
-						app.window.Repaint()
-
-						s = <-app.miniBuffer.ch
-
-						app.modeLine.Text("")
-						app.miniBuffer.ReadOnly()
-						app.window.Repaint()
-						conf.Approve = s == "y" || s == "Y"
-					}
-
-					ev.Consume(context.Background())
-
-					if msg, ok := ev.(*llm.MessageEvent); ok {
-						response := msg.GetResult().Choices[0].Message.Content
-						app.textEdior.TextArea.TextBox.CursorReset()
-						if doc.FindNext(marker) {
-							doc.Replace(len(marker), response)
-							doc.MoveRight()
-						}
-						break
-					}
-
-					if e, ok := ev.(*llm.ErrorEvent); ok {
-						if doc.FindNext(marker) {
-							doc.Replace(len(marker), e.GetError().Error())
-							doc.MoveRight()
-						}
-						break
-					}
-				}
-
-				app.miniBuffer.Editable()
-				app.window.Repaint()
-			}()
-
-			<-done
-			app.chatResponseId++
-		}
-	}()
+	go app.loopMiniBuffer()
 
 	for {
 		app.screen.Clear()
