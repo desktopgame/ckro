@@ -11,6 +11,7 @@ type ToolEvent struct {
 	mcpClient *McpClient
 	name      string
 	args      interface{}
+	e         error
 }
 
 func (t *ToolEvent) Consume(ctx context.Context) {
@@ -18,11 +19,18 @@ func (t *ToolEvent) Consume(ctx context.Context) {
 	if err == nil {
 		t.result = response
 		t.ch <- Complete
+		return
 	}
+	t.e = err
+	t.ch <- Error
 }
 
 func (t *ToolEvent) Cancel(ctx context.Context) {
 	t.ch <- Cancel
+}
+
+func (t *ToolEvent) GetError() error {
+	return t.e
 }
 
 func (t *ToolEvent) GetResult() *mcp.CallToolResult {

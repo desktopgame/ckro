@@ -12,6 +12,7 @@ type ChatEvent struct {
 	inputList  []openai.ChatCompletionMessageParamUnion
 	model      string
 	toolParams []openai.ChatCompletionToolUnionParam
+	e          error
 }
 
 func (c *ChatEvent) Consume(ctx context.Context) {
@@ -28,10 +29,16 @@ func (c *ChatEvent) Consume(ctx context.Context) {
 		c.ch <- Complete
 		return
 	}
+	c.e = err
+	c.ch <- Error
 }
 
 func (c *ChatEvent) Cancel(ctx context.Context) {
 	c.ch <- Cancel
+}
+
+func (c *ChatEvent) GetError() error {
+	return c.e
 }
 
 func (c *ChatEvent) GetResult() *openai.ChatCompletion {

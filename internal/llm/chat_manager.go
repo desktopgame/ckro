@@ -108,7 +108,7 @@ func (cm *ChatManager) toolUse(ctx context.Context, response *mcp.CallToolResult
 	}
 }
 
-func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion, input chan Status, output chan Event) {
+func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion, input chan Status, output chan Event) error {
 	cm.inputList = append(cm.inputList, response.Choices[0].Message.ToParam())
 	toolCalls := response.Choices[0].Message.ToolCalls
 	if len(toolCalls) > 0 {
@@ -145,8 +145,11 @@ func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion
 								output <- &chatEvent
 
 								status = <-input
-								if status == Complete {
-									cm.turn(ctx, chatEvent.result, input, output)
+								switch status {
+								case Complete:
+									return cm.turn(ctx, chatEvent.result, input, output)
+								case Error:
+									return chatEvent.GetError()
 								}
 							}
 						} else {
@@ -165,8 +168,11 @@ func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion
 							output <- &chatEvent
 
 							status = <-input
-							if status == Complete {
-								cm.turn(ctx, chatEvent.result, input, output)
+							switch status {
+							case Complete:
+								return cm.turn(ctx, chatEvent.result, input, output)
+							case Error:
+								return chatEvent.GetError()
 							}
 						}
 					}
@@ -186,8 +192,11 @@ func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion
 					output <- &chatEvent
 
 					status := <-input
-					if status == Complete {
-						cm.turn(ctx, chatEvent.result, input, output)
+					switch status {
+					case Complete:
+						return cm.turn(ctx, chatEvent.result, input, output)
+					case Error:
+						return chatEvent.GetError()
 					}
 				}
 			}
@@ -200,9 +209,10 @@ func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion
 		}
 		output <- &messageEvent
 	}
+	return nil
 }
 
-func (cm *ChatManager) Post(ctx context.Context, message string, output chan Event) {
+func (cm *ChatManager) Post(ctx context.Context, message string, output chan Event) error {
 	if !cm.backgroundDone {
 		<-cm.backgroundToken
 		cm.backgroundDone = true
@@ -225,7 +235,7 @@ func (cm *ChatManager) Post(ctx context.Context, message string, output chan Eve
 
 	status := <-input
 	if status == Cancel {
-		return
+		return nil
 	}
-	cm.turn(ctx, chatEvent.result, input, output)
+	return cm.turn(ctx, chatEvent.result, input, output)
 }
