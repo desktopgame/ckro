@@ -2,7 +2,6 @@ package llm
 
 import (
 	"context"
-	"log"
 	"os/exec"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -27,7 +26,6 @@ func (m *McpClient) Connect(ctx context.Context, name string, args ...string) er
 			session.InitializeResult()
 			return nil
 		}
-		log.Fatal(err)
 		return err
 	}
 	return nil
@@ -48,7 +46,6 @@ func (m *McpClient) ConnectLocal(ctx context.Context, server *mcp.Server) error 
 			}
 			return err
 		}
-		log.Fatal(err)
 		return err
 	}
 	return nil

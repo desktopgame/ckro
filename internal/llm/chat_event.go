@@ -2,7 +2,6 @@ package llm
 
 import (
 	"context"
-	"log"
 
 	"github.com/openai/openai-go/v2"
 )
@@ -16,7 +15,6 @@ type ChatEvent struct {
 }
 
 func (c *ChatEvent) Consume(ctx context.Context) {
-	log.Println("ChatEvent: Consume")
 	chatCompletion, err := c.client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: c.inputList,
 		Model:    c.model,
@@ -30,11 +28,9 @@ func (c *ChatEvent) Consume(ctx context.Context) {
 		c.ch <- Complete
 		return
 	}
-	log.Fatal(err)
 }
 
 func (c *ChatEvent) Cancel(ctx context.Context) {
-	log.Println("ChatEvent: Cancel")
 	c.ch <- Cancel
 }
 

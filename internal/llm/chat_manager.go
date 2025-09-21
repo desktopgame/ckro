@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -65,9 +64,6 @@ func (cm *ChatManager) background(ctx context.Context) error {
 				if _, ok := data["properties"]; !ok {
 					data["properties"] = map[string]interface{}{}
 				}
-
-				jbyts, _ := json.Marshal(data)
-				log.Println(string(jbyts))
 
 				if err == nil {
 					t := openai.ChatCompletionFunctionToolParam{
@@ -246,10 +242,8 @@ func (cm *ChatManager) Post(ctx context.Context, message string, output chan Eve
 			ch: input,
 		},
 	}
-	log.Println("Send")
 	output <- &chatEvent
 
-	log.Println("Recv")
 	status := <-input
 	if status == Cancel {
 		return
