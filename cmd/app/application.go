@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/desktopgame/ckro/internal/llm"
 	"github.com/desktopgame/ckro/internal/tui"
@@ -15,7 +14,6 @@ import (
 	"github.com/desktopgame/ckro/internal/tui/controls"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
 	"github.com/gdamore/tcell/v2"
-	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
 )
@@ -301,27 +299,9 @@ func (app *Application) Init() {
 	app.width = w
 	app.height = h
 
-	type TimeArgs struct {
-		//Zone string `json:"zone,omitempty"`
-	}
-
-	server := mcp.NewServer(&mcp.Implementation{Name: "time-server", Version: "v0.1.0"}, nil)
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "get_current_time",
-		Description: "Return current time string",
-	}, func(ctx context.Context, req *mcp.CallToolRequest, in TimeArgs) (*mcp.CallToolResult, any, error) {
-		t := time.Now()
-
-		res := mcp.CallToolResult{}
-		res.Content = []mcp.Content{
-			&mcp.TextContent{Text: t.String()},
-		}
-		return &res, nil, nil
-	})
-
 	mcpClient := llm.McpClient{}
 	mcpClient.Init()
-	mcpClient.ConnectLocal(context.Background(), server)
+	mcpClient.ConnectLocal(context.Background(), NewTimeMcp())
 
 	mcpClients := map[string]*llm.McpClient{}
 	mcpClients["time"] = &mcpClient
