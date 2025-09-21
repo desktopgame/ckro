@@ -120,6 +120,7 @@ func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion
 			if err == nil {
 				if client, ok := cm.tool2client[fn.Name]; ok {
 					confirmEvent := ConfirmEvent{
+						ToolName: fn.Name,
 						EventBase: EventBase[struct{}]{
 							ch: input,
 						},

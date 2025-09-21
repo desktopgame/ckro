@@ -6,7 +6,8 @@ import (
 
 type ConfirmEvent struct {
 	EventBase[struct{}]
-	Approve bool
+	ToolName string
+	Approve  bool
 }
 
 func (c *ConfirmEvent) Consume(ctx context.Context) {
