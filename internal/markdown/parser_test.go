@@ -151,10 +151,17 @@ func TestList06(t *testing.T) {
     * Item3
 	`
 	doc := markdown.Parse(text)
-	assert.Equal(t, len(doc.Blocks), 1)
+	// Should have 1 heading + 5 list blocks = 6 blocks total
+	assert.Equal(t, len(doc.Blocks), 6)
 
+	// First block should be a heading
 	heading := doc.Blocks[0]
 	_, ok := heading.(*markdown.Heading)
 	assert.True(t, ok)
 
+	// Remaining blocks should be lists
+	for i := 1; i < len(doc.Blocks); i++ {
+		_, ok := doc.Blocks[i].(*markdown.ListBlock)
+		assert.True(t, ok)
+	}
 }

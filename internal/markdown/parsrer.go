@@ -245,7 +245,7 @@ func parseInline(text string) []AbstractInline {
 		}
 		// Fallback: plain text until next special char
 		j := i + 1
-		for j < n && strings.ContainsRune(SPECIAL_INLINE_CHARS, rune(text[j])) {
+		for j < n && !strings.ContainsRune(SPECIAL_INLINE_CHARS, rune(text[j])) {
 			j++
 		}
 		out = append(out, &Text{
@@ -253,7 +253,7 @@ func parseInline(text string) []AbstractInline {
 		})
 		// separate check
 		taggableAt = false
-		if text[j-1] == ' ' || text[j-1] == '\n' {
+		if j > 0 && (text[j-1] == ' ' || text[j-1] == '\n') {
 			taggableAt = true
 		}
 		i = j
@@ -451,7 +451,7 @@ func Parse(text string) *Document {
 
 			bodyLines := []string{}
 			for j < len(lines) && !FENCE_RE.MatchString(lines[j]) {
-				bodyLines = append(bodyLines, bodyLines[j])
+				bodyLines = append(bodyLines, lines[j])
 				j++
 			}
 			// consume closing fence if present
@@ -505,7 +505,7 @@ func Parse(text string) *Document {
 		}
 
 		// Heading
-		hm := FENCE_RE.FindStringSubmatch(ln)
+		hm := HEADER_RE.FindStringSubmatch(ln)
 		if len(hm) > 0 {
 			level := len(hm[1])
 			content := hm[2]
@@ -531,7 +531,7 @@ func Parse(text string) *Document {
 		if QUOTE_RE.MatchString(ln) {
 			j := i
 			innerLines := []string{}
-			for j < len(lines) && !QUOTE_RE.MatchString(lines[j]) {
+			for j < len(lines) && QUOTE_RE.MatchString(lines[j]) {
 				innerLines = append(innerLines, QUOTE_RE.FindStringSubmatch(lines[j])[1])
 				j++
 			}
