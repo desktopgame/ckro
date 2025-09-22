@@ -639,7 +639,7 @@ func Parse(text string) *Document {
 					startRune, endRune, sl, el := locationRange(text, lineStarts, i, j)
 					doc.Blocks = append(doc.Blocks, &Table{
 						Headers: headers[1 : len(headers)-1],
-						Aligns:  dAligns,
+						Aligns:  dAligns[1 : len(dAligns)-1],
 						Rows:    dContents,
 						Block: Block{
 							Node: Node{

@@ -165,3 +165,78 @@ func TestList06(t *testing.T) {
 		assert.True(t, ok)
 	}
 }
+
+func TestList07(t *testing.T) {
+	text := `
+# Test
+
+* [ ] item1
+  * [ ] item2
+  * [x] item3
+    * [] item4
+* [ ] item5
+* [x] item6
+	`
+	doc := markdown.Parse(text)
+	assert.Equal(t, len(doc.Blocks), 2)
+
+	_, ok := doc.Blocks[0].(*markdown.Heading)
+	assert.True(t, ok)
+
+	if list, ok := doc.Blocks[1].(*markdown.ListBlock); ok {
+		assert.Equal(t, len(list.Items), 3)
+		assert.Equal(t, len(list.Items[0].Blocks), 1)
+
+		if list2, ok := list.Items[0].Blocks[0].(*markdown.ListBlock); ok {
+			assert.Equal(t, len(list2.Items), 2)
+		}
+	} else {
+		assert.True(t, false)
+	}
+}
+
+func TestTable01(t *testing.T) {
+	text := `
+|H1|H2|H3|
+|---|---|---|
+|co1|co2|co3|
+	`
+	doc := markdown.Parse(text)
+	assert.Equal(t, len(doc.Blocks), 1)
+
+	if tb, ok := doc.Blocks[0].(*markdown.Table); ok {
+		assert.Equal(t, len(tb.Headers), 3)
+		assert.Equal(t, tb.Headers[0], "H1")
+		assert.Equal(t, tb.Headers[1], "H2")
+		assert.Equal(t, tb.Headers[2], "H3")
+		assert.Equal(t, len(tb.Aligns), 3)
+		assert.Equal(t, tb.Aligns[0], "left")
+		assert.Equal(t, tb.Aligns[1], "left")
+		assert.Equal(t, tb.Aligns[2], "left")
+	} else {
+		assert.True(t, false)
+	}
+}
+
+func TestTable02(t *testing.T) {
+	text := `
+|H1|H2|H3|
+|---:|:---:|:---|
+|co1|co2|co3|
+	`
+	doc := markdown.Parse(text)
+	assert.Equal(t, len(doc.Blocks), 1)
+
+	if tb, ok := doc.Blocks[0].(*markdown.Table); ok {
+		assert.Equal(t, len(tb.Headers), 3)
+		assert.Equal(t, tb.Headers[0], "H1")
+		assert.Equal(t, tb.Headers[1], "H2")
+		assert.Equal(t, tb.Headers[2], "H3")
+		assert.Equal(t, len(tb.Aligns), 3)
+		assert.Equal(t, tb.Aligns[0], "right")
+		assert.Equal(t, tb.Aligns[1], "center")
+		assert.Equal(t, tb.Aligns[2], "left")
+	} else {
+		assert.True(t, false)
+	}
+}
