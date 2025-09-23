@@ -19,6 +19,10 @@ func (doc *PlainDocument) Init() {
 	doc.Clear()
 }
 
+func (doc *PlainDocument) Render() []Element {
+	return nil
+}
+
 // InsertLine is break line at current cursor position.
 func (doc *PlainDocument) InsertLine() {
 	currLine := doc.buffer.GetLineAt(doc.cursorRow)

@@ -1,6 +1,8 @@
 package model
 
 type Document interface {
+	Render() []Element
+
 	InsertLine()
 	InsertString(s string)
 	RemoveChar()
