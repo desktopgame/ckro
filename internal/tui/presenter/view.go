@@ -19,7 +19,7 @@ type View interface {
 	TextClear()
 	CursorUpdate()
 	BreakIter() iter.Seq[Segment]
-	GetDocument() *model.Document
+	GetDocument() model.Document
 	GetWidth() int
 	GetHeight() int
 	GetScrollX() int

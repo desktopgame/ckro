@@ -12,7 +12,7 @@ type LabelTextPresenter struct {
 
 func (label *LabelTextPresenter) Present(view View) {
 	doc := view.GetDocument()
-	doc.Init()
+	doc.Clear()
 
 	if label.AlignCenter {
 		width := view.GetWidth()

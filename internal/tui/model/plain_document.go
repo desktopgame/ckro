@@ -6,24 +6,21 @@ import (
 	"github.com/desktopgame/ckro/internal/text"
 )
 
-// Document is wrapper of Buffer.
+// PlainDocument is wrapper of Buffer.
 // track a current cursor position.
-type Document struct {
+type PlainDocument struct {
 	buffer       Buffer
 	cursorRow    int
 	cursorColumn int
 }
 
 // Init is initialize Buffer.
-func (doc *Document) Init() {
-	doc.buffer = Buffer{}
-	doc.buffer.Init()
-	doc.cursorRow = 0
-	doc.cursorColumn = 0
+func (doc *PlainDocument) Init() {
+	doc.Clear()
 }
 
 // InsertLine is break line at current cursor position.
-func (doc *Document) InsertLine() {
+func (doc *PlainDocument) InsertLine() {
 	currLine := doc.buffer.GetLineAt(doc.cursorRow)
 	codepointColumn := text.GraphemeToCodepointPos(currLine.GetContent(), doc.cursorColumn)
 
@@ -33,7 +30,7 @@ func (doc *Document) InsertLine() {
 }
 
 // InsertString is insert string at current cursor position.
-func (doc *Document) InsertString(s string) {
+func (doc *PlainDocument) InsertString(s string) {
 	currLine := doc.buffer.GetLineAt(doc.cursorRow)
 	codepointColumn := text.GraphemeToCodepointPos(currLine.GetContent(), doc.cursorColumn)
 
@@ -49,7 +46,7 @@ func (doc *Document) InsertString(s string) {
 }
 
 // RemoveChar is remove character at current cursor position.
-func (doc *Document) RemoveChar() {
+func (doc *PlainDocument) RemoveChar() {
 	currLine := doc.buffer.GetLineAt(doc.cursorRow)
 	if doc.cursorRow > 0 {
 		if len(currLine.GetContent()) == 0 || doc.cursorColumn == 0 {
@@ -78,10 +75,18 @@ func (doc *Document) RemoveChar() {
 	}
 }
 
+// Clear is initialize Buffer.
+func (doc *PlainDocument) Clear() {
+	doc.buffer = Buffer{}
+	doc.buffer.Init()
+	doc.cursorRow = 0
+	doc.cursorColumn = 0
+}
+
 // FindPrev is searches for the specified string backward from the current cursor position
 // and moves the cursor to the beginning of the found string.
 // Returns true if found, false otherwise.
-func (doc *Document) FindPrev(searchStr string) bool {
+func (doc *PlainDocument) FindPrev(searchStr string) bool {
 	if searchStr == "" {
 		return false
 	}
@@ -141,7 +146,7 @@ func (doc *Document) FindPrev(searchStr string) bool {
 // FindNext is searches for the specified string forward from the current cursor position
 // and moves the cursor to the beginning of the found string.
 // Returns true if found, false otherwise.
-func (doc *Document) FindNext(searchStr string) bool {
+func (doc *PlainDocument) FindNext(searchStr string) bool {
 	if searchStr == "" {
 		return false
 	}
@@ -200,7 +205,7 @@ func (doc *Document) FindNext(searchStr string) bool {
 // and inserts the replacement string at that position.
 // After replacement, the cursor is moved to the end of the inserted text.
 // Returns true if the operation was successful, false otherwise.
-func (doc *Document) Replace(deleteCount int, replaceStr string) bool {
+func (doc *PlainDocument) Replace(deleteCount int, replaceStr string) bool {
 	if deleteCount < 0 {
 		return false
 	}
@@ -259,7 +264,7 @@ func (doc *Document) Replace(deleteCount int, replaceStr string) bool {
 }
 
 // MoveLeft is move cursor to left.
-func (doc *Document) MoveLeft() {
+func (doc *PlainDocument) MoveLeft() {
 	if doc.cursorColumn > 0 {
 		doc.cursorColumn--
 	} else {
@@ -271,7 +276,7 @@ func (doc *Document) MoveLeft() {
 }
 
 // MoveRight is move cursor to right.
-func (doc *Document) MoveRight() {
+func (doc *PlainDocument) MoveRight() {
 	currLine := doc.buffer.GetLineAt(doc.cursorRow)
 	if doc.cursorColumn < text.GraphemeLength(currLine.GetContent()) {
 		doc.cursorColumn++
@@ -284,7 +289,7 @@ func (doc *Document) MoveRight() {
 }
 
 // MoveUp is move cursor to up.
-func (doc *Document) MoveUp() {
+func (doc *PlainDocument) MoveUp() {
 	if doc.cursorRow > 0 {
 		doc.cursorRow--
 
@@ -297,7 +302,7 @@ func (doc *Document) MoveUp() {
 }
 
 // MoveDown is move cursor to down.
-func (doc *Document) MoveDown() {
+func (doc *PlainDocument) MoveDown() {
 	if doc.cursorRow < doc.buffer.GetLineCount()-1 {
 		doc.cursorRow++
 
@@ -310,22 +315,22 @@ func (doc *Document) MoveDown() {
 }
 
 // MoveReset is cursor position reset to zero.
-func (doc *Document) MoveReset() {
+func (doc *PlainDocument) MoveReset() {
 	doc.cursorRow = 0
 	doc.cursorColumn = 0
 }
 
 // GetBuffer returns Buffer.
-func (doc *Document) GetBuffer() *Buffer {
+func (doc *PlainDocument) GetBuffer() *Buffer {
 	return &doc.buffer
 }
 
 // GetCursorRow returns row of cursor.
-func (doc *Document) GetCursorRow() int {
+func (doc *PlainDocument) GetCursorRow() int {
 	return doc.cursorRow
 }
 
 // GetCursorColumn returns column of cursor.
-func (doc *Document) GetCursorColumn() int {
+func (doc *PlainDocument) GetCursorColumn() int {
 	return doc.cursorColumn
 }

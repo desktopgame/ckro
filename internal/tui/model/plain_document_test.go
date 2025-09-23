@@ -9,7 +9,7 @@ import (
 )
 
 func TestDocument(t *testing.T) {
-	doc := model.Document{}
+	doc := model.PlainDocument{}
 	doc.Init()
 
 	doc.InsertString("Hello")
@@ -22,7 +22,7 @@ func TestDocument(t *testing.T) {
 }
 
 func TestReplace(t *testing.T) {
-	doc := model.Document{}
+	doc := model.PlainDocument{}
 	doc.Init()
 
 	doc.InsertString("Hello1")
@@ -40,7 +40,7 @@ func TestReplace(t *testing.T) {
 }
 
 func TestTooManyLines(t *testing.T) {
-	doc := model.Document{}
+	doc := model.PlainDocument{}
 	doc.Init()
 
 	firstLine := "こんにちは！今日はどんなご用件でしょうか？😊"
@@ -83,7 +83,7 @@ Line 5: Finally, end with a closing statement or marker like END_OF_TEXT.
 }
 
 func TestTooManyLines2(t *testing.T) {
-	doc := model.Document{}
+	doc := model.PlainDocument{}
 	doc.Init()
 
 	firstLine := "<marker>"
@@ -126,7 +126,7 @@ Line 5: Finally, end with a closing statement or marker like END_OF_TEXT.
 }
 
 func TestEmptyLine(t *testing.T) {
-	doc := model.Document{}
+	doc := model.PlainDocument{}
 	doc.Init()
 
 	doc.InsertString("\n\n\n")

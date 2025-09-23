@@ -297,7 +297,7 @@ func (id *InputDialog) SetPrompt(prompt string) {
 // SetInputValue sets the input field value
 func (id *InputDialog) SetInputValue(value string) {
 	doc := id.inputField.TextBox.GetDocument()
-	doc.Init()
+	doc.Clear()
 	doc.InsertString(value)
 }
 
@@ -309,5 +309,5 @@ func (id *InputDialog) GetInputValue() string {
 // ClearInput clears the input field
 func (id *InputDialog) ClearInput() {
 	doc := id.inputField.TextBox.GetDocument()
-	doc.Init()
+	doc.Clear()
 }

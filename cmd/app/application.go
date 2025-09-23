@@ -47,7 +47,7 @@ func (app *Application) newFile() {
 	app.filePath = ""
 	app.modified = false
 	doc := app.textEdior.TextArea.TextBox.GetDocument()
-	doc.Init()
+	doc.Clear()
 	app.textEdior.TextArea.TextBox.CursorReset()
 }
 
@@ -63,7 +63,7 @@ func (app *Application) openFile(filePath string) error {
 
 	// テキストエリアのドキュメントをクリアして新しい内容を設定
 	doc := app.textEdior.TextArea.TextBox.GetDocument()
-	doc.Init()
+	doc.Clear()
 	doc.InsertString(string(content))
 	app.textEdior.TextArea.TextBox.CursorReset()
 	return nil

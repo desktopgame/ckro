@@ -15,7 +15,7 @@ import (
 // TextBox has region of rect, rendering text within that range.
 // long line is always wrap at right end of region.
 type TextBox struct {
-	Document   *model.Document
+	Document   model.Document
 	X          int
 	Y          int
 	Width      int
@@ -27,8 +27,10 @@ type TextBox struct {
 
 // Init is initialize TextBox.
 func (tb *TextBox) Init() {
-	tb.Document = &model.Document{}
-	tb.Document.Init()
+	pd := &model.PlainDocument{}
+	pd.Init()
+
+	tb.Document = pd
 	tb.X = 0
 	tb.Y = 0
 	tb.Width = 20
@@ -230,7 +232,7 @@ func (tb *TextBox) CursorReset() {
 
 // TextFrame is print a frame of TextBox region.
 func (tb *TextBox) TextFrame() {
-	tb.Document.Init()
+	tb.Document.Clear()
 
 	w := tb.Width
 	h := tb.Height
@@ -262,7 +264,7 @@ func (tb *TextBox) TextFrame() {
 
 // TextVertical is print vertical line.
 func (tb *TextBox) TextVertical() {
-	tb.Document.Init()
+	tb.Document.Clear()
 
 	h := tb.Height
 
@@ -275,7 +277,7 @@ func (tb *TextBox) TextVertical() {
 
 // TextHorizontal is print horizontal line.
 func (tb *TextBox) TextHorizontal() {
-	tb.Document.Init()
+	tb.Document.Clear()
 
 	w := tb.Width
 
@@ -288,7 +290,7 @@ func (tb *TextBox) TextHorizontal() {
 
 // TextClear is do reset to content.
 func (tb *TextBox) TextClear() {
-	tb.Document.Init()
+	tb.Document.Clear()
 }
 
 // Draw is render content.
@@ -482,7 +484,7 @@ func (tb *TextBox) WrappedLineCount() int {
 }
 
 // GetDocument returns Document.
-func (tb *TextBox) GetDocument() *model.Document {
+func (tb *TextBox) GetDocument() model.Document {
 	return tb.Document
 }
 
