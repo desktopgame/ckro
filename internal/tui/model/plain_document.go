@@ -20,7 +20,12 @@ func (doc *PlainDocument) Init() {
 }
 
 func (doc *PlainDocument) Render() []Element {
-	return nil
+	elements := []Element{}
+	for i := 0; i < doc.buffer.GetLineCount(); i++ {
+		line := doc.buffer.GetLineAt(i)
+		elements = append(elements, &ParagraphElement{Line: line.GetContent()})
+	}
+	return elements
 }
 
 // InsertLine is break line at current cursor position.
