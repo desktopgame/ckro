@@ -7,7 +7,7 @@ import (
 )
 
 type Segment struct {
-	Text      string
+	Element   model.Element
 	ModelLine int
 	ViewLine  int
 }

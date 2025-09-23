@@ -2,7 +2,6 @@ package tui
 
 import (
 	"iter"
-	"strings"
 
 	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui/model"
@@ -10,6 +9,11 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/mattn/go-runewidth"
 )
+
+type textSegment struct {
+	textLayout *TextLayout
+	segment    presenter.Segment
+}
 
 // TextBox is editable text widget.
 // TextBox has region of rect, rendering text within that range.
@@ -20,6 +24,7 @@ type TextBox struct {
 	Y          int
 	Width      int
 	Height     int
+	TextEngine TextEngine
 	ShowCursor bool
 	scrollX    int
 	scrollY    int
@@ -35,6 +40,7 @@ func (tb *TextBox) Init() {
 	tb.Y = 0
 	tb.Width = 20
 	tb.Height = 6
+	tb.TextEngine = &PlainTextEngine{}
 	tb.scrollX = 0
 	tb.scrollY = 0
 }
@@ -309,43 +315,47 @@ func (tb *TextBox) Draw(g *Graphics) {
 	}
 	def := tcell.StyleDefault
 
-	for seg := range tb.BreakIter() {
-		if seg.ViewLine >= tb.scrollY {
-			clusters := text.GraphemeClusters(seg.Text)
-			x := 0
-			y := seg.ViewLine - tb.scrollY
-			for _, cluster := range clusters {
+	for textSegment := range tb.BreakIter2() {
+		if textSegment.segment.ViewLine >= tb.scrollY {
+			view := tb.TextEngine.ProvideView(textSegment.textLayout.Element)
+			view.Draw(textSegment.textLayout, clip, 0, textSegment.segment.ViewLine-tb.scrollY)
+			/*
+				clusters := text.GraphemeClusters(seg.Text)
+				x := 0
+				y := seg.ViewLine - tb.scrollY
+				for _, cluster := range clusters {
 
-				if cluster == "\t" {
-					spaces := text.TabWidth - (x % text.TabWidth)
-					for i := 0; i < spaces; i++ {
-						clip.SetContent(x+i, y, ' ', nil, def)
-					}
-					x += spaces
-
-				} else {
-					runes := []rune(cluster)
-
-					if len(runes) > 0 {
-						mainRune := runes[0]
-						var combining []rune
-
-						// 残りのruneをcombining charactersとして設定
-						if len(runes) > 1 {
-							combining = runes[1:]
+					if cluster == "\t" {
+						spaces := text.TabWidth - (x % text.TabWidth)
+						for i := 0; i < spaces; i++ {
+							clip.SetContent(x+i, y, ' ', nil, def)
 						}
-						width := runewidth.RuneWidth(mainRune)
+						x += spaces
 
-						clip.SetContent(x, y, mainRune, combining, def)
-						// 全角文字の場合、次のセルを空にする
-						if width == 2 {
-							x++
-							clip.SetContent(x, y, 0, nil, def)
+					} else {
+						runes := []rune(cluster)
+
+						if len(runes) > 0 {
+							mainRune := runes[0]
+							var combining []rune
+
+							// 残りのruneをcombining charactersとして設定
+							if len(runes) > 1 {
+								combining = runes[1:]
+							}
+							width := runewidth.RuneWidth(mainRune)
+
+							clip.SetContent(x, y, mainRune, combining, def)
+							// 全角文字の場合、次のセルを空にする
+							if width == 2 {
+								x++
+								clip.SetContent(x, y, 0, nil, def)
+							}
 						}
+						x++
 					}
-					x++
 				}
-			}
+			*/
 		}
 	}
 
@@ -372,23 +382,77 @@ func (tb *TextBox) Draw(g *Graphics) {
 
 // BreakIter returns segment array by line, in consideration a wrap.
 func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
-	buf := tb.Document.GetBuffer()
-	sb := strings.Builder{}
+	//buf := tb.Document.GetBuffer()
+	//sb := strings.Builder{}
 
 	return func(yield func(presenter.Segment) bool) {
-		startY := 0
-		endY := min(tb.scrollY+tb.Height, buf.GetLineCount())
-		drawY := 0
-		for i := startY; i < endY; i++ {
-			line := buf.GetLineAt(i).GetContent()
-			x := 0
+		for textSegment := range tb.BreakIter2() {
+			if !yield(textSegment.segment) {
+				return
+			}
+		}
+	}
+	/*
+		return func(yield func(presenter.Segment) bool) {
+			startY := 0
+			endY := min(tb.scrollY+tb.Height, buf.GetLineCount())
+			drawY := 0
+			for i := startY; i < endY; i++ {
+				line := buf.GetLineAt(i).GetContent()
+				x := 0
 
-			clusters := text.GraphemeClusters(line)
-			for _, cluster := range clusters {
-				runes := []rune(cluster)
+				clusters := text.GraphemeClusters(line)
+				for _, cluster := range clusters {
+					runes := []rune(cluster)
 
-				if cluster == "\t" {
-					if x+text.TabWidth > tb.Width {
+					if cluster == "\t" {
+						if x+text.TabWidth > tb.Width {
+							seg := presenter.Segment{
+								Text:      sb.String(),
+								ModelLine: i,
+								ViewLine:  drawY,
+							}
+							if !yield(seg) {
+								return
+							}
+							sb.Reset()
+
+							drawY++
+							x = 0
+						}
+						sb.WriteString(cluster)
+						if drawY-tb.scrollY >= tb.Height {
+							break
+						}
+						x += 3
+					} else if len(runes) > 0 {
+						mainRune := runes[0]
+						width := runewidth.RuneWidth(mainRune)
+
+						if x+width > tb.Width {
+							seg := presenter.Segment{
+								Text:      sb.String(),
+								ModelLine: i,
+								ViewLine:  drawY,
+							}
+							if !yield(seg) {
+								return
+							}
+							sb.Reset()
+
+							drawY++
+							x = 0
+						}
+						sb.WriteString(cluster)
+						if drawY-tb.scrollY >= tb.Height {
+							break
+						}
+						if width == 2 {
+							x++
+						}
+					}
+					x++
+					if x > tb.Width {
 						seg := presenter.Segment{
 							Text:      sb.String(),
 							ModelLine: i,
@@ -402,72 +466,163 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 						drawY++
 						x = 0
 					}
-					sb.WriteString(cluster)
 					if drawY-tb.scrollY >= tb.Height {
 						break
 					}
-					x += 3
-				} else if len(runes) > 0 {
-					mainRune := runes[0]
-					width := runewidth.RuneWidth(mainRune)
-
-					if x+width > tb.Width {
-						seg := presenter.Segment{
-							Text:      sb.String(),
-							ModelLine: i,
-							ViewLine:  drawY,
-						}
-						if !yield(seg) {
-							return
-						}
-						sb.Reset()
-
-						drawY++
-						x = 0
-					}
-					sb.WriteString(cluster)
-					if drawY-tb.scrollY >= tb.Height {
-						break
-					}
-					if width == 2 {
-						x++
-					}
 				}
-				x++
-				if x > tb.Width {
-					seg := presenter.Segment{
-						Text:      sb.String(),
-						ModelLine: i,
-						ViewLine:  drawY,
-					}
-					if !yield(seg) {
-						return
-					}
-					sb.Reset()
-
-					drawY++
-					x = 0
+				seg := presenter.Segment{
+					Text:      sb.String(),
+					ModelLine: i,
+					ViewLine:  drawY,
 				}
+				if !yield(seg) {
+					return
+				}
+				sb.Reset()
+
+				drawY++
 				if drawY-tb.scrollY >= tb.Height {
 					break
 				}
 			}
-			seg := presenter.Segment{
-				Text:      sb.String(),
-				ModelLine: i,
-				ViewLine:  drawY,
-			}
-			if !yield(seg) {
-				return
-			}
-			sb.Reset()
+		}
+	*/
+}
 
-			drawY++
-			if drawY-tb.scrollY >= tb.Height {
-				break
+// BreakIter returns segment array by line, in consideration a wrap.
+func (tb *TextBox) BreakIter2() iter.Seq[textSegment] {
+	//buf := tb.Document.GetBuffer()
+	//sb := strings.Builder{}
+
+	return func(yield func(textSegment) bool) {
+		elements := tb.Document.Render()
+		textLayouts := []*TextLayout{}
+		for i := 0; i < len(elements); i++ {
+			elem := elements[i]
+			view := tb.TextEngine.ProvideView(elem)
+
+			newLayout := view.Layout(elem, tb.Width)
+			textLayouts = append(textLayouts, newLayout)
+		}
+
+		line := 0
+		for i := 0; i < len(textLayouts); i++ {
+			textLayout := textLayouts[i]
+			view := tb.TextEngine.ProvideView(textLayout.Element)
+			height := view.Height(textLayout)
+
+			for j := 0; j < height; j++ {
+				segment := presenter.Segment{
+					Element:   textLayout.Element,
+					ModelLine: textLayout.Element.GetStartPosition().Row,
+					ViewLine:  line,
+				}
+				textSegment := textSegment{
+					textLayout: textLayout,
+					segment:    segment,
+				}
+				if !yield(textSegment) {
+					return
+				}
+				line++
 			}
 		}
 	}
+	/*
+		return func(yield func(presenter.Segment) bool) {
+			startY := 0
+			endY := min(tb.scrollY+tb.Height, buf.GetLineCount())
+			drawY := 0
+			for i := startY; i < endY; i++ {
+				line := buf.GetLineAt(i).GetContent()
+				x := 0
+
+				clusters := text.GraphemeClusters(line)
+				for _, cluster := range clusters {
+					runes := []rune(cluster)
+
+					if cluster == "\t" {
+						if x+text.TabWidth > tb.Width {
+							seg := presenter.Segment{
+								Text:      sb.String(),
+								ModelLine: i,
+								ViewLine:  drawY,
+							}
+							if !yield(seg) {
+								return
+							}
+							sb.Reset()
+
+							drawY++
+							x = 0
+						}
+						sb.WriteString(cluster)
+						if drawY-tb.scrollY >= tb.Height {
+							break
+						}
+						x += 3
+					} else if len(runes) > 0 {
+						mainRune := runes[0]
+						width := runewidth.RuneWidth(mainRune)
+
+						if x+width > tb.Width {
+							seg := presenter.Segment{
+								Text:      sb.String(),
+								ModelLine: i,
+								ViewLine:  drawY,
+							}
+							if !yield(seg) {
+								return
+							}
+							sb.Reset()
+
+							drawY++
+							x = 0
+						}
+						sb.WriteString(cluster)
+						if drawY-tb.scrollY >= tb.Height {
+							break
+						}
+						if width == 2 {
+							x++
+						}
+					}
+					x++
+					if x > tb.Width {
+						seg := presenter.Segment{
+							Text:      sb.String(),
+							ModelLine: i,
+							ViewLine:  drawY,
+						}
+						if !yield(seg) {
+							return
+						}
+						sb.Reset()
+
+						drawY++
+						x = 0
+					}
+					if drawY-tb.scrollY >= tb.Height {
+						break
+					}
+				}
+				seg := presenter.Segment{
+					Text:      sb.String(),
+					ModelLine: i,
+					ViewLine:  drawY,
+				}
+				if !yield(seg) {
+					return
+				}
+				sb.Reset()
+
+				drawY++
+				if drawY-tb.scrollY >= tb.Height {
+					break
+				}
+			}
+		}
+	*/
 }
 
 // WrappedLineCount returns count of lines, in consideration a wrap.

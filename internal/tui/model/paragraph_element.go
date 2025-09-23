@@ -1,11 +1,21 @@
 package model
 
 type ParagraphElement struct {
-	Line string
+	Line          string
+	StartPosition Position
+	EndPosition   Position
 }
 
 func (p *ParagraphElement) GetText() string {
 	return p.Line
+}
+
+func (p *ParagraphElement) GetStartPosition() Position {
+	return p.StartPosition
+}
+
+func (p *ParagraphElement) GetEndPosition() Position {
+	return p.EndPosition
 }
 
 func (p *ParagraphElement) GetElement(index int) Element {

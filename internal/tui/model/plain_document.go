@@ -23,7 +23,18 @@ func (doc *PlainDocument) Render() []Element {
 	elements := []Element{}
 	for i := 0; i < doc.buffer.GetLineCount(); i++ {
 		line := doc.buffer.GetLineAt(i)
-		elements = append(elements, &ParagraphElement{Line: line.GetContent()})
+		lineStr := line.GetContent()
+		elements = append(elements, &ParagraphElement{
+			Line: lineStr,
+			StartPosition: Position{
+				Row:    i,
+				Column: 0,
+			},
+			EndPosition: Position{
+				Row:    i,
+				Column: text.GraphemeLength(lineStr) - 1,
+			},
+		})
 	}
 	return elements
 }
