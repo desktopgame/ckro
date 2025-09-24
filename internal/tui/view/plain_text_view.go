@@ -1,4 +1,4 @@
-package tui
+package view
 
 import (
 	"github.com/desktopgame/ckro/internal/text"
@@ -17,7 +17,7 @@ func (p *PlainTextView) Layout(e model.Element, width int) *TextLayout {
 	}
 }
 
-func (p *PlainTextView) Draw(textLayout *TextLayout, clip Clip, x int, y int) {
+func (p *PlainTextView) Draw(textLayout *TextLayout, renderer Renderer, x int, y int) {
 	// x := 0
 	// y := 0
 	def := tcell.StyleDefault
@@ -27,7 +27,7 @@ func (p *PlainTextView) Draw(textLayout *TextLayout, clip Clip, x int, y int) {
 		if cluster == "\t" {
 			spaces := text.TabWidth - (x % text.TabWidth)
 			for i := 0; i < spaces; i++ {
-				clip.SetContent(x+i, y, ' ', nil, def)
+				renderer.SetContent(x+i, y, ' ', nil, def)
 			}
 			x += spaces
 
@@ -44,11 +44,11 @@ func (p *PlainTextView) Draw(textLayout *TextLayout, clip Clip, x int, y int) {
 				}
 				width := runewidth.RuneWidth(mainRune)
 
-				clip.SetContent(x, y, mainRune, combining, def)
+				renderer.SetContent(x, y, mainRune, combining, def)
 				// 全角文字の場合、次のセルを空にする
 				if width == 2 {
 					x++
-					clip.SetContent(x, y, 0, nil, def)
+					renderer.SetContent(x, y, 0, nil, def)
 				}
 			}
 			x++

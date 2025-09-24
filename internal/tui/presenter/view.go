@@ -4,12 +4,13 @@ import (
 	"iter"
 
 	"github.com/desktopgame/ckro/internal/tui/model"
+	"github.com/desktopgame/ckro/internal/tui/view"
 )
 
 type Segment struct {
-	Element   model.Element
-	ModelLine int
-	ViewLine  int
+	TextLayout *view.TextLayout
+	ModelLine  int
+	ViewLine   int
 }
 
 type View interface {

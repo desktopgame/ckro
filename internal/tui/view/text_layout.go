@@ -1,4 +1,4 @@
-package tui
+package view
 
 import "github.com/desktopgame/ckro/internal/tui/model"
 

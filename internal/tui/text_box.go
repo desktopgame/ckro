@@ -2,16 +2,18 @@ package tui
 
 import (
 	"iter"
+	"strings"
 
 	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
+	"github.com/desktopgame/ckro/internal/tui/view"
 	"github.com/gdamore/tcell/v2"
 	"github.com/mattn/go-runewidth"
 )
 
 type textSegment struct {
-	textLayout *TextLayout
+	textLayout *view.TextLayout
 	segment    presenter.Segment
 }
 
@@ -316,9 +318,9 @@ func (tb *TextBox) Draw(g *Graphics) {
 	def := tcell.StyleDefault
 
 	for textSegment := range tb.BreakIter2() {
-		if textSegment.segment.ViewLine >= tb.scrollY {
-			view := tb.TextEngine.ProvideView(textSegment.textLayout.Element)
-			view.Draw(textSegment.textLayout, clip, 0, textSegment.segment.ViewLine-tb.scrollY)
+		if textSegment.ViewLine >= tb.scrollY {
+			view := tb.TextEngine.ProvideView(textSegment.TextLayout.Element)
+			view.Draw(textSegment.TextLayout, clip, 0, textSegment.ViewLine-tb.scrollY)
 			/*
 				clusters := text.GraphemeClusters(seg.Text)
 				x := 0
@@ -387,7 +389,7 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 
 	return func(yield func(presenter.Segment) bool) {
 		for textSegment := range tb.BreakIter2() {
-			if !yield(textSegment.segment) {
+			if !yield(textSegment) {
 				return
 			}
 		}
@@ -490,41 +492,200 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 }
 
 // BreakIter returns segment array by line, in consideration a wrap.
-func (tb *TextBox) BreakIter2() iter.Seq[textSegment] {
+func (tb *TextBox) BreakIter2() iter.Seq[presenter.Segment] {
 	//buf := tb.Document.GetBuffer()
 	//sb := strings.Builder{}
 
-	return func(yield func(textSegment) bool) {
+	return func(yield func(presenter.Segment) bool) {
 		elements := tb.Document.Render()
-		textLayouts := []*TextLayout{}
-		for i := 0; i < len(elements); i++ {
-			elem := elements[i]
-			view := tb.TextEngine.ProvideView(elem)
 
-			newLayout := view.Layout(elem, tb.Width)
-			textLayouts = append(textLayouts, newLayout)
+		entries := []*view.TextLayout{}
+		for i := 0; i < len(elements); i++ {
+			element := elements[i]
+			view := tb.TextEngine.ProvideView(element)
+
+			newLayout := view.Layout(element, tb.Width)
+			entries = append(entries, newLayout)
 		}
 
-		line := 0
-		for i := 0; i < len(textLayouts); i++ {
-			textLayout := textLayouts[i]
-			view := tb.TextEngine.ProvideView(textLayout.Element)
-			height := view.Height(textLayout)
+		viewLine := 0
+		for i := 0; i < len(entries); i++ {
+			entry := entries[i]
+			textView := tb.TextEngine.ProvideView(entry.Element)
+			height := textView.Height(entry)
 
+			lineWrap := false
 			for j := 0; j < height; j++ {
-				segment := presenter.Segment{
-					Element:   textLayout.Element,
-					ModelLine: textLayout.Element.GetStartPosition().Row,
-					ViewLine:  line,
+				if textView.Width(entry, j) > tb.Width {
+					lineWrap = true
+					break
 				}
-				textSegment := textSegment{
-					textLayout: textLayout,
-					segment:    segment,
+			}
+
+			if lineWrap {
+				lineCount := entry.Element.GetEndPosition().Row - entry.Element.GetStartPosition().Row + 1
+				for j := 0; j < lineCount; j++ {
+					lineNo := entry.Element.GetStartPosition().Row + j
+					line := tb.Document.GetBuffer().GetLineAt(lineNo)
+					lineWidth := text.DisplayWidth(line.GetContent())
+
+					if lineWidth <= tb.Width {
+						//*
+						segment := presenter.Segment{
+							TextLayout: &view.TextLayout{
+								Element: &model.ParagraphElement{
+									Line: line.GetContent(),
+								},
+							},
+							ModelLine: lineNo,
+							ViewLine:  viewLine,
+						}
+						if !yield(segment) {
+							return
+						}
+						viewLine++
+						//*/
+					} else {
+						x := 0
+						startX := 0
+						sb := strings.Builder{}
+
+						clusters := text.GraphemeClusters(line.GetContent())
+						for _, cluster := range clusters {
+							runes := []rune(cluster)
+
+							if cluster == "\t" {
+								// w := text.TabWidth - (x % text.TabWidth)
+								w := text.TabWidth
+								if x+w > tb.Width {
+									segment := presenter.Segment{
+										TextLayout: &view.TextLayout{
+											Element: &model.ParagraphElement{
+												Line: sb.String(),
+												StartPosition: model.Position{
+													Row:    lineNo,
+													Column: startX,
+												},
+												EndPosition: model.Position{
+													Row:    lineNo,
+													Column: x,
+												},
+											},
+										},
+										ModelLine: lineNo,
+										ViewLine:  viewLine,
+									}
+									if !yield(segment) {
+										return
+									}
+									sb.Reset()
+
+									viewLine++
+									startX = x
+									x = 0
+								}
+								sb.WriteString(cluster)
+								x += w
+							} else if len(runes) > 0 {
+								mainRune := runes[0]
+								width := runewidth.RuneWidth(mainRune)
+
+								if x+width > tb.Width {
+									segment := presenter.Segment{
+										TextLayout: &view.TextLayout{
+											Element: &model.ParagraphElement{
+												Line: sb.String(),
+												StartPosition: model.Position{
+													Row:    lineNo,
+													Column: startX,
+												},
+												EndPosition: model.Position{
+													Row:    lineNo,
+													Column: x,
+												},
+											},
+										},
+										ModelLine: lineNo,
+										ViewLine:  viewLine,
+									}
+									if !yield(segment) {
+										return
+									}
+									sb.Reset()
+
+									viewLine++
+									startX = x
+									x = 0
+								}
+								sb.WriteString(cluster)
+								if width == 2 {
+									x++
+								}
+							}
+							x++
+							if x > tb.Width {
+								segment := presenter.Segment{
+									TextLayout: &view.TextLayout{
+										Element: &model.ParagraphElement{
+											Line: sb.String(),
+											StartPosition: model.Position{
+												Row:    lineNo,
+												Column: startX,
+											},
+											EndPosition: model.Position{
+												Row:    lineNo,
+												Column: x,
+											},
+										},
+									},
+									ModelLine: lineNo,
+									ViewLine:  viewLine,
+								}
+								if !yield(segment) {
+									return
+								}
+								sb.Reset()
+
+								viewLine++
+								startX = x
+								x = 0
+							}
+							//sb.WriteString(cluster)
+						}
+						segment := presenter.Segment{
+							TextLayout: &view.TextLayout{
+								Element: &model.ParagraphElement{
+									Line:          sb.String(),
+									StartPosition: model.Position{},
+									EndPosition:   model.Position{},
+								},
+							},
+							ModelLine: lineNo,
+							ViewLine:  viewLine,
+						}
+						if !yield(segment) {
+							return
+						}
+						sb.Reset()
+
+						viewLine++
+						//if drawY-tb.scrollY >= tb.Height {
+						//	break
+						//}
+					}
 				}
-				if !yield(textSegment) {
-					return
+			} else {
+				for j := 0; j < height; j++ {
+					segment := presenter.Segment{
+						TextLayout: entry,
+						ModelLine:  entry.Element.GetStartPosition().Row,
+						ViewLine:   viewLine,
+					}
+					if !yield(segment) {
+						return
+					}
+					viewLine++
 				}
-				line++
 			}
 		}
 	}
