@@ -21,18 +21,16 @@ func (l *ListContainerView) Layout(textViewResolver TextViewResolver, e model.El
 	}
 }
 
-func (l *ListContainerView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer, x int, y int, localViewLine int) {
+func (l *ListContainerView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
 	if listContainer, ok := textLayout.Element.(*model.ListContainerElement); ok {
+		y := 0
 		for i := 0; i < listContainer.GetElementCount(); i++ {
 			childElement := listContainer.GetElement(i)
 			childView := textViewResolver.Resolve(childElement)
 
 			height := childView.Height(textViewResolver, textLayout.Children[i])
-			if localViewLine < height {
-				childView.Draw(textViewResolver, textLayout.Children[i], renderer, x+2, y, localViewLine)
-				break
-			}
-			localViewLine -= height
+			childView.Draw(textViewResolver, textLayout.Children[i], renderer.Translate(0, y))
+			y += height
 		}
 		return
 	}

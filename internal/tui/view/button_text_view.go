@@ -15,22 +15,22 @@ func (b *ButtonTextView) Layout(textViewResolver TextViewResolver, e model.Eleme
 	}
 }
 
-func (b *ButtonTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer, x int, y int, localViewLine int) {
-	// x := 0
-	// y :=
-
-	s := ""
-	if localViewLine == 0 {
-		s = "*---*"
-	} else if localViewLine == 1 {
-		s = "|ABC|"
-	} else if localViewLine == 2 {
-		s = "*---*"
-	}
-	runes := []rune(s)
-	for i, r := range runes {
-		renderer.SetContent(x+i, y, r, nil, tcell.StyleDefault)
-	}
+func (b *ButtonTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
+	renderer.SetContent(0, 0, '*', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 0, '-', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 0, '-', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 0, '-', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 0, '*', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 1, '|', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 1, 'A', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 1, 'B', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 1, 'C', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 1, '|', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 2, '*', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 2, '-', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 2, '-', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 2, '-', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 2, '*', nil, tcell.StyleDefault)
 }
 
 func (b *ButtonTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {

@@ -33,40 +33,32 @@ func (t *TableContainerView) Layout(textViewResolver TextViewResolver, e model.E
 	panic("TableContainerView requires TableContainerElement")
 }
 
-func (t *TableContainerView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer, x int, y int, localViewLine int) {
+func (t *TableContainerView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
 	// x := 0
 	// y :=
 
 	if _, ok := textLayout.Element.(*model.TableContainerElement); ok {
 		// yBorders := table.GetElementCount() + 1
 		heightTable := t.HeightTable(textViewResolver, textLayout)
-		seek := localViewLine
-		drawX := x + 1
-		drawY := y + 1
+
+		drawY := 1
 		for i, h := range heightTable {
+			columns := len(textLayout.Children[i].Children)
+			drawX := 1
+			widthTable := t.WidthTable(textViewResolver, textLayout, i)
 
-			if seek < h {
-				widthTable := t.WidthTable(textViewResolver, textLayout, i)
+			for j := 0; j < columns; j++ {
+				cellElem := textLayout.Children[i].Children[j].Element
+				cellView := textViewResolver.Resolve(cellElem)
 
-				columns := len(textLayout.Children[i].Children)
-				for j := 0; j < columns; j++ {
-					cellElem := textLayout.Children[i].Children[j].Element
-					cellView := textViewResolver.Resolve(cellElem)
-
-					cellView.Draw(textViewResolver, textLayout.Children[i].Children[j], renderer, drawX, drawY, seek)
-					drawX += widthTable[j] + 1
-				}
-				break
+				cellView.Draw(textViewResolver, textLayout.Children[i].Children[j], renderer.Translate(drawX, drawY))
+				drawX += widthTable[j] + 1
 			}
-			drawY += h
-			seek -= h
+			drawY += h + 1
 		}
 
 		height := t.Height(textViewResolver, textLayout)
 		for i := 0; i < height; i++ {
-			if i != localViewLine {
-				continue
-			}
 			width := t.Width(textViewResolver, textLayout, i)
 			if i == 0 || i == height-1 {
 				for j := 0; j < width; j++ {

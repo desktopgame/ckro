@@ -38,8 +38,104 @@ func (doc *PlainDocument) Render() []Element {
 				Elements: []Element{
 					&TableRowElement{
 						Elements: []Element{
-							&InlineElement{
-								Text: "Column1",
+							&TableContainerElement{
+								StartPosition: Position{
+									Row:    i,
+									Column: 0,
+								},
+								EndPosition: Position{
+									Row:    i,
+									Column: text.GraphemeLength(lineStr) - 1,
+								},
+								Elements: []Element{
+									&TableRowElement{
+										Elements: []Element{
+											&TableContainerElement{
+												StartPosition: Position{
+													Row:    i,
+													Column: 0,
+												},
+												EndPosition: Position{
+													Row:    i,
+													Column: text.GraphemeLength(lineStr) - 1,
+												},
+												Elements: []Element{
+													&TableRowElement{
+														Elements: []Element{
+															&InlineElement{
+																Text: "Column1",
+															},
+															&InlineElement{
+																Text: "Column2",
+															},
+															&InlineElement{
+																Text: "Column3",
+															},
+														},
+													},
+													&TableRowElement{
+														Elements: []Element{
+															&InlineElement{
+																Text: "ColumnA",
+															},
+															&InlineElement{
+																Text: "ColumnB",
+															},
+															&InlineElement{
+																Text: "ColumnC",
+															},
+														},
+													},
+													&TableRowElement{
+														Elements: []Element{
+															&InlineElement{
+																Text: "ColumnX",
+															},
+															&InlineElement{
+																Text: "ColumnY",
+															},
+															&InlineElement{
+																Text: "ColumnZ",
+															},
+														},
+													},
+												},
+											},
+											&InlineElement{
+												Text: "Column2",
+											},
+											&InlineElement{
+												Text: "Column3",
+											},
+										},
+									},
+									&TableRowElement{
+										Elements: []Element{
+											&InlineElement{
+												Text: "ColumnA",
+											},
+											&InlineElement{
+												Text: "ColumnB",
+											},
+											&InlineElement{
+												Text: "ColumnC",
+											},
+										},
+									},
+									&TableRowElement{
+										Elements: []Element{
+											&InlineElement{
+												Text: "ColumnX",
+											},
+											&InlineElement{
+												Text: "ColumnY",
+											},
+											&InlineElement{
+												Text: "ColumnZ",
+											},
+										},
+									},
+								},
 							},
 							&InlineElement{
 								Text: "Column2",

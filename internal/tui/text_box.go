@@ -309,24 +309,31 @@ func (tb *TextBox) Draw(g *Graphics) {
 
 	// バッファの内容を描画
 	clip := Clip{
-		Graphics: g,
-		X:        tb.X,
-		Y:        tb.Y,
-		Width:    tb.Width,
-		Height:   tb.Height,
+		Graphics:   g,
+		X:          tb.X,
+		Y:          tb.Y,
+		Width:      tb.Width,
+		Height:     tb.Height,
+		FirstLineY: tb.scrollY,
 	}
+	cursor := clip
 	def := tcell.StyleDefault
 
 	for textSegment := range tb.BreakIter() {
-		if textSegment.ViewLine >= tb.scrollY {
+		if textSegment.LocalViewLine == 0 {
 			view := tb.TextEngine.Resolve(textSegment.TextLayout.Element)
-			view.Draw(tb.TextEngine, textSegment.TextLayout, clip, 0, textSegment.ViewLine-tb.scrollY, textSegment.LocalViewLine)
+			view.Draw(tb.TextEngine, textSegment.TextLayout, &clip)
+			clip.Y++
+		} else {
+			clip.Y++
 		}
 	}
 
 	if !tb.ShowCursor {
 		return
 	}
+
+	clip = cursor
 
 	screenX, cursorRow, currentRune, combining := tb.CursorPosition()
 

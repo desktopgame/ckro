@@ -3,7 +3,6 @@ package view
 import (
 	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui/model"
-	"github.com/gdamore/tcell/v2"
 	"github.com/mattn/go-runewidth"
 )
 
@@ -17,21 +16,23 @@ func (il *InlineTextView) Layout(textViewResolver TextViewResolver, e model.Elem
 	}
 }
 
-func (il *InlineTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer, x int, y int, localViewLine int) {
+func (il *InlineTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
 	// x := 0
 	// y := 0
 
-	def := tcell.StyleDefault
+	// def := tcell.StyleDefault
 	style := ConvertStyle(textLayout.Element.GetStyle())
 	clusters := text.GraphemeClusters(textLayout.Element.GetText())
+	x := 0
+	y := 0
 	for _, cluster := range clusters {
 
 		if cluster == "\t" {
-			spaces := text.TabWidth - (x % text.TabWidth)
-			for i := 0; i < spaces; i++ {
-				renderer.SetContent(x+i, y, ' ', nil, def)
-			}
-			x += spaces
+			//spaces := text.TabWidth - (x % text.TabWidth)
+			//for i := 0; i < spaces; i++ {
+			//	renderer.SetContent(x+i, y, ' ', nil, def)
+			//}
+			//x += spaces
 
 		} else {
 			runes := []rune(cluster)

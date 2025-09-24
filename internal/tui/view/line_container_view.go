@@ -21,13 +21,14 @@ func (l *LineContainerView) Layout(textViewResolver TextViewResolver, e model.El
 	}
 }
 
-func (l *LineContainerView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer, x int, y int, localViewLine int) {
+func (l *LineContainerView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
 	if lineContainer, ok := textLayout.Element.(*model.LineContainerElement); ok {
+		x := 0
 		for i := 0; i < lineContainer.GetElementCount(); i++ {
 			childElement := lineContainer.GetElement(i)
 			childView := textViewResolver.Resolve(childElement)
 
-			childView.Draw(textViewResolver, textLayout.Children[i], renderer, x, y, localViewLine)
+			childView.Draw(textViewResolver, textLayout.Children[i], renderer.Translate(x, 0))
 
 			width := 0
 			if tChildView, ok := childView.(TabStopTextView); ok {
