@@ -17,20 +17,20 @@ func (b *ButtonTextView) Layout(textViewResolver TextViewResolver, e model.Eleme
 
 func (b *ButtonTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
 	renderer.SetContent(0, 0, '*', nil, tcell.StyleDefault)
-	renderer.SetContent(0, 0, '-', nil, tcell.StyleDefault)
-	renderer.SetContent(0, 0, '-', nil, tcell.StyleDefault)
-	renderer.SetContent(0, 0, '-', nil, tcell.StyleDefault)
-	renderer.SetContent(0, 0, '*', nil, tcell.StyleDefault)
+	renderer.SetContent(1, 0, '-', nil, tcell.StyleDefault)
+	renderer.SetContent(2, 0, '-', nil, tcell.StyleDefault)
+	renderer.SetContent(3, 0, '-', nil, tcell.StyleDefault)
+	renderer.SetContent(4, 0, '*', nil, tcell.StyleDefault)
 	renderer.SetContent(0, 1, '|', nil, tcell.StyleDefault)
-	renderer.SetContent(0, 1, 'A', nil, tcell.StyleDefault)
-	renderer.SetContent(0, 1, 'B', nil, tcell.StyleDefault)
-	renderer.SetContent(0, 1, 'C', nil, tcell.StyleDefault)
-	renderer.SetContent(0, 1, '|', nil, tcell.StyleDefault)
+	renderer.SetContent(1, 1, 'A', nil, tcell.StyleDefault)
+	renderer.SetContent(2, 1, 'B', nil, tcell.StyleDefault)
+	renderer.SetContent(3, 1, 'C', nil, tcell.StyleDefault)
+	renderer.SetContent(4, 1, '|', nil, tcell.StyleDefault)
 	renderer.SetContent(0, 2, '*', nil, tcell.StyleDefault)
-	renderer.SetContent(0, 2, '-', nil, tcell.StyleDefault)
-	renderer.SetContent(0, 2, '-', nil, tcell.StyleDefault)
-	renderer.SetContent(0, 2, '-', nil, tcell.StyleDefault)
-	renderer.SetContent(0, 2, '*', nil, tcell.StyleDefault)
+	renderer.SetContent(1, 2, '-', nil, tcell.StyleDefault)
+	renderer.SetContent(2, 2, '-', nil, tcell.StyleDefault)
+	renderer.SetContent(3, 2, '-', nil, tcell.StyleDefault)
+	renderer.SetContent(4, 2, '*', nil, tcell.StyleDefault)
 }
 
 func (b *ButtonTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
