@@ -37,8 +37,8 @@ func ConvertStyle(s *model.Style) tcell.Style {
 		}
 	}
 
-	if s.Foreground != model.Default {
-		switch s.Foreground {
+	if s.Background != model.Default {
+		switch s.Background {
 		case model.White:
 			style = style.Background(tcell.ColorWhite)
 		case model.Black:
