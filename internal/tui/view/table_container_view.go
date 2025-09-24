@@ -52,12 +52,26 @@ func (t *TableContainerView) Draw(textViewResolver TextViewResolver, textLayout 
 				cellView := textViewResolver.Resolve(cellElem)
 
 				cellHeight := cellView.Height(textViewResolver, textLayout.Children[i].Children[j])
+				cellWidth := -1
+
+				for k := 0; k < cellHeight; k++ {
+					cw := cellView.Width(textViewResolver, textLayout.Children[i].Children[j], k)
+					if cw > cellWidth {
+						cellWidth = cw
+					}
+				}
+
+				offsetX := drawX
+				if cellWidth < widthTable[j] {
+					offsetX += (widthTable[j] - cellWidth) / 2
+				}
+
 				offsetY := drawY
 				if cellHeight < h {
 					offsetY += (h - cellHeight) / 2
 				}
 
-				cellView.Draw(textViewResolver, textLayout.Children[i].Children[j], renderer.Translate(drawX, offsetY))
+				cellView.Draw(textViewResolver, textLayout.Children[i].Children[j], renderer.Translate(offsetX, offsetY))
 				drawX += widthTable[j] + 1
 			}
 			drawY += h + 1
