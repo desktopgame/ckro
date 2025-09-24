@@ -7,17 +7,17 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
-type StyledTextView struct {
+type InlineTextView struct {
 }
 
-func (s *StyledTextView) Layout(e model.Element, width int) *TextLayout {
+func (il *InlineTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
 	return &TextLayout{
 		Element:  e,
 		Children: nil,
 	}
 }
 
-func (s *StyledTextView) Draw(textLayout *TextLayout, renderer Renderer, x int, y int) {
+func (il *InlineTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer, x int, y int) {
 	// x := 0
 	// y := 0
 
@@ -58,10 +58,26 @@ func (s *StyledTextView) Draw(textLayout *TextLayout, renderer Renderer, x int, 
 	}
 }
 
-func (s *StyledTextView) Width(textLayout *TextLayout, row int) int {
+func (il *InlineTextView) WidthWithTabStop(textViewResolver TextViewResolver, textLayout *TextLayout, column int) int {
+	clusters := text.GraphemeClusters(textLayout.Element.GetText())
+	totalWidth := 0
+	for _, cluster := range clusters {
+		width := 0
+		if cluster == "\t" {
+			width = text.TabWidth - (column % text.TabWidth)
+		} else {
+			width = runewidth.StringWidth(cluster)
+		}
+		column += width
+		totalWidth += width
+	}
+	return totalWidth
+}
+
+func (il *InlineTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
 	return text.DisplayWidth(textLayout.Element.GetText())
 }
 
-func (s *StyledTextView) Height(textLayout *TextLayout) int {
+func (il *InlineTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
 	return 1
 }

@@ -319,8 +319,8 @@ func (tb *TextBox) Draw(g *Graphics) {
 
 	for textSegment := range tb.BreakIter() {
 		if textSegment.ViewLine >= tb.scrollY {
-			view := tb.TextEngine.ProvideView(textSegment.TextLayout.Element)
-			view.Draw(textSegment.TextLayout, clip, 0, textSegment.ViewLine-tb.scrollY)
+			view := tb.TextEngine.Resolve(textSegment.TextLayout.Element)
+			view.Draw(tb.TextEngine, textSegment.TextLayout, clip, 0, textSegment.ViewLine-tb.scrollY)
 		}
 	}
 
@@ -356,21 +356,21 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 		entries := []*view.TextLayout{}
 		for i := 0; i < len(elements); i++ {
 			element := elements[i]
-			view := tb.TextEngine.ProvideView(element)
+			view := tb.TextEngine.Resolve(element)
 
-			newLayout := view.Layout(element, tb.Width)
+			newLayout := view.Layout(tb.TextEngine, element, tb.Width)
 			entries = append(entries, newLayout)
 		}
 
 		viewLine := 0
 		for i := 0; i < len(entries); i++ {
 			entry := entries[i]
-			textView := tb.TextEngine.ProvideView(entry.Element)
-			height := textView.Height(entry)
+			textView := tb.TextEngine.Resolve(entry.Element)
+			height := textView.Height(tb.TextEngine, entry)
 
 			lineWrap := false
 			for j := 0; j < height; j++ {
-				if textView.Width(entry, j) > tb.Width {
+				if textView.Width(tb.TextEngine, entry, j) > tb.Width {
 					lineWrap = true
 					break
 				}

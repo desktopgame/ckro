@@ -6,6 +6,6 @@ import (
 )
 
 type TextEngine interface {
-	ProvideView(e model.Element) view.TextView
+	Resolve(e model.Element) view.TextView
 	ProvideInputHandler(e model.Element) TextInputHandler
 }
