@@ -8,9 +8,10 @@ import (
 )
 
 type Segment struct {
-	TextLayout *view.TextLayout
-	ModelLine  int
-	ViewLine   int
+	TextLayout    *view.TextLayout
+	ModelLine     int
+	ViewLine      int
+	LocalViewLine int
 }
 
 type View interface {

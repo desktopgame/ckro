@@ -320,7 +320,7 @@ func (tb *TextBox) Draw(g *Graphics) {
 	for textSegment := range tb.BreakIter() {
 		if textSegment.ViewLine >= tb.scrollY {
 			view := tb.TextEngine.Resolve(textSegment.TextLayout.Element)
-			view.Draw(tb.TextEngine, textSegment.TextLayout, clip, 0, textSegment.ViewLine-tb.scrollY)
+			view.Draw(tb.TextEngine, textSegment.TextLayout, clip, 0, textSegment.ViewLine-tb.scrollY, textSegment.LocalViewLine)
 		}
 	}
 
@@ -528,9 +528,10 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 			} else {
 				for j := 0; j < height; j++ {
 					segment := presenter.Segment{
-						TextLayout: entry,
-						ModelLine:  entry.Element.GetStartPosition().Row,
-						ViewLine:   viewLine,
+						TextLayout:    entry,
+						ModelLine:     entry.Element.GetStartPosition().Row,
+						ViewLine:      viewLine,
+						LocalViewLine: j,
 					}
 					if !yield(segment) {
 						return

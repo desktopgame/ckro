@@ -17,7 +17,7 @@ func (il *InlineTextView) Layout(textViewResolver TextViewResolver, e model.Elem
 	}
 }
 
-func (il *InlineTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer, x int, y int) {
+func (il *InlineTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer, x int, y int, localViewLine int) {
 	// x := 0
 	// y := 0
 

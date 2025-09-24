@@ -24,6 +24,28 @@ func (doc *PlainDocument) Render() []Element {
 	for i := 0; i < doc.buffer.GetLineCount(); i++ {
 		line := doc.buffer.GetLineAt(i)
 		lineStr := line.GetContent()
+
+		words := strings.Split(line.GetContent(), ";")
+		if len(words) > 1 {
+			var listItems []Element
+			for _, word := range words {
+				listItems = append(listItems, &InlineElement{
+					Text: word,
+				})
+			}
+			elements = append(elements, &ListContainerElement{
+				StartPosition: Position{
+					Row:    i,
+					Column: 0,
+				},
+				EndPosition: Position{
+					Row:    i,
+					Column: text.GraphemeLength(lineStr) - 1,
+				},
+				Elements: listItems,
+			})
+			continue
+		}
 		elements = append(elements, &LineContainerElement{
 			StartPosition: Position{
 				Row:    i,
