@@ -317,7 +317,7 @@ func (tb *TextBox) Draw(g *Graphics) {
 	}
 	def := tcell.StyleDefault
 
-	for textSegment := range tb.BreakIter2() {
+	for textSegment := range tb.BreakIter() {
 		if textSegment.ViewLine >= tb.scrollY {
 			view := tb.TextEngine.ProvideView(textSegment.TextLayout.Element)
 			view.Draw(textSegment.TextLayout, clip, 0, textSegment.ViewLine-tb.scrollY)
@@ -384,115 +384,6 @@ func (tb *TextBox) Draw(g *Graphics) {
 
 // BreakIter returns segment array by line, in consideration a wrap.
 func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
-	//buf := tb.Document.GetBuffer()
-	//sb := strings.Builder{}
-
-	return func(yield func(presenter.Segment) bool) {
-		for textSegment := range tb.BreakIter2() {
-			if !yield(textSegment) {
-				return
-			}
-		}
-	}
-	/*
-		return func(yield func(presenter.Segment) bool) {
-			startY := 0
-			endY := min(tb.scrollY+tb.Height, buf.GetLineCount())
-			drawY := 0
-			for i := startY; i < endY; i++ {
-				line := buf.GetLineAt(i).GetContent()
-				x := 0
-
-				clusters := text.GraphemeClusters(line)
-				for _, cluster := range clusters {
-					runes := []rune(cluster)
-
-					if cluster == "\t" {
-						if x+text.TabWidth > tb.Width {
-							seg := presenter.Segment{
-								Text:      sb.String(),
-								ModelLine: i,
-								ViewLine:  drawY,
-							}
-							if !yield(seg) {
-								return
-							}
-							sb.Reset()
-
-							drawY++
-							x = 0
-						}
-						sb.WriteString(cluster)
-						if drawY-tb.scrollY >= tb.Height {
-							break
-						}
-						x += 3
-					} else if len(runes) > 0 {
-						mainRune := runes[0]
-						width := runewidth.RuneWidth(mainRune)
-
-						if x+width > tb.Width {
-							seg := presenter.Segment{
-								Text:      sb.String(),
-								ModelLine: i,
-								ViewLine:  drawY,
-							}
-							if !yield(seg) {
-								return
-							}
-							sb.Reset()
-
-							drawY++
-							x = 0
-						}
-						sb.WriteString(cluster)
-						if drawY-tb.scrollY >= tb.Height {
-							break
-						}
-						if width == 2 {
-							x++
-						}
-					}
-					x++
-					if x > tb.Width {
-						seg := presenter.Segment{
-							Text:      sb.String(),
-							ModelLine: i,
-							ViewLine:  drawY,
-						}
-						if !yield(seg) {
-							return
-						}
-						sb.Reset()
-
-						drawY++
-						x = 0
-					}
-					if drawY-tb.scrollY >= tb.Height {
-						break
-					}
-				}
-				seg := presenter.Segment{
-					Text:      sb.String(),
-					ModelLine: i,
-					ViewLine:  drawY,
-				}
-				if !yield(seg) {
-					return
-				}
-				sb.Reset()
-
-				drawY++
-				if drawY-tb.scrollY >= tb.Height {
-					break
-				}
-			}
-		}
-	*/
-}
-
-// BreakIter returns segment array by line, in consideration a wrap.
-func (tb *TextBox) BreakIter2() iter.Seq[presenter.Segment] {
 	//buf := tb.Document.GetBuffer()
 	//sb := strings.Builder{}
 
