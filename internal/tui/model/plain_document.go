@@ -25,30 +25,8 @@ func (doc *PlainDocument) Render() []Element {
 		line := doc.buffer.GetLineAt(i)
 		lineStr := line.GetContent()
 
-		words := strings.Split(line.GetContent(), ";")
-		if len(words) > 1 {
-			var listItems []Element
-			for _, word := range words {
-				cells := strings.Split(word, ",")
-				if len(cells) > 1 {
-					var cellItems []Element
-					for _, cell := range cells {
-						cellItems = append(cellItems, &InlineElement{
-							Text: cell,
-						})
-					}
-					listItems = append(listItems, &ListContainerElement{
-						Elements: cellItems,
-					})
-				} else if word == "+" {
-					listItems = append(listItems, &ButtonElement{})
-				} else {
-					listItems = append(listItems, &InlineElement{
-						Text: word,
-					})
-				}
-			}
-			elements = append(elements, &ListContainerElement{
+		if line.GetContent() == "TABLE" {
+			elements = append(elements, &TableContainerElement{
 				StartPosition: Position{
 					Row:    i,
 					Column: 0,
@@ -57,7 +35,47 @@ func (doc *PlainDocument) Render() []Element {
 					Row:    i,
 					Column: text.GraphemeLength(lineStr) - 1,
 				},
-				Elements: listItems,
+				Elements: []Element{
+					&TableRowElement{
+						Elements: []Element{
+							&InlineElement{
+								Text: "Column1",
+							},
+							&InlineElement{
+								Text: "Column2",
+							},
+							&InlineElement{
+								Text: "Column3",
+							},
+						},
+					},
+					&TableRowElement{
+						Elements: []Element{
+							&InlineElement{
+								Text: "ColumnA",
+							},
+							&InlineElement{
+								Text: "ColumnB",
+							},
+							&InlineElement{
+								Text: "ColumnC",
+							},
+						},
+					},
+					&TableRowElement{
+						Elements: []Element{
+							&InlineElement{
+								Text: "ColumnX",
+							},
+							&InlineElement{
+								Text: "ColumnY",
+							},
+							&InlineElement{
+								Text: "ColumnZ",
+							},
+						},
+					},
+				},
 			})
 			continue
 		}
