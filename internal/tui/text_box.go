@@ -323,9 +323,9 @@ func (tb *TextBox) Draw(g *Graphics) {
 		if textSegment.LocalViewLine == 0 {
 			view := tb.TextEngine.Resolve(textSegment.TextLayout.Element)
 			view.Draw(tb.TextEngine, textSegment.TextLayout, &clip)
-			clip.Y++
+			clip.offsetY++
 		} else {
-			clip.Y++
+			clip.offsetY++
 		}
 	}
 
