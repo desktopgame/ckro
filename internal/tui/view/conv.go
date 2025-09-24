@@ -8,6 +8,10 @@ import (
 func ConvertStyle(s *model.Style) tcell.Style {
 	style := tcell.StyleDefault
 
+	if s == nil {
+		return style
+	}
+
 	if s.IsBold {
 		style = style.Bold(true)
 	}
