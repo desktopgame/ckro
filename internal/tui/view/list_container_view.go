@@ -32,6 +32,7 @@ func (l *ListContainerView) Draw(textViewResolver TextViewResolver, textLayout *
 			height := childView.Height(textViewResolver, textLayout.Children[i])
 			y += height
 		}
+		return
 	}
 	panic("ListContainerView requires ListContainerElement")
 }
@@ -48,6 +49,7 @@ func (l *ListContainerView) Width(textViewResolver TextViewResolver, textLayout 
 			}
 			row -= height
 		}
+		return -1
 	}
 	panic("ListContainerView requires ListContainerElement")
 }
@@ -61,6 +63,7 @@ func (l *ListContainerView) Height(textViewResolver TextViewResolver, textLayout
 
 			height += childView.Height(textViewResolver, textLayout.Children[i])
 		}
+		return height
 	}
 	panic("ListContainerView requires ListContainerElement")
 }
