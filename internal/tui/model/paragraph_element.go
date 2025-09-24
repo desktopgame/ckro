@@ -6,6 +6,10 @@ type ParagraphElement struct {
 	EndPosition   Position
 }
 
+func (p *ParagraphElement) GetStyle() *Style {
+	return nil
+}
+
 func (p *ParagraphElement) GetText() string {
 	return p.Line
 }

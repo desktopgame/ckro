@@ -1,6 +1,7 @@
 package model
 
 type Element interface {
+	GetStyle() *Style
 	GetText() string
 	GetStartPosition() Position
 	GetEndPosition() Position
