@@ -409,8 +409,8 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 							runes := []rune(cluster)
 
 							if cluster == "\t" {
-								// w := text.TabWidth - (x % text.TabWidth)
-								w := text.TabWidth
+								w := text.TabWidth - (x % text.TabWidth)
+								// w := text.TabWidth
 								if x+w > tb.Width {
 									segment := presenter.Segment{
 										TextLayout: &view.TextLayout{
@@ -472,11 +472,8 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 									x = 0
 								}
 								sb.WriteString(cluster)
-								if width == 2 {
-									x++
-								}
+								x += width
 							}
-							x++
 							if x > tb.Width {
 								segment := presenter.Segment{
 									TextLayout: &view.TextLayout{
