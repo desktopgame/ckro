@@ -24,7 +24,7 @@ func (doc *PlainDocument) Render() []Element {
 	for i := 0; i < doc.buffer.GetLineCount(); i++ {
 		line := doc.buffer.GetLineAt(i)
 		lineStr := line.GetContent()
-		elements = append(elements, &ParagraphElement{
+		elements = append(elements, &StyledParagraphElement{
 			Line: lineStr,
 			StartPosition: Position{
 				Row:    i,
@@ -33,6 +33,10 @@ func (doc *PlainDocument) Render() []Element {
 			EndPosition: Position{
 				Row:    i,
 				Column: text.GraphemeLength(lineStr) - 1,
+			},
+			Style: &Style{
+				IsBold:     true,
+				Foreground: Green,
 			},
 		})
 	}

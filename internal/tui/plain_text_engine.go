@@ -9,7 +9,7 @@ type PlainTextEngine struct {
 }
 
 func (p *PlainTextEngine) ProvideView(e model.Element) view.TextView {
-	return &view.PlainTextView{}
+	return &view.StyledTextView{}
 }
 
 func (p *PlainTextEngine) ProvideInputHandler(e model.Element) TextInputHandler {
