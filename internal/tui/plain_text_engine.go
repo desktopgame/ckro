@@ -16,6 +16,8 @@ func (p *PlainTextEngine) Resolve(e model.Element) view.TextView {
 		return &view.InlineTextView{}
 	case *model.ListContainerElement:
 		return &view.ListContainerView{}
+	case *model.ButtonElement:
+		return &view.ButtonTextView{}
 	case *model.ParagraphElement:
 		return &view.InlineTextView{}
 	}

@@ -29,9 +29,24 @@ func (doc *PlainDocument) Render() []Element {
 		if len(words) > 1 {
 			var listItems []Element
 			for _, word := range words {
-				listItems = append(listItems, &InlineElement{
-					Text: word,
-				})
+				cells := strings.Split(word, ",")
+				if len(cells) > 1 {
+					var cellItems []Element
+					for _, cell := range cells {
+						cellItems = append(cellItems, &InlineElement{
+							Text: cell,
+						})
+					}
+					listItems = append(listItems, &ListContainerElement{
+						Elements: cellItems,
+					})
+				} else if word == "+" {
+					listItems = append(listItems, &ButtonElement{})
+				} else {
+					listItems = append(listItems, &InlineElement{
+						Text: word,
+					})
+				}
 			}
 			elements = append(elements, &ListContainerElement{
 				StartPosition: Position{

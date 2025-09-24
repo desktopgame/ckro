@@ -29,7 +29,7 @@ func (l *ListContainerView) Draw(textViewResolver TextViewResolver, textLayout *
 
 			height := childView.Height(textViewResolver, textLayout.Children[i])
 			if localViewLine < height {
-				childView.Draw(textViewResolver, textLayout.Children[i], renderer, x, y, localViewLine)
+				childView.Draw(textViewResolver, textLayout.Children[i], renderer, x+2, y, localViewLine)
 				break
 			}
 			localViewLine -= height
