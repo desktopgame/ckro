@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/desktopgame/ckro/internal/tui"
+	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
 )
 
@@ -19,6 +20,9 @@ func (t *TextEditor) Init(onModified func()) {
 	t.TextArea.TextBox.ShowCursor = true
 	t.TextArea.TextPresenter = &presenter.EditTextPresenter{
 		OnModified: onModified,
+	}
+	if plainDoc, ok := t.TextArea.TextBox.Document.(*model.PlainDocument); ok {
+		plainDoc.Styled = true
 	}
 	// 行番号エリア
 	lineNumbers := tui.Tile{}

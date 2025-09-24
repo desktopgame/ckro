@@ -12,6 +12,7 @@ type PlainDocument struct {
 	buffer       Buffer
 	cursorRow    int
 	cursorColumn int
+	Styled       bool
 }
 
 // Init is initialize Buffer.
@@ -21,160 +22,13 @@ func (doc *PlainDocument) Init() {
 
 func (doc *PlainDocument) Render() []Element {
 	elements := []Element{}
+	if doc.Styled {
+
+	}
 	for i := 0; i < doc.buffer.GetLineCount(); i++ {
 		line := doc.buffer.GetLineAt(i)
 		lineStr := line.GetContent()
 
-		if line.GetContent() == "TABLE" {
-			elements = append(elements, &TableContainerElement{
-				StartPosition: Position{
-					Row:    i,
-					Column: 0,
-				},
-				EndPosition: Position{
-					Row:    i,
-					Column: text.GraphemeLength(lineStr) - 1,
-				},
-				Elements: []Element{
-					&TableRowElement{
-						Elements: []Element{
-							&TableContainerElement{
-								StartPosition: Position{
-									Row:    i,
-									Column: 0,
-								},
-								EndPosition: Position{
-									Row:    i,
-									Column: text.GraphemeLength(lineStr) - 1,
-								},
-								Elements: []Element{
-									&TableRowElement{
-										Elements: []Element{
-											&TableContainerElement{
-												StartPosition: Position{
-													Row:    i,
-													Column: 0,
-												},
-												EndPosition: Position{
-													Row:    i,
-													Column: text.GraphemeLength(lineStr) - 1,
-												},
-												Elements: []Element{
-													&TableRowElement{
-														Elements: []Element{
-															&InlineElement{
-																Text: "Column1",
-															},
-															&InlineElement{
-																Text: "Column2",
-															},
-															&InlineElement{
-																Text: "Column3",
-															},
-														},
-													},
-													&TableRowElement{
-														Elements: []Element{
-															&InlineElement{
-																Text: "ColumnA",
-															},
-															&InlineElement{
-																Text: "ColumnB",
-															},
-															&InlineElement{
-																Text: "ColumnC",
-															},
-														},
-													},
-													&TableRowElement{
-														Elements: []Element{
-															&InlineElement{
-																Text: "ColumnX",
-															},
-															&InlineElement{
-																Text: "ColumnY",
-															},
-															&InlineElement{
-																Text: "ColumnZ",
-															},
-														},
-													},
-												},
-											},
-											&InlineElement{
-												Text: "Column2",
-											},
-											&InlineElement{
-												Text: "Column3",
-											},
-										},
-									},
-									&TableRowElement{
-										Elements: []Element{
-											&InlineElement{
-												Text: "ColumnA",
-											},
-											&InlineElement{
-												Text: "ColumnB",
-											},
-											&InlineElement{
-												Text: "ColumnC",
-											},
-										},
-									},
-									&TableRowElement{
-										Elements: []Element{
-											&InlineElement{
-												Text: "ColumnX",
-											},
-											&InlineElement{
-												Text: "ColumnY",
-											},
-											&InlineElement{
-												Text: "ColumnZ",
-											},
-										},
-									},
-								},
-							},
-							&InlineElement{
-								Text: "Column2",
-							},
-							&InlineElement{
-								Text: "Column3",
-							},
-						},
-					},
-					&TableRowElement{
-						Elements: []Element{
-							&InlineElement{
-								Text: "ColumnA",
-							},
-							&InlineElement{
-								Text: "ColumnB",
-							},
-							&InlineElement{
-								Text: "ColumnC",
-							},
-						},
-					},
-					&TableRowElement{
-						Elements: []Element{
-							&InlineElement{
-								Text: "ColumnX",
-							},
-							&InlineElement{
-								Text: "ColumnY",
-							},
-							&InlineElement{
-								Text: "ColumnZ",
-							},
-						},
-					},
-				},
-			})
-			continue
-		}
 		elements = append(elements, &LineContainerElement{
 			StartPosition: Position{
 				Row:    i,
