@@ -51,18 +51,11 @@ func (m *MarkdownTextEngine) Resolve(e model.Element) view.TextView {
 		return &view.TableRowTextViewGM{}
 	case *model.TableCellElement:
 		return &view.TableCellTextView{}
-
-	// Legacy Elements (for backward compatibility)
+	// Legacy elements
 	case *model.LineContainerElement:
 		return &view.LineContainerView{}
 	case *model.InlineElement:
 		return &view.InlineTextView{}
-	case *model.ListContainerElement:
-		return &view.ListContainerView{}
-	case *model.TableContainerElement:
-		return &view.TableContainerView{}
-	case *model.ButtonElement:
-		return &view.ButtonTextView{}
 	case *model.ParagraphElement:
 		return &view.InlineTextView{}
 	}
