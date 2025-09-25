@@ -414,26 +414,33 @@ func (c *GoldmarkConverter) isTableNode(node ast.Node) bool {
 	return strings.Contains(kind.String(), "Table")
 }
 
-// Convert table nodes (simplified implementation)
+// Convert table nodes (improved implementation)
 func (c *GoldmarkConverter) convertTableNode(node ast.Node) Element {
 	startPos, endPos := c.getPosition(node)
 	kind := node.Kind().String()
 
 	switch {
-	case strings.Contains(kind, "Table") && !strings.Contains(kind, "Row") && !strings.Contains(kind, "Cell"):
+	case kind == "Table":
 		// Table root
 		return &TableElement{
 			StartPosition: startPos,
 			EndPosition:   endPos,
 			Children:      c.convertChildren(node),
 		}
-	case strings.Contains(kind, "TableRow"):
+	case kind == "TableHeader":
+		// Table header - this is the key fix!
+		return &TableHeaderElement{
+			StartPosition: startPos,
+			EndPosition:   endPos,
+			Children:      c.convertChildren(node),
+		}
+	case kind == "TableRow":
 		return &TableRowElementGM{
 			StartPosition: startPos,
 			EndPosition:   endPos,
 			Children:      c.convertChildren(node),
 		}
-	case strings.Contains(kind, "TableCell"):
+	case kind == "TableCell":
 		return &TableCellElement{
 			StartPosition: startPos,
 			EndPosition:   endPos,

@@ -765,13 +765,16 @@ func (t *TableTextView) Layout(textViewResolver TextViewResolver, e model.Elemen
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		children = append(children, childView.Layout(textViewResolver, childElement, width))
+		children = append(children, childView.Layout(textViewResolver, childElement, width-2)) // Account for left/right borders
 	}
 
 	totalHeight := 0
 	for _, child := range children {
 		totalHeight += child.Height
 	}
+
+	// Add space for top and bottom borders
+	totalHeight += 2
 
 	return &TextLayout{
 		Element:  e,
@@ -782,11 +785,35 @@ func (t *TableTextView) Layout(textViewResolver TextViewResolver, e model.Elemen
 }
 
 func (t *TableTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
-	y := 0
+	tableWidth := textLayout.Width
+	tableHeight := textLayout.Height
+
+	// Draw top border
+	renderer.SetContent(0, 0, '┌', nil, tcell.StyleDefault)
+	for x := 1; x < tableWidth-1; x++ {
+		renderer.SetContent(x, 0, '─', nil, tcell.StyleDefault)
+	}
+	renderer.SetContent(tableWidth-1, 0, '┐', nil, tcell.StyleDefault)
+
+	// Draw bottom border
+	renderer.SetContent(0, tableHeight-1, '└', nil, tcell.StyleDefault)
+	for x := 1; x < tableWidth-1; x++ {
+		renderer.SetContent(x, tableHeight-1, '─', nil, tcell.StyleDefault)
+	}
+	renderer.SetContent(tableWidth-1, tableHeight-1, '┘', nil, tcell.StyleDefault)
+
+	// Draw left and right borders
+	for y := 1; y < tableHeight-1; y++ {
+		renderer.SetContent(0, y, '│', nil, tcell.StyleDefault)
+		renderer.SetContent(tableWidth-1, y, '│', nil, tcell.StyleDefault)
+	}
+
+	// Draw table content
+	y := 1 // Start after top border
 	for i, child := range textLayout.Children {
 		childElement := textLayout.Element.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		childView.Draw(textViewResolver, child, renderer.Translate(0, y))
+		childView.Draw(textViewResolver, child, renderer.Translate(1, y)) // Offset by left border
 		y += child.Height
 	}
 }
@@ -805,10 +832,25 @@ type TableHeaderTextView struct{}
 func (t *TableHeaderTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
 	children := []*TextLayout{}
 
-	for i := 0; i < e.GetElementCount(); i++ {
+	// Calculate cell width - distribute available width among cells
+	cellCount := e.GetElementCount()
+	if cellCount == 0 {
+		return &TextLayout{
+			Element:  e,
+			Children: children,
+			Width:    width,
+			Height:   1,
+		}
+	}
+
+	// Account for cell separators (│) between cells
+	availableWidth := width - (cellCount - 1)
+	cellWidth := availableWidth / cellCount
+
+	for i := 0; i < cellCount; i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		children = append(children, childView.Layout(textViewResolver, childElement, width))
+		children = append(children, childView.Layout(textViewResolver, childElement, cellWidth))
 	}
 
 	return &TextLayout{
@@ -821,12 +863,19 @@ func (t *TableHeaderTextView) Layout(textViewResolver TextViewResolver, e model.
 
 func (t *TableHeaderTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
 	style := tcell.StyleDefault.Bold(true)
+	cellCount := len(textLayout.Children)
+	if cellCount == 0 {
+		return
+	}
+
+	availableWidth := textLayout.Width - (cellCount - 1)
+	cellWidth := availableWidth / cellCount
 
 	x := 0
 	for i, child := range textLayout.Children {
-		// Draw separator
+		// Draw cell separator
 		if i > 0 {
-			renderer.SetContent(x, 0, '|', nil, style)
+			renderer.SetContent(x, 0, '│', nil, style)
 			x++
 		}
 
@@ -840,21 +889,12 @@ func (t *TableHeaderTextView) Draw(textViewResolver TextViewResolver, textLayout
 		}
 
 		childView.Draw(textViewResolver, child, headerRenderer)
-		x += childView.Width(textViewResolver, child, 0)
+		x += cellWidth
 	}
 }
 
 func (t *TableHeaderTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	totalWidth := 0
-	for i, child := range textLayout.Children {
-		if i > 0 {
-			totalWidth += 1 // Separator
-		}
-		childElement := textLayout.Element.GetElement(i)
-		childView := textViewResolver.Resolve(childElement)
-		totalWidth += childView.Width(textViewResolver, child, 0)
-	}
-	return totalWidth
+	return textLayout.Width
 }
 
 func (t *TableHeaderTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
@@ -867,10 +907,25 @@ type TableRowTextViewGM struct{}
 func (t *TableRowTextViewGM) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
 	children := []*TextLayout{}
 
-	for i := 0; i < e.GetElementCount(); i++ {
+	// Calculate cell width - distribute available width among cells
+	cellCount := e.GetElementCount()
+	if cellCount == 0 {
+		return &TextLayout{
+			Element:  e,
+			Children: children,
+			Width:    width,
+			Height:   1,
+		}
+	}
+
+	// Account for cell separators (|) between cells
+	availableWidth := width - (cellCount - 1)
+	cellWidth := availableWidth / cellCount
+
+	for i := 0; i < cellCount; i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		children = append(children, childView.Layout(textViewResolver, childElement, width))
+		children = append(children, childView.Layout(textViewResolver, childElement, cellWidth))
 	}
 
 	return &TextLayout{
@@ -882,32 +937,31 @@ func (t *TableRowTextViewGM) Layout(textViewResolver TextViewResolver, e model.E
 }
 
 func (t *TableRowTextViewGM) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
+	cellCount := len(textLayout.Children)
+	if cellCount == 0 {
+		return
+	}
+
+	availableWidth := textLayout.Width - (cellCount - 1)
+	cellWidth := availableWidth / cellCount
+
 	x := 0
 	for i, child := range textLayout.Children {
-		// Draw separator
+		// Draw cell separator
 		if i > 0 {
-			renderer.SetContent(x, 0, '|', nil, tcell.StyleDefault)
+			renderer.SetContent(x, 0, '│', nil, tcell.StyleDefault)
 			x++
 		}
 
 		childElement := textLayout.Element.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
 		childView.Draw(textViewResolver, child, renderer.Translate(x, 0))
-		x += childView.Width(textViewResolver, child, 0)
+		x += cellWidth
 	}
 }
 
 func (t *TableRowTextViewGM) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	totalWidth := 0
-	for i, child := range textLayout.Children {
-		if i > 0 {
-			totalWidth += 1 // Separator
-		}
-		childElement := textLayout.Element.GetElement(i)
-		childView := textViewResolver.Resolve(childElement)
-		totalWidth += childView.Width(textViewResolver, child, 0)
-	}
-	return totalWidth
+	return textLayout.Width
 }
 
 func (t *TableRowTextViewGM) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
