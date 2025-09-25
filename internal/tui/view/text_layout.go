@@ -8,4 +8,5 @@ type TextLayout struct {
 
 	Width  int
 	Height int
+	Indent int
 }

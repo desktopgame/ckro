@@ -264,7 +264,9 @@ func (l *ListTextView) Layout(textViewResolver TextViewResolver, e model.Element
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		children = append(children, childView.Layout(textViewResolver, childElement, childWidth))
+		childTextLayout := childView.Layout(textViewResolver, childElement, childWidth)
+		childTextLayout.Indent++
+		children = append(children, childTextLayout)
 	}
 
 	totalHeight := 0
@@ -291,6 +293,10 @@ func (l *ListTextView) Draw(textViewResolver TextViewResolver, textLayout *TextL
 			prefix = strings.Repeat(" ", 2) + string(rune('1'+i)) + ". "
 		} else {
 			prefix = "  - "
+		}
+
+		if textLayout.Indent > 0 {
+			prefix = strings.Repeat("  ", textLayout.Indent) + prefix
 		}
 
 		x := 0
