@@ -42,7 +42,8 @@ func (doc *PlainDocument) Render() []Element {
 		line := doc.buffer.GetLineAt(i)
 		lineStr := line.GetContent()
 
-		elements = append(elements, &LineContainerElement{
+		elements = append(elements, &PlainElement{
+			Text: line.GetContent(),
 			StartPosition: Position{
 				Row:    i,
 				Column: 0,
@@ -50,19 +51,6 @@ func (doc *PlainDocument) Render() []Element {
 			EndPosition: Position{
 				Row:    i,
 				Column: text.GraphemeLength(lineStr) - 1,
-			},
-			Elements: []Element{
-				&InlineElement{
-					Text: line.GetContent(),
-					StartPosition: Position{
-						Row:    i,
-						Column: 0,
-					},
-					EndPosition: Position{
-						Row:    i,
-						Column: text.GraphemeLength(lineStr) - 1,
-					},
-				},
 			},
 		})
 	}
