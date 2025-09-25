@@ -452,18 +452,39 @@ func (c *GoldmarkConverter) convertGenericNode(node ast.Node) Element {
 	// If it's a leaf node with text, convert to TextElement
 	if node.FirstChild() == nil {
 		if hasText := node.HasChildren(); !hasText {
-			// Try to extract text content
-			var buf bytes.Buffer
-			if node.Lines().Len() > 0 {
-				for i := 0; i < node.Lines().Len(); i++ {
-					line := node.Lines().At(i)
-					buf.Write(line.Value(c.source))
+			// Check if this is a block node that can have Lines
+			kind := node.Kind()
+			isBlockNode := kind == ast.KindDocument ||
+				kind == ast.KindParagraph ||
+				kind == ast.KindHeading ||
+				kind == ast.KindCodeBlock ||
+				kind == ast.KindFencedCodeBlock ||
+				kind == ast.KindBlockquote ||
+				kind == ast.KindList ||
+				kind == ast.KindListItem ||
+				kind == ast.KindThematicBreak
+
+			// Try to extract text content only from block nodes
+			if isBlockNode {
+				var buf bytes.Buffer
+				if node.Lines().Len() > 0 {
+					for i := 0; i < node.Lines().Len(); i++ {
+						line := node.Lines().At(i)
+						buf.Write(line.Value(c.source))
+					}
+					return &TextElement{
+						StartPosition: startPos,
+						EndPosition:   endPos,
+						Text:          buf.String(),
+					}
 				}
-				return &TextElement{
-					StartPosition: startPos,
-					EndPosition:   endPos,
-					Text:          buf.String(),
-				}
+			}
+
+			// For inline nodes without text, return empty text element
+			return &TextElement{
+				StartPosition: startPos,
+				EndPosition:   endPos,
+				Text:          "",
 			}
 		}
 	}
