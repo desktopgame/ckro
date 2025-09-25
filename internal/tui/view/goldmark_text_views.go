@@ -700,3 +700,254 @@ func (s *StyleRenderer) Translate(offsetX int, offsetY int) Renderer {
 		style: s.style,
 	}
 }
+
+// SoftBreakTextView renders SoftBreakElement
+type SoftBreakTextView struct{}
+
+func (s *SoftBreakTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
+	return &TextLayout{
+		Element:  e,
+		Children: nil,
+		Width:    width,
+		Height:   1,
+	}
+}
+
+func (s *SoftBreakTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
+	// Draw a space for soft break
+	renderer.SetContent(0, 0, ' ', nil, tcell.StyleDefault)
+}
+
+func (s *SoftBreakTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
+	return 1 // Single space
+}
+
+func (s *SoftBreakTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
+	return 1
+}
+
+// HardBreakTextView renders HardBreakElement
+type HardBreakTextView struct{}
+
+func (h *HardBreakTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
+	return &TextLayout{
+		Element:  e,
+		Children: nil,
+		Width:    width,
+		Height:   1,
+	}
+}
+
+func (h *HardBreakTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
+	// Hard break creates a line break - no visual content needed
+}
+
+func (h *HardBreakTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
+	return 0 // Line break has no width
+}
+
+func (h *HardBreakTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
+	return 1
+}
+
+// TableTextView renders TableElement
+type TableTextView struct{}
+
+func (t *TableTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
+	children := []*TextLayout{}
+
+	for i := 0; i < e.GetElementCount(); i++ {
+		childElement := e.GetElement(i)
+		childView := textViewResolver.Resolve(childElement)
+		children = append(children, childView.Layout(textViewResolver, childElement, width))
+	}
+
+	totalHeight := 0
+	for _, child := range children {
+		totalHeight += child.Height
+	}
+
+	return &TextLayout{
+		Element:  e,
+		Children: children,
+		Width:    width,
+		Height:   totalHeight,
+	}
+}
+
+func (t *TableTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
+	y := 0
+	for i, child := range textLayout.Children {
+		childElement := textLayout.Element.GetElement(i)
+		childView := textViewResolver.Resolve(childElement)
+		childView.Draw(textViewResolver, child, renderer.Translate(0, y))
+		y += child.Height
+	}
+}
+
+func (t *TableTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
+	return textLayout.Width
+}
+
+func (t *TableTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
+	return textLayout.Height
+}
+
+// TableHeaderTextView renders TableHeaderElement
+type TableHeaderTextView struct{}
+
+func (t *TableHeaderTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
+	children := []*TextLayout{}
+
+	for i := 0; i < e.GetElementCount(); i++ {
+		childElement := e.GetElement(i)
+		childView := textViewResolver.Resolve(childElement)
+		children = append(children, childView.Layout(textViewResolver, childElement, width))
+	}
+
+	return &TextLayout{
+		Element:  e,
+		Children: children,
+		Width:    width,
+		Height:   1,
+	}
+}
+
+func (t *TableHeaderTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
+	style := tcell.StyleDefault.Bold(true)
+
+	x := 0
+	for i, child := range textLayout.Children {
+		// Draw separator
+		if i > 0 {
+			renderer.SetContent(x, 0, '|', nil, style)
+			x++
+		}
+
+		childElement := textLayout.Element.GetElement(i)
+		childView := textViewResolver.Resolve(childElement)
+
+		// Apply bold style to header cells
+		headerRenderer := &StyleRenderer{
+			base:  renderer.Translate(x, 0),
+			style: style,
+		}
+
+		childView.Draw(textViewResolver, child, headerRenderer)
+		x += childView.Width(textViewResolver, child, 0)
+	}
+}
+
+func (t *TableHeaderTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
+	totalWidth := 0
+	for i, child := range textLayout.Children {
+		if i > 0 {
+			totalWidth += 1 // Separator
+		}
+		childElement := textLayout.Element.GetElement(i)
+		childView := textViewResolver.Resolve(childElement)
+		totalWidth += childView.Width(textViewResolver, child, 0)
+	}
+	return totalWidth
+}
+
+func (t *TableHeaderTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
+	return 1
+}
+
+// TableRowTextViewGM renders TableRowElementGM
+type TableRowTextViewGM struct{}
+
+func (t *TableRowTextViewGM) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
+	children := []*TextLayout{}
+
+	for i := 0; i < e.GetElementCount(); i++ {
+		childElement := e.GetElement(i)
+		childView := textViewResolver.Resolve(childElement)
+		children = append(children, childView.Layout(textViewResolver, childElement, width))
+	}
+
+	return &TextLayout{
+		Element:  e,
+		Children: children,
+		Width:    width,
+		Height:   1,
+	}
+}
+
+func (t *TableRowTextViewGM) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
+	x := 0
+	for i, child := range textLayout.Children {
+		// Draw separator
+		if i > 0 {
+			renderer.SetContent(x, 0, '|', nil, tcell.StyleDefault)
+			x++
+		}
+
+		childElement := textLayout.Element.GetElement(i)
+		childView := textViewResolver.Resolve(childElement)
+		childView.Draw(textViewResolver, child, renderer.Translate(x, 0))
+		x += childView.Width(textViewResolver, child, 0)
+	}
+}
+
+func (t *TableRowTextViewGM) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
+	totalWidth := 0
+	for i, child := range textLayout.Children {
+		if i > 0 {
+			totalWidth += 1 // Separator
+		}
+		childElement := textLayout.Element.GetElement(i)
+		childView := textViewResolver.Resolve(childElement)
+		totalWidth += childView.Width(textViewResolver, child, 0)
+	}
+	return totalWidth
+}
+
+func (t *TableRowTextViewGM) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
+	return 1
+}
+
+// TableCellTextView renders TableCellElement
+type TableCellTextView struct{}
+
+func (t *TableCellTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
+	children := []*TextLayout{}
+
+	for i := 0; i < e.GetElementCount(); i++ {
+		childElement := e.GetElement(i)
+		childView := textViewResolver.Resolve(childElement)
+		children = append(children, childView.Layout(textViewResolver, childElement, width))
+	}
+
+	return &TextLayout{
+		Element:  e,
+		Children: children,
+		Width:    width,
+		Height:   1,
+	}
+}
+
+func (t *TableCellTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
+	x := 0
+	for i, child := range textLayout.Children {
+		childElement := textLayout.Element.GetElement(i)
+		childView := textViewResolver.Resolve(childElement)
+		childView.Draw(textViewResolver, child, renderer.Translate(x, 0))
+		x += childView.Width(textViewResolver, child, 0)
+	}
+}
+
+func (t *TableCellTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
+	totalWidth := 0
+	for i, child := range textLayout.Children {
+		childElement := textLayout.Element.GetElement(i)
+		childView := textViewResolver.Resolve(childElement)
+		totalWidth += childView.Width(textViewResolver, child, 0)
+	}
+	return totalWidth
+}
+
+func (t *TableCellTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
+	return 1
+}

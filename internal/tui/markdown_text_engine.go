@@ -40,17 +40,17 @@ func (m *MarkdownTextEngine) Resolve(e model.Element) view.TextView {
 	case *model.ImageElement:
 		return &view.ImageTextView{}
 	case *model.SoftBreakElement:
-		return &view.TextElementView{} // Treat as space
+		return &view.SoftBreakTextView{}
 	case *model.HardBreakElement:
-		return &view.TextElementView{} // Treat as newline
+		return &view.HardBreakTextView{}
 	case *model.TableElement:
-		return &view.TableContainerView{} // Fallback to existing table view
+		return &view.TableTextView{}
 	case *model.TableHeaderElement:
-		return &view.TableContainerView{} // Fallback to existing table view
+		return &view.TableHeaderTextView{}
 	case *model.TableRowElementGM:
-		return &view.TableContainerView{} // Fallback to existing table view
+		return &view.TableRowTextViewGM{}
 	case *model.TableCellElement:
-		return &view.InlineTextView{} // Fallback to inline view
+		return &view.TableCellTextView{}
 
 	// Legacy Elements (for backward compatibility)
 	case *model.LineContainerElement:
