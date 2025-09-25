@@ -21,10 +21,23 @@ func (doc *PlainDocument) Init() {
 }
 
 func (doc *PlainDocument) Render() []Element {
-	elements := []Element{}
 	if doc.Styled {
+		// Get all text content from buffer
+		var content strings.Builder
+		for i := 0; i < doc.buffer.GetLineCount(); i++ {
+			line := doc.buffer.GetLineAt(i)
+			content.WriteString(line.GetContent())
+			if i < doc.buffer.GetLineCount()-1 {
+				content.WriteString("\n")
+			}
+		}
 
+		// Convert markdown to elements using goldmark
+		return ConvertMarkdownToElements(content.String())
 	}
+
+	// Fallback to plain text rendering
+	elements := []Element{}
 	for i := 0; i < doc.buffer.GetLineCount(); i++ {
 		line := doc.buffer.GetLineAt(i)
 		lineStr := line.GetContent()
