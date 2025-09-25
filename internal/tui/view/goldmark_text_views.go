@@ -125,7 +125,27 @@ func (h *HeadingTextView) Draw(textViewResolver TextViewResolver, textLayout *Te
 
 	// Draw heading prefix (# ## ### etc.)
 	prefix := strings.Repeat("#", headingElement.Level) + " "
-	style := tcell.StyleDefault.Bold(true)
+
+	// Set color based on heading level
+	var color tcell.Color
+	switch headingElement.Level {
+	case 1:
+		color = tcell.ColorRed // H1: Red
+	case 2:
+		color = tcell.ColorBlue // H2: Blue
+	case 3:
+		color = tcell.ColorGreen // H3: Green
+	case 4:
+		color = tcell.ColorYellow // H4: Yellow
+	case 5:
+		color = tcell.ColorPurple // H5: Purple
+	case 6:
+		color = tcell.ColorTeal // H6: Teal
+	default:
+		color = tcell.ColorWhite // Default: White
+	}
+
+	style := tcell.StyleDefault.Bold(true).Foreground(color)
 
 	x := 0
 	for _, r := range prefix {
@@ -133,12 +153,21 @@ func (h *HeadingTextView) Draw(textViewResolver TextViewResolver, textLayout *Te
 		x++
 	}
 
-	// Draw heading content
+	// Draw heading content with the same style
+	headingRenderer := &StyleRenderer{
+		base:  renderer.Translate(x, 0),
+		style: style,
+	}
+
 	for i, child := range textLayout.Children {
 		childElement := textLayout.Element.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		childView.Draw(textViewResolver, child, renderer.Translate(x, 0))
+		childView.Draw(textViewResolver, child, headingRenderer)
 		x += childView.Width(textViewResolver, child, 0)
+		headingRenderer = &StyleRenderer{
+			base:  renderer.Translate(x, 0),
+			style: style,
+		}
 	}
 }
 
