@@ -52,12 +52,8 @@ func (m *MarkdownTextEngine) Resolve(e model.Element) view.TextView {
 	case *model.TableCellElement:
 		return &view.TableCellTextView{}
 	// Legacy elements
-	case *model.LineContainerElement:
-		return &view.LineContainerView{}
-	case *model.InlineElement:
-		return &view.InlineTextView{}
-	case *model.ParagraphElement:
-		return &view.InlineTextView{}
+	case *model.PlainElement:
+		return &view.PlainTextView{}
 	}
 	return nil
 }

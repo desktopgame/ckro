@@ -394,8 +394,8 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 						//*
 						segment := presenter.Segment{
 							TextLayout: &view.TextLayout{
-								Element: &model.ParagraphElement{
-									Line: line.GetContent(),
+								Element: &model.PlainElement{
+									Text: line.GetContent(),
 								},
 							},
 							ModelLine: lineNo,
@@ -421,8 +421,8 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 								if x+w > tb.Width {
 									segment := presenter.Segment{
 										TextLayout: &view.TextLayout{
-											Element: &model.ParagraphElement{
-												Line: sb.String(),
+											Element: &model.PlainElement{
+												Text: sb.String(),
 												StartPosition: model.Position{
 													Row:    lineNo,
 													Column: startX,
@@ -454,8 +454,8 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 								if x+width > tb.Width {
 									segment := presenter.Segment{
 										TextLayout: &view.TextLayout{
-											Element: &model.ParagraphElement{
-												Line: sb.String(),
+											Element: &model.PlainElement{
+												Text: sb.String(),
 												StartPosition: model.Position{
 													Row:    lineNo,
 													Column: startX,
@@ -484,8 +484,8 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 							if x > tb.Width {
 								segment := presenter.Segment{
 									TextLayout: &view.TextLayout{
-										Element: &model.ParagraphElement{
-											Line: sb.String(),
+										Element: &model.PlainElement{
+											Text: sb.String(),
 											StartPosition: model.Position{
 												Row:    lineNo,
 												Column: startX,
@@ -512,8 +512,8 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 						}
 						segment := presenter.Segment{
 							TextLayout: &view.TextLayout{
-								Element: &model.ParagraphElement{
-									Line:          sb.String(),
+								Element: &model.PlainElement{
+									Text:          sb.String(),
 									StartPosition: model.Position{},
 									EndPosition:   model.Position{},
 								},
