@@ -880,6 +880,9 @@ func (t *TableTextView) Layout(textViewResolver TextViewResolver, textLayout *Te
 
 		textLayout.Children[i].WidthTable = widthTable
 		rowView.Layout(textViewResolver, textLayout.Children[i], 1, yy, w, h)
+		if _, ok := row.(*model.TableHeaderElement); ok {
+			h++
+		}
 		totalHeight += h
 		yy += h
 	}
