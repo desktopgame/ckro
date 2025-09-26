@@ -525,7 +525,7 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 				}
 			} else {
 				textView := tb.TextEngine.Resolve(entry.Element)
-				textView.Layout(tb.TextEngine, entry, 0, viewLine, tb.Width, entry.MinimumHeight)
+				textView.Layout(tb.TextEngine, entry, 0, viewLine, entry.MinimumWidth, entry.MinimumHeight)
 				for j := 0; j < entry.MinimumHeight; j++ {
 					segment := presenter.Segment{
 						TextLayout:    entry,

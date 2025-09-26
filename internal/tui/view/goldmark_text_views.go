@@ -877,7 +877,9 @@ func (t *TableTextView) Layout(textViewResolver TextViewResolver, textLayout *Te
 	for i, h := range heightTable {
 		row := textLayout.Children[i].Element
 		rowView := textViewResolver.Resolve(row)
-		rowView.Layout(textViewResolver, textLayout.Children[i], 0, yy, w, h)
+
+		textLayout.Children[i].WidthTable = widthTable
+		rowView.Layout(textViewResolver, textLayout.Children[i], 1, yy, w, h)
 		totalHeight += h
 		yy += h
 	}
@@ -917,7 +919,7 @@ func (t *TableTextView) Draw(textViewResolver TextViewResolver, textLayout *Text
 	for i, child := range textLayout.Children {
 		childElement := textLayout.Element.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		childView.Draw(textViewResolver, child, renderer.Translate(1, y)) // Offset by left border
+		childView.Draw(textViewResolver, child, renderer.Translate(child.RelativeX, child.RelativeY)) // Offset by left border
 		y += child.Height
 
 		// Draw horizontal separator after header
@@ -991,14 +993,14 @@ func (t *TableTextView) MinimumSize(textViewResolver TextViewResolver, e model.E
 type TableHeaderTextView struct{}
 
 func (t *TableHeaderTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
-	offsetX := 1
+	offsetX := 0
 	for i := 0; i < len(textLayout.Children); i++ {
 		childElement := textLayout.Children[i].Element
 		childView := textViewResolver.Resolve(childElement)
-		mw := textLayout.Children[i].MinimumWidth
+		// mw := textLayout.Children[i].MinimumWidth
 		mh := textLayout.Children[i].MinimumHeight
-		childView.Layout(textViewResolver, textLayout.Children[i], offsetX, 0, mw, mh)
-		offsetX += textLayout.Children[i].Width
+		childView.Layout(textViewResolver, textLayout.Children[i], offsetX, 0, textLayout.WidthTable[i], mh)
+		offsetX += textLayout.Children[i].Width + 1
 	}
 
 	textLayout.RelativeX = x
@@ -1028,14 +1030,8 @@ func (t *TableHeaderTextView) Draw(textViewResolver TextViewResolver, textLayout
 		childElement := textLayout.Element.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
 
-		// Apply bold style to header cells
-		headerRenderer := &StyleRenderer{
-			base:  renderer.Translate(child.RelativeX, child.RelativeY),
-			style: style,
-		}
-
-		childView.Draw(textViewResolver, child, headerRenderer)
-		x += child.Width
+		childView.Draw(textViewResolver, child, renderer.Translate(child.RelativeX, child.RelativeY))
+		x += textLayout.WidthTable[i]
 	}
 }
 
@@ -1070,10 +1066,10 @@ func (t *TableRowTextView) Layout(textViewResolver TextViewResolver, textLayout 
 	for i := 0; i < len(textLayout.Children); i++ {
 		childElement := textLayout.Children[i].Element
 		childView := textViewResolver.Resolve(childElement)
-		mw := textLayout.Children[i].MinimumWidth
+		//mw := textLayout.Children[i].MinimumWidth
 		mh := textLayout.Children[i].MinimumHeight
-		childView.Layout(textViewResolver, textLayout.Children[i], offsetX, 0, mw, mh)
-		offsetX += mw
+		childView.Layout(textViewResolver, textLayout.Children[i], offsetX, 0, textLayout.WidthTable[i], mh)
+		offsetX += textLayout.WidthTable[i] + 1
 	}
 
 	textLayout.RelativeX = x
@@ -1102,7 +1098,7 @@ func (t *TableRowTextView) Draw(textViewResolver TextViewResolver, textLayout *T
 		childElement := textLayout.Element.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
 		childView.Draw(textViewResolver, child, renderer.Translate(child.RelativeX, child.RelativeY))
-		x += child.Width
+		x += textLayout.WidthTable[i]
 	}
 }
 
@@ -1133,12 +1129,14 @@ func (t *TableRowTextView) MinimumSize(textViewResolver TextViewResolver, e mode
 type TableCellTextView struct{}
 
 func (t *TableCellTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	offsetX := 0
 	for i := 0; i < len(textLayout.Children); i++ {
 		childElement := textLayout.Children[i].Element
 		childView := textViewResolver.Resolve(childElement)
 		mw := textLayout.Children[i].MinimumWidth
 		mh := textLayout.Children[i].MinimumHeight
-		childView.Layout(textViewResolver, textLayout.Children[i], x, y, mw, mh)
+		childView.Layout(textViewResolver, textLayout.Children[i], offsetX, 0, mw, mh)
+		offsetX += textLayout.Children[i].Width
 	}
 
 	textLayout.RelativeX = x
