@@ -43,23 +43,18 @@ func (d *DocumentTextView) Draw(textViewResolver TextViewResolver, textLayout *T
 	}
 }
 
-func (d *DocumentTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	return textLayout.Width
-}
-
-func (d *DocumentTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return textLayout.Height
-}
-
 // ParagraphTextView renders ParagraphElement
 type ParagraphTextView struct{}
 
 func (p *ParagraphTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
 	children := []*TextLayout{}
+	totalWidth := 0
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		children = append(children, childView.Layout(textViewResolver, childElement, width))
+		childTextLayout := childView.Layout(textViewResolver, childElement, width)
+		children = append(children, childTextLayout)
+		totalWidth += childTextLayout.Width
 	}
 
 	// Calculate height based on text wrapping
@@ -72,7 +67,7 @@ func (p *ParagraphTextView) Layout(textViewResolver TextViewResolver, e model.El
 	return &TextLayout{
 		Element:  e,
 		Children: children,
-		Width:    width,
+		Width:    totalWidth,
 		Height:   height,
 	}
 }
@@ -87,35 +82,26 @@ func (p *ParagraphTextView) Draw(textViewResolver TextViewResolver, textLayout *
 	}
 }
 
-func (p *ParagraphTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	totalWidth := 0
-	for i, child := range textLayout.Children {
-		childElement := textLayout.Element.GetElement(i)
-		childView := textViewResolver.Resolve(childElement)
-		totalWidth += childView.Width(textViewResolver, child, 0)
-	}
-	return totalWidth
-}
-
-func (p *ParagraphTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return textLayout.Height
-}
-
 // HeadingTextView renders HeadingElement
 type HeadingTextView struct{}
 
 func (h *HeadingTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
 	children := []*TextLayout{}
+	headingElement := e.(*model.HeadingElement)
+	prefixWidth := headingElement.Level + 1 // "# " or "## " etc.
+	contentWidth := 0
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		children = append(children, childView.Layout(textViewResolver, childElement, width))
+		childTextLayout := childView.Layout(textViewResolver, childElement, width)
+		children = append(children, childTextLayout)
+		contentWidth += childTextLayout.Width
 	}
 
 	return &TextLayout{
 		Element:  e,
 		Children: children,
-		Width:    width,
+		Width:    prefixWidth + contentWidth,
 		Height:   1,
 	}
 }
@@ -171,24 +157,6 @@ func (h *HeadingTextView) Draw(textViewResolver TextViewResolver, textLayout *Te
 	}
 }
 
-func (h *HeadingTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	headingElement := textLayout.Element.(*model.HeadingElement)
-	prefixWidth := headingElement.Level + 1 // "# " or "## " etc.
-
-	contentWidth := 0
-	for i, child := range textLayout.Children {
-		childElement := textLayout.Element.GetElement(i)
-		childView := textViewResolver.Resolve(childElement)
-		contentWidth += childView.Width(textViewResolver, child, 0)
-	}
-
-	return prefixWidth + contentWidth
-}
-
-func (h *HeadingTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return 1
-}
-
 // CodeBlockTextView renders CodeBlockElement
 type CodeBlockTextView struct{}
 
@@ -217,20 +185,6 @@ func (c *CodeBlockTextView) Draw(textViewResolver TextViewResolver, textLayout *
 			x++
 		}
 	}
-}
-
-func (c *CodeBlockTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	codeBlock := textLayout.Element.(*model.CodeBlockElement)
-	lines := strings.Split(codeBlock.Text, "\n")
-
-	if row >= 0 && row < len(lines) {
-		return text.DisplayWidth(lines[row])
-	}
-	return 0
-}
-
-func (c *CodeBlockTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return textLayout.Height
 }
 
 // BlockquoteTextView renders BlockquoteElement
@@ -273,14 +227,6 @@ func (b *BlockquoteTextView) Draw(textViewResolver TextViewResolver, textLayout 
 		childView.Draw(textViewResolver, child, renderer.Translate(2, y))
 		y += child.Height
 	}
-}
-
-func (b *BlockquoteTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	return textLayout.Width
-}
-
-func (b *BlockquoteTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return textLayout.Height
 }
 
 // ListTextView renders ListElement
@@ -341,14 +287,6 @@ func (l *ListTextView) Draw(textViewResolver TextViewResolver, textLayout *TextL
 	}
 }
 
-func (l *ListTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	return textLayout.Width
-}
-
-func (l *ListTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return textLayout.Height
-}
-
 // ListItemTextView renders ListItemElement
 type ListItemTextView struct{}
 
@@ -384,14 +322,6 @@ func (l *ListItemTextView) Draw(textViewResolver TextViewResolver, textLayout *T
 	}
 }
 
-func (l *ListItemTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	return textLayout.Width
-}
-
-func (l *ListItemTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return textLayout.Height
-}
-
 // ThematicBreakTextView renders ThematicBreakElement
 type ThematicBreakTextView struct{}
 
@@ -411,14 +341,6 @@ func (t *ThematicBreakTextView) Draw(textViewResolver TextViewResolver, textLayo
 	}
 }
 
-func (t *ThematicBreakTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	return textLayout.Width
-}
-
-func (t *ThematicBreakTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return 1
-}
-
 // TextElementView renders TextElement
 type TextElementView struct{}
 
@@ -426,7 +348,7 @@ func (t *TextElementView) Layout(textViewResolver TextViewResolver, e model.Elem
 	return &TextLayout{
 		Element:  e,
 		Children: nil,
-		Width:    width,
+		Width:    text.DisplayWidth(e.GetText()),
 		Height:   1,
 	}
 }
@@ -461,30 +383,24 @@ func (t *TextElementView) Draw(textViewResolver TextViewResolver, textLayout *Te
 	}
 }
 
-func (t *TextElementView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	textElement := textLayout.Element.(*model.TextElement)
-	return text.DisplayWidth(textElement.Text)
-}
-
-func (t *TextElementView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return 1
-}
-
 // EmphasisTextView renders EmphasisElement
 type EmphasisTextView struct{}
 
 func (e *EmphasisTextView) Layout(textViewResolver TextViewResolver, el model.Element, width int) *TextLayout {
 	children := []*TextLayout{}
+	totalWidth := 0
 	for i := 0; i < el.GetElementCount(); i++ {
 		childElement := el.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		children = append(children, childView.Layout(textViewResolver, childElement, width))
+		childTextLayout := childView.Layout(textViewResolver, childElement, width)
+		children = append(children, childTextLayout)
+		totalWidth += childTextLayout.Width
 	}
 
 	return &TextLayout{
 		Element:  el,
 		Children: children,
-		Width:    width,
+		Width:    totalWidth,
 		Height:   1,
 	}
 }
@@ -506,35 +422,24 @@ func (e *EmphasisTextView) Draw(textViewResolver TextViewResolver, textLayout *T
 	}
 }
 
-func (e *EmphasisTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	totalWidth := 0
-	for i, child := range textLayout.Children {
-		childElement := textLayout.Element.GetElement(i)
-		childView := textViewResolver.Resolve(childElement)
-		totalWidth += childView.Width(textViewResolver, child, 0)
-	}
-	return totalWidth
-}
-
-func (e *EmphasisTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return 1
-}
-
 // StrongTextView renders StrongElement
 type StrongTextView struct{}
 
 func (s *StrongTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
 	children := []*TextLayout{}
+	totalWidth := 0
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		children = append(children, childView.Layout(textViewResolver, childElement, width))
+		childTextLayout := childView.Layout(textViewResolver, childElement, width)
+		children = append(children, childTextLayout)
+		totalWidth += childTextLayout.Width
 	}
 
 	return &TextLayout{
 		Element:  e,
 		Children: children,
-		Width:    width,
+		Width:    totalWidth,
 		Height:   1,
 	}
 }
@@ -556,20 +461,6 @@ func (s *StrongTextView) Draw(textViewResolver TextViewResolver, textLayout *Tex
 	}
 }
 
-func (s *StrongTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	totalWidth := 0
-	for i, child := range textLayout.Children {
-		childElement := textLayout.Element.GetElement(i)
-		childView := textViewResolver.Resolve(childElement)
-		totalWidth += childView.Width(textViewResolver, child, 0)
-	}
-	return totalWidth
-}
-
-func (s *StrongTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return 1
-}
-
 // CodeElementView renders CodeElement
 type CodeElementView struct{}
 
@@ -577,7 +468,7 @@ func (c *CodeElementView) Layout(textViewResolver TextViewResolver, e model.Elem
 	return &TextLayout{
 		Element:  e,
 		Children: nil,
-		Width:    width,
+		Width:    text.DisplayWidth(e.GetText()),
 		Height:   1,
 	}
 }
@@ -608,30 +499,24 @@ func (c *CodeElementView) Draw(textViewResolver TextViewResolver, textLayout *Te
 	}
 }
 
-func (c *CodeElementView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	codeElement := textLayout.Element.(*model.CodeElement)
-	return text.DisplayWidth(codeElement.Text)
-}
-
-func (c *CodeElementView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return 1
-}
-
 // LinkTextView renders LinkElement
 type LinkTextView struct{}
 
 func (l *LinkTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
 	children := []*TextLayout{}
+	totalWidth := 0
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		children = append(children, childView.Layout(textViewResolver, childElement, width))
+		childTextLayout := childView.Layout(textViewResolver, childElement, width)
+		children = append(children, childTextLayout)
+		totalWidth += childTextLayout.Width
 	}
 
 	return &TextLayout{
 		Element:  e,
 		Children: children,
-		Width:    width,
+		Width:    totalWidth,
 		Height:   1,
 	}
 }
@@ -653,28 +538,16 @@ func (l *LinkTextView) Draw(textViewResolver TextViewResolver, textLayout *TextL
 	}
 }
 
-func (l *LinkTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	totalWidth := 0
-	for i, child := range textLayout.Children {
-		childElement := textLayout.Element.GetElement(i)
-		childView := textViewResolver.Resolve(childElement)
-		totalWidth += childView.Width(textViewResolver, child, 0)
-	}
-	return totalWidth
-}
-
-func (l *LinkTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return 1
-}
-
 // ImageTextView renders ImageElement
 type ImageTextView struct{}
 
 func (i *ImageTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
+	imageElement := e.(*model.ImageElement)
+	displayText := "[Image: " + imageElement.Alt + "]"
 	return &TextLayout{
 		Element:  e,
 		Children: nil,
-		Width:    width,
+		Width:    text.DisplayWidth(displayText),
 		Height:   1,
 	}
 }
@@ -691,16 +564,6 @@ func (i *ImageTextView) Draw(textViewResolver TextViewResolver, textLayout *Text
 		renderer.SetContent(x, 0, r, nil, style)
 		x++
 	}
-}
-
-func (i *ImageTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	imageElement := textLayout.Element.(*model.ImageElement)
-	displayText := "[Image: " + imageElement.Alt + "]"
-	return text.DisplayWidth(displayText)
-}
-
-func (i *ImageTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return 1
 }
 
 // StyleRenderer wraps a renderer to apply additional styles
@@ -743,7 +606,7 @@ func (s *SoftBreakTextView) Layout(textViewResolver TextViewResolver, e model.El
 	return &TextLayout{
 		Element:  e,
 		Children: nil,
-		Width:    width,
+		Width:    0,
 		Height:   1,
 	}
 }
@@ -753,14 +616,6 @@ func (s *SoftBreakTextView) Draw(textViewResolver TextViewResolver, textLayout *
 	renderer.SetContent(0, 0, ' ', nil, tcell.StyleDefault)
 }
 
-func (s *SoftBreakTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	return 1 // Single space
-}
-
-func (s *SoftBreakTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return 1
-}
-
 // HardBreakTextView renders HardBreakElement
 type HardBreakTextView struct{}
 
@@ -768,21 +623,13 @@ func (h *HardBreakTextView) Layout(textViewResolver TextViewResolver, e model.El
 	return &TextLayout{
 		Element:  e,
 		Children: nil,
-		Width:    width,
+		Width:    0,
 		Height:   1,
 	}
 }
 
 func (h *HardBreakTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
 	// Hard break creates a line break - no visual content needed
-}
-
-func (h *HardBreakTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	return 0 // Line break has no width
-}
-
-func (h *HardBreakTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return 1
 }
 
 // TableTextView renders TableElement
@@ -864,14 +711,6 @@ func (t *TableTextView) Draw(textViewResolver TextViewResolver, textLayout *Text
 	}
 }
 
-func (t *TableTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	return textLayout.Width
-}
-
-func (t *TableTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return textLayout.Height
-}
-
 // TableHeaderTextView renders TableHeaderElement
 type TableHeaderTextView struct{}
 
@@ -939,14 +778,6 @@ func (t *TableHeaderTextView) Draw(textViewResolver TextViewResolver, textLayout
 	}
 }
 
-func (t *TableHeaderTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	return textLayout.Width
-}
-
-func (t *TableHeaderTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return 1
-}
-
 // TableRowTextView renders TableRowElement
 type TableRowTextView struct{}
 
@@ -1006,30 +837,24 @@ func (t *TableRowTextView) Draw(textViewResolver TextViewResolver, textLayout *T
 	}
 }
 
-func (t *TableRowTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	return textLayout.Width
-}
-
-func (t *TableRowTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return 1
-}
-
 // TableCellTextView renders TableCellElement
 type TableCellTextView struct{}
 
 func (t *TableCellTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
 	children := []*TextLayout{}
-
+	totalWidth := 0
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		children = append(children, childView.Layout(textViewResolver, childElement, width))
+		childTextLayout := childView.Layout(textViewResolver, childElement, width)
+		children = append(children, childTextLayout)
+		totalWidth += childTextLayout.Width
 	}
 
 	return &TextLayout{
 		Element:  e,
 		Children: children,
-		Width:    width,
+		Width:    totalWidth,
 		Height:   1,
 	}
 }
@@ -1042,18 +867,4 @@ func (t *TableCellTextView) Draw(textViewResolver TextViewResolver, textLayout *
 		childView.Draw(textViewResolver, child, renderer.Translate(x, 0))
 		x += childView.Width(textViewResolver, child, 0)
 	}
-}
-
-func (t *TableCellTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	totalWidth := 0
-	for i, child := range textLayout.Children {
-		childElement := textLayout.Element.GetElement(i)
-		childView := textViewResolver.Resolve(childElement)
-		totalWidth += childView.Width(textViewResolver, child, 0)
-	}
-	return totalWidth
-}
-
-func (t *TableCellTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return 1
 }

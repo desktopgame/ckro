@@ -14,6 +14,8 @@ func (p *PlainTextView) Layout(textViewResolver TextViewResolver, e model.Elemen
 	return &TextLayout{
 		Element:  e,
 		Children: nil,
+		Width:    text.DisplayWidth(e.GetText()),
+		Height:   1,
 	}
 }
 
@@ -74,12 +76,4 @@ func (p *PlainTextView) WidthWithTabStop(textViewResolver TextViewResolver, text
 		totalWidth += width
 	}
 	return totalWidth
-}
-
-func (p *PlainTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
-	return text.DisplayWidth(textLayout.Element.GetText())
-}
-
-func (p *PlainTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
-	return 1
 }

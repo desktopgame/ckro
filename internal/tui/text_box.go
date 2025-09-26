@@ -372,12 +372,11 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 		viewLine := 0
 		for i := 0; i < len(entries); i++ {
 			entry := entries[i]
-			textView := tb.TextEngine.Resolve(entry.Element)
-			height := textView.Height(tb.TextEngine, entry)
+			height := entry.Height
 
 			lineWrap := false
 			for j := 0; j < height; j++ {
-				if textView.Width(tb.TextEngine, entry, j) > tb.Width {
+				if entry.Width > tb.Width {
 					lineWrap = true
 					break
 				}
