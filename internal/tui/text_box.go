@@ -360,32 +360,18 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 	return func(yield func(presenter.Segment) bool) {
 		elements := tb.Document.Render()
 
-		entries := []*view.TextLayout{}
+		viewLine := 0
 		for i := 0; i < len(elements); i++ {
 			element := elements[i]
-			view := tb.TextEngine.Resolve(element)
+			textView := tb.TextEngine.Resolve(element)
+			mw, mh := textView.MinimumSize(tb.TextEngine, element, tb.Width, 9999)
 
-			newLayout := view.Layout(tb.TextEngine, element, tb.Width)
-			entries = append(entries, newLayout)
-		}
-
-		viewLine := 0
-		for i := 0; i < len(entries); i++ {
-			entry := entries[i]
-			height := entry.Height
-
-			lineWrap := false
-			for j := 0; j < height; j++ {
-				if entry.Width > tb.Width {
-					lineWrap = true
-					break
-				}
-			}
+			lineWrap := mw > tb.Width
 
 			if lineWrap {
-				lineCount := entry.Element.GetEndPosition().Row - entry.Element.GetStartPosition().Row + 1
+				lineCount := element.GetEndPosition().Row - element.GetStartPosition().Row + 1
 				for j := 0; j < lineCount; j++ {
-					lineNo := entry.Element.GetStartPosition().Row + j
+					lineNo := element.GetStartPosition().Row + j
 					line := tb.Document.GetBuffer().GetLineAt(lineNo)
 					lineWidth := text.DisplayWidth(line.GetContent())
 
@@ -532,10 +518,11 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 					}
 				}
 			} else {
-				for j := 0; j < height; j++ {
+				tl := textView.Layout(tb.TextEngine, element, 0, viewLine, tb.Width, mh)
+				for j := 0; j < mh; j++ {
 					segment := presenter.Segment{
-						TextLayout:    entry,
-						ModelLine:     entry.Element.GetStartPosition().Row,
+						TextLayout:    tl,
+						ModelLine:     element.GetStartPosition().Row,
 						ViewLine:      viewLine,
 						LocalViewLine: j,
 					}
