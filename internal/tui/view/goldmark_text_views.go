@@ -51,10 +51,10 @@ func (d *DocumentTextView) Height(textViewResolver TextViewResolver, textLayout 
 	return textLayout.Height
 }
 
-// ParagraphTextViewGM renders ParagraphElement
-type ParagraphTextViewGM struct{}
+// ParagraphTextView renders ParagraphElement
+type ParagraphTextView struct{}
 
-func (p *ParagraphTextViewGM) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
+func (p *ParagraphTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
 	children := []*TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
@@ -77,7 +77,7 @@ func (p *ParagraphTextViewGM) Layout(textViewResolver TextViewResolver, e model.
 	}
 }
 
-func (p *ParagraphTextViewGM) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
+func (p *ParagraphTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
 	x := 0
 	for i, child := range textLayout.Children {
 		childElement := textLayout.Element.GetElement(i)
@@ -87,7 +87,7 @@ func (p *ParagraphTextViewGM) Draw(textViewResolver TextViewResolver, textLayout
 	}
 }
 
-func (p *ParagraphTextViewGM) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
+func (p *ParagraphTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
 	totalWidth := 0
 	for i, child := range textLayout.Children {
 		childElement := textLayout.Element.GetElement(i)
@@ -97,7 +97,7 @@ func (p *ParagraphTextViewGM) Width(textViewResolver TextViewResolver, textLayou
 	return totalWidth
 }
 
-func (p *ParagraphTextViewGM) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
+func (p *ParagraphTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
 	return textLayout.Height
 }
 

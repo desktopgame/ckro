@@ -14,7 +14,7 @@ func (m *MarkdownTextEngine) Resolve(e model.Element) view.TextView {
 	case *model.DocumentElement:
 		return &view.DocumentTextView{}
 	case *model.ParagraphElement:
-		return &view.ParagraphTextViewGM{}
+		return &view.ParagraphTextView{}
 	case *model.HeadingElement:
 		return &view.HeadingTextView{}
 	case *model.CodeBlockElement:
