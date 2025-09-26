@@ -798,18 +798,24 @@ func (t *TableRowTextView) Layout(textViewResolver TextViewResolver, e model.Ele
 	// Account for cell separators (|) between cells
 	availableWidth := width - (cellCount - 1)
 	cellWidth := availableWidth / cellCount
+	maxHeight := -1
 
 	for i := 0; i < cellCount; i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		children = append(children, childView.Layout(textViewResolver, childElement, cellWidth))
+		childTextLayout := childView.Layout(textViewResolver, childElement, cellWidth)
+		children = append(children, childTextLayout)
+
+		if childTextLayout.Height > maxHeight {
+			maxHeight = childTextLayout.Height
+		}
 	}
 
 	return &TextLayout{
 		Element:  e,
 		Children: children,
 		Width:    width,
-		Height:   1,
+		Height:   maxHeight,
 	}
 }
 
@@ -843,19 +849,24 @@ type TableCellTextView struct{}
 func (t *TableCellTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
 	children := []*TextLayout{}
 	totalWidth := 0
+	maxHeight := -1
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
 		childTextLayout := childView.Layout(textViewResolver, childElement, width)
 		children = append(children, childTextLayout)
 		totalWidth += childTextLayout.Width
+
+		if childTextLayout.Height > maxHeight {
+			maxHeight = childTextLayout.Height
+		}
 	}
 
 	return &TextLayout{
 		Element:  e,
 		Children: children,
 		Width:    totalWidth,
-		Height:   1,
+		Height:   maxHeight,
 	}
 }
 
