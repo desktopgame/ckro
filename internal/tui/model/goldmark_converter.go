@@ -435,7 +435,7 @@ func (c *GoldmarkConverter) convertTableNode(node ast.Node) Element {
 			Children:      c.convertChildren(node),
 		}
 	case kind == "TableRow":
-		return &TableRowElementGM{
+		return &TableRowElement{
 			StartPosition: startPos,
 			EndPosition:   endPos,
 			Children:      c.convertChildren(node),

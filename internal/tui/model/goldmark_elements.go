@@ -187,23 +187,23 @@ func (e *TableHeaderElement) GetElement(index int) Element {
 }
 func (e *TableHeaderElement) GetElementCount() int { return len(e.Children) }
 
-type TableRowElementGM struct {
+type TableRowElement struct {
 	StartPosition Position
 	EndPosition   Position
 	Children      []Element
 }
 
-func (e *TableRowElementGM) GetStyle() *Style           { return nil }
-func (e *TableRowElementGM) GetText() string            { return "" }
-func (e *TableRowElementGM) GetStartPosition() Position { return e.StartPosition }
-func (e *TableRowElementGM) GetEndPosition() Position   { return e.EndPosition }
-func (e *TableRowElementGM) GetElement(index int) Element {
+func (e *TableRowElement) GetStyle() *Style           { return nil }
+func (e *TableRowElement) GetText() string            { return "" }
+func (e *TableRowElement) GetStartPosition() Position { return e.StartPosition }
+func (e *TableRowElement) GetEndPosition() Position   { return e.EndPosition }
+func (e *TableRowElement) GetElement(index int) Element {
 	if index >= 0 && index < len(e.Children) {
 		return e.Children[index]
 	}
 	return nil
 }
-func (e *TableRowElementGM) GetElementCount() int { return len(e.Children) }
+func (e *TableRowElement) GetElementCount() int { return len(e.Children) }
 
 type TableCellElement struct {
 	StartPosition Position

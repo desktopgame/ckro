@@ -947,7 +947,7 @@ func (t *TableHeaderTextView) Height(textViewResolver TextViewResolver, textLayo
 	return 1
 }
 
-// TableRowTextViewGM renders TableRowElementGM
+// TableRowTextViewGM renders TableRowElement
 type TableRowTextViewGM struct{}
 
 func (t *TableRowTextViewGM) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
