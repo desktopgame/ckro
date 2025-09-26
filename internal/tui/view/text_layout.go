@@ -6,6 +6,10 @@ type TextLayout struct {
 	Element  model.Element
 	Children []*TextLayout
 
+	// この要素を描画するとき、親はこのオフセット分TranslateしたRendererを子に渡して描画を移譲する
+	RelativeX int
+	RelativeY int
+
 	Width  int
 	Height int
 	Indent int
