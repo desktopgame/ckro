@@ -355,13 +355,22 @@ func (l *ListTextView) Draw(textViewResolver TextViewResolver, textLayout *TextL
 }
 
 func (l *ListTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
+	listElement := e.(*model.ListElement)
+	var prefix string
+	if listElement.Ordered {
+		prefix = strings.Repeat(" ", 2) + "1" + ". "
+	} else {
+		prefix = "  - "
+	}
+	offset := text.DisplayWidth(prefix)
+
 	maxWidth := -1
 	totalHeight := 0
 	children := []*TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		child := childView.MinimumSize(textViewResolver, childElement, width-2, 9999)
+		child := childView.MinimumSize(textViewResolver, childElement, width-offset, 9999)
 		children = append(children, child)
 
 		if child.MinimumWidth > maxWidth {
@@ -371,7 +380,7 @@ func (l *ListTextView) MinimumSize(textViewResolver TextViewResolver, e model.El
 	}
 	return &TextLayout{
 		Element:       e,
-		MinimumWidth:  maxWidth,
+		MinimumWidth:  maxWidth + offset,
 		MinimumHeight: totalHeight,
 		Children:      children,
 	}
