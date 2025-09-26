@@ -78,7 +78,7 @@ func (p *ParagraphTextView) Draw(textViewResolver TextViewResolver, textLayout *
 		childElement := textLayout.Element.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
 		childView.Draw(textViewResolver, child, renderer.Translate(x, 0))
-		x += childView.Width(textViewResolver, child, 0)
+		x += child.Width
 	}
 }
 
@@ -149,7 +149,7 @@ func (h *HeadingTextView) Draw(textViewResolver TextViewResolver, textLayout *Te
 		childElement := textLayout.Element.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
 		childView.Draw(textViewResolver, child, headingRenderer)
-		x += childView.Width(textViewResolver, child, 0)
+		x += child.Width
 		headingRenderer = &StyleRenderer{
 			base:  renderer.Translate(x, 0),
 			style: style,
@@ -418,7 +418,7 @@ func (e *EmphasisTextView) Draw(textViewResolver TextViewResolver, textLayout *T
 		}
 
 		childView.Draw(textViewResolver, child, italicRenderer)
-		x += childView.Width(textViewResolver, child, 0)
+		x += child.Width
 	}
 }
 
@@ -457,7 +457,7 @@ func (s *StrongTextView) Draw(textViewResolver TextViewResolver, textLayout *Tex
 		}
 
 		childView.Draw(textViewResolver, child, boldRenderer)
-		x += childView.Width(textViewResolver, child, 0)
+		x += child.Width
 	}
 }
 
@@ -534,7 +534,7 @@ func (l *LinkTextView) Draw(textViewResolver TextViewResolver, textLayout *TextL
 		}
 
 		childView.Draw(textViewResolver, child, linkRenderer)
-		x += childView.Width(textViewResolver, child, 0)
+		x += child.Width
 	}
 }
 
@@ -865,6 +865,6 @@ func (t *TableCellTextView) Draw(textViewResolver TextViewResolver, textLayout *
 		childElement := textLayout.Element.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
 		childView.Draw(textViewResolver, child, renderer.Translate(x, 0))
-		x += childView.Width(textViewResolver, child, 0)
+		x += child.Width
 	}
 }
