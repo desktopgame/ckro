@@ -312,10 +312,6 @@ func (l *ListTextView) Layout(textViewResolver TextViewResolver, textLayout *Tex
 		prefix = "  - "
 	}
 
-	if textLayout.Indent > 0 {
-		prefix = strings.Repeat("  ", textLayout.Indent) + prefix
-	}
-
 	offsetY := 0
 	for i := 0; i < len(textLayout.Children); i++ {
 		childElement := textLayout.Children[i].Element
@@ -345,10 +341,6 @@ func (l *ListTextView) Draw(textViewResolver TextViewResolver, textLayout *TextL
 			prefix = "  - "
 		}
 
-		if textLayout.Indent > 0 {
-			prefix = strings.Repeat("  ", textLayout.Indent) + prefix
-		}
-
 		x := 0
 		for _, r := range prefix {
 			renderer.SetContent(x, y, r, nil, tcell.StyleDefault)
@@ -370,7 +362,6 @@ func (l *ListTextView) MinimumSize(textViewResolver TextViewResolver, e model.El
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
 		child := childView.MinimumSize(textViewResolver, childElement, width-2, 9999)
-		child.Indent++
 		children = append(children, child)
 
 		if child.MinimumWidth > maxWidth {
