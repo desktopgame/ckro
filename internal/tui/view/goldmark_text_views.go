@@ -234,14 +234,14 @@ type ListTextView struct{}
 
 func (l *ListTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
 	children := []*TextLayout{}
-	childWidth := width - 4 // Account for list item prefix
-
+	totalWidth := 0
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		childTextLayout := childView.Layout(textViewResolver, childElement, childWidth)
+		childTextLayout := childView.Layout(textViewResolver, childElement, width)
 		childTextLayout.Indent++
 		children = append(children, childTextLayout)
+		totalWidth += childTextLayout.Width
 	}
 
 	totalHeight := 0
@@ -252,7 +252,7 @@ func (l *ListTextView) Layout(textViewResolver TextViewResolver, e model.Element
 	return &TextLayout{
 		Element:  e,
 		Children: children,
-		Width:    width,
+		Width:    totalWidth,
 		Height:   totalHeight,
 	}
 }
@@ -292,11 +292,16 @@ type ListItemTextView struct{}
 
 func (l *ListItemTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
 	children := []*TextLayout{}
-
+	maxWidth := 0
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		children = append(children, childView.Layout(textViewResolver, childElement, width))
+		childTextLayout := childView.Layout(textViewResolver, childElement, width)
+		children = append(children, childTextLayout)
+
+		if childTextLayout.Width > maxWidth {
+			maxWidth = childTextLayout.Width
+		}
 	}
 
 	totalHeight := 0
@@ -307,7 +312,7 @@ func (l *ListItemTextView) Layout(textViewResolver TextViewResolver, e model.Ele
 	return &TextLayout{
 		Element:  e,
 		Children: children,
-		Width:    width,
+		Width:    maxWidth,
 		Height:   totalHeight,
 	}
 }
@@ -361,7 +366,11 @@ func (t *TextElementView) Draw(textViewResolver TextViewResolver, textLayout *Te
 	x := 0
 	for _, cluster := range clusters {
 		if cluster == "\t" {
-			// Handle tab
+			spaces := text.TabWidth - (x % text.TabWidth)
+			for i := 0; i < spaces; i++ {
+				renderer.SetContent(x+i, 0, ' ', nil, tcell.StyleDefault)
+			}
+			x += spaces
 		} else {
 			runes := []rune(cluster)
 			if len(runes) > 0 {
