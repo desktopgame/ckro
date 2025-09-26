@@ -48,7 +48,7 @@ func (m *MarkdownTextEngine) Resolve(e model.Element) view.TextView {
 	case *model.TableHeaderElement:
 		return &view.TableHeaderTextView{}
 	case *model.TableRowElement:
-		return &view.TableRowTextViewGM{}
+		return &view.TableRowTextView{}
 	case *model.TableCellElement:
 		return &view.TableCellTextView{}
 	// Legacy elements

@@ -947,10 +947,10 @@ func (t *TableHeaderTextView) Height(textViewResolver TextViewResolver, textLayo
 	return 1
 }
 
-// TableRowTextViewGM renders TableRowElement
-type TableRowTextViewGM struct{}
+// TableRowTextView renders TableRowElement
+type TableRowTextView struct{}
 
-func (t *TableRowTextViewGM) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
+func (t *TableRowTextView) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
 	children := []*TextLayout{}
 
 	// Calculate cell width - distribute available width among cells
@@ -982,7 +982,7 @@ func (t *TableRowTextViewGM) Layout(textViewResolver TextViewResolver, e model.E
 	}
 }
 
-func (t *TableRowTextViewGM) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
+func (t *TableRowTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
 	cellCount := len(textLayout.Children)
 	if cellCount == 0 {
 		return
@@ -1006,11 +1006,11 @@ func (t *TableRowTextViewGM) Draw(textViewResolver TextViewResolver, textLayout 
 	}
 }
 
-func (t *TableRowTextViewGM) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
+func (t *TableRowTextView) Width(textViewResolver TextViewResolver, textLayout *TextLayout, row int) int {
 	return textLayout.Width
 }
 
-func (t *TableRowTextViewGM) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
+func (t *TableRowTextView) Height(textViewResolver TextViewResolver, textLayout *TextLayout) int {
 	return 1
 }
 
