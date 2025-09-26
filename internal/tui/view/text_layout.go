@@ -10,7 +10,9 @@ type TextLayout struct {
 	RelativeX int
 	RelativeY int
 
-	Width  int
-	Height int
-	Indent int
+	Width         int
+	Height        int
+	MinimumWidth  int
+	MinimumHeight int
+	Indent        int
 }

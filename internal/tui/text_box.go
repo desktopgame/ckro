@@ -360,13 +360,19 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 	return func(yield func(presenter.Segment) bool) {
 		elements := tb.Document.Render()
 
-		viewLine := 0
+		entries := []*view.TextLayout{}
 		for i := 0; i < len(elements); i++ {
 			element := elements[i]
 			textView := tb.TextEngine.Resolve(element)
-			mw, mh := textView.MinimumSize(tb.TextEngine, element, tb.Width, 9999)
+			tl := textView.MinimumSize(tb.TextEngine, element, tb.Width, 9999)
+			entries = append(entries, tl)
+		}
 
-			lineWrap := mw > tb.Width
+		viewLine := 0
+		for _, entry := range entries {
+			element := entry.Element
+
+			lineWrap := entry.MinimumWidth > tb.Width
 
 			if lineWrap {
 				lineCount := element.GetEndPosition().Row - element.GetStartPosition().Row + 1
@@ -518,10 +524,11 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 					}
 				}
 			} else {
-				tl := textView.Layout(tb.TextEngine, element, 0, viewLine, tb.Width, mh)
-				for j := 0; j < mh; j++ {
+				textView := tb.TextEngine.Resolve(entry.Element)
+				textView.Layout(tb.TextEngine, entry, 0, viewLine, tb.Width, entry.MinimumHeight)
+				for j := 0; j < entry.MinimumHeight; j++ {
 					segment := presenter.Segment{
-						TextLayout:    tl,
+						TextLayout:    entry,
 						ModelLine:     element.GetStartPosition().Row,
 						ViewLine:      viewLine,
 						LocalViewLine: j,

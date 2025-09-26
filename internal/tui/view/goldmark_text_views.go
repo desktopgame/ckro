@@ -12,33 +12,21 @@ import (
 // DocumentTextView renders DocumentElement
 type DocumentTextView struct{}
 
-func (d *DocumentTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	children := []*TextLayout{}
-	totalHeight := 0
-	maxWidth := 0
-	for i := 0; i < e.GetElementCount(); i++ {
-		childElement := e.GetElement(i)
+func (d *DocumentTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	for i := 0; i < len(textLayout.Children); i++ {
+		childElement := textLayout.Children[i].Element
 		childView := textViewResolver.Resolve(childElement)
 
-		mw, mh := childView.MinimumSize(textViewResolver, childElement, w, 9999)
-		childTextLayout := childView.Layout(textViewResolver, childElement, x, y, mw, mh)
-		children = append(children, childTextLayout)
+		mw := textLayout.Children[i].MinimumWidth
+		mh := textLayout.Children[i].MinimumHeight
+		childView.Layout(textViewResolver, textLayout.Children[i], x, y, mw, mh)
 		y += mh
-
-		totalHeight += childTextLayout.Height
-		if mw > maxWidth {
-			maxWidth = childTextLayout.Width
-		}
 	}
 
-	return &TextLayout{
-		Element:   e,
-		Children:  children,
-		RelativeX: x,
-		RelativeY: y,
-		Width:     maxWidth,
-		Height:    totalHeight,
-	}
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (d *DocumentTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -51,48 +39,46 @@ func (d *DocumentTextView) Draw(textViewResolver TextViewResolver, textLayout *T
 	}
 }
 
-func (d *DocumentTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
+func (d *DocumentTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
 	totalHeight := 0
 	maxWidth := 0
+	children := []*TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
 
-		mw, mh := childView.MinimumSize(textViewResolver, childElement, width, 9999)
+		child := childView.MinimumSize(textViewResolver, childElement, width, 9999)
+		children = append(children, child)
 
-		totalHeight += mh
-		if mw > maxWidth {
-			maxWidth = mw
+		totalHeight += child.MinimumHeight
+		if child.MinimumWidth > maxWidth {
+			maxWidth = child.MinimumWidth
 		}
 	}
-	return max(maxWidth, width), totalHeight
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  max(maxWidth, width),
+		MinimumHeight: totalHeight,
+	}
 }
 
 // ParagraphTextView renders ParagraphElement
 type ParagraphTextView struct{}
 
-func (p *ParagraphTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	children := []*TextLayout{}
-	totalWidth := 0
-	for i := 0; i < e.GetElementCount(); i++ {
-		childElement := e.GetElement(i)
+func (p *ParagraphTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	for i := 0; i < len(textLayout.Children); i++ {
+		childElement := textLayout.Children[i].Element
 		childView := textViewResolver.Resolve(childElement)
 
-		mw, _ := childView.MinimumSize(textViewResolver, childElement, w, 1)
-		childTextLayout := childView.Layout(textViewResolver, childElement, x, y, mw, 1)
-		children = append(children, childTextLayout)
-		x += childTextLayout.Width
+		mw := textLayout.Children[i].MinimumWidth
+		childView.Layout(textViewResolver, textLayout.Children[i], x, y, mw, 1)
+		x += textLayout.Children[i].Width
+	}
 
-		totalWidth += childTextLayout.Width
-	}
-	return &TextLayout{
-		Element:   e,
-		Children:  children,
-		RelativeX: x,
-		RelativeY: y,
-		Width:     totalWidth,
-		Height:    1,
-	}
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (p *ParagraphTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -103,44 +89,44 @@ func (p *ParagraphTextView) Draw(textViewResolver TextViewResolver, textLayout *
 	}
 }
 
-func (p *ParagraphTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
+func (p *ParagraphTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
 	totalWidth := 0
+	children := []*TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
 
-		mw, _ := childView.MinimumSize(textViewResolver, childElement, width, 1)
-		totalWidth += mw
+		child := childView.MinimumSize(textViewResolver, childElement, width, 1)
+		children = append(children, child)
+		totalWidth += child.MinimumWidth
 	}
-	return totalWidth, 1
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  totalWidth,
+		MinimumHeight: 1,
+		Children:      children,
+	}
 }
 
 // HeadingTextView renders HeadingElement
 type HeadingTextView struct{}
 
-func (ht *HeadingTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	children := []*TextLayout{}
-	headingElement := e.(*model.HeadingElement)
+func (ht *HeadingTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	headingElement := textLayout.Element.(*model.HeadingElement)
 	prefixWidth := headingElement.Level + 1 // "# " or "## " etc.
-	contentWidth := 0
-	for i := 0; i < e.GetElementCount(); i++ {
-		childElement := e.GetElement(i)
+	for i := 0; i < len(textLayout.Children); i++ {
+		childElement := textLayout.Children[i].Element
 		childView := textViewResolver.Resolve(childElement)
 
-		mw, mh := childView.MinimumSize(textViewResolver, childElement, w, 1)
-		childTextLayout := childView.Layout(textViewResolver, childElement, x+prefixWidth, y, mw, mh)
-		children = append(children, childTextLayout)
-		contentWidth += childTextLayout.Width
+		mw := textLayout.Children[i].MinimumWidth
+		mh := textLayout.Children[i].MinimumHeight
+		childView.Layout(textViewResolver, textLayout.Children[i], x+prefixWidth, y, mw, mh)
 	}
 
-	return &TextLayout{
-		Element:   e,
-		Children:  children,
-		Width:     prefixWidth + contentWidth,
-		Height:    1,
-		RelativeX: x,
-		RelativeY: y,
-	}
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (h *HeadingTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -189,33 +175,36 @@ func (h *HeadingTextView) Draw(textViewResolver TextViewResolver, textLayout *Te
 	}
 }
 
-func (h *HeadingTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
+func (h *HeadingTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
 	totalWidth := 0
+	headingElement := e.(*model.HeadingElement)
+	prefixWidth := headingElement.Level + 1 // "# " or "## " etc.
+	children := []*TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
 
-		mw, _ := childView.MinimumSize(textViewResolver, childElement, width, 1)
+		child := childView.MinimumSize(textViewResolver, childElement, width, 1)
+		children = append(children, child)
 
-		totalWidth += mw
+		totalWidth += child.MinimumWidth
 	}
-	return totalWidth, 1
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  totalWidth + prefixWidth,
+		MinimumHeight: 1,
+		Children:      children,
+	}
 }
 
 // CodeBlockTextView renders CodeBlockElement
 type CodeBlockTextView struct{}
 
-func (c *CodeBlockTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	mw, mh := c.MinimumSize(textViewResolver, e, w, h)
-
-	return &TextLayout{
-		Element:   e,
-		Children:  nil,
-		Width:     mw,
-		Height:    mh,
-		RelativeX: x,
-		RelativeY: y,
-	}
+func (c *CodeBlockTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (c *CodeBlockTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -233,7 +222,7 @@ func (c *CodeBlockTextView) Draw(textViewResolver TextViewResolver, textLayout *
 	}
 }
 
-func (c *CodeBlockTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
+func (c *CodeBlockTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
 	codeBlock := e.(*model.CodeBlockElement)
 	lines := strings.Split(codeBlock.Text, "\n")
 
@@ -244,34 +233,28 @@ func (c *CodeBlockTextView) MinimumSize(textViewResolver TextViewResolver, e mod
 			maxWidth = w
 		}
 	}
-	return maxWidth, len(lines)
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  maxWidth,
+		MinimumHeight: len(lines),
+	}
 }
 
 // BlockquoteTextView renders BlockquoteElement
 type BlockquoteTextView struct{}
 
-func (b *BlockquoteTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	children := []*TextLayout{}
-	maxWidth := -1
-	totalHeight := 0
-	for i := 0; i < e.GetElementCount(); i++ {
-		childElement := e.GetElement(i)
+func (b *BlockquoteTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	for i := 0; i < len(textLayout.Children); i++ {
+		childElement := textLayout.Children[i].Element
 		childView := textViewResolver.Resolve(childElement)
-		mw, _ := childView.MinimumSize(textViewResolver, childElement, w-2, 1)
-		childTextLayout := childView.Layout(textViewResolver, childElement, x+2, y, mw, 1)
-		children = append(children, childTextLayout)
+		mw := textLayout.Children[i].MinimumWidth
+		childView.Layout(textViewResolver, textLayout.Children[i], x+2, y, mw, 1)
+	}
 
-		if mw > maxWidth {
-			maxWidth = mw
-		}
-		totalHeight++
-	}
-	return &TextLayout{
-		Element:  e,
-		Children: children,
-		Width:    maxWidth + 2,
-		Height:   totalHeight,
-	}
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (b *BlockquoteTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -290,48 +273,45 @@ func (b *BlockquoteTextView) Draw(textViewResolver TextViewResolver, textLayout 
 	}
 }
 
-func (b *BlockquoteTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
+func (b *BlockquoteTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
 	maxWidth := -1
 	totalHeight := 0
+	children := []*TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		mw, _ := childView.MinimumSize(textViewResolver, childElement, width, 1)
+		child := childView.MinimumSize(textViewResolver, childElement, width, 1)
+		children = append(children, child)
 
-		if mw > maxWidth {
-			maxWidth = mw
+		if child.MinimumWidth > maxWidth {
+			maxWidth = child.MinimumWidth
 		}
 		totalHeight++
 	}
-	return maxWidth, totalHeight
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  maxWidth,
+		MinimumHeight: totalHeight,
+		Children:      children,
+	}
 }
 
 // ListTextView renders ListElement
 type ListTextView struct{}
 
-func (l *ListTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	children := []*TextLayout{}
-	maxWidth := -1
-	totalHeight := 0
-	for i := 0; i < e.GetElementCount(); i++ {
-		childElement := e.GetElement(i)
+func (l *ListTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	for i := 0; i < len(textLayout.Children); i++ {
+		childElement := textLayout.Children[i].Element
 		childView := textViewResolver.Resolve(childElement)
-		mw, mh := childView.MinimumSize(textViewResolver, childElement, w-2, 9999)
-		childTextLayout := childView.Layout(textViewResolver, childElement, x+2, y, mw, mh)
-		children = append(children, childTextLayout)
-
-		if mw > maxWidth {
-			maxWidth = mw
-		}
-		totalHeight += mh
+		mw := textLayout.Children[i].MinimumWidth
+		mh := textLayout.Children[i].MinimumHeight
+		childView.Layout(textViewResolver, textLayout.Children[i], x+2, y, mw, mh)
 	}
 
-	return &TextLayout{
-		Element:  e,
-		Children: children,
-		Width:    maxWidth,
-		Height:   totalHeight,
-	}
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (l *ListTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -364,47 +344,45 @@ func (l *ListTextView) Draw(textViewResolver TextViewResolver, textLayout *TextL
 	}
 }
 
-func (l *ListTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
+func (l *ListTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
 	maxWidth := -1
 	totalHeight := 0
+	children := []*TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		mw, mh := childView.MinimumSize(textViewResolver, childElement, width-2, 9999)
+		child := childView.MinimumSize(textViewResolver, childElement, width-2, 9999)
+		children = append(children, child)
 
-		if mw > maxWidth {
-			maxWidth = mw
+		if child.MinimumWidth > maxWidth {
+			maxWidth = child.MinimumWidth
 		}
-		totalHeight += mh
+		totalHeight += child.MinimumHeight
 	}
-	return maxWidth, totalHeight
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  maxWidth,
+		MinimumHeight: totalHeight,
+		Children:      children,
+	}
 }
 
 // ListItemTextView renders ListItemElement
 type ListItemTextView struct{}
 
-func (l *ListItemTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	children := []*TextLayout{}
-	totalWidth := 0
-	maxHeight := -1
-	for i := 0; i < e.GetElementCount(); i++ {
-		childElement := e.GetElement(i)
+func (l *ListItemTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	for i := 0; i < len(textLayout.Children); i++ {
+		childElement := textLayout.Children[i].Element
 		childView := textViewResolver.Resolve(childElement)
-		mw, mh := childView.MinimumSize(textViewResolver, childElement, w, h)
-		childTextLayout := childView.Layout(textViewResolver, childElement, x, y, mw, mh)
-		children = append(children, childTextLayout)
+		mw := textLayout.Children[i].MinimumWidth
+		mh := textLayout.Children[i].MinimumHeight
+		childView.Layout(textViewResolver, textLayout.Children[i], x, y, mw, mh)
+	}
 
-		if mh > maxHeight {
-			maxHeight = mh
-		}
-		totalWidth += mw
-	}
-	return &TextLayout{
-		Element:  e,
-		Children: children,
-		Width:    totalWidth,
-		Height:   maxHeight,
-	}
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (l *ListItemTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -417,32 +395,37 @@ func (l *ListItemTextView) Draw(textViewResolver TextViewResolver, textLayout *T
 	}
 }
 
-func (l *ListItemTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
+func (l *ListItemTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
 	totalWidth := 0
 	maxHeight := -1
+	children := []*TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		mw, mh := childView.MinimumSize(textViewResolver, childElement, width, height)
+		child := childView.MinimumSize(textViewResolver, childElement, width, height)
+		children = append(children, child)
 
-		if mh > maxHeight {
-			maxHeight = mh
+		if child.MinimumHeight > maxHeight {
+			maxHeight = child.MinimumHeight
 		}
-		totalWidth += mw
+		totalWidth += child.MinimumWidth
 	}
-	return totalWidth, maxHeight
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  totalWidth,
+		MinimumHeight: maxHeight,
+		Children:      children,
+	}
 }
 
 // ThematicBreakTextView renders ThematicBreakElement
 type ThematicBreakTextView struct{}
 
-func (t *ThematicBreakTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	return &TextLayout{
-		Element:  e,
-		Children: nil,
-		Width:    1,
-		Height:   1,
-	}
+func (t *ThematicBreakTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (t *ThematicBreakTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -452,20 +435,22 @@ func (t *ThematicBreakTextView) Draw(textViewResolver TextViewResolver, textLayo
 	}
 }
 
-func (t *ThematicBreakTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
-	return 1, 1
+func (t *ThematicBreakTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  1,
+		MinimumHeight: 1,
+	}
 }
 
 // TextElementView renders TextElement
 type TextElementView struct{}
 
-func (t *TextElementView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	return &TextLayout{
-		Element:  e,
-		Children: nil,
-		Width:    text.DisplayWidth(e.GetText()),
-		Height:   1,
-	}
+func (t *TextElementView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (t *TextElementView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -502,31 +487,29 @@ func (t *TextElementView) Draw(textViewResolver TextViewResolver, textLayout *Te
 	}
 }
 
-func (t *TextElementView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
-	return text.DisplayWidth(e.GetText()), 1
+func (t *TextElementView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  text.DisplayWidth(e.GetText()),
+		MinimumHeight: 1,
+	}
 }
 
 // EmphasisTextView renders EmphasisElement
 type EmphasisTextView struct{}
 
-func (em *EmphasisTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	children := []*TextLayout{}
-	totalWidth := 0
-	for i := 0; i < e.GetElementCount(); i++ {
-		childElement := e.GetElement(i)
+func (em *EmphasisTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	for i := 0; i < len(textLayout.Children); i++ {
+		childElement := textLayout.Children[i].Element
 		childView := textViewResolver.Resolve(childElement)
-		mw, _ := childView.MinimumSize(textViewResolver, childElement, w, 1)
-		childTextLayout := childView.Layout(textViewResolver, childElement, x, y, mw, 1)
-		children = append(children, childTextLayout)
-		totalWidth += mw
+		mw := textLayout.Children[i].MinimumWidth
+		childView.Layout(textViewResolver, textLayout.Children[i], x, y, mw, 1)
 	}
 
-	return &TextLayout{
-		Element:  e,
-		Children: children,
-		Width:    totalWidth,
-		Height:   1,
-	}
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (em *EmphasisTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -546,39 +529,39 @@ func (em *EmphasisTextView) Draw(textViewResolver TextViewResolver, textLayout *
 	}
 }
 
-func (em *EmphasisTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
+func (em *EmphasisTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
 	totalWidth := 0
+	children := []*TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		mw, _ := childView.MinimumSize(textViewResolver, childElement, width, 1)
-		totalWidth += mw
+		child := childView.MinimumSize(textViewResolver, childElement, width, 1)
+		children = append(children, child)
+		totalWidth += child.MinimumWidth
 	}
-	return totalWidth, 1
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  totalWidth,
+		MinimumHeight: 1,
+		Children:      children,
+	}
 }
 
 // StrongTextView renders StrongElement
 type StrongTextView struct{}
 
-func (s *StrongTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	children := []*TextLayout{}
-	totalWidth := 0
-	for i := 0; i < e.GetElementCount(); i++ {
-		childElement := e.GetElement(i)
+func (s *StrongTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	for i := 0; i < len(textLayout.Children); i++ {
+		childElement := textLayout.Children[i].Element
 		childView := textViewResolver.Resolve(childElement)
-		mw, _ := childView.MinimumSize(textViewResolver, childElement, w, 1)
-		childTextLayout := childView.Layout(textViewResolver, childElement, x, y, mw, 1)
-		children = append(children, childTextLayout)
-
-		totalWidth += mw
+		mw := textLayout.Children[i].MinimumWidth
+		childView.Layout(textViewResolver, textLayout.Children[i], x, y, mw, 1)
 	}
 
-	return &TextLayout{
-		Element:  e,
-		Children: children,
-		Width:    totalWidth,
-		Height:   1,
-	}
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (s *StrongTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -598,27 +581,32 @@ func (s *StrongTextView) Draw(textViewResolver TextViewResolver, textLayout *Tex
 	}
 }
 
-func (s *StrongTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
+func (s *StrongTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
 	totalWidth := 0
+	children := []*TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		mw, _ := childView.MinimumSize(textViewResolver, childElement, width, 1)
-		totalWidth += mw
+		child := childView.MinimumSize(textViewResolver, childElement, width, 1)
+		children = append(children, child)
+		totalWidth += child.MinimumWidth
 	}
-	return totalWidth, 1
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  totalWidth,
+		MinimumHeight: 1,
+		Children:      children,
+	}
 }
 
 // CodeElementView renders CodeElement
 type CodeElementView struct{}
 
-func (c *CodeElementView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	return &TextLayout{
-		Element:  e,
-		Children: nil,
-		Width:    text.DisplayWidth(e.GetText()),
-		Height:   1,
-	}
+func (c *CodeElementView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (c *CodeElementView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -647,31 +635,29 @@ func (c *CodeElementView) Draw(textViewResolver TextViewResolver, textLayout *Te
 	}
 }
 
-func (c *CodeElementView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
-	return text.DisplayWidth(e.GetText()), 1
+func (c *CodeElementView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  text.DisplayWidth(e.GetText()),
+		MinimumHeight: 1,
+	}
 }
 
 // LinkTextView renders LinkElement
 type LinkTextView struct{}
 
-func (l *LinkTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	children := []*TextLayout{}
-	totalWidth := 0
-	for i := 0; i < e.GetElementCount(); i++ {
-		childElement := e.GetElement(i)
+func (l *LinkTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	for i := 0; i < len(textLayout.Children); i++ {
+		childElement := textLayout.Children[i].Element
 		childView := textViewResolver.Resolve(childElement)
-		mw, _ := childView.MinimumSize(textViewResolver, childElement, w, 1)
-		childTextLayout := childView.Layout(textViewResolver, childElement, x, y, mw, 1)
-		children = append(children, childTextLayout)
-		totalWidth += mw
+		mw := textLayout.Children[i].MinimumWidth
+		childView.Layout(textViewResolver, textLayout.Children[i], x, y, mw, 1)
 	}
 
-	return &TextLayout{
-		Element:  e,
-		Children: children,
-		Width:    totalWidth,
-		Height:   1,
-	}
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (l *LinkTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -691,28 +677,32 @@ func (l *LinkTextView) Draw(textViewResolver TextViewResolver, textLayout *TextL
 	}
 }
 
-func (l *LinkTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
+func (l *LinkTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
 	totalWidth := 0
+	children := []*TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		mw, _ := childView.MinimumSize(textViewResolver, childElement, width, 1)
-		totalWidth += mw
+		child := childView.MinimumSize(textViewResolver, childElement, width, 1)
+		children = append(children, child)
+		totalWidth += child.MinimumWidth
 	}
-	return totalWidth, 1
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  totalWidth,
+		MinimumHeight: 1,
+		Children:      children,
+	}
 }
 
 // ImageTextView renders ImageElement
 type ImageTextView struct{}
 
-func (i *ImageTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	mw, mh := i.MinimumSize(textViewResolver, e, w, h)
-	return &TextLayout{
-		Element:  e,
-		Children: nil,
-		Width:    mw,
-		Height:   mh,
-	}
+func (i *ImageTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (i *ImageTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -729,10 +719,14 @@ func (i *ImageTextView) Draw(textViewResolver TextViewResolver, textLayout *Text
 	}
 }
 
-func (i *ImageTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
+func (i *ImageTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
 	imageElement := e.(*model.ImageElement)
 	displayText := "[Image: " + imageElement.Alt + "]"
-	return text.DisplayWidth(displayText), 1
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  text.DisplayWidth(displayText),
+		MinimumHeight: 1,
+	}
 }
 
 // StyleRenderer wraps a renderer to apply additional styles
@@ -771,13 +765,11 @@ func (s *StyleRenderer) Translate(offsetX int, offsetY int) Renderer {
 // SoftBreakTextView renders SoftBreakElement
 type SoftBreakTextView struct{}
 
-func (s *SoftBreakTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	return &TextLayout{
-		Element:  e,
-		Children: nil,
-		Width:    1,
-		Height:   1,
-	}
+func (s *SoftBreakTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (s *SoftBreakTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -785,43 +777,46 @@ func (s *SoftBreakTextView) Draw(textViewResolver TextViewResolver, textLayout *
 	renderer.SetContent(0, 0, ' ', nil, tcell.StyleDefault)
 }
 
-func (s *SoftBreakTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
-	return 1, 1
+func (s *SoftBreakTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  1,
+		MinimumHeight: 1,
+	}
 }
 
 // HardBreakTextView renders HardBreakElement
 type HardBreakTextView struct{}
 
-func (hb *HardBreakTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	return &TextLayout{
-		Element:  e,
-		Children: nil,
-		Width:    1,
-		Height:   1,
-	}
+func (hb *HardBreakTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (hb *HardBreakTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
 	// Hard break creates a line break - no visual content needed
 }
 
-func (hb *HardBreakTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
-	return 1, 1
+func (hb *HardBreakTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  1,
+		MinimumHeight: 1,
+	}
 }
 
 // TableTextView renders TableElement
 type TableTextView struct{}
 
-func (t *TableTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	children := []*TextLayout{}
+func (t *TableTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
 	var heightTable []int
-	for i := 0; i < e.GetElementCount(); i++ {
-		row := e.GetElement(i)
+	for i := 0; i < len(textLayout.Children); i++ {
+		row := textLayout.Children[i].Element
 		maxHeight := -1
 		for j := 0; j < row.GetElementCount(); j++ {
-			col := row.GetElement(j)
-			colView := textViewResolver.Resolve(col)
-			_, mh := colView.MinimumSize(textViewResolver, col, w, h)
+			mh := textLayout.Children[i].MinimumHeight
 
 			if mh > maxHeight {
 				maxHeight = mh
@@ -831,12 +826,10 @@ func (t *TableTextView) Layout(textViewResolver TextViewResolver, e model.Elemen
 	}
 
 	var widthTable []int
-	for j := 0; j < e.GetElement(0).GetElementCount(); j++ {
+	for j := 0; j < len(textLayout.Children[0].Children); j++ {
 		maxWidth := -1
-		for i := 0; i < e.GetElementCount(); i++ {
-			cell := e.GetElement(i).GetElement(j)
-			cellView := textViewResolver.Resolve(cell)
-			mw, _ := cellView.MinimumSize(textViewResolver, cell, w, h)
+		for i := 0; i < len(textLayout.Children); i++ {
+			mw := textLayout.Children[i].Children[j].MinimumWidth
 
 			if mw > maxWidth {
 				maxWidth = mw
@@ -853,22 +846,17 @@ func (t *TableTextView) Layout(textViewResolver TextViewResolver, e model.Elemen
 	totalHeight := 0
 	yy := 1
 	for i, h := range heightTable {
-		row := e.GetElement(i)
+		row := textLayout.Children[i].Element
 		rowView := textViewResolver.Resolve(row)
-		rowElement := rowView.Layout(textViewResolver, row, 0, yy, w, h)
-		children = append(children, rowElement)
+		rowView.Layout(textViewResolver, textLayout.Children[i], 0, yy, w, h)
 		totalHeight += h
 		yy += h
 	}
 
-	return &TextLayout{
-		Element:   e,
-		Children:  children,
-		Width:     totalWidth + (len(children[0].Children) + 1),
-		Height:    totalHeight + 3,
-		RelativeX: x,
-		RelativeY: y,
-	}
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (t *TableTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -916,15 +904,21 @@ func (t *TableTextView) Draw(textViewResolver TextViewResolver, textLayout *Text
 	}
 }
 
-func (t *TableTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
+func (t *TableTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
+	children := []*TextLayout{}
+	for i := 0; i < e.GetElementCount(); i++ {
+		childElement := e.GetElement(i)
+		childView := textViewResolver.Resolve(childElement)
+		child := childView.MinimumSize(textViewResolver, childElement, width, height)
+		children = append(children, child)
+	}
+
 	var heightTable []int
 	for i := 0; i < e.GetElementCount(); i++ {
 		row := e.GetElement(i)
 		maxHeight := -1
 		for j := 0; j < row.GetElementCount(); j++ {
-			col := row.GetElement(j)
-			colView := textViewResolver.Resolve(col)
-			_, mh := colView.MinimumSize(textViewResolver, col, width, height)
+			mh := children[i].Children[j].MinimumHeight
 
 			if mh > maxHeight {
 				maxHeight = mh
@@ -937,9 +931,7 @@ func (t *TableTextView) MinimumSize(textViewResolver TextViewResolver, e model.E
 	for j := 0; j < e.GetElement(0).GetElementCount(); j++ {
 		maxWidth := -1
 		for i := 0; i < e.GetElementCount(); i++ {
-			cell := e.GetElement(i).GetElement(j)
-			cellView := textViewResolver.Resolve(cell)
-			mw, _ := cellView.MinimumSize(textViewResolver, cell, width, height)
+			mw := children[i].Children[j].MinimumWidth
 
 			if mw > maxWidth {
 				maxWidth = mw
@@ -958,35 +950,30 @@ func (t *TableTextView) MinimumSize(textViewResolver TextViewResolver, e model.E
 		totalHeight += h
 	}
 
-	return totalWidth + (e.GetElement(0).GetElementCount() + 1), totalHeight + 3
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  totalWidth + (e.GetElement(0).GetElementCount() + 1),
+		MinimumHeight: totalHeight + 3,
+		Children:      children,
+	}
 }
 
 // TableHeaderTextView renders TableHeaderElement
 type TableHeaderTextView struct{}
 
-func (t *TableHeaderTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	children := []*TextLayout{}
-	totalWidth := 0
-	maxHeight := -1
-	for i := 0; i < e.GetElementCount(); i++ {
-		childElement := e.GetElement(i)
+func (t *TableHeaderTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	for i := 0; i < len(textLayout.Children); i++ {
+		childElement := textLayout.Children[i].Element
 		childView := textViewResolver.Resolve(childElement)
-		mw, mh := childView.MinimumSize(textViewResolver, childElement, w, h)
-		childTextLayout := childView.Layout(textViewResolver, childElement, x, y, mw, mh)
-		children = append(children, childTextLayout)
-
-		if mh > maxHeight {
-			maxHeight = mh
-		}
-		totalWidth += mw
+		mw := textLayout.Children[i].MinimumWidth
+		mh := textLayout.Children[i].MinimumHeight
+		childView.Layout(textViewResolver, textLayout.Children[i], x, y, mw, mh)
 	}
 
-	return &TextLayout{
-		Element:  e,
-		Children: children,
-		Width:    totalWidth,
-		Height:   maxHeight,
-	}
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (t *TableHeaderTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -1021,48 +1008,45 @@ func (t *TableHeaderTextView) Draw(textViewResolver TextViewResolver, textLayout
 	}
 }
 
-func (t *TableHeaderTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
+func (t *TableHeaderTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
 	totalWidth := 0
 	maxHeight := -1
+	children := []*TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		mw, mh := childView.MinimumSize(textViewResolver, childElement, width, height)
+		child := childView.MinimumSize(textViewResolver, childElement, width, height)
+		children = append(children, child)
 
-		if mh > maxHeight {
-			maxHeight = mh
+		if child.MinimumHeight > maxHeight {
+			maxHeight = child.MinimumHeight
 		}
-		totalWidth += mw
+		totalWidth += child.MinimumWidth
 	}
-	return totalWidth, maxHeight
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  totalWidth,
+		MinimumHeight: maxHeight,
+		Children:      children,
+	}
 }
 
 // TableRowTextView renders TableRowElement
 type TableRowTextView struct{}
 
-func (t *TableRowTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	children := []*TextLayout{}
-	totalWidth := 0
-	maxHeight := -1
-	for i := 0; i < e.GetElementCount(); i++ {
-		childElement := e.GetElement(i)
+func (t *TableRowTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	for i := 0; i < len(textLayout.Children); i++ {
+		childElement := textLayout.Children[i].Element
 		childView := textViewResolver.Resolve(childElement)
-		mw, mh := childView.MinimumSize(textViewResolver, childElement, w, h)
-		childTextLayout := childView.Layout(textViewResolver, childElement, x, y, mw, mh)
-		children = append(children, childTextLayout)
-
-		if mh > maxHeight {
-			maxHeight = mh
-		}
-		totalWidth += mw
+		mw := textLayout.Children[i].MinimumWidth
+		mh := textLayout.Children[i].MinimumHeight
+		childView.Layout(textViewResolver, textLayout.Children[i], x, y, mw, mh)
 	}
 
-	return &TextLayout{
-		Element:  e,
-		Children: children,
-		Width:    totalWidth,
-		Height:   maxHeight,
-	}
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (t *TableRowTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -1089,48 +1073,45 @@ func (t *TableRowTextView) Draw(textViewResolver TextViewResolver, textLayout *T
 	}
 }
 
-func (t *TableRowTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
+func (t *TableRowTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
 	totalWidth := 0
 	maxHeight := -1
+	children := []*TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		mw, mh := childView.MinimumSize(textViewResolver, childElement, width, height)
+		child := childView.MinimumSize(textViewResolver, childElement, width, height)
+		children = append(children, child)
 
-		if mh > maxHeight {
-			maxHeight = mh
+		if child.MinimumHeight > maxHeight {
+			maxHeight = child.MinimumHeight
 		}
-		totalWidth += mw
+		totalWidth += child.MinimumWidth
 	}
-	return totalWidth, maxHeight
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  totalWidth,
+		MinimumHeight: maxHeight,
+		Children:      children,
+	}
 }
 
 // TableCellTextView renders TableCellElement
 type TableCellTextView struct{}
 
-func (t *TableCellTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	children := []*TextLayout{}
-	totalWidth := 0
-	maxHeight := -1
-	for i := 0; i < e.GetElementCount(); i++ {
-		childElement := e.GetElement(i)
+func (t *TableCellTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	for i := 0; i < len(textLayout.Children); i++ {
+		childElement := textLayout.Children[i].Element
 		childView := textViewResolver.Resolve(childElement)
-		mw, mh := childView.MinimumSize(textViewResolver, childElement, w, h)
-		childTextLayout := childView.Layout(textViewResolver, childElement, x, y, mw, mh)
-		children = append(children, childTextLayout)
-
-		if mh > maxHeight {
-			maxHeight = mh
-		}
-		totalWidth += mw
+		mw := textLayout.Children[i].MinimumWidth
+		mh := textLayout.Children[i].MinimumHeight
+		childView.Layout(textViewResolver, textLayout.Children[i], x, y, mw, mh)
 	}
 
-	return &TextLayout{
-		Element:  e,
-		Children: children,
-		Width:    totalWidth,
-		Height:   maxHeight,
-	}
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (t *TableCellTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -1143,18 +1124,25 @@ func (t *TableCellTextView) Draw(textViewResolver TextViewResolver, textLayout *
 	}
 }
 
-func (t *TableCellTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
+func (t *TableCellTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
 	totalWidth := 0
 	maxHeight := -1
+	children := []*TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
-		mw, mh := childView.MinimumSize(textViewResolver, childElement, width, height)
+		child := childView.MinimumSize(textViewResolver, childElement, width, height)
+		children = append(children, child)
 
-		if mh > maxHeight {
-			maxHeight = mh
+		if child.MinimumHeight > maxHeight {
+			maxHeight = child.MinimumHeight
 		}
-		totalWidth += mw
+		totalWidth += child.MinimumWidth
 	}
-	return totalWidth, maxHeight
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  totalWidth,
+		MinimumHeight: maxHeight,
+		Children:      children,
+	}
 }

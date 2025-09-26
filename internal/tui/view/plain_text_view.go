@@ -10,13 +10,11 @@ import (
 type PlainTextView struct {
 }
 
-func (p *PlainTextView) Layout(textViewResolver TextViewResolver, e model.Element, x, y, w, h int) *TextLayout {
-	return &TextLayout{
-		Element:  e,
-		Children: nil,
-		Width:    text.DisplayWidth(e.GetText()),
-		Height:   1,
-	}
+func (p *PlainTextView) Layout(textViewResolver TextViewResolver, textLayout *TextLayout, x, y, w, h int) {
+	textLayout.RelativeX = x
+	textLayout.RelativeY = y
+	textLayout.Width = w
+	textLayout.Height = h
 }
 
 func (p *PlainTextView) Draw(textViewResolver TextViewResolver, textLayout *TextLayout, renderer Renderer) {
@@ -78,6 +76,10 @@ func (p *PlainTextView) WidthWithTabStop(textViewResolver TextViewResolver, text
 	return totalWidth
 }
 
-func (p *PlainTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) (Width int, Height int) {
-	return text.DisplayWidth(e.GetText()), 1
+func (p *PlainTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
+	return &TextLayout{
+		Element:       e,
+		MinimumWidth:  text.DisplayWidth(e.GetText()),
+		MinimumHeight: 1,
+	}
 }
