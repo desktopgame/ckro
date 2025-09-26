@@ -13,7 +13,7 @@ func (m *MarkdownTextEngine) Resolve(e model.Element) view.TextView {
 	// Goldmark Elements
 	case *model.DocumentElement:
 		return &view.DocumentTextView{}
-	case *model.ParagraphElementGM:
+	case *model.ParagraphElement:
 		return &view.ParagraphTextViewGM{}
 	case *model.HeadingElement:
 		return &view.HeadingTextView{}

@@ -191,7 +191,7 @@ func (c *GoldmarkConverter) convertDocument(node *ast.Document) Element {
 // Paragraph conversion
 func (c *GoldmarkConverter) convertParagraph(node *ast.Paragraph) Element {
 	startPos, endPos := c.getPosition(node)
-	return &ParagraphElementGM{
+	return &ParagraphElement{
 		StartPosition: startPos,
 		EndPosition:   endPos,
 		Children:      c.convertChildren(node),
@@ -497,7 +497,7 @@ func (c *GoldmarkConverter) convertGenericNode(node ast.Node) Element {
 	}
 
 	// For container nodes, create a generic paragraph-like element
-	return &ParagraphElementGM{
+	return &ParagraphElement{
 		StartPosition: startPos,
 		EndPosition:   endPos,
 		Children:      c.convertChildren(node),

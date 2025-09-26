@@ -87,9 +87,9 @@ func TestParagraphWithInlineElements(t *testing.T) {
 		t.Fatalf("Expected 1 element, got %d", len(elements))
 	}
 
-	paragraph, ok := elements[0].(*ParagraphElementGM)
+	paragraph, ok := elements[0].(*ParagraphElement)
 	if !ok {
-		t.Fatal("Expected ParagraphElementGM")
+		t.Fatal("Expected ParagraphElement")
 	}
 
 	if paragraph.GetElementCount() == 0 {
@@ -149,9 +149,9 @@ func TestLinkElement(t *testing.T) {
 		t.Fatalf("Expected 1 element, got %d", len(elements))
 	}
 
-	paragraph, ok := elements[0].(*ParagraphElementGM)
+	paragraph, ok := elements[0].(*ParagraphElement)
 	if !ok {
-		t.Fatal("Expected ParagraphElementGM")
+		t.Fatal("Expected ParagraphElement")
 	}
 
 	if paragraph.GetElementCount() == 0 {

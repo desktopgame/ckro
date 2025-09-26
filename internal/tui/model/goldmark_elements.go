@@ -24,23 +24,23 @@ func (e *DocumentElement) GetElementCount() int { return len(e.Children) }
 // Block elements
 
 // Paragraph element
-type ParagraphElementGM struct {
+type ParagraphElement struct {
 	StartPosition Position
 	EndPosition   Position
 	Children      []Element
 }
 
-func (e *ParagraphElementGM) GetStyle() *Style           { return nil }
-func (e *ParagraphElementGM) GetText() string            { return "" }
-func (e *ParagraphElementGM) GetStartPosition() Position { return e.StartPosition }
-func (e *ParagraphElementGM) GetEndPosition() Position   { return e.EndPosition }
-func (e *ParagraphElementGM) GetElement(index int) Element {
+func (e *ParagraphElement) GetStyle() *Style           { return nil }
+func (e *ParagraphElement) GetText() string            { return "" }
+func (e *ParagraphElement) GetStartPosition() Position { return e.StartPosition }
+func (e *ParagraphElement) GetEndPosition() Position   { return e.EndPosition }
+func (e *ParagraphElement) GetElement(index int) Element {
 	if index >= 0 && index < len(e.Children) {
 		return e.Children[index]
 	}
 	return nil
 }
-func (e *ParagraphElementGM) GetElementCount() int { return len(e.Children) }
+func (e *ParagraphElement) GetElementCount() int { return len(e.Children) }
 
 // Heading element
 type HeadingElement struct {

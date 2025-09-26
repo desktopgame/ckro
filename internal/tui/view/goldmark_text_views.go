@@ -51,7 +51,7 @@ func (d *DocumentTextView) Height(textViewResolver TextViewResolver, textLayout 
 	return textLayout.Height
 }
 
-// ParagraphTextViewGM renders ParagraphElementGM
+// ParagraphTextViewGM renders ParagraphElement
 type ParagraphTextViewGM struct{}
 
 func (p *ParagraphTextViewGM) Layout(textViewResolver TextViewResolver, e model.Element, width int) *TextLayout {
