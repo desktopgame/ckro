@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -276,4 +277,22 @@ You may be using [Markdown Live Preview](https://markdownlivepreview.com/).
 `
 
 	ConvertMarkdownToElements(code)
+}
+
+func TestTable(t *testing.T) {
+	code := `| Functional option | Type | Description |
+| ----------------- | ---- | ----------- |
+| goldmark.WithParser | parser.Parser  | This option must be passed before goldmark.WithParserOptions and goldmark.WithExtensions |
+| goldmark.WithRenderer | renderer.Renderer  | This option must be passed before goldmark.WithRendererOptions and goldmark.WithExtensions  |
+| goldmark.WithParserOptions | ...parser.Option  |  |
+| goldmark.WithRendererOptions | ...renderer.Option |  |
+| goldmark.WithExtensions | ...goldmark.Extender  |  |
+`
+
+	elements := ConvertMarkdownToElements(code)
+	if table, ok := elements[0].(*TableElement); ok {
+		for _, child := range table.Children {
+			fmt.Printf("%#v\n", child)
+		}
+	}
 }

@@ -653,25 +653,50 @@ func (t *TableTextView) Layout(textViewResolver TextViewResolver, e model.Elemen
 		children = append(children, childView.Layout(textViewResolver, childElement, width-2)) // Account for left/right borders
 	}
 
-	totalHeight := 0
-	for i, child := range children {
-		totalHeight += child.Height
+	var heightTable []int
+	for _, row := range children {
+		maxHeight := -1
+		for _, col := range row.Children {
+			if col.Height > maxHeight {
+				maxHeight = col.Height
+			}
+		}
+		heightTable = append(heightTable, maxHeight)
+	}
 
-		// Add space for header separator line
-		childElement := e.GetElement(i)
-		if _, isHeader := childElement.(*model.TableHeaderElement); isHeader {
-			totalHeight += 1 // Add 1 line for header separator
+	var widthTable []int
+	for j := 0; j < len(children[0].Children); j++ {
+		maxWidth := -1
+		for i := 0; i < len(children); i++ {
+			if children[i].Children[j].Width > maxWidth {
+				maxWidth = children[i].Children[j].Width
+			}
+		}
+		widthTable = append(widthTable, maxWidth)
+	}
+
+	for i := 0; i < len(children); i++ {
+		for j := 0; j < len(children[0].Children); j++ {
+			children[i].Children[j].Width = widthTable[j]
+			children[i].Children[j].Height = heightTable[i]
 		}
 	}
 
-	// Add space for top and bottom borders
-	totalHeight += 2
+	totalWidth := 0
+	for _, w := range widthTable {
+		totalWidth += w
+	}
+
+	totalHeight := 0
+	for _, h := range heightTable {
+		totalHeight += h
+	}
 
 	return &TextLayout{
 		Element:  e,
 		Children: children,
-		Width:    width,
-		Height:   totalHeight,
+		Width:    totalWidth + (len(children[0].Children) + 1),
+		Height:   totalHeight + 3,
 	}
 }
 
@@ -762,8 +787,8 @@ func (t *TableHeaderTextView) Draw(textViewResolver TextViewResolver, textLayout
 		return
 	}
 
-	availableWidth := textLayout.Width - (cellCount - 1)
-	cellWidth := availableWidth / cellCount
+	//availableWidth := textLayout.Width - (cellCount - 1)
+	//cellWidth := availableWidth / cellCount
 
 	x := 0
 	for i, child := range textLayout.Children {
@@ -783,7 +808,7 @@ func (t *TableHeaderTextView) Draw(textViewResolver TextViewResolver, textLayout
 		}
 
 		childView.Draw(textViewResolver, child, headerRenderer)
-		x += cellWidth
+		x += child.Width
 	}
 }
 
@@ -807,6 +832,7 @@ func (t *TableRowTextView) Layout(textViewResolver TextViewResolver, e model.Ele
 	// Account for cell separators (|) between cells
 	availableWidth := width - (cellCount - 1)
 	cellWidth := availableWidth / cellCount
+	totalWidth := 0
 	maxHeight := -1
 
 	for i := 0; i < cellCount; i++ {
@@ -818,12 +844,13 @@ func (t *TableRowTextView) Layout(textViewResolver TextViewResolver, e model.Ele
 		if childTextLayout.Height > maxHeight {
 			maxHeight = childTextLayout.Height
 		}
+		totalWidth += childTextLayout.Width
 	}
 
 	return &TextLayout{
 		Element:  e,
 		Children: children,
-		Width:    width,
+		Width:    totalWidth,
 		Height:   maxHeight,
 	}
 }
@@ -834,8 +861,8 @@ func (t *TableRowTextView) Draw(textViewResolver TextViewResolver, textLayout *T
 		return
 	}
 
-	availableWidth := textLayout.Width - (cellCount - 1)
-	cellWidth := availableWidth / cellCount
+	//availableWidth := textLayout.Width - (cellCount - 1)
+	//cellWidth := availableWidth / cellCount
 
 	x := 0
 	for i, child := range textLayout.Children {
@@ -848,7 +875,7 @@ func (t *TableRowTextView) Draw(textViewResolver TextViewResolver, textLayout *T
 		childElement := textLayout.Element.GetElement(i)
 		childView := textViewResolver.Resolve(childElement)
 		childView.Draw(textViewResolver, child, renderer.Translate(x, 0))
-		x += cellWidth
+		x += child.Width
 	}
 }
 
