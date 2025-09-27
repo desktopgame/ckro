@@ -78,14 +78,26 @@ func (doc *StyledDocument) Render() []model.Element {
 				})
 			}
 			elements = append(elements, &CodeBlockElement{
-				Range: model.Range{
-					StartPosition: model.Position{
-						Row:    block.LineIndex,
-						Column: 0,
+				Ranges: []model.Range{
+					{
+						StartPosition: model.Position{
+							Row:    block.LineIndex,
+							Column: 0,
+						},
+						EndPosition: model.Position{
+							Row:    block.LineIndex,
+							Column: len(doc.GetLineAt(block.LineIndex)),
+						},
 					},
-					EndPosition: model.Position{
-						Row:    block.LineIndex,
-						Column: len(doc.GetLineAt(block.LineIndex)),
+					{
+						StartPosition: model.Position{
+							Row:    block.LineIndex,
+							Column: block.Span.StartColumn,
+						},
+						EndPosition: model.Position{
+							Row:    block.LineIndex,
+							Column: block.Span.EndColumn,
+						},
 					},
 				},
 				Children: codeLines,

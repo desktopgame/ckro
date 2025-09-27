@@ -3,16 +3,16 @@ package litemark
 import "github.com/desktopgame/ckro/internal/tui/model"
 
 type CodeBlockElement struct {
-	Range    model.Range
+	Ranges   []model.Range
 	Children []model.Element
 }
 
 func (c *CodeBlockElement) GetRange(index int) model.Range {
-	return c.Range
+	return c.Ranges[index]
 }
 
 func (c *CodeBlockElement) GetRangeCount() int {
-	return 1
+	return len(c.Ranges)
 }
 
 func (c *CodeBlockElement) GetElement(index int) model.Element {
