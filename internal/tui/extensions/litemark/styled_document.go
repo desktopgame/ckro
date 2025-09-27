@@ -58,6 +58,16 @@ func (doc *StyledDocument) Render() []model.Element {
 										Column: len(doc.GetLineAt(lineIndex)),
 									},
 								},
+								{
+									StartPosition: model.Position{
+										Row:    lineIndex,
+										Column: 0,
+									},
+									EndPosition: model.Position{
+										Row:    lineIndex,
+										Column: len(doc.GetLineAt(lineIndex)),
+									},
+								},
 							},
 						},
 					},
