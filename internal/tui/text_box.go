@@ -30,7 +30,9 @@ type TextBox struct {
 	scrollX      int
 	scrollY      int
 	viewPosition int
-	layoutCache  []*view.TextLayout
+
+	elements    []model.Element
+	layoutCache []*view.TextLayout
 }
 
 // Init is initialize TextBox.
@@ -344,20 +346,13 @@ func (tb *TextBox) Draw(g *Graphics) {
 	clip = cursor
 
 	if tb.isStyled() {
-		ctx := view.Context{
-			Resolver: tb.TextEngine,
-			Document: tb.Document,
-		}
-
-		elements := tb.Document.Render()
-
-		_, ei, _, eoff := tb.currentViewState(ctx, elements)
-		view := tb.TextEngine.Resolve(elements[ei])
+		_, ei, _, eoff := tb.currentViewState(ctx, tb.elements)
+		view := tb.TextEngine.Resolve(tb.elements[ei])
 		y := 0
 		for i := 0; i < ei; i++ {
 			y += tb.layoutCache[i].Height
 		}
-		vlx, vly := view.ConvertPos(ctx, elements[ei], eoff)
+		vlx, vly := view.ConvertPos(ctx, tb.elements[ei], eoff)
 		ax := vlx
 		ay := y + vly
 
@@ -392,18 +387,20 @@ func (tb *TextBox) isStyled() bool {
 func (tb *TextBox) currentViewState(ctx view.Context, elements []model.Element) (TotalViewLen int, CurrentElementIndex int, CurrentElementStart int, CurrentElementOffset int) {
 	totalViewLen := 0
 	elementIndex := 0
-	elementStart := 0
+	elementStart := -1
 	oldLocalViewPos := 0
 	for i, elem := range elements {
 		viewStart := totalViewLen
 		view := tb.TextEngine.Resolve(elem)
+		viewLen := view.MoveLength(ctx, elem)
+		viewEnd := viewStart + viewLen
 
-		if elementStart == 0 && tb.viewPosition >= viewStart {
+		if elementStart == -1 && tb.viewPosition >= viewStart && tb.viewPosition < viewEnd {
 			elementIndex = i
 			oldLocalViewPos = tb.viewPosition - viewStart
 			elementStart = viewStart
 		}
-		totalViewLen += view.MoveLength(ctx, elem)
+		totalViewLen += viewLen
 	}
 	return totalViewLen, elementIndex, elementStart, oldLocalViewPos
 }
@@ -431,7 +428,9 @@ func (tb *TextBox) move(dir int) {
 	}
 
 	if newLocalViewPos == -1 {
-		if dir == 2 {
+		if dir == 3 {
+			tb.viewPosition = elementStart + tview.MoveLength(ctx, elements[elementIndex])
+		} else if dir == 1 {
 			tb.viewPosition = elementStart + tview.MoveLength(ctx, elements[elementIndex])
 		}
 	} else {
@@ -476,6 +475,7 @@ func (tb *TextBox) layout() {
 		entries = append(entries, tl)
 	}
 
+	tb.elements = elements
 	tb.layoutCache = entries
 }
 
