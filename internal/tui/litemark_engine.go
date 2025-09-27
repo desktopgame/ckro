@@ -11,6 +11,8 @@ type LitemarkEngine struct {
 
 func (l *LitemarkEngine) Resolve(e model.Element) view.TextView {
 	switch e.(type) {
+	case *litemark.HeadingElement:
+		return &litemark.HeadingView{}
 	case *litemark.TextElement:
 		return &litemark.TextView{}
 	case *litemark.InlineElement:

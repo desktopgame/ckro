@@ -15,6 +15,19 @@ func (doc *StyledDocument) Render() []model.Element {
 	blocks := Parse(doc)
 	for _, aBlock := range blocks {
 		switch block := aBlock.(type) {
+		case *Heading:
+			elements = append(elements, &HeadingElement{
+				StartPosition: model.Position{
+					Row:    block.LineIndex,
+					Column: 0,
+				},
+				EndPosition: model.Position{
+					Row:    block.LineIndex,
+					Column: text.GraphemeLength(doc.GetLineAt(block.LineIndex)) - 1,
+				},
+				Text:  GetText(doc, block.LineIndex, block.Span),
+				Level: block.Level,
+			})
 		case *Text:
 			texts := []model.Element{}
 			for _, aInline := range block.Inlines {
