@@ -183,10 +183,52 @@ func ParseInline(line string) []AbstractInline {
 				continue
 			}
 		}
+		if c == '_' && column+1 < n && line[column+1] == '_' {
+			end := strIndexOf(line, "__", column+2)
+			if end != -1 {
+				inlines = append(inlines, &Bold{
+					Inline: Inline{
+						Spans: []Span{
+							{
+								StartColumn: at,
+								EndColumn:   end + 2,
+							},
+							{
+								StartColumn: at + 2,
+								EndColumn:   end,
+							},
+						},
+					},
+				})
+				column = end + 2
+				continue
+			}
+		}
 
 		// Italic
 		if c == '*' {
 			end := byteIndexOf(line, '*', column+1)
+			if end != -1 {
+				inlines = append(inlines, &Italic{
+					Inline: Inline{
+						Spans: []Span{
+							{
+								StartColumn: at,
+								EndColumn:   end + 1,
+							},
+							{
+								StartColumn: at + 1,
+								EndColumn:   end,
+							},
+						},
+					},
+				})
+				column = end + 1
+				continue
+			}
+		}
+		if c == '_' {
+			end := byteIndexOf(line, '_', column+1)
 			if end != -1 {
 				inlines = append(inlines, &Italic{
 					Inline: Inline{
