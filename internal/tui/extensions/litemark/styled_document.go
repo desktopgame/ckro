@@ -31,6 +31,15 @@ func (doc *StyledDocument) Render() []model.Element {
 					style = &model.Style{
 						IsBold: true,
 					}
+				case *Link:
+					text = GetText(doc, block.LineIndex, inline.Spans[1])
+					style = &model.Style{
+						Foreground:  model.Blue,
+						IsUnderline: true,
+					}
+				case *Image:
+					text = GetText(doc, block.LineIndex, inline.Spans[1])
+					style = &model.Style{}
 				case *PlainText:
 					text = GetText(doc, block.LineIndex, inline.Spans[0])
 					style = &model.Style{}
