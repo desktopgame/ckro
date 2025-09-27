@@ -94,7 +94,7 @@ func (p *PlainTextView) MoveRight(ctx Context, e model.Element, viewLocalPos int
 }
 
 func (p *PlainTextView) ConvertPos(ctx Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
-	return 0, text.DisplayPos(ctx.GetText(e), viewLocalPos)
+	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
 }
 
 func (p *PlainTextView) ConvertModel(ctx Context, e model.Element, viewLocalPos int) model.Position {
