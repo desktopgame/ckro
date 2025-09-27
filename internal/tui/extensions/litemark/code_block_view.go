@@ -8,14 +8,14 @@ import (
 type CodeBlockView struct {
 }
 
-func (c *CodeBlockView) Layout(textViewResolver view.TextViewResolver, textLayout *view.TextLayout, x, y, w, h int) {
+func (c *CodeBlockView) Layout(ctx view.Context, textLayout *view.TextLayout, x, y, w, h int) {
 	offsetY := 0
 	for i := 0; i < len(textLayout.Children); i++ {
 		childElement := textLayout.Children[i].Element
-		childView := textViewResolver.Resolve(childElement)
+		childView := ctx.Resolver.Resolve(childElement)
 
 		mw := textLayout.Children[i].MinimumWidth
-		childView.Layout(textViewResolver, textLayout.Children[i], 0, offsetY, mw, 1)
+		childView.Layout(ctx, textLayout.Children[i], 0, offsetY, mw, 1)
 		offsetY++
 	}
 	textLayout.RelativeX = x
@@ -24,21 +24,21 @@ func (c *CodeBlockView) Layout(textViewResolver view.TextViewResolver, textLayou
 	textLayout.Height = h
 }
 
-func (c *CodeBlockView) Draw(textViewResolver view.TextViewResolver, textLayout *view.TextLayout, renderer view.Renderer) {
+func (c *CodeBlockView) Draw(ctx view.Context, textLayout *view.TextLayout, renderer view.Renderer) {
 	for _, child := range textLayout.Children {
-		childView := textViewResolver.Resolve(child.Element)
-		childView.Draw(textViewResolver, child, renderer.Translate(child.RelativeX, child.RelativeY))
+		childView := ctx.Resolver.Resolve(child.Element)
+		childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY))
 	}
 }
 
-func (c *CodeBlockView) MinimumSize(textViewResolver view.TextViewResolver, e model.Element, width int, height int) *view.TextLayout {
+func (c *CodeBlockView) MinimumSize(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
 	totalWidth := 0
 	children := []*view.TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
-		childView := textViewResolver.Resolve(childElement)
+		childView := ctx.Resolver.Resolve(childElement)
 
-		child := childView.MinimumSize(textViewResolver, childElement, width, 1)
+		child := childView.MinimumSize(ctx, childElement, width, 1)
 		children = append(children, child)
 		totalWidth += child.MinimumWidth
 	}

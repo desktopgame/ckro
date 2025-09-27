@@ -11,14 +11,14 @@ import (
 type InlineView struct {
 }
 
-func (il *InlineView) Layout(textViewResolver view.TextViewResolver, textLayout *view.TextLayout, x, y, w, h int) {
+func (il *InlineView) Layout(ctx view.Context, textLayout *view.TextLayout, x, y, w, h int) {
 	textLayout.RelativeX = x
 	textLayout.RelativeY = y
 	textLayout.Width = w
 	textLayout.Height = h
 }
 
-func (il *InlineView) Draw(textViewResolver view.TextViewResolver, textLayout *view.TextLayout, renderer view.Renderer) {
+func (il *InlineView) Draw(ctx view.Context, textLayout *view.TextLayout, renderer view.Renderer) {
 	// x := 0
 	// y := 0
 
@@ -61,7 +61,7 @@ func (il *InlineView) Draw(textViewResolver view.TextViewResolver, textLayout *v
 	}
 }
 
-func (il *InlineView) WidthWithTabStop(textViewResolver view.TextViewResolver, textLayout *view.TextLayout, column int) int {
+func (il *InlineView) WidthWithTabStop(ctx view.Context, textLayout *view.TextLayout, column int) int {
 	clusters := text.GraphemeClusters(textLayout.Element.GetText())
 	totalWidth := 0
 	for _, cluster := range clusters {
@@ -77,7 +77,7 @@ func (il *InlineView) WidthWithTabStop(textViewResolver view.TextViewResolver, t
 	return totalWidth
 }
 
-func (il *InlineView) MinimumSize(textViewResolver view.TextViewResolver, e model.Element, width int, height int) *view.TextLayout {
+func (il *InlineView) MinimumSize(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
 	return &view.TextLayout{
 		Element:       e,
 		MinimumWidth:  text.DisplayWidth(e.GetText()),

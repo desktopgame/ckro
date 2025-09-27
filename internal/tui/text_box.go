@@ -319,10 +319,15 @@ func (tb *TextBox) Draw(g *Graphics) {
 	cursor := clip
 	def := tcell.StyleDefault
 
+	ctx := view.Context{
+		Resolver: tb.TextEngine,
+		Document: tb.Document,
+	}
+
 	for textSegment := range tb.BreakIter() {
 		if textSegment.LocalViewLine == 0 {
 			view := tb.TextEngine.Resolve(textSegment.TextLayout.Element)
-			view.Draw(tb.TextEngine, textSegment.TextLayout, &clip)
+			view.Draw(ctx, textSegment.TextLayout, &clip)
 			clip.offsetY++
 		} else {
 			clip.offsetY++
@@ -358,13 +363,18 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 	//sb := strings.Builder{}
 
 	return func(yield func(presenter.Segment) bool) {
+		ctx := view.Context{
+			Resolver: tb.TextEngine,
+			Document: tb.Document,
+		}
+
 		elements := tb.Document.Render()
 
 		entries := []*view.TextLayout{}
 		for i := 0; i < len(elements); i++ {
 			element := elements[i]
 			textView := tb.TextEngine.Resolve(element)
-			tl := textView.MinimumSize(tb.TextEngine, element, tb.Width, 9999)
+			tl := textView.MinimumSize(ctx, element, tb.Width, 9999)
 			entries = append(entries, tl)
 		}
 
@@ -525,7 +535,7 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 				}
 			} else {
 				textView := tb.TextEngine.Resolve(entry.Element)
-				textView.Layout(tb.TextEngine, entry, 0, viewLine, entry.MinimumWidth, entry.MinimumHeight)
+				textView.Layout(ctx, entry, 0, viewLine, entry.MinimumWidth, entry.MinimumHeight)
 				for j := 0; j < entry.MinimumHeight; j++ {
 					segment := presenter.Segment{
 						TextLayout:    entry,

@@ -11,14 +11,14 @@ import (
 type HeadingView struct {
 }
 
-func (hv *HeadingView) Layout(textViewResolver view.TextViewResolver, textLayout *view.TextLayout, x, y, w, h int) {
+func (hv *HeadingView) Layout(ctx view.Context, textLayout *view.TextLayout, x, y, w, h int) {
 	textLayout.RelativeX = x
 	textLayout.RelativeY = y
 	textLayout.Width = w
 	textLayout.Height = h
 }
 
-func (hv *HeadingView) Draw(textViewResolver view.TextViewResolver, textLayout *view.TextLayout, renderer view.Renderer) {
+func (hv *HeadingView) Draw(ctx view.Context, textLayout *view.TextLayout, renderer view.Renderer) {
 	// x := 0
 	// y := 0
 	headingElement := textLayout.Element.(*HeadingElement)
@@ -80,7 +80,7 @@ func (hv *HeadingView) Draw(textViewResolver view.TextViewResolver, textLayout *
 	}
 }
 
-func (hv *HeadingView) MinimumSize(textViewResolver view.TextViewResolver, e model.Element, width int, height int) *view.TextLayout {
+func (hv *HeadingView) MinimumSize(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
 	return &view.TextLayout{
 		Element:       e,
 		MinimumWidth:  text.DisplayWidth(e.GetText()),
