@@ -19,6 +19,13 @@ func (doc *PlainDocument) Init() {
 	doc.Clear()
 }
 
+func (doc *PlainDocument) GetSegment(r Range) Segment {
+	return BufferSegment{
+		buffer: doc.buffer,
+		r:      r,
+	}
+}
+
 func (doc *PlainDocument) Render() []Element {
 	elements := []Element{}
 
