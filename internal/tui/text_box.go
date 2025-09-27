@@ -20,15 +20,17 @@ type textSegment struct {
 // TextBox has region of rect, rendering text within that range.
 // long line is always wrap at right end of region.
 type TextBox struct {
-	Document   model.Document
-	X          int
-	Y          int
-	Width      int
-	Height     int
-	TextEngine TextEngine
-	ShowCursor bool
-	scrollX    int
-	scrollY    int
+	Document     model.Document
+	X            int
+	Y            int
+	Width        int
+	Height       int
+	TextEngine   TextEngine
+	ShowCursor   bool
+	scrollX      int
+	scrollY      int
+	viewPosition int
+	layoutCache  []*view.TextLayout
 }
 
 // Init is initialize TextBox.
@@ -306,6 +308,8 @@ func (tb *TextBox) Draw(g *Graphics) {
 		return
 	}
 
+	tb.layout()
+
 	// バッファの内容を描画
 	clip := Clip{
 		Graphics:   g,
@@ -339,6 +343,30 @@ func (tb *TextBox) Draw(g *Graphics) {
 
 	clip = cursor
 
+	if tb.isStyled() {
+		ctx := view.Context{
+			Resolver: tb.TextEngine,
+			Document: tb.Document,
+		}
+
+		elements := tb.Document.Render()
+
+		_, ei, eoff := tb.currentViewState(ctx, elements)
+		view := tb.TextEngine.Resolve(elements[ei])
+		y := 0
+		for i := 0; i < ei; i++ {
+			y += tb.layoutCache[i].Height
+		}
+		vlx, vly := view.ConvertPos(ctx, elements[ei], eoff)
+		ax := vlx
+		ay := y + vly
+
+		// カーソル位置の文字を反転表示
+		cursorStyle := def.Reverse(true)
+		clip.SetCursor(ax, ay, ' ', nil, cursorStyle)
+		return
+	}
+
 	screenX, cursorRow, currentRune, combining := tb.CursorPosition()
 
 	// カーソル位置の文字を反転表示
@@ -356,6 +384,92 @@ func (tb *TextBox) Draw(g *Graphics) {
 
 }
 
+func (tb *TextBox) isStyled() bool {
+	_, ok := tb.Document.(*model.PlainDocument)
+	return !ok
+}
+
+func (tb *TextBox) currentViewState(ctx view.Context, elements []model.Element) (TotalViewLen int, CurrentElementIndex int, CurrentElementOffset int) {
+	totalViewLen := 0
+	elementIndex := 0
+	oldLocalViewPos := 0
+	for i, elem := range elements {
+		viewStart := totalViewLen
+		view := tb.TextEngine.Resolve(elem)
+
+		if tb.viewPosition >= viewStart {
+			elementIndex = i
+			oldLocalViewPos = tb.viewPosition - viewStart
+		}
+		totalViewLen += view.MoveLength(ctx, elem)
+	}
+	return totalViewLen, elementIndex, oldLocalViewPos
+}
+
+func (tb *TextBox) move(dir int) {
+	ctx := view.Context{
+		Resolver: tb.TextEngine,
+		Document: tb.Document,
+	}
+
+	elements := tb.Document.Render()
+	_, elementIndex, oldLocalViewPos := tb.currentViewState(ctx, elements)
+
+	tview := tb.TextEngine.Resolve(elements[elementIndex])
+	var newLocalViewPos int
+	switch dir {
+	case 0:
+		newLocalViewPos = tview.MoveLeft(ctx, elements[elementIndex], oldLocalViewPos)
+	case 1:
+		newLocalViewPos = tview.MoveRight(ctx, elements[elementIndex], oldLocalViewPos)
+	case 2:
+		newLocalViewPos = tview.MoveUp(ctx, elements[elementIndex], oldLocalViewPos)
+	case 3:
+		newLocalViewPos = tview.MoveDown(ctx, elements[elementIndex], oldLocalViewPos)
+	}
+	moves := newLocalViewPos - oldLocalViewPos
+	tb.viewPosition += moves
+}
+
+func (tb *TextBox) MoveLeft() {
+	tb.move(0)
+}
+
+func (tb *TextBox) MoveRight() {
+	tb.move(1)
+}
+
+func (tb *TextBox) MoveUp() {
+	tb.move(2)
+}
+
+func (tb *TextBox) MoveDown() {
+	tb.move(3)
+}
+
+func (tb *TextBox) MoveReset() {
+	tb.viewPosition = 0
+}
+
+func (tb *TextBox) layout() {
+	ctx := view.Context{
+		Resolver: tb.TextEngine,
+		Document: tb.Document,
+	}
+
+	elements := tb.Document.Render()
+
+	entries := []*view.TextLayout{}
+	for i := 0; i < len(elements); i++ {
+		element := elements[i]
+		textView := tb.TextEngine.Resolve(element)
+		tl := textView.MinimumSize(ctx, element, tb.Width, 9999)
+		entries = append(entries, tl)
+	}
+
+	tb.layoutCache = entries
+}
+
 // BreakIter returns segment array by line, in consideration a wrap.
 func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 	//buf := tb.Document.GetBuffer()
@@ -367,16 +481,7 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 			Document: tb.Document,
 		}
 
-		elements := tb.Document.Render()
-
-		entries := []*view.TextLayout{}
-		for i := 0; i < len(elements); i++ {
-			element := elements[i]
-			textView := tb.TextEngine.Resolve(element)
-			tl := textView.MinimumSize(ctx, element, tb.Width, 9999)
-			entries = append(entries, tl)
-		}
-
+		entries := tb.layoutCache
 		viewLine := 0
 		for _, entry := range entries {
 			element := entry.Element

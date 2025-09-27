@@ -26,13 +26,13 @@ func (edit *EditTextPresenter) Handle(view View, ev tcell.Event) {
 	case *tcell.EventKey:
 		switch e.Key() {
 		case tcell.KeyUp, tcell.KeyCtrlP:
-			doc.MoveUp()
+			view.MoveUp()
 		case tcell.KeyDown, tcell.KeyCtrlN:
-			doc.MoveDown()
+			view.MoveDown()
 		case tcell.KeyLeft, tcell.KeyCtrlB:
-			doc.MoveLeft()
+			view.MoveLeft()
 		case tcell.KeyRight, tcell.KeyCtrlF:
-			doc.MoveRight()
+			view.MoveRight()
 		case tcell.KeyCtrlA:
 			for doc.GetCursorColumn() > 0 {
 				doc.MoveLeft()

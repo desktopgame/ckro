@@ -20,6 +20,11 @@ type View interface {
 	TextHorizontal()
 	TextClear()
 	CursorUpdate()
+	MoveLeft()
+	MoveRight()
+	MoveUp()
+	MoveDown()
+	MoveReset()
 	BreakIter() iter.Seq[Segment]
 	GetDocument() model.Document
 	GetWidth() int
