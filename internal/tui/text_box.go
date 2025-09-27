@@ -52,7 +52,7 @@ func (tb *TextBox) Init() {
 
 // CursorPosition returns position of cursor.
 // TODO: refactor
-func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
+func (tb *TextBox) CursorPosition2() (X int, Y int, Rune rune, Combine []rune) {
 	buf := tb.Document.GetBuffer()
 	cursorRow := tb.Document.GetCursorRow()
 	cursorCol := tb.Document.GetCursorColumn()
@@ -72,6 +72,72 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	cursorLine := buf.GetLineAt(cursorRow).GetContent()
 	screenX, additionalRows := tb.calculateCursorPosition(cursorLine, cursorCol)
 	screenY += additionalRows
+
+	// カーソル位置の文字を取得
+	var currentRune rune = ' '
+	var combining []rune
+
+	if cursorCol < text.GraphemeLength(cursorLine) {
+		// カーソル位置に文字がある場合
+		clusters := text.GraphemeClusters(cursorLine)
+		if cursorCol < len(clusters) {
+			cluster := clusters[cursorCol]
+			runes := []rune(cluster)
+			if len(runes) > 0 {
+				currentRune = runes[0]
+				if len(runes) > 1 {
+					combining = runes[1:]
+				}
+			}
+		}
+	}
+
+	return screenX, screenY, currentRune, combining
+}
+
+// CursorPosition returns position of cursor.
+// TODO: refactor
+func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
+	ctx := view.Context{
+		Resolver: tb.TextEngine,
+		Document: tb.Document,
+	}
+
+	_, ei, _, eoff := tb.currentViewState(ctx, tb.elements)
+	view := tb.TextEngine.Resolve(tb.elements[ei])
+	y := 0
+	for i := 0; i < ei; i++ {
+		y += tb.layoutCache[i].Height
+	}
+	vlx, vly := view.ConvertPos(ctx, tb.elements[ei], eoff)
+	ax := vlx
+	ay := y + vly
+
+	buf := tb.Document.GetBuffer()
+	cursorRow := ay
+	cursorCol := ax
+
+	if cursorRow >= buf.GetLineCount() {
+		return 0, 0, ' ', nil
+	}
+
+	// カーソルがある行までの画面行数を計算
+	screenY := 0
+	//for i := 0; i < cursorRow; i++ {
+	//	line := buf.GetLineAt(i).GetContent()
+	//	screenY += tb.calculateWrappedLines(line)
+	//}
+	for i := 0; i < ei; i++ {
+		screenY += tb.layoutCache[i].Height
+	}
+
+	// カーソルがある行での位置を正確に計算
+	cursorLine := buf.GetLineAt(cursorRow).GetContent()
+	relx, rely := tb.TextEngine.Resolve(tb.elements[ei]).ConvertPos(ctx, tb.elements[ei], eoff)
+	screenX := relx
+	screenY += rely
+	//screenX, additionalRows :=
+	//screenY += additionalRows
 
 	// カーソル位置の文字を取得
 	var currentRune rune = ' '
@@ -346,19 +412,30 @@ func (tb *TextBox) Draw(g *Graphics) {
 	clip = cursor
 
 	if tb.isStyled() {
-		_, ei, _, eoff := tb.currentViewState(ctx, tb.elements)
-		view := tb.TextEngine.Resolve(tb.elements[ei])
-		y := 0
-		for i := 0; i < ei; i++ {
-			y += tb.layoutCache[i].Height
-		}
-		vlx, vly := view.ConvertPos(ctx, tb.elements[ei], eoff)
-		ax := vlx
-		ay := y + vly
+		//_, ei, _, eoff := tb.currentViewState(ctx, tb.elements)
+		//view := tb.TextEngine.Resolve(tb.elements[ei])
+		//y := 0
+		//for i := 0; i < ei; i++ {
+		//	y += tb.layoutCache[i].Height
+		//}
+		//vlx, vly := view.ConvertPos(ctx, tb.elements[ei], eoff)
+		//ax := vlx
+		//ay := y + vly
+
+		screenX, cursorRow, currentRune, combining := tb.CursorPosition()
 
 		// カーソル位置の文字を反転表示
 		cursorStyle := def.Reverse(true)
-		clip.SetCursor(ax, ay, ' ', nil, cursorStyle)
+		clip.SetCursor(screenX, cursorRow-tb.scrollY, currentRune, combining, cursorStyle)
+
+		// 全角文字の場合、隣接するセルもカーソル表示
+		if currentRune != ' ' {
+			width := runewidth.RuneWidth(currentRune)
+			if width == 2 {
+				// 隣接するセルにもカーソルを表示（空文字で反転）
+				clip.SetCursor(screenX+1, cursorRow-tb.scrollY, 0, nil, cursorStyle)
+			}
+		}
 		return
 	}
 
