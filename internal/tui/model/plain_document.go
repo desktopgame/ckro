@@ -3,6 +3,7 @@ package model
 import (
 	"strings"
 
+	"github.com/desktopgame/ckro/internal/litemark"
 	"github.com/desktopgame/ckro/internal/text"
 )
 
@@ -21,23 +22,33 @@ func (doc *PlainDocument) Init() {
 }
 
 func (doc *PlainDocument) Render() []Element {
+	elements := []Element{}
+
 	if doc.Styled {
-		// Get all text content from buffer
-		var content strings.Builder
-		for i := 0; i < doc.buffer.GetLineCount(); i++ {
-			line := doc.buffer.GetLineAt(i)
-			content.WriteString(line.GetContent())
-			if i < doc.buffer.GetLineCount()-1 {
-				content.WriteString("\n")
+		blocks := litemark.Parse(doc)
+		for _, aBlock := range blocks {
+			switch block := aBlock.(type) {
+			case *litemark.Text:
+				elements = append(elements, &PlainElement{
+					Text: litemark.GetText(doc, block.LineIndex, litemark.Span{
+						StartColumn: 0,
+						EndColumn:   len(doc.GetLineAt(block.LineIndex)),
+					}),
+					StartPosition: Position{
+						Row:    block.LineIndex,
+						Column: 0,
+					},
+					EndPosition: Position{
+						Row:    block.LineIndex,
+						Column: text.GraphemeLength(doc.GetLineAt(block.LineIndex)) - 1,
+					},
+				})
 			}
 		}
-
-		// Convert markdown to elements using goldmark
-		return ConvertMarkdownToElements(content.String())
+		return elements
 	}
 
 	// Fallback to plain text rendering
-	elements := []Element{}
 	for i := 0; i < doc.buffer.GetLineCount(); i++ {
 		line := doc.buffer.GetLineAt(i)
 		lineStr := line.GetContent()
@@ -356,6 +367,14 @@ func (doc *PlainDocument) MoveDown() {
 func (doc *PlainDocument) MoveReset() {
 	doc.cursorRow = 0
 	doc.cursorColumn = 0
+}
+
+func (doc *PlainDocument) GetLineAt(lineIndex int) string {
+	return doc.buffer.GetLineAt(lineIndex).GetContent()
+}
+
+func (doc *PlainDocument) LineCount() int {
+	return doc.buffer.GetLineCount()
 }
 
 // GetBuffer returns Buffer.
