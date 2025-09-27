@@ -126,6 +126,23 @@ func Parse(reader Reader) []AbstractBlock {
 			Inlines: ParseInline(line),
 		})
 	}
+
+	// remaining lines
+	if codeBlockScope {
+		blocks = blocks[:len(blocks)-1]
+
+		for i := 0; i < codeBlockCurrent.LineCount; i++ {
+			lineIndex := codeBlockCurrent.LineIndex + i
+			blocks = append(blocks, &Text{
+				Block: Block{
+					LineIndex: lineIndex,
+					LineCount: 1,
+				},
+				Inlines: ParseInline(reader.GetLineAt(lineIndex)),
+			})
+		}
+		codeBlockScope = false
+	}
 	return blocks
 }
 
