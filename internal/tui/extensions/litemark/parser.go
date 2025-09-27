@@ -101,17 +101,15 @@ func Parse(reader Reader) []AbstractBlock {
 			}
 			codeBlockMarkerLen = column - 1
 
-			lang := ""
-			if column < len(line) {
-				lang = line[column:]
-			}
-
 			codeBlockCurrent = &CodeBlock{
 				Block: Block{
 					LineIndex: lineIndex,
 					LineCount: 1,
 				},
-				Lang: lang,
+				Span: Span{
+					StartColumn: column,
+					EndColumn:   len(line),
+				},
 			}
 			blocks = append(blocks, codeBlockCurrent)
 			continue

@@ -30,7 +30,7 @@ type BlankLine struct {
 
 type CodeBlock struct {
 	Block
-	Lang string
+	Span Span
 }
 
 type Inline struct {
