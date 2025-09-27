@@ -93,20 +93,23 @@ func (doc *StyledDocument) Render() []model.Element {
 					},
 				}
 
-				if _, ok := aInline.(*PlainText); !ok {
-					ranges = append(ranges,
-						model.Range{
-							StartPosition: model.Position{
-								Row:    block.LineIndex,
-								Column: aInline.BaseInline().Spans[1].StartColumn,
-							},
-							EndPosition: model.Position{
-								Row:    block.LineIndex,
-								Column: aInline.BaseInline().Spans[1].EndColumn,
-							},
-						},
-					)
+				spanIndex := 1
+				if _, ok := aInline.(*PlainText); ok {
+					spanIndex = 0
 				}
+
+				ranges = append(ranges,
+					model.Range{
+						StartPosition: model.Position{
+							Row:    block.LineIndex,
+							Column: aInline.BaseInline().Spans[spanIndex].StartColumn,
+						},
+						EndPosition: model.Position{
+							Row:    block.LineIndex,
+							Column: aInline.BaseInline().Spans[spanIndex].EndColumn,
+						},
+					},
+				)
 
 				texts = append(texts, &InlineElement{
 					Ranges: ranges,
