@@ -148,7 +148,7 @@ func TestSegment(t *testing.T) {
 		},
 		EndPosition: model.Position{
 			Row:    0,
-			Column: 9,
+			Column: 10,
 		},
 	}
 
@@ -161,7 +161,7 @@ func TestSegment(t *testing.T) {
 		},
 		EndPosition: model.Position{
 			Row:    1,
-			Column: 3,
+			Column: 4,
 		},
 	}
 

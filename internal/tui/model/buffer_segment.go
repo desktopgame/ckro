@@ -15,7 +15,7 @@ func (bs BufferSegment) GetLine(lineIndex int) string {
 	if bs.r.StartPosition.Row == bs.r.EndPosition.Row {
 		spans = append(spans, Span{
 			StartColumn: bs.r.StartPosition.Column,
-			EndColumn:   bs.r.EndPosition.Column + 1,
+			EndColumn:   bs.r.EndPosition.Column,
 		})
 	} else {
 		spans = append(spans, Span{
@@ -32,7 +32,7 @@ func (bs BufferSegment) GetLine(lineIndex int) string {
 
 		spans = append(spans, Span{
 			StartColumn: 0,
-			EndColumn:   bs.r.EndPosition.Column + 1,
+			EndColumn:   bs.r.EndPosition.Column,
 		})
 	}
 
