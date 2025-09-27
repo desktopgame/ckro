@@ -351,7 +351,7 @@ func (tb *TextBox) Draw(g *Graphics) {
 
 		elements := tb.Document.Render()
 
-		_, ei, eoff := tb.currentViewState(ctx, elements)
+		_, ei, _, eoff := tb.currentViewState(ctx, elements)
 		view := tb.TextEngine.Resolve(elements[ei])
 		y := 0
 		for i := 0; i < ei; i++ {
@@ -389,21 +389,23 @@ func (tb *TextBox) isStyled() bool {
 	return !ok
 }
 
-func (tb *TextBox) currentViewState(ctx view.Context, elements []model.Element) (TotalViewLen int, CurrentElementIndex int, CurrentElementOffset int) {
+func (tb *TextBox) currentViewState(ctx view.Context, elements []model.Element) (TotalViewLen int, CurrentElementIndex int, CurrentElementStart int, CurrentElementOffset int) {
 	totalViewLen := 0
 	elementIndex := 0
+	elementStart := 0
 	oldLocalViewPos := 0
 	for i, elem := range elements {
 		viewStart := totalViewLen
 		view := tb.TextEngine.Resolve(elem)
 
-		if tb.viewPosition >= viewStart {
+		if elementStart == 0 && tb.viewPosition >= viewStart {
 			elementIndex = i
 			oldLocalViewPos = tb.viewPosition - viewStart
+			elementStart = viewStart
 		}
 		totalViewLen += view.MoveLength(ctx, elem)
 	}
-	return totalViewLen, elementIndex, oldLocalViewPos
+	return totalViewLen, elementIndex, elementStart, oldLocalViewPos
 }
 
 func (tb *TextBox) move(dir int) {
@@ -413,7 +415,7 @@ func (tb *TextBox) move(dir int) {
 	}
 
 	elements := tb.Document.Render()
-	_, elementIndex, oldLocalViewPos := tb.currentViewState(ctx, elements)
+	_, elementIndex, elementStart, oldLocalViewPos := tb.currentViewState(ctx, elements)
 
 	tview := tb.TextEngine.Resolve(elements[elementIndex])
 	var newLocalViewPos int
@@ -427,8 +429,15 @@ func (tb *TextBox) move(dir int) {
 	case 3:
 		newLocalViewPos = tview.MoveDown(ctx, elements[elementIndex], oldLocalViewPos)
 	}
-	moves := newLocalViewPos - oldLocalViewPos
-	tb.viewPosition += moves
+
+	if newLocalViewPos == -1 {
+		if dir == 2 {
+			tb.viewPosition = elementStart + tview.MoveLength(ctx, elements[elementIndex])
+		}
+	} else {
+		moves := newLocalViewPos - oldLocalViewPos
+		tb.viewPosition += moves
+	}
 }
 
 func (tb *TextBox) MoveLeft() {

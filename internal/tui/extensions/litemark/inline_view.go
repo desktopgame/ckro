@@ -130,7 +130,7 @@ func (il *InlineView) MoveRight(ctx view.Context, e model.Element, viewLocalPos 
 }
 
 func (il *InlineView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
-	return 0, text.DisplayPos(ctx.GetText(e), viewLocalPos)
+	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
 }
 
 func (il *InlineView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) model.Position {

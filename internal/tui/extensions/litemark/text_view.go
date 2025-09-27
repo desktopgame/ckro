@@ -91,7 +91,7 @@ func (t *TextView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int
 }
 
 func (t *TextView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
-	return 0, text.DisplayPos(ctx.GetText(e), viewLocalPos)
+	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
 }
 
 func (t *TextView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) model.Position {

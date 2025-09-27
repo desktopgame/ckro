@@ -78,7 +78,7 @@ func (c *CodeBlockView) MoveRight(ctx view.Context, e model.Element, viewLocalPo
 }
 
 func (c *CodeBlockView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
-	return 0, text.DisplayPos(ctx.GetText(e), viewLocalPos)
+	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
 }
 
 func (c *CodeBlockView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) model.Position {

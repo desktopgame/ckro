@@ -115,7 +115,7 @@ func (hv *HeadingView) MoveRight(ctx view.Context, e model.Element, viewLocalPos
 }
 
 func (hv *HeadingView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
-	return 0, text.DisplayPos(ctx.GetText(e), viewLocalPos)
+	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
 }
 
 func (hv *HeadingView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) model.Position {
