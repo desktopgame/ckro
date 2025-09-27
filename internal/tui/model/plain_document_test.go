@@ -134,3 +134,37 @@ func TestEmptyLine(t *testing.T) {
 	assert.Equal(t, doc.GetCursorRow(), 3)
 	assert.Equal(t, doc.GetCursorColumn(), 0)
 }
+
+func TestSegment(t *testing.T) {
+	doc := model.PlainDocument{}
+	doc.Init()
+
+	doc.InsertString("1234567890\n1234567890\n1234567890\n1234567890")
+
+	r1 := model.Range{
+		StartPosition: model.Position{
+			Row:    0,
+			Column: 0,
+		},
+		EndPosition: model.Position{
+			Row:    0,
+			Column: 9,
+		},
+	}
+
+	assert.Equal(t, doc.GetSegment(r1).GetLine(0), "1234567890")
+
+	r2 := model.Range{
+		StartPosition: model.Position{
+			Row:    0,
+			Column: 0,
+		},
+		EndPosition: model.Position{
+			Row:    1,
+			Column: 3,
+		},
+	}
+
+	assert.Equal(t, doc.GetSegment(r2).GetLine(0), "1234567890")
+	assert.Equal(t, doc.GetSegment(r2).GetLine(1), "1234")
+}
