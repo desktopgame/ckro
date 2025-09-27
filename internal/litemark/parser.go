@@ -108,6 +108,13 @@ func Parse(reader Reader) []AbstractBlock {
 		}
 
 		// Inline text
+		blocks = append(blocks, &Text{
+			Block: Block{
+				LineIndex: lineIndex,
+				LineCount: 1,
+			},
+			Inlines: ParseInline(line),
+		})
 	}
 	return blocks
 }

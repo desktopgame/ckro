@@ -49,3 +49,22 @@ func Test02(t *testing.T) {
 	assert.Equal(t, cb.LineIndex, 0)
 	assert.Equal(t, cb.LineCount, 5)
 }
+
+func Test03(t *testing.T) {
+	text := `
+this text is *litemark*, this is dialect of **markdown**.
+`
+	text = strings.Trim(text, " \t\n")
+
+	r := litemark.StringReader{
+		Source: strings.Split(text, "\n"),
+	}
+	blocks := litemark.Parse(&r)
+
+	tx := blocks[0].(*litemark.Text)
+	assert.IsType(t, tx.Inlines[0], &litemark.PlainText{})
+	assert.IsType(t, tx.Inlines[1], &litemark.Italic{})
+	assert.IsType(t, tx.Inlines[2], &litemark.PlainText{})
+	assert.IsType(t, tx.Inlines[3], &litemark.Bold{})
+	assert.IsType(t, tx.Inlines[4], &litemark.PlainText{})
+}

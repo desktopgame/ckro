@@ -74,5 +74,5 @@ type PlainText struct {
 
 type Text struct {
 	Block
-	Inlines []Inline
+	Inlines []AbstractInline
 }
