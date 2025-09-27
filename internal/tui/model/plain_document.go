@@ -3,7 +3,6 @@ package model
 import (
 	"strings"
 
-	"github.com/desktopgame/ckro/internal/litemark"
 	"github.com/desktopgame/ckro/internal/text"
 )
 
@@ -13,7 +12,6 @@ type PlainDocument struct {
 	buffer       Buffer
 	cursorRow    int
 	cursorColumn int
-	Styled       bool
 }
 
 // Init is initialize Buffer.
@@ -23,30 +21,6 @@ func (doc *PlainDocument) Init() {
 
 func (doc *PlainDocument) Render() []Element {
 	elements := []Element{}
-
-	if doc.Styled {
-		blocks := litemark.Parse(doc)
-		for _, aBlock := range blocks {
-			switch block := aBlock.(type) {
-			case *litemark.Text:
-				elements = append(elements, &PlainElement{
-					Text: litemark.GetText(doc, block.LineIndex, litemark.Span{
-						StartColumn: 0,
-						EndColumn:   len(doc.GetLineAt(block.LineIndex)),
-					}),
-					StartPosition: Position{
-						Row:    block.LineIndex,
-						Column: 0,
-					},
-					EndPosition: Position{
-						Row:    block.LineIndex,
-						Column: text.GraphemeLength(doc.GetLineAt(block.LineIndex)) - 1,
-					},
-				})
-			}
-		}
-		return elements
-	}
 
 	// Fallback to plain text rendering
 	for i := 0; i < doc.buffer.GetLineCount(); i++ {

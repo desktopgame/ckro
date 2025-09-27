@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/desktopgame/ckro/internal/litemark"
+	"github.com/desktopgame/ckro/internal/tui/model/litemark"
 	"github.com/stretchr/testify/assert"
 )
 

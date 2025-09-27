@@ -171,7 +171,7 @@ func TestLinkElement(t *testing.T) {
 
 func TestPlainDocumentRender(t *testing.T) {
 	doc := &PlainDocument{
-		Styled: true,
+		// Styled: true,
 	}
 	doc.Init()
 
