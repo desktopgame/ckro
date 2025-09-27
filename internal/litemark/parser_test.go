@@ -83,3 +83,25 @@ this text is *litemark*, this is dialect of **markdown**.
 	assert.Equal(t, p3.StartColumn, 56)
 	assert.Equal(t, p3.EndColumn, 57)
 }
+
+func Test04(t *testing.T) {
+	text := `
+this is [link](https://www.google.com/?hl=ja), this is ![image](image.png)
+`
+	text = strings.Trim(text, " \t\n")
+
+	r := litemark.StringReader{
+		Source: strings.Split(text, "\n"),
+	}
+	blocks := litemark.Parse(&r)
+
+	tx := blocks[0].(*litemark.Text)
+
+	link := tx.Inlines[1].(*litemark.Link)
+	assert.Equal(t, link.StartColumn, 8)
+	assert.Equal(t, link.EndColumn, 8+37)
+
+	image := tx.Inlines[3].(*litemark.Image)
+	assert.Equal(t, image.StartColumn, 55)
+	assert.Equal(t, image.EndColumn, 55+19)
+}

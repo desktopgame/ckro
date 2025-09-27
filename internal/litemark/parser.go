@@ -173,6 +173,43 @@ func ParseInline(line string) []AbstractInline {
 			}
 		}
 
+		// Link / Image
+		if c == '[' || (c == '!' && column+1 < n && line[column+1] == '[') {
+			bang := c == '!'
+			start := column + 1
+			if bang {
+				start = column + 2
+			}
+			if start < n && start+1 < n {
+				end := byteIndexOf(line, ']', start+1)
+				if end != -1 {
+					// alt := line[start:end]
+					start = end
+					if start+1 < n && line[start+1] == '(' {
+						end = byteIndexOf(line, ')', start+2)
+						// link := line[start+2 : end]
+						if bang {
+							inlines = append(inlines, &Image{
+								Inline: Inline{
+									StartColumn: column,
+									EndColumn:   end + 1,
+								},
+							})
+						} else {
+							inlines = append(inlines, &Link{
+								Inline: Inline{
+									StartColumn: column,
+									EndColumn:   end + 1,
+								},
+							})
+						}
+						column = end + 1
+						continue
+					}
+				}
+			}
+		}
+
 		// Strike
 		if c == '~' && column+1 < n && line[column+1] == '~' {
 			end := strIndexOf(line, "~~", column+2)
