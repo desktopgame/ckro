@@ -433,6 +433,12 @@ func (tb *TextBox) move(dir int) {
 		} else if dir == 1 {
 			tb.viewPosition = elementStart + tview.MoveLength(ctx, elements[elementIndex])
 		}
+
+		if dir == 0 {
+			tb.viewPosition = max(elementStart-1, 0)
+		} else if dir == 2 {
+			tb.viewPosition = max(elementStart-1, 0)
+		}
 	} else {
 		moves := newLocalViewPos - oldLocalViewPos
 		tb.viewPosition += moves
