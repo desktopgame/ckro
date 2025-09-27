@@ -42,6 +42,8 @@ func (doc *StyledDocument) Render() []model.Element {
 				},
 				Level: block.Level,
 			})
+		case *BlankLine:
+			elements = append(elements, &BlankLineElement{})
 		case *CodeBlock:
 			codeLines := []model.Element{}
 			for i := 0; i < block.LineCount-2; i++ {
