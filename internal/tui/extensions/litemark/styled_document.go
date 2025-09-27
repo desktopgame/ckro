@@ -28,6 +28,29 @@ func (doc *StyledDocument) Render() []model.Element {
 				Text:  GetText(doc, block.LineIndex, block.Span),
 				Level: block.Level,
 			})
+		case *CodeBlock:
+			codeLines := []model.Element{}
+			for i := 0; i < block.LineCount-2; i++ {
+				lineIndex := block.LineIndex + i + 1
+				codeLines = append(codeLines, &TextElement{
+					Children: []model.Element{
+						&InlineElement{
+							Text: doc.GetLineAt(lineIndex),
+						},
+					},
+				})
+			}
+			elements = append(elements, &CodeBlockElement{
+				StartPosition: model.Position{
+					Row:    block.LineIndex,
+					Column: 0,
+				},
+				EndPosition: model.Position{
+					Row:    block.LineIndex,
+					Column: text.GraphemeLength(doc.GetLineAt(block.LineIndex)) - 1,
+				},
+				Children: codeLines,
+			})
 		case *Text:
 			texts := []model.Element{}
 			for _, aInline := range block.Inlines {

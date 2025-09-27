@@ -17,6 +17,8 @@ func (l *LitemarkEngine) Resolve(e model.Element) view.TextView {
 		return &litemark.TextView{}
 	case *litemark.InlineElement:
 		return &litemark.InlineView{}
+	case *litemark.CodeBlockElement:
+		return &litemark.CodeBlockView{}
 	// Legacy elements
 	case *model.PlainElement:
 		return &view.PlainTextView{}
