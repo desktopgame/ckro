@@ -1,7 +1,9 @@
 package litemark
 
 import (
+	"github.com/desktopgame/ckro/internal/optional"
 	"github.com/desktopgame/ckro/internal/tui/model"
+	"github.com/gdamore/tcell/v2"
 )
 
 type StyledDocument struct {
@@ -121,8 +123,32 @@ func (doc *StyledDocument) Render() []model.Element {
 					},
 				)
 
+				isBold := false
+				isItalic := false
+				isUnderline := false
+				fg := optional.None[tcell.Color]()
+				bg := optional.None[tcell.Color]()
+
+				switch aInline.(type) {
+				case *Bold:
+					isBold = true
+				case *Italic:
+					isItalic = true
+				case *Link:
+					isUnderline = true
+					fg = optional.Some(tcell.ColorBlue)
+				case *Code:
+					fg = optional.Some(tcell.ColorBlack)
+					bg = optional.Some(tcell.ColorWhite)
+				}
+
 				texts = append(texts, &InlineElement{
-					Ranges: ranges,
+					Ranges:      ranges,
+					IsBold:      isBold,
+					IsItalic:    isItalic,
+					IsUnderline: isUnderline,
+					Foreground:  fg,
+					Background:  bg,
 				})
 			}
 

@@ -19,11 +19,29 @@ func (il *InlineView) Layout(ctx view.Context, textLayout *view.TextLayout, x, y
 }
 
 func (il *InlineView) Draw(ctx view.Context, textLayout *view.TextLayout, renderer view.Renderer) {
-	// x := 0
-	// y := 0
-
-	// def := tcell.StyleDefault
+	inlineElement := textLayout.Element.(*InlineElement)
 	style := tcell.StyleDefault
+
+	if inlineElement.IsBold {
+		style = style.Bold(true)
+	}
+
+	if inlineElement.IsItalic {
+		style = style.Italic(true)
+	}
+
+	if inlineElement.IsUnderline {
+		style = style.Underline(true)
+	}
+
+	if fg, ok := inlineElement.Foreground.TryValue(); ok {
+		style = style.Foreground(fg)
+	}
+
+	if bg, ok := inlineElement.Background.TryValue(); ok {
+		style = style.Background(bg)
+	}
+
 	clusters := text.GraphemeClusters(ctx.GetSegment(textLayout.Element, 1).GetLine(0))
 	x := 0
 	y := 0

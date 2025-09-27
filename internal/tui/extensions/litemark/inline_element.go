@@ -1,10 +1,19 @@
 package litemark
 
-import "github.com/desktopgame/ckro/internal/tui/model"
+import (
+	"github.com/desktopgame/ckro/internal/optional"
+	"github.com/desktopgame/ckro/internal/tui/model"
+	"github.com/gdamore/tcell/v2"
+)
 
 type InlineElement struct {
-	Ranges   []model.Range
-	Children []model.Element
+	Ranges      []model.Range
+	Children    []model.Element
+	IsBold      bool
+	IsItalic    bool
+	IsUnderline bool
+	Foreground  optional.Optional[tcell.Color]
+	Background  optional.Optional[tcell.Color]
 }
 
 func (il *InlineElement) GetRange(index int) model.Range {
