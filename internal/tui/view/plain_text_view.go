@@ -66,3 +66,41 @@ func (p *PlainTextView) MinimumSize(ctx Context, e model.Element, width int, hei
 		MinimumHeight: 1,
 	}
 }
+
+func (p *PlainTextView) MoveLength(ctx Context, e model.Element) int {
+	return text.GraphemeLength(ctx.GetText(e)) + 1 // include newline
+}
+
+func (p *PlainTextView) MoveUp(ctx Context, e model.Element, viewLocalPos int) int {
+	return -1
+}
+
+func (p *PlainTextView) MoveDown(ctx Context, e model.Element, viewLocalPos int) int {
+	return -1
+}
+
+func (p *PlainTextView) MoveLeft(ctx Context, e model.Element, viewLocalPos int) int {
+	if viewLocalPos <= 0 {
+		return -1
+	}
+	return viewLocalPos - 1
+}
+
+func (p *PlainTextView) MoveRight(ctx Context, e model.Element, viewLocalPos int) int {
+	if viewLocalPos > p.MoveLength(ctx, e) {
+		return -1
+	}
+	return viewLocalPos + 1
+}
+
+func (p *PlainTextView) ConvertPos(ctx Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
+	return 0, text.DisplayPos(ctx.GetText(e), viewLocalPos)
+}
+
+func (p *PlainTextView) ConvertModel(ctx Context, e model.Element, viewLocalPos int) model.Position {
+	st := e.GetRange(0).StartPosition
+	return model.Position{
+		Row:    st.Row,
+		Column: st.Column + viewLocalPos,
+	}
+}

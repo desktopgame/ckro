@@ -102,3 +102,41 @@ func (il *InlineView) MinimumSize(ctx view.Context, e model.Element, width int, 
 		MinimumHeight: 1,
 	}
 }
+
+func (il *InlineView) MoveLength(ctx view.Context, e model.Element) int {
+	return text.GraphemeLength(ctx.GetText(e)) + 1 // include newline
+}
+
+func (il *InlineView) MoveUp(ctx view.Context, e model.Element, viewLocalPos int) int {
+	return -1
+}
+
+func (il *InlineView) MoveDown(ctx view.Context, e model.Element, viewLocalPos int) int {
+	return -1
+}
+
+func (il *InlineView) MoveLeft(ctx view.Context, e model.Element, viewLocalPos int) int {
+	if viewLocalPos <= 0 {
+		return -1
+	}
+	return viewLocalPos - 1
+}
+
+func (il *InlineView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int) int {
+	if viewLocalPos > il.MoveLength(ctx, e) {
+		return -1
+	}
+	return viewLocalPos + 1
+}
+
+func (il *InlineView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
+	return 0, text.DisplayPos(ctx.GetText(e), viewLocalPos)
+}
+
+func (il *InlineView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) model.Position {
+	st := e.GetRange(0).StartPosition
+	return model.Position{
+		Row:    st.Row,
+		Column: st.Column + viewLocalPos,
+	}
+}

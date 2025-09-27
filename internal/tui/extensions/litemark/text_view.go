@@ -1,6 +1,7 @@
 package litemark
 
 import (
+	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/view"
 )
@@ -60,5 +61,43 @@ func (t *TextView) MinimumSize(ctx view.Context, e model.Element, width int, hei
 		MinimumWidth:  totalWidth,
 		MinimumHeight: 1,
 		Children:      children,
+	}
+}
+
+func (t *TextView) MoveLength(ctx view.Context, e model.Element) int {
+	return text.GraphemeLength(ctx.GetText(e)) + 1 // include newline
+}
+
+func (t *TextView) MoveUp(ctx view.Context, e model.Element, viewLocalPos int) int {
+	return -1
+}
+
+func (t *TextView) MoveDown(ctx view.Context, e model.Element, viewLocalPos int) int {
+	return -1
+}
+
+func (t *TextView) MoveLeft(ctx view.Context, e model.Element, viewLocalPos int) int {
+	if viewLocalPos <= 0 {
+		return -1
+	}
+	return viewLocalPos - 1
+}
+
+func (t *TextView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int) int {
+	if viewLocalPos > t.MoveLength(ctx, e) {
+		return -1
+	}
+	return viewLocalPos + 1
+}
+
+func (t *TextView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
+	return 0, text.DisplayPos(ctx.GetText(e), viewLocalPos)
+}
+
+func (t *TextView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) model.Position {
+	st := e.GetRange(0).StartPosition
+	return model.Position{
+		Row:    st.Row,
+		Column: st.Column + viewLocalPos,
 	}
 }

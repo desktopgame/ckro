@@ -87,3 +87,41 @@ func (hv *HeadingView) MinimumSize(ctx view.Context, e model.Element, width int,
 		MinimumHeight: 1,
 	}
 }
+
+func (hv *HeadingView) MoveLength(ctx view.Context, e model.Element) int {
+	return text.GraphemeLength(ctx.GetText(e)) + 1 // include newline
+}
+
+func (hv *HeadingView) MoveUp(ctx view.Context, e model.Element, viewLocalPos int) int {
+	return -1
+}
+
+func (hv *HeadingView) MoveDown(ctx view.Context, e model.Element, viewLocalPos int) int {
+	return -1
+}
+
+func (hv *HeadingView) MoveLeft(ctx view.Context, e model.Element, viewLocalPos int) int {
+	if viewLocalPos <= 0 {
+		return -1
+	}
+	return viewLocalPos - 1
+}
+
+func (hv *HeadingView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int) int {
+	if viewLocalPos > hv.MoveLength(ctx, e) {
+		return -1
+	}
+	return viewLocalPos + 1
+}
+
+func (hv *HeadingView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
+	return 0, text.DisplayPos(ctx.GetText(e), viewLocalPos)
+}
+
+func (hv *HeadingView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) model.Position {
+	st := e.GetRange(0).StartPosition
+	return model.Position{
+		Row:    st.Row,
+		Column: st.Column + viewLocalPos,
+	}
+}
