@@ -1,5 +1,10 @@
 package litemark
 
+type Span struct {
+	StartColumn int
+	EndColumn   int
+}
+
 type Block struct {
 	LineIndex int
 	LineCount int
@@ -15,6 +20,7 @@ type AbstractBlock interface {
 
 type Heading struct {
 	Block
+	Span  Span
 	Level int
 }
 
@@ -29,11 +35,6 @@ type HardBreak struct {
 type CodeBlock struct {
 	Block
 	Lang string
-}
-
-type Span struct {
-	StartColumn int
-	EndColumn   int
 }
 
 type Inline struct {

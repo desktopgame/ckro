@@ -18,6 +18,10 @@ func byteIndexOf(s string, sub byte, at int) int {
 	return at + i
 }
 
+func GetText(reader Reader, lineIndex int, span Span) string {
+	return reader.GetLine(lineIndex)[span.StartColumn:span.EndColumn]
+}
+
 func Parse(reader Reader) []AbstractBlock {
 	sc := Scanner{Reader: reader}
 	blocks := []AbstractBlock{}
@@ -60,14 +64,20 @@ func Parse(reader Reader) []AbstractBlock {
 			for column < len(line) && line[column] == '#' {
 				column++
 			}
-			blocks = append(blocks, &Heading{
-				Block: Block{
-					LineIndex: lineIndex,
-					LineCount: 1,
-				},
-				Level: column,
-			})
-			continue
+			if column < len(line) && line[column] == ' ' {
+				blocks = append(blocks, &Heading{
+					Block: Block{
+						LineIndex: lineIndex,
+						LineCount: 1,
+					},
+					Span: Span{
+						StartColumn: column + 1,
+						EndColumn:   len(line),
+					},
+					Level: column,
+				})
+				continue
+			}
 		}
 
 		// Soft break

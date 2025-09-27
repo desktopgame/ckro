@@ -23,12 +23,15 @@ func Test01(t *testing.T) {
 
 	h1 := blocks[0].(*litemark.Heading)
 	assert.Equal(t, h1.Level, 1)
+	assert.Equal(t, litemark.GetText(&r, h1.LineIndex, h1.Span), "H1")
 
 	h2 := blocks[1].(*litemark.Heading)
 	assert.Equal(t, h2.Level, 2)
+	assert.Equal(t, litemark.GetText(&r, h2.LineIndex, h2.Span), "H2")
 
 	h3 := blocks[2].(*litemark.Heading)
 	assert.Equal(t, h3.Level, 3)
+	assert.Equal(t, litemark.GetText(&r, h3.LineIndex, h3.Span), "H3")
 }
 
 func Test02(t *testing.T) {
