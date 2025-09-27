@@ -135,7 +135,7 @@ func ParseInline(line string) []AbstractInline {
 				inlines = append(inlines, &Code{
 					Inline: Inline{
 						Spans: []Span{
-							Span{
+							{
 								StartColumn: at,
 								EndColumn:   end + 1,
 							},
@@ -154,7 +154,7 @@ func ParseInline(line string) []AbstractInline {
 				inlines = append(inlines, &Bold{
 					Inline: Inline{
 						Spans: []Span{
-							Span{
+							{
 								StartColumn: at,
 								EndColumn:   end + 2,
 							},
@@ -173,7 +173,7 @@ func ParseInline(line string) []AbstractInline {
 				inlines = append(inlines, &Italic{
 					Inline: Inline{
 						Spans: []Span{
-							Span{
+							{
 								StartColumn: at,
 								EndColumn:   end + 1,
 							},
@@ -204,7 +204,7 @@ func ParseInline(line string) []AbstractInline {
 							inlines = append(inlines, &Image{
 								Inline: Inline{
 									Spans: []Span{
-										Span{
+										{
 											StartColumn: column,
 											EndColumn:   end + 1,
 										},
@@ -215,7 +215,7 @@ func ParseInline(line string) []AbstractInline {
 							inlines = append(inlines, &Link{
 								Inline: Inline{
 									Spans: []Span{
-										Span{
+										{
 											StartColumn: column,
 											EndColumn:   end + 1,
 										},
@@ -237,7 +237,7 @@ func ParseInline(line string) []AbstractInline {
 				inlines = append(inlines, &Strike{
 					Inline: Inline{
 						Spans: []Span{
-							Span{
+							{
 								StartColumn: at,
 								EndColumn:   end + 2,
 							},
