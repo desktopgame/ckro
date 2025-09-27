@@ -36,7 +36,7 @@ func Parse(reader Reader) []AbstractBlock {
 
 		// Soft break
 		if len(line) == 0 {
-			blocks = append(blocks, &SoftBreak{
+			blocks = append(blocks, &BlankLine{
 				Block: Block{
 					LineIndex: lineIndex,
 					LineCount: 1,

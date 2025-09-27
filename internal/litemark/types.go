@@ -24,11 +24,7 @@ type Heading struct {
 	Level int
 }
 
-type SoftBreak struct {
-	Block
-}
-
-type HardBreak struct {
+type BlankLine struct {
 	Block
 }
 
