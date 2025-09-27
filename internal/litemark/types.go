@@ -31,9 +31,13 @@ type CodeBlock struct {
 	Lang string
 }
 
-type Inline struct {
+type Span struct {
 	StartColumn int
 	EndColumn   int
+}
+
+type Inline struct {
+	Spans []Span
 }
 
 func (i *Inline) BaseInline() *Inline {

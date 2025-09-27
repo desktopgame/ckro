@@ -64,24 +64,24 @@ this text is *litemark*, this is dialect of **markdown**.
 	tx := blocks[0].(*litemark.Text)
 
 	p1 := tx.Inlines[0].(*litemark.PlainText)
-	assert.Equal(t, p1.StartColumn, 0)
-	assert.Equal(t, p1.EndColumn, 13)
+	assert.Equal(t, p1.Spans[0].StartColumn, 0)
+	assert.Equal(t, p1.Spans[0].EndColumn, 13)
 
 	it := tx.Inlines[1].(*litemark.Italic)
-	assert.Equal(t, it.StartColumn, 13)
-	assert.Equal(t, it.EndColumn, 23)
+	assert.Equal(t, it.Spans[0].StartColumn, 13)
+	assert.Equal(t, it.Spans[0].EndColumn, 23)
 
 	p2 := tx.Inlines[2].(*litemark.PlainText)
-	assert.Equal(t, p2.StartColumn, 23)
-	assert.Equal(t, p2.EndColumn, 44)
+	assert.Equal(t, p2.Spans[0].StartColumn, 23)
+	assert.Equal(t, p2.Spans[0].EndColumn, 44)
 
 	bd := tx.Inlines[3].(*litemark.Bold)
-	assert.Equal(t, bd.StartColumn, 44)
-	assert.Equal(t, bd.EndColumn, 56)
+	assert.Equal(t, bd.Spans[0].StartColumn, 44)
+	assert.Equal(t, bd.Spans[0].EndColumn, 56)
 
 	p3 := tx.Inlines[4].(*litemark.PlainText)
-	assert.Equal(t, p3.StartColumn, 56)
-	assert.Equal(t, p3.EndColumn, 57)
+	assert.Equal(t, p3.Spans[0].StartColumn, 56)
+	assert.Equal(t, p3.Spans[0].EndColumn, 57)
 }
 
 func Test04(t *testing.T) {
@@ -98,10 +98,10 @@ this is [link](https://www.google.com/?hl=ja), this is ![image](image.png)
 	tx := blocks[0].(*litemark.Text)
 
 	link := tx.Inlines[1].(*litemark.Link)
-	assert.Equal(t, link.StartColumn, 8)
-	assert.Equal(t, link.EndColumn, 8+37)
+	assert.Equal(t, link.Spans[0].StartColumn, 8)
+	assert.Equal(t, link.Spans[0].EndColumn, 8+37)
 
 	image := tx.Inlines[3].(*litemark.Image)
-	assert.Equal(t, image.StartColumn, 55)
-	assert.Equal(t, image.EndColumn, 55+19)
+	assert.Equal(t, image.Spans[0].StartColumn, 55)
+	assert.Equal(t, image.Spans[0].EndColumn, 55+19)
 }
