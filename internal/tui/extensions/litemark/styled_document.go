@@ -18,51 +18,36 @@ func (doc *StyledDocument) Render() []model.Element {
 		case *Text:
 			texts := []model.Element{}
 			for _, aInline := range block.Inlines {
+				var text string
+				var style *model.Style
 				switch inline := aInline.(type) {
 				case *Italic:
-					texts = append(texts, &InlineElement{
-						Text: GetText(doc, block.LineIndex, inline.Spans[1]),
-						StartPosition: model.Position{
-							Row:    block.LineIndex,
-							Column: inline.Spans[0].StartColumn,
-						},
-						EndPosition: model.Position{
-							Row:    block.LineIndex,
-							Column: inline.Spans[0].EndColumn - 1,
-						},
-						Style: &model.Style{
-							IsItalic: true,
-						},
-					})
+					text = GetText(doc, block.LineIndex, inline.Spans[1])
+					style = &model.Style{
+						IsItalic: true,
+					}
 				case *Bold:
-					texts = append(texts, &InlineElement{
-						Text: GetText(doc, block.LineIndex, inline.Spans[1]),
-						StartPosition: model.Position{
-							Row:    block.LineIndex,
-							Column: inline.Spans[0].StartColumn,
-						},
-						EndPosition: model.Position{
-							Row:    block.LineIndex,
-							Column: inline.Spans[0].EndColumn - 1,
-						},
-						Style: &model.Style{
-							IsBold: true,
-						},
-					})
+					text = GetText(doc, block.LineIndex, inline.Spans[1])
+					style = &model.Style{
+						IsBold: true,
+					}
 				case *PlainText:
-					texts = append(texts, &InlineElement{
-						Text: GetText(doc, block.LineIndex, inline.Spans[0]),
-						StartPosition: model.Position{
-							Row:    block.LineIndex,
-							Column: inline.Spans[0].StartColumn,
-						},
-						EndPosition: model.Position{
-							Row:    block.LineIndex,
-							Column: inline.Spans[0].EndColumn - 1,
-						},
-						Style: &model.Style{},
-					})
+					text = GetText(doc, block.LineIndex, inline.Spans[0])
+					style = &model.Style{}
 				}
+
+				texts = append(texts, &InlineElement{
+					Text: text,
+					StartPosition: model.Position{
+						Row:    block.LineIndex,
+						Column: aInline.BaseInline().Spans[0].StartColumn,
+					},
+					EndPosition: model.Position{
+						Row:    block.LineIndex,
+						Column: aInline.BaseInline().Spans[0].EndColumn - 1,
+					},
+					Style: style,
+				})
 			}
 			elements = append(elements, &TextElement{
 				StartPosition: model.Position{
