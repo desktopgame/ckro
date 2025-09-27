@@ -104,7 +104,8 @@ func (il *InlineView) MinimumSize(ctx view.Context, e model.Element, width int, 
 }
 
 func (il *InlineView) MoveLength(ctx view.Context, e model.Element) int {
-	return text.GraphemeLength(ctx.GetText(e)) + 1 // include newline
+	line := ctx.GetSegment(e, 1).GetLine(0)
+	return text.GraphemeLength(line)
 }
 
 func (il *InlineView) MoveUp(ctx view.Context, e model.Element, viewLocalPos int) int {

@@ -65,7 +65,14 @@ func (t *TextView) MinimumSize(ctx view.Context, e model.Element, width int, hei
 }
 
 func (t *TextView) MoveLength(ctx view.Context, e model.Element) int {
-	return text.GraphemeLength(ctx.GetText(e)) + 1 // include newline
+	totalLength := 0
+	for i := 0; i < e.GetElementCount(); i++ {
+		childElement := e.GetElement(i)
+		childView := ctx.Resolver.Resolve(childElement)
+
+		totalLength += childView.MoveLength(ctx, childElement)
+	}
+	return totalLength + 1
 }
 
 func (t *TextView) MoveUp(ctx view.Context, e model.Element, viewLocalPos int) int {
@@ -84,7 +91,7 @@ func (t *TextView) MoveLeft(ctx view.Context, e model.Element, viewLocalPos int)
 }
 
 func (t *TextView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int) int {
-	if viewLocalPos > t.MoveLength(ctx, e) {
+	if viewLocalPos >= t.MoveLength(ctx, e) {
 		return -1
 	}
 	return viewLocalPos + 1
