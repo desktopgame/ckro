@@ -23,8 +23,8 @@ func (il *InlineView) Draw(ctx view.Context, textLayout *view.TextLayout, render
 	// y := 0
 
 	// def := tcell.StyleDefault
-	style := view.ConvertStyle(textLayout.Element.GetStyle())
-	clusters := text.GraphemeClusters(textLayout.Element.GetText())
+	style := tcell.StyleDefault
+	clusters := text.GraphemeClusters(ctx.GetText(textLayout.Element))
 	x := 0
 	y := 0
 	for _, cluster := range clusters {
@@ -62,7 +62,7 @@ func (il *InlineView) Draw(ctx view.Context, textLayout *view.TextLayout, render
 }
 
 func (il *InlineView) WidthWithTabStop(ctx view.Context, textLayout *view.TextLayout, column int) int {
-	clusters := text.GraphemeClusters(textLayout.Element.GetText())
+	clusters := text.GraphemeClusters(ctx.GetText(textLayout.Element))
 	totalWidth := 0
 	for _, cluster := range clusters {
 		width := 0
@@ -80,7 +80,7 @@ func (il *InlineView) WidthWithTabStop(ctx view.Context, textLayout *view.TextLa
 func (il *InlineView) MinimumSize(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
 	return &view.TextLayout{
 		Element:       e,
-		MinimumWidth:  text.DisplayWidth(e.GetText()),
+		MinimumWidth:  text.DisplayWidth(ctx.GetText(e)),
 		MinimumHeight: 1,
 	}
 }

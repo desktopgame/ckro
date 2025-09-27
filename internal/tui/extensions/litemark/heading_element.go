@@ -3,27 +3,16 @@ package litemark
 import "github.com/desktopgame/ckro/internal/tui/model"
 
 type HeadingElement struct {
-	Text          string
-	Style         *model.Style
-	Level         int
-	StartPosition model.Position
-	EndPosition   model.Position
+	Ranges []model.Range
+	Level  int
 }
 
-func (h *HeadingElement) GetStyle() *model.Style {
-	return h.Style
+func (h *HeadingElement) GetRange(index int) model.Range {
+	return h.Ranges[index]
 }
 
-func (h *HeadingElement) GetText() string {
-	return h.Text
-}
-
-func (h *HeadingElement) GetStartPosition() model.Position {
-	return h.StartPosition
-}
-
-func (h *HeadingElement) GetEndPosition() model.Position {
-	return h.EndPosition
+func (h *HeadingElement) GetRangeCount() int {
+	return len(h.Ranges)
 }
 
 func (h *HeadingElement) GetElement(index int) model.Element {

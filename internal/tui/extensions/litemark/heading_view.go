@@ -43,7 +43,7 @@ func (hv *HeadingView) Draw(ctx view.Context, textLayout *view.TextLayout, rende
 
 	// def := tcell.StyleDefault
 	style := tcell.StyleDefault.Bold(true).Foreground(color)
-	clusters := text.GraphemeClusters(textLayout.Element.GetText())
+	clusters := text.GraphemeClusters(ctx.GetText(textLayout.Element))
 	x := 0
 	y := 0
 	for _, cluster := range clusters {
@@ -83,7 +83,7 @@ func (hv *HeadingView) Draw(ctx view.Context, textLayout *view.TextLayout, rende
 func (hv *HeadingView) MinimumSize(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
 	return &view.TextLayout{
 		Element:       e,
-		MinimumWidth:  text.DisplayWidth(e.GetText()),
+		MinimumWidth:  text.DisplayWidth(ctx.GetText(e)),
 		MinimumHeight: 1,
 	}
 }

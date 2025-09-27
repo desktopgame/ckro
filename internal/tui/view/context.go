@@ -6,3 +6,16 @@ type Context struct {
 	Resolver TextViewResolver
 	Document model.Document
 }
+
+func (ctx Context) GetSegment(e model.Element, rangeIndex int) model.Segment {
+	r := e.GetRange(rangeIndex)
+	return ctx.Document.GetSegment(r)
+}
+
+func (ctx Context) GetText(e model.Element) string {
+	sg := ctx.GetSegment(e, 0)
+	if sg.GetLineCount() != 1 {
+		panic("")
+	}
+	return sg.GetLine(0)
+}

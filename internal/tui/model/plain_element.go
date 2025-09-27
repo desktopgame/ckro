@@ -1,26 +1,15 @@
 package model
 
 type PlainElement struct {
-	Text          string
-	Style         *Style
-	StartPosition Position
-	EndPosition   Position
+	Range Range
 }
 
-func (p *PlainElement) GetStyle() *Style {
-	return nil
+func (p *PlainElement) GetRange(index int) Range {
+	return p.Range
 }
 
-func (p *PlainElement) GetText() string {
-	return p.Text
-}
-
-func (p *PlainElement) GetStartPosition() Position {
-	return p.StartPosition
-}
-
-func (p *PlainElement) GetEndPosition() Position {
-	return p.EndPosition
+func (p *PlainElement) GetRangeCount() int {
+	return 1
 }
 
 func (p *PlainElement) GetElement(index int) Element {

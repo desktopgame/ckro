@@ -22,8 +22,7 @@ func (p *PlainTextView) Draw(ctx Context, textLayout *TextLayout, renderer Rende
 	// y := 0
 
 	// def := tcell.StyleDefault
-	style := ConvertStyle(textLayout.Element.GetStyle())
-	clusters := text.GraphemeClusters(textLayout.Element.GetText())
+	clusters := text.GraphemeClusters(ctx.GetText(textLayout.Element))
 	x := 0
 	y := 0
 	for _, cluster := range clusters {
@@ -48,11 +47,11 @@ func (p *PlainTextView) Draw(ctx Context, textLayout *TextLayout, renderer Rende
 				}
 				width := runewidth.RuneWidth(mainRune)
 
-				renderer.SetContent(x, y, mainRune, combining, style)
+				renderer.SetContent(x, y, mainRune, combining, tcell.StyleDefault)
 				// 全角文字の場合、次のセルを空にする
 				if width == 2 {
 					x++
-					renderer.SetContent(x, y, 0, nil, style)
+					renderer.SetContent(x, y, 0, nil, tcell.StyleDefault)
 				}
 			}
 			x++
@@ -63,7 +62,7 @@ func (p *PlainTextView) Draw(ctx Context, textLayout *TextLayout, renderer Rende
 func (p *PlainTextView) MinimumSize(ctx Context, e model.Element, width int, height int) *TextLayout {
 	return &TextLayout{
 		Element:       e,
-		MinimumWidth:  text.DisplayWidth(e.GetText()),
+		MinimumWidth:  text.DisplayWidth(ctx.GetText(e)),
 		MinimumHeight: 1,
 	}
 }

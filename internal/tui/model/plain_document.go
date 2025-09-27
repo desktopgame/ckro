@@ -35,14 +35,15 @@ func (doc *PlainDocument) Render() []Element {
 		lineStr := line.GetContent()
 
 		elements = append(elements, &PlainElement{
-			Text: line.GetContent(),
-			StartPosition: Position{
-				Row:    i,
-				Column: 0,
-			},
-			EndPosition: Position{
-				Row:    i,
-				Column: text.GraphemeLength(lineStr) - 1,
+			Range: Range{
+				StartPosition: Position{
+					Row:    i,
+					Column: 0,
+				},
+				EndPosition: Position{
+					Row:    i,
+					Column: len(lineStr),
+				},
 			},
 		})
 	}

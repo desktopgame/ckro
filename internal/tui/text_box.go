@@ -2,7 +2,6 @@ package tui
 
 import (
 	"iter"
-	"strings"
 
 	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui/model"
@@ -385,9 +384,10 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 			lineWrap := entry.MinimumWidth > tb.Width
 
 			if lineWrap {
-				lineCount := element.GetEndPosition().Row - element.GetStartPosition().Row + 1
+				elementRange := element.GetRange(0)
+				lineCount := elementRange.EndPosition.Row - elementRange.StartPosition.Row + 1
 				for j := 0; j < lineCount; j++ {
-					lineNo := element.GetStartPosition().Row + j
+					lineNo := elementRange.StartPosition.Row + j
 					line := tb.Document.GetBuffer().GetLineAt(lineNo)
 					lineWidth := text.DisplayWidth(line.GetContent())
 
@@ -396,7 +396,16 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 						segment := presenter.Segment{
 							TextLayout: &view.TextLayout{
 								Element: &model.PlainElement{
-									Text: line.GetContent(),
+									Range: model.Range{
+										StartPosition: model.Position{
+											Row:    lineNo,
+											Column: 0,
+										},
+										EndPosition: model.Position{
+											Row:    lineNo,
+											Column: len(line.GetContent()),
+										},
+									},
 								},
 							},
 							ModelLine: lineNo,
@@ -409,8 +418,8 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 						//*/
 					} else {
 						x := 0
-						startX := 0
-						sb := strings.Builder{}
+						bytes := 0
+						bytes2 := 0
 
 						clusters := text.GraphemeClusters(line.GetContent())
 						for _, cluster := range clusters {
@@ -423,14 +432,15 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 									segment := presenter.Segment{
 										TextLayout: &view.TextLayout{
 											Element: &model.PlainElement{
-												Text: sb.String(),
-												StartPosition: model.Position{
-													Row:    lineNo,
-													Column: startX,
-												},
-												EndPosition: model.Position{
-													Row:    lineNo,
-													Column: x,
+												Range: model.Range{
+													StartPosition: model.Position{
+														Row:    lineNo,
+														Column: bytes,
+													},
+													EndPosition: model.Position{
+														Row:    lineNo,
+														Column: bytes2,
+													},
 												},
 											},
 										},
@@ -440,13 +450,11 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 									if !yield(segment) {
 										return
 									}
-									sb.Reset()
 
 									viewLine++
-									startX = x
+									bytes = bytes2
 									x = 0
 								}
-								sb.WriteString(cluster)
 								x += w
 							} else if len(runes) > 0 {
 								mainRune := runes[0]
@@ -456,14 +464,15 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 									segment := presenter.Segment{
 										TextLayout: &view.TextLayout{
 											Element: &model.PlainElement{
-												Text: sb.String(),
-												StartPosition: model.Position{
-													Row:    lineNo,
-													Column: startX,
-												},
-												EndPosition: model.Position{
-													Row:    lineNo,
-													Column: x,
+												Range: model.Range{
+													StartPosition: model.Position{
+														Row:    lineNo,
+														Column: bytes,
+													},
+													EndPosition: model.Position{
+														Row:    lineNo,
+														Column: bytes2,
+													},
 												},
 											},
 										},
@@ -473,64 +482,41 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 									if !yield(segment) {
 										return
 									}
-									sb.Reset()
 
 									viewLine++
-									startX = x
+									bytes = bytes2
 									x = 0
 								}
-								sb.WriteString(cluster)
 								x += width
 							}
-							if x > tb.Width {
-								segment := presenter.Segment{
-									TextLayout: &view.TextLayout{
-										Element: &model.PlainElement{
-											Text: sb.String(),
+
+							bytes2 += len(cluster)
+						}
+
+						if bytes2 > bytes {
+							segment := presenter.Segment{
+								TextLayout: &view.TextLayout{
+									Element: &model.PlainElement{
+										Range: model.Range{
 											StartPosition: model.Position{
 												Row:    lineNo,
-												Column: startX,
+												Column: bytes,
 											},
 											EndPosition: model.Position{
 												Row:    lineNo,
-												Column: x,
+												Column: bytes2,
 											},
 										},
 									},
-									ModelLine: lineNo,
-									ViewLine:  viewLine,
-								}
-								if !yield(segment) {
-									return
-								}
-								sb.Reset()
-
-								viewLine++
-								startX = x
-								x = 0
-							}
-							//sb.WriteString(cluster)
-						}
-						segment := presenter.Segment{
-							TextLayout: &view.TextLayout{
-								Element: &model.PlainElement{
-									Text:          sb.String(),
-									StartPosition: model.Position{},
-									EndPosition:   model.Position{},
 								},
-							},
-							ModelLine: lineNo,
-							ViewLine:  viewLine,
+								ModelLine: lineNo,
+								ViewLine:  viewLine,
+							}
+							if !yield(segment) {
+								return
+							}
+							viewLine++
 						}
-						if !yield(segment) {
-							return
-						}
-						sb.Reset()
-
-						viewLine++
-						//if drawY-tb.scrollY >= tb.Height {
-						//	break
-						//}
 					}
 				}
 			} else {
@@ -539,7 +525,7 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 				for j := 0; j < entry.MinimumHeight; j++ {
 					segment := presenter.Segment{
 						TextLayout:    entry,
-						ModelLine:     element.GetStartPosition().Row,
+						ModelLine:     element.GetRange(0).StartPosition.Row,
 						ViewLine:      viewLine,
 						LocalViewLine: j,
 					}

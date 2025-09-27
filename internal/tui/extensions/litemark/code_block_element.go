@@ -3,27 +3,16 @@ package litemark
 import "github.com/desktopgame/ckro/internal/tui/model"
 
 type CodeBlockElement struct {
-	Text          string
-	Style         *model.Style
-	StartPosition model.Position
-	EndPosition   model.Position
-	Children      []model.Element
+	Range    model.Range
+	Children []model.Element
 }
 
-func (c *CodeBlockElement) GetStyle() *model.Style {
-	return nil
+func (c *CodeBlockElement) GetRange(index int) model.Range {
+	return c.Range
 }
 
-func (c *CodeBlockElement) GetText() string {
-	return c.Text
-}
-
-func (c *CodeBlockElement) GetStartPosition() model.Position {
-	return c.StartPosition
-}
-
-func (c *CodeBlockElement) GetEndPosition() model.Position {
-	return c.EndPosition
+func (c *CodeBlockElement) GetRangeCount() int {
+	return 1
 }
 
 func (c *CodeBlockElement) GetElement(index int) model.Element {

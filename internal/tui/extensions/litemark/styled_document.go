@@ -1,7 +1,6 @@
 package litemark
 
 import (
-	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui/model"
 )
 
@@ -17,15 +16,28 @@ func (doc *StyledDocument) Render() []model.Element {
 		switch block := aBlock.(type) {
 		case *Heading:
 			elements = append(elements, &HeadingElement{
-				StartPosition: model.Position{
-					Row:    block.LineIndex,
-					Column: 0,
+				Ranges: []model.Range{
+					{
+						StartPosition: model.Position{
+							Row:    block.LineIndex,
+							Column: 0,
+						},
+						EndPosition: model.Position{
+							Row:    block.LineIndex,
+							Column: len(doc.GetLineAt(block.LineIndex)),
+						},
+					},
+					{
+						StartPosition: model.Position{
+							Row:    block.LineIndex,
+							Column: block.Span.StartColumn,
+						},
+						EndPosition: model.Position{
+							Row:    block.LineIndex,
+							Column: block.Span.EndColumn,
+						},
+					},
 				},
-				EndPosition: model.Position{
-					Row:    block.LineIndex,
-					Column: text.GraphemeLength(doc.GetLineAt(block.LineIndex)) - 1,
-				},
-				Text:  GetText(doc, block.LineIndex, block.Span),
 				Level: block.Level,
 			})
 		case *CodeBlock:
@@ -35,79 +47,82 @@ func (doc *StyledDocument) Render() []model.Element {
 				codeLines = append(codeLines, &TextElement{
 					Children: []model.Element{
 						&InlineElement{
-							Text: doc.GetLineAt(lineIndex),
+							Ranges: []model.Range{
+								{
+									StartPosition: model.Position{
+										Row:    lineIndex,
+										Column: 0,
+									},
+									EndPosition: model.Position{
+										Row:    lineIndex,
+										Column: len(doc.GetLineAt(lineIndex)),
+									},
+								},
+							},
 						},
 					},
 				})
 			}
 			elements = append(elements, &CodeBlockElement{
-				StartPosition: model.Position{
-					Row:    block.LineIndex,
-					Column: 0,
-				},
-				EndPosition: model.Position{
-					Row:    block.LineIndex,
-					Column: text.GraphemeLength(doc.GetLineAt(block.LineIndex)) - 1,
+				Range: model.Range{
+					StartPosition: model.Position{
+						Row:    block.LineIndex,
+						Column: 0,
+					},
+					EndPosition: model.Position{
+						Row:    block.LineIndex,
+						Column: len(doc.GetLineAt(block.LineIndex)),
+					},
 				},
 				Children: codeLines,
 			})
 		case *Text:
 			texts := []model.Element{}
 			for _, aInline := range block.Inlines {
-				var text string
-				var style *model.Style
-				switch inline := aInline.(type) {
-				case *Italic:
-					text = GetText(doc, block.LineIndex, inline.Spans[1])
-					style = &model.Style{
-						IsItalic: true,
-					}
-				case *Bold:
-					text = GetText(doc, block.LineIndex, inline.Spans[1])
-					style = &model.Style{
-						IsBold: true,
-					}
-				case *Code:
-					text = GetText(doc, block.LineIndex, inline.Spans[1])
-					style = &model.Style{
-						Foreground: model.Black,
-						Background: model.White,
-					}
-				case *Link:
-					text = GetText(doc, block.LineIndex, inline.Spans[1])
-					style = &model.Style{
-						Foreground:  model.Blue,
-						IsUnderline: true,
-					}
-				case *Image:
-					text = GetText(doc, block.LineIndex, inline.Spans[1])
-					style = &model.Style{}
-				case *PlainText:
-					text = GetText(doc, block.LineIndex, inline.Spans[0])
-					style = &model.Style{}
+
+				ranges := []model.Range{
+					{
+						StartPosition: model.Position{
+							Row:    block.LineIndex,
+							Column: aInline.BaseInline().Spans[0].StartColumn,
+						},
+						EndPosition: model.Position{
+							Row:    block.LineIndex,
+							Column: aInline.BaseInline().Spans[0].EndColumn,
+						},
+					},
+				}
+
+				if _, ok := aInline.(*PlainText); !ok {
+					ranges = append(ranges,
+						model.Range{
+							StartPosition: model.Position{
+								Row:    block.LineIndex,
+								Column: aInline.BaseInline().Spans[1].StartColumn,
+							},
+							EndPosition: model.Position{
+								Row:    block.LineIndex,
+								Column: aInline.BaseInline().Spans[1].EndColumn,
+							},
+						},
+					)
 				}
 
 				texts = append(texts, &InlineElement{
-					Text: text,
+					Ranges: ranges,
+				})
+			}
+
+			elements = append(elements, &TextElement{
+				Range: model.Range{
 					StartPosition: model.Position{
 						Row:    block.LineIndex,
-						Column: aInline.BaseInline().Spans[0].StartColumn,
+						Column: 0,
 					},
 					EndPosition: model.Position{
 						Row:    block.LineIndex,
-						Column: aInline.BaseInline().Spans[0].EndColumn - 1,
+						Column: len(doc.GetLineAt(block.LineIndex)),
 					},
-					Style: style,
-				})
-			}
-			elements = append(elements, &TextElement{
-				StartPosition: model.Position{
-					Row:    block.LineIndex,
-					Column: 0,
-				},
-				EndPosition: model.Position{
-					Row:    block.LineIndex,
-					Column: text.GraphemeLength(doc.GetLineAt(block.LineIndex)) - 1,
 				},
 				Children: texts,
 			})

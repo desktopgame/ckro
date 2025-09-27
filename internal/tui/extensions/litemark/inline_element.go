@@ -3,27 +3,16 @@ package litemark
 import "github.com/desktopgame/ckro/internal/tui/model"
 
 type InlineElement struct {
-	Text          string
-	Style         *model.Style
-	StartPosition model.Position
-	EndPosition   model.Position
-	Children      []model.Element
+	Ranges   []model.Range
+	Children []model.Element
 }
 
-func (il *InlineElement) GetStyle() *model.Style {
-	return il.Style
+func (il *InlineElement) GetRange(index int) model.Range {
+	return il.Ranges[index]
 }
 
-func (il *InlineElement) GetText() string {
-	return il.Text
-}
-
-func (il *InlineElement) GetStartPosition() model.Position {
-	return il.StartPosition
-}
-
-func (il *InlineElement) GetEndPosition() model.Position {
-	return il.EndPosition
+func (il *InlineElement) GetRangeCount() int {
+	return len(il.Ranges)
 }
 
 func (il *InlineElement) GetElement(index int) model.Element {
