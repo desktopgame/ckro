@@ -62,9 +62,24 @@ this text is *litemark*, this is dialect of **markdown**.
 	blocks := litemark.Parse(&r)
 
 	tx := blocks[0].(*litemark.Text)
-	assert.IsType(t, tx.Inlines[0], &litemark.PlainText{})
-	assert.IsType(t, tx.Inlines[1], &litemark.Italic{})
-	assert.IsType(t, tx.Inlines[2], &litemark.PlainText{})
-	assert.IsType(t, tx.Inlines[3], &litemark.Bold{})
-	assert.IsType(t, tx.Inlines[4], &litemark.PlainText{})
+
+	p1 := tx.Inlines[0].(*litemark.PlainText)
+	assert.Equal(t, p1.StartColumn, 0)
+	assert.Equal(t, p1.EndColumn, 13)
+
+	it := tx.Inlines[1].(*litemark.Italic)
+	assert.Equal(t, it.StartColumn, 13)
+	assert.Equal(t, it.EndColumn, 23)
+
+	p2 := tx.Inlines[2].(*litemark.PlainText)
+	assert.Equal(t, p2.StartColumn, 23)
+	assert.Equal(t, p2.EndColumn, 44)
+
+	bd := tx.Inlines[3].(*litemark.Bold)
+	assert.Equal(t, bd.StartColumn, 44)
+	assert.Equal(t, bd.EndColumn, 56)
+
+	p3 := tx.Inlines[4].(*litemark.PlainText)
+	assert.Equal(t, p3.StartColumn, 56)
+	assert.Equal(t, p3.EndColumn, 57)
 }
