@@ -69,22 +69,29 @@ this text is *litemark*, this is dialect of **markdown**.
 	p1 := tx.Inlines[0].(*litemark.PlainText)
 	assert.Equal(t, p1.Spans[0].StartColumn, 0)
 	assert.Equal(t, p1.Spans[0].EndColumn, 13)
+	assert.Equal(t, litemark.GetText(&r, tx.LineIndex, p1.Spans[0]), "this text is ")
 
 	it := tx.Inlines[1].(*litemark.Italic)
 	assert.Equal(t, it.Spans[0].StartColumn, 13)
 	assert.Equal(t, it.Spans[0].EndColumn, 23)
+	assert.Equal(t, litemark.GetText(&r, tx.LineIndex, it.Spans[0]), "*litemark*")
+	assert.Equal(t, litemark.GetText(&r, tx.LineIndex, it.Spans[1]), "litemark")
 
 	p2 := tx.Inlines[2].(*litemark.PlainText)
 	assert.Equal(t, p2.Spans[0].StartColumn, 23)
 	assert.Equal(t, p2.Spans[0].EndColumn, 44)
+	assert.Equal(t, litemark.GetText(&r, tx.LineIndex, p2.Spans[0]), ", this is dialect of ")
 
 	bd := tx.Inlines[3].(*litemark.Bold)
 	assert.Equal(t, bd.Spans[0].StartColumn, 44)
 	assert.Equal(t, bd.Spans[0].EndColumn, 56)
+	assert.Equal(t, litemark.GetText(&r, tx.LineIndex, bd.Spans[0]), "**markdown**")
+	assert.Equal(t, litemark.GetText(&r, tx.LineIndex, bd.Spans[1]), "markdown")
 
 	p3 := tx.Inlines[4].(*litemark.PlainText)
 	assert.Equal(t, p3.Spans[0].StartColumn, 56)
 	assert.Equal(t, p3.Spans[0].EndColumn, 57)
+	assert.Equal(t, litemark.GetText(&r, tx.LineIndex, p3.Spans[0]), ".")
 }
 
 func Test04(t *testing.T) {
@@ -103,8 +110,12 @@ this is [link](https://www.google.com/?hl=ja), this is ![image](image.png)
 	link := tx.Inlines[1].(*litemark.Link)
 	assert.Equal(t, link.Spans[0].StartColumn, 8)
 	assert.Equal(t, link.Spans[0].EndColumn, 8+37)
+	assert.Equal(t, litemark.GetText(&r, tx.LineIndex, link.Spans[1]), "link")
+	assert.Equal(t, litemark.GetText(&r, tx.LineIndex, link.Spans[2]), "https://www.google.com/?hl=ja")
 
 	image := tx.Inlines[3].(*litemark.Image)
 	assert.Equal(t, image.Spans[0].StartColumn, 55)
 	assert.Equal(t, image.Spans[0].EndColumn, 55+19)
+	assert.Equal(t, litemark.GetText(&r, tx.LineIndex, image.Spans[1]), "image")
+	assert.Equal(t, litemark.GetText(&r, tx.LineIndex, image.Spans[2]), "image.png")
 }

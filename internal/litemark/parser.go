@@ -149,6 +149,10 @@ func ParseInline(line string) []AbstractInline {
 								StartColumn: at,
 								EndColumn:   end + 1,
 							},
+							{
+								StartColumn: at + 1,
+								EndColumn:   end,
+							},
 						},
 					},
 				})
@@ -167,6 +171,10 @@ func ParseInline(line string) []AbstractInline {
 							{
 								StartColumn: at,
 								EndColumn:   end + 2,
+							},
+							{
+								StartColumn: at + 2,
+								EndColumn:   end,
 							},
 						},
 					},
@@ -187,6 +195,10 @@ func ParseInline(line string) []AbstractInline {
 								StartColumn: at,
 								EndColumn:   end + 1,
 							},
+							{
+								StartColumn: at + 1,
+								EndColumn:   end,
+							},
 						},
 					},
 				})
@@ -205,11 +217,13 @@ func ParseInline(line string) []AbstractInline {
 			if start < n && start+1 < n {
 				end := byteIndexOf(line, ']', start+1)
 				if end != -1 {
-					// alt := line[start:end]
+					altStart := start
+					altEnd := end
 					start = end
 					if start+1 < n && line[start+1] == '(' {
 						end = byteIndexOf(line, ')', start+2)
-						// link := line[start+2 : end]
+						linkStart := start + 2
+						linkEnd := end
 						if bang {
 							inlines = append(inlines, &Image{
 								Inline: Inline{
@@ -217,6 +231,14 @@ func ParseInline(line string) []AbstractInline {
 										{
 											StartColumn: column,
 											EndColumn:   end + 1,
+										},
+										{
+											StartColumn: altStart,
+											EndColumn:   altEnd,
+										},
+										{
+											StartColumn: linkStart,
+											EndColumn:   linkEnd,
 										},
 									},
 								},
@@ -228,6 +250,14 @@ func ParseInline(line string) []AbstractInline {
 										{
 											StartColumn: column,
 											EndColumn:   end + 1,
+										},
+										{
+											StartColumn: altStart,
+											EndColumn:   altEnd,
+										},
+										{
+											StartColumn: linkStart,
+											EndColumn:   linkEnd,
 										},
 									},
 								},
@@ -251,6 +281,10 @@ func ParseInline(line string) []AbstractInline {
 								StartColumn: at,
 								EndColumn:   end + 2,
 							},
+							{
+								StartColumn: at + 2,
+								EndColumn:   end,
+							},
 						},
 					},
 				})
@@ -267,7 +301,7 @@ func ParseInline(line string) []AbstractInline {
 		inlines = append(inlines, &PlainText{
 			Inline: Inline{
 				Spans: []Span{
-					Span{
+					{
 						StartColumn: column,
 						EndColumn:   next,
 					},
