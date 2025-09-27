@@ -60,22 +60,6 @@ func (p *PlainTextView) Draw(textViewResolver TextViewResolver, textLayout *Text
 	}
 }
 
-func (p *PlainTextView) WidthWithTabStop(textViewResolver TextViewResolver, textLayout *TextLayout, column int) int {
-	clusters := text.GraphemeClusters(textLayout.Element.GetText())
-	totalWidth := 0
-	for _, cluster := range clusters {
-		width := 0
-		if cluster == "\t" {
-			width = text.TabWidth - (column % text.TabWidth)
-		} else {
-			width = runewidth.StringWidth(cluster)
-		}
-		column += width
-		totalWidth += width
-	}
-	return totalWidth
-}
-
 func (p *PlainTextView) MinimumSize(textViewResolver TextViewResolver, e model.Element, width int, height int) *TextLayout {
 	return &TextLayout{
 		Element:       e,
