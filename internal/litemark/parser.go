@@ -34,6 +34,17 @@ func Parse(reader Reader) []AbstractBlock {
 		lineIndex := sc.lineIndex
 		line := sc.Next()
 
+		// Soft break
+		if len(line) == 0 {
+			blocks = append(blocks, &SoftBreak{
+				Block: Block{
+					LineIndex: lineIndex,
+					LineCount: 1,
+				},
+			})
+			continue
+		}
+
 		// CodeBlock
 		if codeBlockScope {
 			codeBlockEnded := false
@@ -78,17 +89,6 @@ func Parse(reader Reader) []AbstractBlock {
 				})
 				continue
 			}
-		}
-
-		// Soft break
-		if len(line) == 0 {
-			blocks = append(blocks, &SoftBreak{
-				Block: Block{
-					LineIndex: lineIndex,
-					LineCount: 1,
-				},
-			})
-			continue
 		}
 
 		// CodeBlock
