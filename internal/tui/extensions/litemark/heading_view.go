@@ -43,7 +43,7 @@ func (hv *HeadingView) Draw(ctx view.Context, textLayout *view.TextLayout, rende
 
 	// def := tcell.StyleDefault
 	style := tcell.StyleDefault.Bold(true).Foreground(color)
-	clusters := text.GraphemeClusters(ctx.GetText(textLayout.Element))
+	clusters := text.GraphemeClusters(ctx.GetSegment(textLayout.Element, 1).GetLine(0))
 	x := 0
 	y := 0
 	for _, cluster := range clusters {
@@ -83,13 +83,13 @@ func (hv *HeadingView) Draw(ctx view.Context, textLayout *view.TextLayout, rende
 func (hv *HeadingView) MinimumSize(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
 	return &view.TextLayout{
 		Element:       e,
-		MinimumWidth:  text.DisplayWidth(ctx.GetText(e)),
+		MinimumWidth:  text.DisplayWidth(ctx.GetSegment(e, 1).GetLine(0)),
 		MinimumHeight: 1,
 	}
 }
 
 func (hv *HeadingView) MoveLength(ctx view.Context, e model.Element) int {
-	return text.GraphemeLength(ctx.GetText(e)) + 1 // include newline
+	return text.GraphemeLength(ctx.GetSegment(e, 1).GetLine(0)) + 1 // include newline
 }
 
 func (hv *HeadingView) MoveUp(ctx view.Context, e model.Element, viewLocalPos int) int {
@@ -115,7 +115,7 @@ func (hv *HeadingView) MoveRight(ctx view.Context, e model.Element, viewLocalPos
 }
 
 func (hv *HeadingView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
-	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
+	return text.DisplayPos(ctx.GetSegment(e, 1).GetLine(0), viewLocalPos), 0
 }
 
 func (hv *HeadingView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) model.Position {
