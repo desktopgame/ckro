@@ -1,6 +1,6 @@
 package litemark
 
 type Reader interface {
-	GetLine(lineIndex int) string
+	GetLineAt(lineIndex int) string
 	LineCount() int
 }

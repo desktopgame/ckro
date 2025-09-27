@@ -4,7 +4,7 @@ type StringReader struct {
 	Source []string
 }
 
-func (s *StringReader) GetLine(lineIndex int) string {
+func (s *StringReader) GetLineAt(lineIndex int) string {
 	return s.Source[lineIndex]
 }
 

@@ -6,7 +6,7 @@ type Scanner struct {
 }
 
 func (s *Scanner) Next() string {
-	line := s.Reader.GetLine(s.lineIndex)
+	line := s.Reader.GetLineAt(s.lineIndex)
 	s.lineIndex++
 	return line
 }

@@ -19,7 +19,7 @@ func byteIndexOf(s string, sub byte, at int) int {
 }
 
 func GetText(reader Reader, lineIndex int, span Span) string {
-	return reader.GetLine(lineIndex)[span.StartColumn:span.EndColumn]
+	return reader.GetLineAt(lineIndex)[span.StartColumn:span.EndColumn]
 }
 
 func Parse(reader Reader) []AbstractBlock {
