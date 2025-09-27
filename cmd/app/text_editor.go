@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/desktopgame/ckro/internal/tui"
-	"github.com/desktopgame/ckro/internal/tui/model/litemark"
+	"github.com/desktopgame/ckro/internal/tui/extensions/litemark"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
 )
 
