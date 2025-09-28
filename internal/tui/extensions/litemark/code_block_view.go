@@ -1,7 +1,6 @@
 package litemark
 
 import (
-	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/view"
 )
@@ -136,15 +135,9 @@ func (c *CodeBlockView) ConvertPos(ctx view.Context, e model.Element, viewLocalP
 }
 
 func (c *CodeBlockView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) view.CharacterReference {
-	r := e.GetRange(0)
-	str := ctx.Document.Read(r).GetLine(0)
-	st := r.StartPosition
-	bPos, bLen := text.GraphemeToByteRange(str, viewLocalPos)
-	return view.CharacterReference{
-		StartPosition: model.Position{
-			Row:    st.Row,
-			Column: st.Column + bPos,
-		},
-		Bytes: bLen,
-	}
+	table, _ := c.ViewLengthTable(ctx, e)
+	index, col := c.findTableIndex(table, viewLocalPos)
+
+	v := ctx.Resolver.Resolve(e.GetElement(index))
+	return v.ConvertModel(ctx, e.GetElement(index), col)
 }

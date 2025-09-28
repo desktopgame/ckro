@@ -60,6 +60,16 @@ func (doc *StyledDocument) Render() []model.Element {
 			for i := 0; i < block.LineCount-2; i++ {
 				lineIndex := block.LineIndex + i + 1
 				codeLines = append(codeLines, &TextElement{
+					Range: model.Range{
+						StartPosition: model.Position{
+							Row:    lineIndex,
+							Column: 0,
+						},
+						EndPosition: model.Position{
+							Row:    lineIndex,
+							Column: len(doc.GetLineAt(lineIndex)),
+						},
+					},
 					Children: []model.Element{
 						&InlineElement{
 							Ranges: []model.Range{
@@ -96,7 +106,7 @@ func (doc *StyledDocument) Render() []model.Element {
 							Column: 0,
 						},
 						EndPosition: model.Position{
-							Row:    block.LineIndex,
+							Row:    block.LineIndex + block.LineCount - 1,
 							Column: len(doc.GetLineAt(block.LineIndex)),
 						},
 					},
