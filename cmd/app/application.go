@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -52,19 +53,24 @@ func (app *Application) newFile() {
 }
 
 func (app *Application) openFile(filePath string) error {
-	// ファイルを読み込んでテキストエリアに表示
-	content, err := os.ReadFile(filePath)
+	file, err := os.Open(filePath)
 	if err != nil {
 		return err
+	}
+	defer file.Close()
+
+	doc := app.textEdior.TextArea.TextBox.GetDocument()
+	doc.Clear()
+
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		doc.InsertString(scanner.Text())
+		doc.InsertLine()
 	}
 
 	app.filePath = filePath
 	app.modified = false
-
-	// テキストエリアのドキュメントをクリアして新しい内容を設定
-	doc := app.textEdior.TextArea.TextBox.GetDocument()
-	doc.Clear()
-	doc.InsertString(string(content))
 	app.textEdior.TextArea.TextBox.CursorReset()
 	return nil
 }
