@@ -489,7 +489,7 @@ func (tb *TextBox) move(dir int) {
 	}
 
 	elements := tb.Document.Render()
-	_, elementIndex, elementStart, oldLocalViewPos := tb.currentViewState(ctx, elements)
+	ttl, elementIndex, elementStart, oldLocalViewPos := tb.currentViewState(ctx, elements)
 
 	tview := tb.TextEngine.Resolve(elements[elementIndex])
 	var newLocalViewPos int
@@ -553,6 +553,8 @@ func (tb *TextBox) move(dir int) {
 		// moves := newLocalViewPos - oldLocalViewPos
 		tb.viewPosition = elementStart + newLocalViewPos
 	}
+
+	tb.viewPosition = min(max(tb.viewPosition, 0), ttl-1)
 }
 
 func (tb *TextBox) MoveLeft() {
