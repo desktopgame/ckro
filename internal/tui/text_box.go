@@ -34,6 +34,8 @@ type TextBox struct {
 	documentVersion uint
 	elements        []model.Element
 	layoutCache     []*view.TextLayout
+	totalViewLen    int
+	viewLenTable    []int
 }
 
 // Init is initialize TextBox.
@@ -599,9 +601,21 @@ func (tb *TextBox) layout() {
 		entries = append(entries, tl)
 	}
 
+	totalViewLen := 0
+	viewLenTable := []int{}
+	for _, elem := range elements {
+		view := tb.TextEngine.Resolve(elem)
+		viewLen := view.MoveLength(ctx, elem)
+
+		viewLenTable = append(viewLenTable, viewLen)
+		totalViewLen += viewLen
+	}
+
+	tb.documentVersion = tb.Document.GetVersion()
 	tb.elements = elements
 	tb.layoutCache = entries
-	tb.documentVersion = tb.Document.GetVersion()
+	tb.totalViewLen = totalViewLen
+	tb.viewLenTable = viewLenTable
 }
 
 // BreakIter returns segment array by line, in consideration a wrap.
