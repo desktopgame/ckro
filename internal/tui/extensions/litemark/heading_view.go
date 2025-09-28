@@ -118,10 +118,16 @@ func (hv *HeadingView) ConvertPos(ctx view.Context, e model.Element, viewLocalPo
 	return text.DisplayPos(ctx.GetSegment(e, 1).GetLine(0), viewLocalPos), 0
 }
 
-func (hv *HeadingView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) model.Position {
-	st := e.GetRange(0).StartPosition
-	return model.Position{
-		Row:    st.Row,
-		Column: st.Column + viewLocalPos,
+func (hv *HeadingView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) view.CharacterReference {
+	r := e.GetRange(0)
+	str := ctx.Document.Read(r).GetLine(0)
+	st := r.StartPosition
+	bPos, bLen := text.GraphemeToByteRange(str, viewLocalPos)
+	return view.CharacterReference{
+		StartPosition: model.Position{
+			Row:    st.Row,
+			Column: st.Column + bPos,
+		},
+		Bytes: bLen,
 	}
 }

@@ -19,5 +19,5 @@ type TextView interface {
 	MoveLeft(ctx Context, e model.Element, viewLocalPos int) int
 	MoveRight(ctx Context, e model.Element, viewLocalPos int) int
 	ConvertPos(ctx Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int)
-	ConvertModel(ctx Context, e model.Element, viewLocalPos int) model.Position
+	ConvertModel(ctx Context, e model.Element, viewLocalPos int) CharacterReference
 }

@@ -108,13 +108,13 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	for i := 0; i < ei; i++ {
 		y += tb.renderCache.GetLayout(i).Height
 	}
-	vlx, vly := view.ConvertPos(ctx, tb.renderCache.GetElement(ei), eoff)
-	ax := vlx
+	_, vly := view.ConvertPos(ctx, tb.renderCache.GetElement(ei), eoff)
+	// ax := vlx
 	ay := y + vly
 
 	buf := tb.Document.GetBuffer()
 	cursorRow := ay
-	cursorCol := ax
+	// cursorCol := ax
 
 	if cursorRow >= buf.GetLineCount() {
 		return 0, 0, ' ', nil
@@ -131,31 +131,34 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	}
 
 	// カーソルがある行での位置を正確に計算
-	cursorLine := buf.GetLineAt(cursorRow).GetContent()
-	relx, rely := tb.TextEngine.Resolve(tb.renderCache.GetElement(ei)).ConvertPos(ctx, tb.renderCache.GetElement(ei), eoff)
+	// cursorLine := buf.GetLineAt(cursorRow).GetContent()
+	currentView := tb.TextEngine.Resolve(tb.renderCache.GetElement(ei))
+	relx, rely := currentView.ConvertPos(ctx, tb.renderCache.GetElement(ei), eoff)
 	screenX := relx
 	screenY += rely
 	//screenX, additionalRows :=
 	//screenY += additionalRows
 
-	// カーソル位置の文字を取得
-	var currentRune rune = ' '
-	var combining []rune
+	charRef := currentView.ConvertModel(ctx, tb.renderCache.GetElement(ei), eoff)
 
-	if cursorCol < text.GraphemeLength(cursorLine) {
-		// カーソル位置に文字がある場合
-		clusters := text.GraphemeClusters(cursorLine)
-		if cursorCol < len(clusters) {
-			cluster := clusters[cursorCol]
-			runes := []rune(cluster)
-			if len(runes) > 0 {
-				currentRune = runes[0]
-				if len(runes) > 1 {
-					combining = runes[1:]
-				}
-			}
-		}
+	if charRef.Bytes == 0 {
+		return screenX, screenY, ' ', nil
 	}
+
+	r := model.Range{
+		StartPosition: charRef.StartPosition,
+		EndPosition: model.Position{
+			Row:    charRef.StartPosition.Row,
+			Column: charRef.StartPosition.Column + charRef.Bytes,
+		},
+	}
+	sg := tb.Document.Read(r)
+
+	char := sg.GetLine(0)
+
+	runes := []rune(char)
+	currentRune := runes[0]
+	combining := runes[1:]
 
 	return screenX, screenY, currentRune, combining
 }

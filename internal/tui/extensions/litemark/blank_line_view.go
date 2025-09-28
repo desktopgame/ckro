@@ -50,10 +50,14 @@ func (b *BlankLineView) ConvertPos(ctx view.Context, e model.Element, viewLocalP
 	return 0, 0
 }
 
-func (b *BlankLineView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) model.Position {
-	st := e.GetRange(0).StartPosition
-	return model.Position{
-		Row:    st.Row,
-		Column: st.Column,
+func (b *BlankLineView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) view.CharacterReference {
+	r := e.GetRange(0)
+	st := r.StartPosition
+	return view.CharacterReference{
+		StartPosition: model.Position{
+			Row:    st.Row,
+			Column: st.Column,
+		},
+		Bytes: 0,
 	}
 }

@@ -28,6 +28,11 @@ func GraphemeLength(s string) int {
 	return count
 }
 
+func GraphemeToByteRange(s string, graphemePos int) (Pos int, Length int) {
+	clusters := GraphemeClusters(s)
+	return len(strings.Join(clusters[:graphemePos], "")), len(clusters[graphemePos])
+}
+
 func GraphemeToCodepointPos(s string, graphemePos int) int {
 	if graphemePos <= 0 {
 		return 0

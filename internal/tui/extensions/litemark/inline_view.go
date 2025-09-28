@@ -134,10 +134,14 @@ func (il *InlineView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos
 	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
 }
 
-func (il *InlineView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) model.Position {
-	st := e.GetRange(0).StartPosition
-	return model.Position{
-		Row:    st.Row,
-		Column: st.Column + viewLocalPos,
+func (il *InlineView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) view.CharacterReference {
+	r := e.GetRange(0)
+	st := r.StartPosition
+	return view.CharacterReference{
+		StartPosition: model.Position{
+			Row:    st.Row,
+			Column: st.Column,
+		},
+		Bytes: 0,
 	}
 }

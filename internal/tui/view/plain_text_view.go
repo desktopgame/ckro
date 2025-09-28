@@ -97,11 +97,29 @@ func (p *PlainTextView) ConvertPos(ctx Context, e model.Element, viewLocalPos in
 	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
 }
 
-func (p *PlainTextView) ConvertModel(ctx Context, e model.Element, viewLocalPos int) model.Position {
-	st := e.GetRange(0).StartPosition
-	return model.Position{
-		Row:    st.Row,
-		Column: st.Column + viewLocalPos,
+func (p *PlainTextView) ConvertModel(ctx Context, e model.Element, viewLocalPos int) CharacterReference {
+	r := e.GetRange(0)
+	str := ctx.Document.Read(r).GetLine(0)
+	st := r.StartPosition
+
+	graphemes := text.GraphemeLength(str)
+	if viewLocalPos >= graphemes {
+		return CharacterReference{
+			StartPosition: model.Position{
+				Row:    st.Row,
+				Column: st.Column + graphemes,
+			},
+			Bytes: 0,
+		}
+	}
+
+	bPos, bLen := text.GraphemeToByteRange(str, viewLocalPos)
+	return CharacterReference{
+		StartPosition: model.Position{
+			Row:    st.Row,
+			Column: st.Column + bPos,
+		},
+		Bytes: bLen,
 	}
 }
 
