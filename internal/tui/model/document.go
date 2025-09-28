@@ -1,7 +1,7 @@
 package model
 
 type Document interface {
-	GetSegment(r Range) Segment
+	Read(r Range) Segment
 	Render() []Element
 
 	InsertLine()

@@ -9,7 +9,7 @@ type Context struct {
 
 func (ctx Context) GetSegment(e model.Element, rangeIndex int) model.Segment {
 	r := e.GetRange(rangeIndex)
-	return ctx.Document.GetSegment(r)
+	return ctx.Document.Read(r)
 }
 
 func (ctx Context) GetText(e model.Element) string {

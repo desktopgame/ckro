@@ -135,9 +135,9 @@ func TestBreak(t *testing.T) {
 		segments = append(segments, brk)
 	}
 
-	c1 := tb.Document.GetSegment(segments[0].TextLayout.Element.GetRange(0)).GetLine(0)
+	c1 := tb.Document.Read(segments[0].TextLayout.Element.GetRange(0)).GetLine(0)
 	assert.Equal(t, c1, "1234")
 
-	c2 := tb.Document.GetSegment(segments[1].TextLayout.Element.GetRange(0)).GetLine(0)
+	c2 := tb.Document.Read(segments[1].TextLayout.Element.GetRange(0)).GetLine(0)
 	assert.Equal(t, c2, "あ")
 }

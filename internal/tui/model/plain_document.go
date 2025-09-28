@@ -19,7 +19,7 @@ func (doc *PlainDocument) Init() {
 	doc.Clear()
 }
 
-func (doc *PlainDocument) GetSegment(r Range) Segment {
+func (doc *PlainDocument) Read(r Range) Segment {
 	return BufferSegment{
 		buffer: doc.buffer,
 		r:      r,

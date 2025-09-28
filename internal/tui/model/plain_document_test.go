@@ -152,7 +152,7 @@ func TestSegment(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, doc.GetSegment(r1).GetLine(0), "1234567890")
+	assert.Equal(t, doc.Read(r1).GetLine(0), "1234567890")
 
 	r2 := model.Range{
 		StartPosition: model.Position{
@@ -165,6 +165,6 @@ func TestSegment(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, doc.GetSegment(r2).GetLine(0), "1234567890")
-	assert.Equal(t, doc.GetSegment(r2).GetLine(1), "1234")
+	assert.Equal(t, doc.Read(r2).GetLine(0), "1234567890")
+	assert.Equal(t, doc.Read(r2).GetLine(1), "1234")
 }
