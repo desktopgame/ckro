@@ -115,10 +115,10 @@ func (t *TextView) ConvertRelativeX(ctx view.Context, e model.Element, viewLocal
 
 func (t *TextView) MoveFirstLine(ctx view.Context, e model.Element, relX int) int {
 	l := t.MoveLength(ctx, e)
-	return min(relX, l)
+	return min(relX, l-1)
 }
 
 func (t *TextView) MoveLastLine(ctx view.Context, e model.Element, relX int) int {
 	l := t.MoveLength(ctx, e)
-	return min(relX, l)
+	return min(relX, l-1)
 }
