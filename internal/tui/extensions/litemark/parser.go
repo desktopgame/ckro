@@ -156,7 +156,7 @@ func ParseInline(line string) []AbstractInline {
 		// Code
 		if c == '`' {
 			end := byteIndexOf(line, '`', column+1)
-			if end != -1 {
+			if end != -1 && end != column+1 {
 				inlines = append(inlines, &Code{
 					Inline: Inline{
 						Spans: []Span{
@@ -223,7 +223,7 @@ func ParseInline(line string) []AbstractInline {
 		// Italic
 		if c == '*' {
 			end := byteIndexOf(line, '*', column+1)
-			if end != -1 {
+			if end != -1 && end != column+1 {
 				inlines = append(inlines, &Italic{
 					Inline: Inline{
 						Spans: []Span{
@@ -244,7 +244,7 @@ func ParseInline(line string) []AbstractInline {
 		}
 		if c == '_' {
 			end := byteIndexOf(line, '_', column+1)
-			if end != -1 {
+			if end != -1 && end != column+1 {
 				inlines = append(inlines, &Italic{
 					Inline: Inline{
 						Spans: []Span{
