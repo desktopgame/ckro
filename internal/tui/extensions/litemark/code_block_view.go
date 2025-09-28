@@ -122,7 +122,7 @@ func (c *CodeBlockView) MoveLeft(ctx view.Context, e model.Element, viewLocalPos
 }
 
 func (c *CodeBlockView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int) int {
-	if viewLocalPos > c.MoveLength(ctx, e) {
+	if viewLocalPos >= c.MoveLength(ctx, e) {
 		return -1
 	}
 	return viewLocalPos + 1
