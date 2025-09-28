@@ -43,7 +43,7 @@ func (edit *EditTextPresenter) Handle(view View, ev tcell.Event) {
 				doc.MoveRight()
 			}
 		case tcell.KeyBackspace, tcell.KeyBackspace2:
-			doc.RemoveChar()
+			view.RemoveChar()
 		case tcell.KeyEnter:
 			view.InsertString("\n")
 			edit.modify()

@@ -21,6 +21,7 @@ type View interface {
 	TextClear()
 	CursorUpdate()
 	InsertString(s string)
+	RemoveChar()
 	MoveLeft()
 	MoveRight()
 	MoveUp()

@@ -573,6 +573,45 @@ func (tb *TextBox) InsertString(s string) {
 	}
 }
 
+func (tb *TextBox) RemoveChar() {
+	if tb.viewPosition == 0 {
+		return
+	}
+
+	ctx := view.Context{
+		Resolver: tb.TextEngine,
+		Document: tb.Document,
+	}
+
+	tb.renderCache.Update(ctx, tb.Width)
+
+	_, elementIndex, viewStart, viewLocalPos := tb.renderCache.Stats(tb.viewPosition)
+	element := tb.renderCache.GetElement(elementIndex)
+	textView := tb.TextEngine.Resolve(element)
+
+	newViewLocalPos := textView.MoveLeft(ctx, element, viewLocalPos)
+
+	if newViewLocalPos >= 0 {
+		viewLocalPos = newViewLocalPos
+		position := textView.ConvertModel(ctx, element, viewLocalPos)
+
+		tb.Document.Remove(position.StartPosition.Row, position.StartPosition.Column, position.Bytes)
+		tb.renderCache.Update(ctx, tb.Width)
+		tb.viewPosition = viewStart + viewLocalPos
+	} else {
+		element = tb.renderCache.GetElement(elementIndex - 1)
+		textView = tb.TextEngine.Resolve(element)
+		viewLocalPos = textView.MoveLength(ctx, element) - 1
+
+		position := textView.ConvertModel(ctx, element, viewLocalPos)
+		position.Bytes = max(position.Bytes, 1)
+
+		tb.Document.Remove(position.StartPosition.Row, position.StartPosition.Column, position.Bytes)
+		tb.renderCache.Update(ctx, tb.Width)
+		tb.viewPosition = viewStart - 1
+	}
+}
+
 func (tb *TextBox) MoveLeft() {
 	tb.move(0)
 }

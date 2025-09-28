@@ -153,15 +153,22 @@ func (buf *Buffer) RemoveString(row int, column int, length int) {
 		line := buf.lines[row]
 
 		for length > 0 {
-			removeChars := min(len(line.GetContent())-column, length)
-			line.Remove(column, removeChars)
-			length -= removeChars
-			length -= 1
+			lineLen := len(line.GetContent())
+			if lineLen == 0 {
+				buf.RemoveLine(row)
+				length--
+			} else {
+				removeChars := min(lineLen-column, length)
 
-			if length > 0 {
-				row += 1
-				column = 0
-				line = buf.lines[row]
+				line.Remove(column, removeChars)
+				length -= removeChars
+				length -= 1
+
+				if length > 0 {
+					row += 1
+					column = 0
+					line = buf.lines[row]
+				}
 			}
 		}
 	}
