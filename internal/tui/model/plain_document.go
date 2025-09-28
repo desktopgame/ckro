@@ -9,7 +9,9 @@ import (
 // PlainDocument is wrapper of Buffer.
 // track a current cursor position.
 type PlainDocument struct {
-	buffer       Buffer
+	buffer  Buffer
+	version uint
+
 	cursorRow    int
 	cursorColumn int
 }
@@ -48,6 +50,10 @@ func (doc *PlainDocument) Render() []Element {
 		})
 	}
 	return elements
+}
+
+func (doc *PlainDocument) GetVersion() uint {
+	return doc.version
 }
 
 // InsertLine is break line at current cursor position.

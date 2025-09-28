@@ -3,6 +3,7 @@ package model
 type Document interface {
 	Read(r Range) Segment
 	Render() []Element
+	GetVersion() uint
 
 	InsertLine()
 	InsertString(s string)

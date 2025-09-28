@@ -31,8 +31,9 @@ type TextBox struct {
 	scrollY      int
 	viewPosition int
 
-	elements    []model.Element
-	layoutCache []*view.TextLayout
+	documentVersion uint
+	elements        []model.Element
+	layoutCache     []*view.TextLayout
 }
 
 // Init is initialize TextBox.
@@ -578,6 +579,10 @@ func (tb *TextBox) MoveReset() {
 }
 
 func (tb *TextBox) layout() {
+	if tb.documentVersion > 0 && tb.documentVersion == tb.Document.GetVersion() {
+		return
+	}
+
 	ctx := view.Context{
 		Resolver: tb.TextEngine,
 		Document: tb.Document,
@@ -595,6 +600,7 @@ func (tb *TextBox) layout() {
 
 	tb.elements = elements
 	tb.layoutCache = entries
+	tb.documentVersion = tb.Document.GetVersion()
 }
 
 // BreakIter returns segment array by line, in consideration a wrap.
