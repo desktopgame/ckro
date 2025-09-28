@@ -63,11 +63,11 @@ func (doc *StyledDocument) Render() []model.Element {
 					codeLines = append(codeLines, &BlankLineElement{
 						Range: model.Range{
 							StartPosition: model.Position{
-								Row:    block.LineIndex,
+								Row:    lineIndex,
 								Column: 0,
 							},
 							EndPosition: model.Position{
-								Row:    block.LineIndex,
+								Row:    lineIndex,
 								Column: 0,
 							},
 						},
