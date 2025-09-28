@@ -31,11 +31,7 @@ type TextBox struct {
 	scrollY      int
 	viewPosition int
 
-	documentVersion uint
-	elements        []model.Element
-	layoutCache     []*view.TextLayout
-	totalViewLen    int
-	viewLenTable    []int
+	renderCache TextRenderCache
 }
 
 // Init is initialize TextBox.
@@ -106,13 +102,13 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 		Document: tb.Document,
 	}
 
-	_, ei, _, eoff := tb.currentViewState(ctx, tb.elements)
-	view := tb.TextEngine.Resolve(tb.elements[ei])
+	_, ei, _, eoff := tb.renderCache.Stats(tb.viewPosition)
+	view := tb.TextEngine.Resolve(tb.renderCache.GetElement(ei))
 	y := 0
 	for i := 0; i < ei; i++ {
-		y += tb.layoutCache[i].Height
+		y += tb.renderCache.GetLayout(i).Height
 	}
-	vlx, vly := view.ConvertPos(ctx, tb.elements[ei], eoff)
+	vlx, vly := view.ConvertPos(ctx, tb.renderCache.GetElement(ei), eoff)
 	ax := vlx
 	ay := y + vly
 
@@ -131,12 +127,12 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	//	screenY += tb.calculateWrappedLines(line)
 	//}
 	for i := 0; i < ei; i++ {
-		screenY += tb.layoutCache[i].Height
+		screenY += tb.renderCache.GetLayout(i).Height
 	}
 
 	// カーソルがある行での位置を正確に計算
 	cursorLine := buf.GetLineAt(cursorRow).GetContent()
-	relx, rely := tb.TextEngine.Resolve(tb.elements[ei]).ConvertPos(ctx, tb.elements[ei], eoff)
+	relx, rely := tb.TextEngine.Resolve(tb.renderCache.GetElement(ei)).ConvertPos(ctx, tb.renderCache.GetElement(ei), eoff)
 	screenX := relx
 	screenY += rely
 	//screenX, additionalRows :=
@@ -379,7 +375,11 @@ func (tb *TextBox) Draw(g *Graphics) {
 		return
 	}
 
-	tb.layout()
+	ctx := view.Context{
+		Resolver: tb.TextEngine,
+		Document: tb.Document,
+	}
+	tb.renderCache.Update(ctx, tb.Width)
 
 	// バッファの内容を描画
 	clip := Clip{
@@ -392,11 +392,6 @@ func (tb *TextBox) Draw(g *Graphics) {
 	}
 	cursor := clip
 	def := tcell.StyleDefault
-
-	ctx := view.Context{
-		Resolver: tb.TextEngine,
-		Document: tb.Document,
-	}
 
 	for textSegment := range tb.BreakIter() {
 		if textSegment.LocalViewLine == 0 {
@@ -464,48 +459,27 @@ func (tb *TextBox) isStyled() bool {
 	return !ok
 }
 
-func (tb *TextBox) currentViewState(ctx view.Context, elements []model.Element) (TotalViewLen int, CurrentElementIndex int, CurrentElementStart int, CurrentElementOffset int) {
-	totalViewLen := 0
-	elementIndex := 0
-	elementStart := -1
-	oldLocalViewPos := 0
-	for i, elem := range elements {
-		viewStart := totalViewLen
-		view := tb.TextEngine.Resolve(elem)
-		viewLen := view.MoveLength(ctx, elem)
-		viewEnd := viewStart + viewLen
-
-		if tb.viewPosition >= viewStart && tb.viewPosition < viewEnd {
-			elementIndex = i
-			oldLocalViewPos = tb.viewPosition - viewStart
-			elementStart = viewStart
-		}
-		totalViewLen += viewLen
-	}
-	return totalViewLen, elementIndex, elementStart, oldLocalViewPos
-}
-
 func (tb *TextBox) move(dir int) {
-	tb.layout()
-
 	ctx := view.Context{
 		Resolver: tb.TextEngine,
 		Document: tb.Document,
 	}
 
-	ttl, elementIndex, elementStart, oldLocalViewPos := tb.currentViewState(ctx, tb.elements)
+	tb.renderCache.Update(ctx, tb.Width)
 
-	tview := tb.TextEngine.Resolve(tb.elements[elementIndex])
+	ttl, elementIndex, elementStart, oldLocalViewPos := tb.renderCache.Stats(tb.viewPosition)
+
+	tview := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex))
 	var newLocalViewPos int
 	switch dir {
 	case 0:
-		newLocalViewPos = tview.MoveLeft(ctx, tb.elements[elementIndex], oldLocalViewPos)
+		newLocalViewPos = tview.MoveLeft(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
 	case 1:
-		newLocalViewPos = tview.MoveRight(ctx, tb.elements[elementIndex], oldLocalViewPos)
+		newLocalViewPos = tview.MoveRight(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
 	case 2:
-		newLocalViewPos = tview.MoveUp(ctx, tb.elements[elementIndex], oldLocalViewPos)
+		newLocalViewPos = tview.MoveUp(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
 	case 3:
-		newLocalViewPos = tview.MoveDown(ctx, tb.elements[elementIndex], oldLocalViewPos)
+		newLocalViewPos = tview.MoveDown(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
 	}
 
 	if newLocalViewPos == -1 {
@@ -513,22 +487,22 @@ func (tb *TextBox) move(dir int) {
 
 			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok {
 
-				nextView := tb.TextEngine.Resolve(tb.elements[elementIndex+1])
-				relx := pLinebaseView.ConvertRelativeX(ctx, tb.elements[elementIndex], oldLocalViewPos)
+				nextView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex + 1))
+				relx := pLinebaseView.ConvertRelativeX(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
 
 				if linebaseTV, ok := nextView.(view.LinebaseTextView); ok {
-					offset := linebaseTV.MoveFirstLine(ctx, tb.elements[elementIndex+1], relx)
+					offset := linebaseTV.MoveFirstLine(ctx, tb.renderCache.GetElement(elementIndex+1), relx)
 
-					tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.elements[elementIndex]) + offset
+					tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.renderCache.GetElement(elementIndex)) + offset
 
 				} else {
-					tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.elements[elementIndex])
+					tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.renderCache.GetElement(elementIndex))
 				}
 			} else {
-				tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.elements[elementIndex])
+				tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.renderCache.GetElement(elementIndex))
 			}
 		} else if dir == 1 {
-			tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.elements[elementIndex])
+			tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.renderCache.GetElement(elementIndex))
 		}
 
 		if dir == 0 {
@@ -537,12 +511,12 @@ func (tb *TextBox) move(dir int) {
 
 			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok {
 
-				prevView := tb.TextEngine.Resolve(tb.elements[elementIndex-1])
-				relx := pLinebaseView.ConvertRelativeX(ctx, tb.elements[elementIndex], oldLocalViewPos)
+				prevView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
+				relx := pLinebaseView.ConvertRelativeX(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
 
 				if linebaseTV, ok := prevView.(view.LinebaseTextView); ok {
-					offset := linebaseTV.MoveLastLine(ctx, tb.elements[elementIndex-1], relx)
-					l := linebaseTV.MoveLength(ctx, tb.elements[elementIndex-1])
+					offset := linebaseTV.MoveLastLine(ctx, tb.renderCache.GetElement(elementIndex-1), relx)
+					l := linebaseTV.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
 
 					tb.viewPosition = elementStart - l + offset
 
@@ -581,43 +555,6 @@ func (tb *TextBox) MoveReset() {
 	tb.viewPosition = 0
 }
 
-func (tb *TextBox) layout() {
-	if tb.documentVersion > 0 && tb.documentVersion == tb.Document.GetVersion() {
-		return
-	}
-
-	ctx := view.Context{
-		Resolver: tb.TextEngine,
-		Document: tb.Document,
-	}
-
-	elements := tb.Document.Render()
-
-	entries := []*view.TextLayout{}
-	for i := 0; i < len(elements); i++ {
-		element := elements[i]
-		textView := tb.TextEngine.Resolve(element)
-		tl := textView.MinimumSize(ctx, element, tb.Width, 9999)
-		entries = append(entries, tl)
-	}
-
-	totalViewLen := 0
-	viewLenTable := []int{}
-	for _, elem := range elements {
-		view := tb.TextEngine.Resolve(elem)
-		viewLen := view.MoveLength(ctx, elem)
-
-		viewLenTable = append(viewLenTable, viewLen)
-		totalViewLen += viewLen
-	}
-
-	tb.documentVersion = tb.Document.GetVersion()
-	tb.elements = elements
-	tb.layoutCache = entries
-	tb.totalViewLen = totalViewLen
-	tb.viewLenTable = viewLenTable
-}
-
 // BreakIter returns segment array by line, in consideration a wrap.
 func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 	//buf := tb.Document.GetBuffer()
@@ -629,9 +566,9 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 			Document: tb.Document,
 		}
 
-		entries := tb.layoutCache
 		viewLine := 0
-		for _, entry := range entries {
+		for i := 0; i < tb.renderCache.GetItemCount(); i++ {
+			entry := tb.renderCache.GetLayout(i)
 			element := entry.Element
 
 			lineWrap := entry.MinimumWidth > tb.Width
