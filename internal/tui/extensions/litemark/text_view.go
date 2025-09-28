@@ -140,20 +140,3 @@ func (t *TextView) MoveLastLine(ctx view.Context, e model.Element, relX int) int
 	l := t.MoveLength(ctx, e)
 	return min(relX, l-1)
 }
-
-func (t *TextView) ConvertLocalPos(ctx view.Context, e model.Element, localBytePos int) int {
-	r := e.GetRange(0)
-	str := ctx.Document.Read(r).GetLine(0)
-	clusters := text.GraphemeClusters(str)
-	// aBytePos := r.StartPosition.Column + localBytePos
-
-	bytes := 0
-	for i, cluster := range clusters {
-		l := len(cluster)
-		if bytes == localBytePos {
-			return i
-		}
-		bytes += l
-	}
-	return -1
-}
