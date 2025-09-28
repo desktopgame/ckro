@@ -51,51 +51,6 @@ func (tb *TextBox) Init() {
 
 // CursorPosition returns position of cursor.
 // TODO: refactor
-func (tb *TextBox) CursorPosition2() (X int, Y int, Rune rune, Combine []rune) {
-	buf := tb.Document.GetBuffer()
-	cursorRow := tb.Document.GetCursorRow()
-	cursorCol := tb.Document.GetCursorColumn()
-
-	if cursorRow >= buf.GetLineCount() {
-		return 0, 0, ' ', nil
-	}
-
-	// カーソルがある行までの画面行数を計算
-	screenY := 0
-	for i := 0; i < cursorRow; i++ {
-		line := buf.GetLineAt(i).GetContent()
-		screenY += tb.calculateWrappedLines(line)
-	}
-
-	// カーソルがある行での位置を正確に計算
-	cursorLine := buf.GetLineAt(cursorRow).GetContent()
-	screenX, additionalRows := tb.calculateCursorPosition(cursorLine, cursorCol)
-	screenY += additionalRows
-
-	// カーソル位置の文字を取得
-	var currentRune rune = ' '
-	var combining []rune
-
-	if cursorCol < text.GraphemeLength(cursorLine) {
-		// カーソル位置に文字がある場合
-		clusters := text.GraphemeClusters(cursorLine)
-		if cursorCol < len(clusters) {
-			cluster := clusters[cursorCol]
-			runes := []rune(cluster)
-			if len(runes) > 0 {
-				currentRune = runes[0]
-				if len(runes) > 1 {
-					combining = runes[1:]
-				}
-			}
-		}
-	}
-
-	return screenX, screenY, currentRune, combining
-}
-
-// CursorPosition returns position of cursor.
-// TODO: refactor
 func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	ctx := view.Context{
 		Resolver: tb.TextEngine,
