@@ -607,6 +607,7 @@ func (tb *TextBox) RemoveChar() {
 	if newViewLocalPos >= 0 {
 		viewLocalPos = newViewLocalPos
 		position := textView.ConvertModel(ctx, element, viewLocalPos)
+		position.Bytes = max(position.Bytes, 1)
 
 		tb.Document.Remove(position.StartPosition.Row, position.StartPosition.Column, position.Bytes)
 		tb.renderCache.Update(ctx, tb.Width)

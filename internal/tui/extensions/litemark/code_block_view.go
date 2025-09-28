@@ -45,7 +45,7 @@ func (c *CodeBlockView) Draw(ctx view.Context, textLayout *view.TextLayout, rend
 }
 
 func (c *CodeBlockView) MinimumSize(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
-	totalWidth := 0
+	maxWidth := -1
 	children := []*view.TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
@@ -53,11 +53,14 @@ func (c *CodeBlockView) MinimumSize(ctx view.Context, e model.Element, width int
 
 		child := childView.MinimumSize(ctx, childElement, width, 1)
 		children = append(children, child)
-		totalWidth += child.MinimumWidth
+
+		if child.MinimumWidth > maxWidth {
+			maxWidth = child.MinimumWidth
+		}
 	}
 	return &view.TextLayout{
 		Element:       e,
-		MinimumWidth:  totalWidth + 2,
+		MinimumWidth:  maxWidth + 2,
 		MinimumHeight: e.GetElementCount() + 2,
 		Children:      children,
 	}
