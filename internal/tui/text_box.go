@@ -472,7 +472,7 @@ func (tb *TextBox) currentViewState(ctx view.Context, elements []model.Element) 
 		viewLen := view.MoveLength(ctx, elem)
 		viewEnd := viewStart + viewLen
 
-		if elementStart == -1 && tb.viewPosition >= viewStart && tb.viewPosition < viewEnd {
+		if tb.viewPosition >= viewStart && tb.viewPosition < viewEnd {
 			elementIndex = i
 			oldLocalViewPos = tb.viewPosition - viewStart
 			elementStart = viewStart
@@ -517,8 +517,8 @@ func (tb *TextBox) move(dir int) {
 			tb.viewPosition = max(elementStart-1, 0)
 		}
 	} else {
-		moves := newLocalViewPos - oldLocalViewPos
-		tb.viewPosition += moves
+		// moves := newLocalViewPos - oldLocalViewPos
+		tb.viewPosition = elementStart + newLocalViewPos
 	}
 }
 

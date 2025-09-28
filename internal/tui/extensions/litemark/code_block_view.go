@@ -1,7 +1,6 @@
 package litemark
 
 import (
-	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/view"
 )
@@ -51,16 +50,68 @@ func (c *CodeBlockView) MinimumSize(ctx view.Context, e model.Element, width int
 	}
 }
 
+func (c *CodeBlockView) ViewLengthTable(ctx view.Context, e model.Element) ([]int, int) {
+	var table []int
+	total := 0
+	for i := 0; i < e.GetElementCount(); i++ {
+		childElement := e.GetElement(i)
+		childView := ctx.Resolver.Resolve(childElement)
+
+		l := childView.MoveLength(ctx, childElement)
+		table = append(table, l)
+		total += l
+	}
+	return table, total
+}
+
+func (c *CodeBlockView) findTableIndex(table []int, viewLocalPos int) (Row int, Column int) {
+	n := 0
+	index := -1
+	col := -1
+	for i, l := range table {
+		start := n
+		if viewLocalPos >= start && viewLocalPos < n+l {
+			index = i
+			col = viewLocalPos - start
+			break
+		}
+		n += l
+	}
+	return index, col
+}
+
+func (c *CodeBlockView) sumTableValue(table []int, index int) int {
+	v := 0
+	for i := 0; i <= index; i++ {
+		v += table[i]
+	}
+	return v
+}
+
 func (c *CodeBlockView) MoveLength(ctx view.Context, e model.Element) int {
-	return text.GraphemeLength(ctx.GetText(e)) + 1 // include newline
+	_, ttl := c.ViewLengthTable(ctx, e)
+	return ttl
 }
 
 func (c *CodeBlockView) MoveUp(ctx view.Context, e model.Element, viewLocalPos int) int {
-	return -1
+	table, _ := c.ViewLengthTable(ctx, e)
+	index, _ := c.findTableIndex(table, viewLocalPos)
+	if index <= 0 {
+		return -1
+	}
+	if index == 1 {
+		return 0
+	}
+	return c.sumTableValue(table, index-2)
 }
 
 func (c *CodeBlockView) MoveDown(ctx view.Context, e model.Element, viewLocalPos int) int {
-	return -1
+	table, _ := c.ViewLengthTable(ctx, e)
+	index, _ := c.findTableIndex(table, viewLocalPos)
+	if index == len(table)-1 {
+		return -1
+	}
+	return c.sumTableValue(table, index)
 }
 
 func (c *CodeBlockView) MoveLeft(ctx view.Context, e model.Element, viewLocalPos int) int {
@@ -78,7 +129,9 @@ func (c *CodeBlockView) MoveRight(ctx view.Context, e model.Element, viewLocalPo
 }
 
 func (c *CodeBlockView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
-	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
+	table, _ := c.ViewLengthTable(ctx, e)
+	index, col := c.findTableIndex(table, viewLocalPos)
+	return col, index
 }
 
 func (c *CodeBlockView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) model.Position {
