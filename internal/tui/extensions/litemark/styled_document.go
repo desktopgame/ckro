@@ -59,44 +59,59 @@ func (doc *StyledDocument) Render() []model.Element {
 			codeLines := []model.Element{}
 			for i := 0; i < block.LineCount-2; i++ {
 				lineIndex := block.LineIndex + i + 1
-				codeLines = append(codeLines, &TextElement{
-					Range: model.Range{
-						StartPosition: model.Position{
-							Row:    lineIndex,
-							Column: 0,
+				if len(doc.GetLineAt(lineIndex)) == 0 {
+					codeLines = append(codeLines, &BlankLineElement{
+						Range: model.Range{
+							StartPosition: model.Position{
+								Row:    block.LineIndex,
+								Column: 0,
+							},
+							EndPosition: model.Position{
+								Row:    block.LineIndex,
+								Column: 0,
+							},
 						},
-						EndPosition: model.Position{
-							Row:    lineIndex,
-							Column: len(doc.GetLineAt(lineIndex)),
+					})
+				} else {
+					codeLines = append(codeLines, &TextElement{
+						Range: model.Range{
+							StartPosition: model.Position{
+								Row:    lineIndex,
+								Column: 0,
+							},
+							EndPosition: model.Position{
+								Row:    lineIndex,
+								Column: len(doc.GetLineAt(lineIndex)),
+							},
 						},
-					},
-					Children: []model.Element{
-						&InlineElement{
-							Ranges: []model.Range{
-								{
-									StartPosition: model.Position{
-										Row:    lineIndex,
-										Column: 0,
+						Children: []model.Element{
+							&InlineElement{
+								Ranges: []model.Range{
+									{
+										StartPosition: model.Position{
+											Row:    lineIndex,
+											Column: 0,
+										},
+										EndPosition: model.Position{
+											Row:    lineIndex,
+											Column: len(doc.GetLineAt(lineIndex)),
+										},
 									},
-									EndPosition: model.Position{
-										Row:    lineIndex,
-										Column: len(doc.GetLineAt(lineIndex)),
-									},
-								},
-								{
-									StartPosition: model.Position{
-										Row:    lineIndex,
-										Column: 0,
-									},
-									EndPosition: model.Position{
-										Row:    lineIndex,
-										Column: len(doc.GetLineAt(lineIndex)),
+									{
+										StartPosition: model.Position{
+											Row:    lineIndex,
+											Column: 0,
+										},
+										EndPosition: model.Position{
+											Row:    lineIndex,
+											Column: len(doc.GetLineAt(lineIndex)),
+										},
 									},
 								},
 							},
 						},
-					},
-				})
+					})
+				}
 			}
 			elements = append(elements, &CodeBlockElement{
 				Ranges: []model.Range{

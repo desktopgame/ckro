@@ -573,7 +573,7 @@ func (tb *TextBox) InsertString(s string) {
 					tb.viewPosition = viewStart
 				}
 			} else {
-				tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
+				tb.viewPosition = viewStart + textView.MoveLength(ctx, element) - 1
 			}
 			_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
 			element = tb.renderCache.GetElement(elementIndex)

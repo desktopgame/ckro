@@ -34,21 +34,10 @@ func Parse(reader Reader) []AbstractBlock {
 		lineIndex := sc.lineIndex
 		line := sc.Next()
 
-		// Soft break
-		if len(line) == 0 {
-			blocks = append(blocks, &BlankLine{
-				Block: Block{
-					LineIndex: lineIndex,
-					LineCount: 1,
-				},
-			})
-			continue
-		}
-
 		// CodeBlock
 		if codeBlockScope {
 			codeBlockEnded := false
-			if line[0] == '`' {
+			if len(line) > 0 && line[0] == '`' {
 				codeBlockScope = true
 
 				column := 0
@@ -66,6 +55,17 @@ func Parse(reader Reader) []AbstractBlock {
 			} else {
 				codeBlockCurrent.LineCount++
 			}
+			continue
+		}
+
+		// Soft break
+		if len(line) == 0 {
+			blocks = append(blocks, &BlankLine{
+				Block: Block{
+					LineIndex: lineIndex,
+					LineCount: 1,
+				},
+			})
 			continue
 		}
 
@@ -93,26 +93,29 @@ func Parse(reader Reader) []AbstractBlock {
 
 		// CodeBlock
 		if line[0] == '`' {
-			codeBlockScope = true
-
 			column := 0
 			for column < len(line) && line[column] == '`' {
 				column++
 			}
-			codeBlockMarkerLen = column - 1
 
-			codeBlockCurrent = &CodeBlock{
-				Block: Block{
-					LineIndex: lineIndex,
-					LineCount: 1,
-				},
-				Span: Span{
-					StartColumn: column,
-					EndColumn:   len(line),
-				},
+			if column >= 3 {
+				codeBlockScope = true
+
+				codeBlockMarkerLen = column - 1
+
+				codeBlockCurrent = &CodeBlock{
+					Block: Block{
+						LineIndex: lineIndex,
+						LineCount: 1,
+					},
+					Span: Span{
+						StartColumn: column,
+						EndColumn:   len(line),
+					},
+				}
+				blocks = append(blocks, codeBlockCurrent)
+				continue
 			}
-			blocks = append(blocks, codeBlockCurrent)
-			continue
 		}
 
 		// Inline text
