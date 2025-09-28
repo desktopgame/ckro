@@ -3,19 +3,20 @@ package litemark
 import (
 	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/view"
+	"github.com/gdamore/tcell/v2"
 )
 
 type CodeBlockView struct {
 }
 
 func (c *CodeBlockView) Layout(ctx view.Context, textLayout *view.TextLayout, x, y, w, h int) {
-	offsetY := 0
+	offsetY := 1
 	for i := 0; i < len(textLayout.Children); i++ {
 		childElement := textLayout.Children[i].Element
 		childView := ctx.Resolver.Resolve(childElement)
 
 		mw := textLayout.Children[i].MinimumWidth
-		childView.Layout(ctx, textLayout.Children[i], 0, offsetY, mw, 1)
+		childView.Layout(ctx, textLayout.Children[i], 1, offsetY, mw, 1)
 		offsetY++
 	}
 	textLayout.RelativeX = x
@@ -25,6 +26,18 @@ func (c *CodeBlockView) Layout(ctx view.Context, textLayout *view.TextLayout, x,
 }
 
 func (c *CodeBlockView) Draw(ctx view.Context, textLayout *view.TextLayout, renderer view.Renderer) {
+	for i := 1; i < textLayout.Width-1; i++ {
+		renderer.SetContent(i, 0, '-', nil, tcell.StyleDefault)
+		renderer.SetContent(i, textLayout.Height-1, '-', nil, tcell.StyleDefault)
+	}
+	for i := 1; i < textLayout.Height-1; i++ {
+		renderer.SetContent(0, i, '|', nil, tcell.StyleDefault)
+		renderer.SetContent(textLayout.Width-1, i, '|', nil, tcell.StyleDefault)
+	}
+	renderer.SetContent(0, 0, '*', nil, tcell.StyleDefault)
+	renderer.SetContent(textLayout.Width-1, 0, '*', nil, tcell.StyleDefault)
+	renderer.SetContent(0, textLayout.Height-1, '*', nil, tcell.StyleDefault)
+	renderer.SetContent(textLayout.Width-1, textLayout.Height-1, '*', nil, tcell.StyleDefault)
 	for _, child := range textLayout.Children {
 		childView := ctx.Resolver.Resolve(child.Element)
 		childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY))
@@ -44,8 +57,8 @@ func (c *CodeBlockView) MinimumSize(ctx view.Context, e model.Element, width int
 	}
 	return &view.TextLayout{
 		Element:       e,
-		MinimumWidth:  totalWidth,
-		MinimumHeight: e.GetElementCount(),
+		MinimumWidth:  totalWidth + 2,
+		MinimumHeight: e.GetElementCount() + 2,
 		Children:      children,
 	}
 }
@@ -131,7 +144,7 @@ func (c *CodeBlockView) MoveRight(ctx view.Context, e model.Element, viewLocalPo
 func (c *CodeBlockView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
 	table, _ := c.ViewLengthTable(ctx, e)
 	index, col := c.findTableIndex(table, viewLocalPos)
-	return col, index
+	return col + 1, index + 1
 }
 
 func (c *CodeBlockView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) view.CharacterReference {
