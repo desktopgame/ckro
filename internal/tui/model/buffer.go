@@ -157,6 +157,11 @@ func (buf *Buffer) RemoveString(row int, column int, length int) {
 			if lineLen == 0 {
 				buf.RemoveLine(row)
 				length--
+			} else if column == lineLen {
+				nextLine := buf.GetLineAt(row + 1)
+				buf.GetLineAt(row).AppendString(nextLine.GetContent())
+				buf.RemoveLine(row + 1)
+				length--
 			} else {
 				removeChars := min(lineLen-column, length)
 
