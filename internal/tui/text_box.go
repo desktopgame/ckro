@@ -102,6 +102,7 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 		Document: tb.Document,
 	}
 
+	tb.renderCache.Update(ctx, tb.Width)
 	_, ei, _, eoff := tb.renderCache.Stats(tb.viewPosition)
 	view := tb.TextEngine.Resolve(tb.renderCache.GetElement(ei))
 	y := 0
