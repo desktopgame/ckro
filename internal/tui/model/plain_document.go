@@ -52,6 +52,16 @@ func (doc *PlainDocument) Render() []Element {
 	return elements
 }
 
+func (doc *PlainDocument) WriteString(row int, bytePos int, s string) {
+	doc.buffer.InsertString(row, bytePos, s)
+	doc.version++
+}
+
+func (doc *PlainDocument) Remove(row int, bytePos int, byteLen int) {
+	doc.buffer.RemoveString(row, bytePos, byteLen)
+	doc.version++
+}
+
 func (doc *PlainDocument) GetVersion() uint {
 	return doc.version
 }
