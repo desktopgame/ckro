@@ -561,7 +561,20 @@ func (tb *TextBox) InsertString(s string) {
 		viewLocalPos = textView.MoveRight(ctx, element, viewLocalPos)
 
 		if viewLocalPos == -1 {
-			tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
+			// 文字挿入によってビューが分割された場合
+			// 移動可能な回数が1回かつテキストが存在しない場合は空行とみなす
+			// その場合には次の行へ降りる
+			// 移動可能回数が1回かつテキストが存在する場合は行を継続する
+			// 移動可能回数が2回以上の場合、そのビューの開始位置までジャンプする
+			if textView.MoveLength(ctx, element) == 1 {
+				if len(ctx.GetText(element)) == 0 {
+					tb.viewPosition = viewStart + 1
+				} else {
+					tb.viewPosition = viewStart
+				}
+			} else {
+				tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
+			}
 			_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
 			element = tb.renderCache.GetElement(elementIndex)
 			textView = tb.TextEngine.Resolve(element)
