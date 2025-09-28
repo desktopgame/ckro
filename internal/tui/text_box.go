@@ -506,7 +506,23 @@ func (tb *TextBox) move(dir int) {
 
 	if newLocalViewPos == -1 {
 		if dir == 3 {
-			tb.viewPosition = elementStart + tview.MoveLength(ctx, elements[elementIndex])
+
+			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok {
+
+				nextView := tb.TextEngine.Resolve(elements[elementIndex+1])
+				relx := pLinebaseView.ConvertRelativeX(ctx, elements[elementIndex], oldLocalViewPos)
+
+				if linebaseTV, ok := nextView.(view.LinebaseTextView); ok {
+					offset := linebaseTV.MoveFirstLine(ctx, elements[elementIndex+1], relx)
+
+					tb.viewPosition = elementStart + tview.MoveLength(ctx, elements[elementIndex]) + offset
+
+				} else {
+					tb.viewPosition = elementStart + tview.MoveLength(ctx, elements[elementIndex])
+				}
+			} else {
+				tb.viewPosition = elementStart + tview.MoveLength(ctx, elements[elementIndex])
+			}
 		} else if dir == 1 {
 			tb.viewPosition = elementStart + tview.MoveLength(ctx, elements[elementIndex])
 		}

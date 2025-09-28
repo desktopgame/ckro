@@ -108,3 +108,17 @@ func (t *TextView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos 
 		Column: st.Column + viewLocalPos,
 	}
 }
+
+func (t *TextView) ConvertRelativeX(ctx view.Context, e model.Element, viewLocalPos int) int {
+	return viewLocalPos
+}
+
+func (t *TextView) MoveFirstLine(ctx view.Context, e model.Element, relX int) int {
+	l := t.MoveLength(ctx, e)
+	return min(relX, l)
+}
+
+func (t *TextView) MoveLastLine(ctx view.Context, e model.Element, relX int) int {
+	l := t.MoveLength(ctx, e)
+	return min(relX, l)
+}
