@@ -484,25 +484,26 @@ func (tb *TextBox) currentViewState(ctx view.Context, elements []model.Element) 
 }
 
 func (tb *TextBox) move(dir int) {
+	tb.layout()
+
 	ctx := view.Context{
 		Resolver: tb.TextEngine,
 		Document: tb.Document,
 	}
 
-	elements := tb.Document.Render()
-	ttl, elementIndex, elementStart, oldLocalViewPos := tb.currentViewState(ctx, elements)
+	ttl, elementIndex, elementStart, oldLocalViewPos := tb.currentViewState(ctx, tb.elements)
 
-	tview := tb.TextEngine.Resolve(elements[elementIndex])
+	tview := tb.TextEngine.Resolve(tb.elements[elementIndex])
 	var newLocalViewPos int
 	switch dir {
 	case 0:
-		newLocalViewPos = tview.MoveLeft(ctx, elements[elementIndex], oldLocalViewPos)
+		newLocalViewPos = tview.MoveLeft(ctx, tb.elements[elementIndex], oldLocalViewPos)
 	case 1:
-		newLocalViewPos = tview.MoveRight(ctx, elements[elementIndex], oldLocalViewPos)
+		newLocalViewPos = tview.MoveRight(ctx, tb.elements[elementIndex], oldLocalViewPos)
 	case 2:
-		newLocalViewPos = tview.MoveUp(ctx, elements[elementIndex], oldLocalViewPos)
+		newLocalViewPos = tview.MoveUp(ctx, tb.elements[elementIndex], oldLocalViewPos)
 	case 3:
-		newLocalViewPos = tview.MoveDown(ctx, elements[elementIndex], oldLocalViewPos)
+		newLocalViewPos = tview.MoveDown(ctx, tb.elements[elementIndex], oldLocalViewPos)
 	}
 
 	if newLocalViewPos == -1 {
@@ -510,22 +511,22 @@ func (tb *TextBox) move(dir int) {
 
 			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok {
 
-				nextView := tb.TextEngine.Resolve(elements[elementIndex+1])
-				relx := pLinebaseView.ConvertRelativeX(ctx, elements[elementIndex], oldLocalViewPos)
+				nextView := tb.TextEngine.Resolve(tb.elements[elementIndex+1])
+				relx := pLinebaseView.ConvertRelativeX(ctx, tb.elements[elementIndex], oldLocalViewPos)
 
 				if linebaseTV, ok := nextView.(view.LinebaseTextView); ok {
-					offset := linebaseTV.MoveFirstLine(ctx, elements[elementIndex+1], relx)
+					offset := linebaseTV.MoveFirstLine(ctx, tb.elements[elementIndex+1], relx)
 
-					tb.viewPosition = elementStart + tview.MoveLength(ctx, elements[elementIndex]) + offset
+					tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.elements[elementIndex]) + offset
 
 				} else {
-					tb.viewPosition = elementStart + tview.MoveLength(ctx, elements[elementIndex])
+					tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.elements[elementIndex])
 				}
 			} else {
-				tb.viewPosition = elementStart + tview.MoveLength(ctx, elements[elementIndex])
+				tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.elements[elementIndex])
 			}
 		} else if dir == 1 {
-			tb.viewPosition = elementStart + tview.MoveLength(ctx, elements[elementIndex])
+			tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.elements[elementIndex])
 		}
 
 		if dir == 0 {
@@ -534,12 +535,12 @@ func (tb *TextBox) move(dir int) {
 
 			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok {
 
-				prevView := tb.TextEngine.Resolve(elements[elementIndex-1])
-				relx := pLinebaseView.ConvertRelativeX(ctx, elements[elementIndex], oldLocalViewPos)
+				prevView := tb.TextEngine.Resolve(tb.elements[elementIndex-1])
+				relx := pLinebaseView.ConvertRelativeX(ctx, tb.elements[elementIndex], oldLocalViewPos)
 
 				if linebaseTV, ok := prevView.(view.LinebaseTextView); ok {
-					offset := linebaseTV.MoveLastLine(ctx, elements[elementIndex-1], relx)
-					l := linebaseTV.MoveLength(ctx, elements[elementIndex-1])
+					offset := linebaseTV.MoveLastLine(ctx, tb.elements[elementIndex-1], relx)
+					l := linebaseTV.MoveLength(ctx, tb.elements[elementIndex-1])
 
 					tb.viewPosition = elementStart - l + offset
 
