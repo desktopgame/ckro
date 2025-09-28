@@ -20,6 +20,7 @@ type View interface {
 	TextHorizontal()
 	TextClear()
 	CursorUpdate()
+	InsertString(s string)
 	MoveLeft()
 	MoveRight()
 	MoveUp()

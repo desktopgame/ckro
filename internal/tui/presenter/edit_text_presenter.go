@@ -45,17 +45,17 @@ func (edit *EditTextPresenter) Handle(view View, ev tcell.Event) {
 		case tcell.KeyBackspace, tcell.KeyBackspace2:
 			doc.RemoveChar()
 		case tcell.KeyEnter:
-			doc.InsertLine()
+			view.InsertString("\n")
 			edit.modify()
 		case tcell.KeyTAB:
-			doc.InsertString("\t")
+			view.InsertString("\t")
 			edit.modify()
 		case tcell.KeyRune:
 			if !edit.ReadOnly {
 				edit.inputBuffer = append(edit.inputBuffer, e.Rune())
 				inputString := string(edit.inputBuffer)
 				if text.GraphemeLength(inputString) == 1 {
-					doc.InsertString(inputString)
+					view.InsertString(inputString)
 					edit.inputBuffer = []rune{}
 					edit.modify()
 				}

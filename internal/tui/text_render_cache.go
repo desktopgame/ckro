@@ -48,7 +48,7 @@ func (trc *TextRenderCache) Update(ctx view.Context, textBoxWidth int) {
 
 func (trc *TextRenderCache) Stats(viewPosition int) (TotalViewLen int, ElementIndex int, ViewStart int, ViewLocalPosition int) {
 	totalViewLen := 0
-	elementIndex := 0
+	elementIndex := -1
 	elementStart := -1
 	viewLocalPosition := 0
 	for i, viewLen := range trc.viewLenTable {
@@ -61,6 +61,15 @@ func (trc *TextRenderCache) Stats(viewPosition int) (TotalViewLen int, ElementIn
 			elementStart = viewStart
 		}
 		totalViewLen += viewLen
+	}
+	if elementIndex == -1 {
+		ttl := 0
+		for i := 0; i < len(trc.viewLenTable); i++ {
+			ttl += trc.viewLenTable[i]
+		}
+		elementIndex = len(trc.elements) - 1
+		viewLocalPosition = trc.viewLenTable[len(trc.viewLenTable)-1]
+		elementStart = ttl
 	}
 	return totalViewLen, elementIndex, elementStart, viewLocalPosition
 }

@@ -538,6 +538,41 @@ func (tb *TextBox) move(dir int) {
 	tb.viewPosition = min(max(tb.viewPosition, 0), ttl-1)
 }
 
+func (tb *TextBox) InsertString(s string) {
+	ctx := view.Context{
+		Resolver: tb.TextEngine,
+		Document: tb.Document,
+	}
+
+	tb.renderCache.Update(ctx, tb.Width)
+
+	_, elementIndex, _, viewLocalPos := tb.renderCache.Stats(tb.viewPosition)
+	element := tb.renderCache.GetElement(elementIndex)
+	textView := tb.TextEngine.Resolve(element)
+	position := textView.ConvertModel(ctx, element, viewLocalPos)
+	tb.Document.WriteString(position.StartPosition.Row, position.StartPosition.Column, s)
+
+	tb.renderCache.Update(ctx, tb.Width)
+	_, elementIndex, viewStart, viewLocalPos := tb.renderCache.Stats(tb.viewPosition)
+	element = tb.renderCache.GetElement(elementIndex)
+	textView = tb.TextEngine.Resolve(element)
+
+	for i := 0; i < text.GraphemeLength(s); i++ {
+		viewLocalPos = textView.MoveRight(ctx, element, viewLocalPos)
+
+		if viewLocalPos == -1 {
+			tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
+			_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
+			element = tb.renderCache.GetElement(elementIndex)
+			textView = tb.TextEngine.Resolve(element)
+			// tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
+			//break
+		} else {
+			tb.viewPosition = viewStart + viewLocalPos
+		}
+	}
+}
+
 func (tb *TextBox) MoveLeft() {
 	tb.move(0)
 }
