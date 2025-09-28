@@ -64,7 +64,7 @@ func (trc *TextRenderCache) Stats(viewPosition int) (TotalViewLen int, ElementIn
 	}
 	if elementIndex == -1 {
 		ttl := 0
-		for i := 0; i < len(trc.viewLenTable); i++ {
+		for i := 0; i < len(trc.viewLenTable)-1; i++ {
 			ttl += trc.viewLenTable[i]
 		}
 		elementIndex = len(trc.elements) - 1

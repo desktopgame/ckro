@@ -89,7 +89,8 @@ func (hv *HeadingView) MinimumSize(ctx view.Context, e model.Element, width int,
 }
 
 func (hv *HeadingView) MoveLength(ctx view.Context, e model.Element) int {
-	return text.GraphemeLength(ctx.GetSegment(e, 1).GetLine(0)) + 1 // include newline
+	line := ctx.GetSegment(e, 1).GetLine(0)
+	return text.GraphemeLength(line) + 1 // include newline
 }
 
 func (hv *HeadingView) MoveUp(ctx view.Context, e model.Element, viewLocalPos int) int {
@@ -108,7 +109,7 @@ func (hv *HeadingView) MoveLeft(ctx view.Context, e model.Element, viewLocalPos 
 }
 
 func (hv *HeadingView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int) int {
-	if viewLocalPos > hv.MoveLength(ctx, e) {
+	if viewLocalPos >= hv.MoveLength(ctx, e) {
 		return -1
 	}
 	return viewLocalPos + 1
