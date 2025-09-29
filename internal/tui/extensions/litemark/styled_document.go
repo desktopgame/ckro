@@ -122,7 +122,7 @@ func (doc *StyledDocument) Render() []model.Element {
 						},
 						EndPosition: model.Position{
 							Row:    block.LineIndex + block.LineCount - 1,
-							Column: len(doc.GetLineAt(block.LineIndex)),
+							Column: len(doc.GetLineAt(block.LineIndex + block.LineCount - 1)),
 						},
 					},
 					{
