@@ -483,20 +483,31 @@ func (tb *TextBox) move(dir int) {
 				}
 			}
 		} else if dir == 1 {
-			tb.viewPosition = elementStart + tvLen
+			if elementIndex+1 < tb.renderCache.GetItemCount() {
+				tb.viewPosition = elementStart + tvLen
 
-			nView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex + 1))
-			bPos := nView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
-			tb.bytePos = bPos
+				nView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex + 1))
+				bPos := nView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
+				tb.bytePos = bPos
+			} else {
+				tb.viewPosition = elementStart + tvLen - 1
+				bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen-1)
+				tb.bytePos = bPos
+			}
 		}
 
 		if dir == 0 {
 			tb.viewPosition = max(elementStart-1, 0)
 
-			pView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
-			pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
-			bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
-			tb.bytePos = bPos
+			if elementIndex > 0 {
+				pView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
+				pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
+				bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
+				tb.bytePos = bPos
+			} else {
+				bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), 0)
+				tb.bytePos = bPos
+			}
 		} else if dir == 2 {
 
 			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok && elementIndex > 0 {

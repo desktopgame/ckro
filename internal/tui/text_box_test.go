@@ -493,3 +493,31 @@ func TestTextBox20(t *testing.T) {
 
 	tb.RemoveChar()
 }
+
+func TestTextBox21(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+	tb.InsertString("#")
+	tb.InsertString(" ")
+	tb.InsertString("H")
+
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+
+	tb.MoveLeft()
+	tb.MoveLeft()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+
+	tb.MoveRight()
+	tb.MoveRight()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+}
