@@ -154,3 +154,37 @@ func TestTextBox07(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
 }
+
+func TestTextBox08(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+	tb.InsertString("\n\n\n\n\n")
+
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+
+	tb.MoveUp()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+}
+
+func TestTextBox09(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+	tb.InsertString("\n\n\n\n\n")
+
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+
+	tb.MoveLeft()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+}

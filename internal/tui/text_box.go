@@ -480,6 +480,11 @@ func (tb *TextBox) move(dir int) {
 
 		if dir == 0 {
 			tb.viewPosition = max(elementStart-1, 0)
+
+			pView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
+			pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
+			bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
+			tb.bytePos = bPos
 		} else if dir == 2 {
 
 			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok {
