@@ -44,7 +44,7 @@ type TextBox struct {
 	viewPosition int
 
 	renderCache  TextRenderCache
-	bytePos      model.Position
+	bytePos      view.CharacterReference
 	affinity     Affinity
 	lineAffinity LineAffinity
 }
@@ -471,7 +471,7 @@ func (tb *TextBox) move(dir int) {
 					tb.viewPosition = elementStart + tvLen + offset
 
 					bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen+offset)
-					tb.bytePos = bPos.StartPosition
+					tb.bytePos = bPos
 
 					if bPos.Bytes == 0 {
 						tb.lineAffinity = AfterBreak
@@ -483,7 +483,7 @@ func (tb *TextBox) move(dir int) {
 
 					// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
 					bPos := nextView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
-					tb.bytePos = bPos.StartPosition
+					tb.bytePos = bPos
 
 					if bPos.Bytes == 0 {
 						tb.lineAffinity = AfterBreak
@@ -495,7 +495,7 @@ func (tb *TextBox) move(dir int) {
 				tb.viewPosition = elementStart + tvLen
 
 				bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
-				tb.bytePos = bPos.StartPosition
+				tb.bytePos = bPos
 
 				if bPos.Bytes == 0 {
 					tb.lineAffinity = AfterBreak
@@ -507,7 +507,7 @@ func (tb *TextBox) move(dir int) {
 			tb.viewPosition = elementStart + tvLen
 
 			bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
-			tb.bytePos = bPos.StartPosition
+			tb.bytePos = bPos
 
 			if bPos.Bytes == 0 {
 				tb.lineAffinity = AfterBreak
@@ -530,7 +530,7 @@ func (tb *TextBox) move(dir int) {
 					tb.viewPosition = elementStart - l + offset
 
 					bPos := linebaseTV.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), offset)
-					tb.bytePos = bPos.StartPosition
+					tb.bytePos = bPos
 
 					if bPos.Bytes == 0 {
 						tb.lineAffinity = AfterBreak
@@ -545,7 +545,7 @@ func (tb *TextBox) move(dir int) {
 						pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
 						// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
 						bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
-						tb.bytePos = bPos.StartPosition
+						tb.bytePos = bPos
 
 						if bPos.Bytes == 0 {
 							tb.lineAffinity = AfterBreak
@@ -560,7 +560,7 @@ func (tb *TextBox) move(dir int) {
 					pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
 					// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
 					bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
-					tb.bytePos = bPos.StartPosition
+					tb.bytePos = bPos
 
 					if bPos.Bytes == 0 {
 						tb.lineAffinity = AfterBreak
@@ -572,7 +572,7 @@ func (tb *TextBox) move(dir int) {
 		// moves := newLocalViewPos - oldLocalViewPos
 		tb.viewPosition = elementStart + newLocalViewPos
 		bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), newLocalViewPos)
-		tb.bytePos = bPos.StartPosition
+		tb.bytePos = bPos
 
 		if bPos.Bytes == 0 {
 			tb.lineAffinity = AfterBreak
@@ -590,7 +590,7 @@ func (tb *TextBox) InsertString(s string) {
 		Document: tb.Document,
 	}
 
-	tb.Document.WriteString(tb.bytePos.Row, tb.bytePos.Column, s)
+	tb.Document.WriteString(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, s)
 	tb.renderCache.Update(ctx, tb.Width)
 
 	elementIndex := -1
@@ -601,14 +601,15 @@ func (tb *TextBox) InsertString(s string) {
 		st := r.StartPosition
 		ed := r.EndPosition
 
-		if tb.bytePos.Row >= st.Row && tb.bytePos.Row <= ed.Row {
-			if tb.bytePos.Column >= st.Column && (tb.bytePos.Column < ed.Column || ed.Row > st.Row) {
-				elementIndex = i
-				break
-			}
-			// 前の行のビューを見つける（tb.bytePos.Column <= ed.Column）
-			if tb.lineAffinity == BeforeBreak {
-				if tb.bytePos.Column >= st.Column && (tb.bytePos.Column <= ed.Column || ed.Row > st.Row) {
+		if tb.bytePos.StartPosition.Row >= st.Row && tb.bytePos.StartPosition.Row <= ed.Row {
+			if tb.bytePos.Bytes == 0 {
+				col := max(tb.bytePos.StartPosition.Column-1, 0)
+				if col >= st.Column && (col < ed.Column || ed.Row > st.Row) {
+					elementIndex = i
+					break
+				}
+			} else {
+				if tb.bytePos.StartPosition.Column >= st.Column && (tb.bytePos.StartPosition.Column < ed.Column || ed.Row > st.Row) {
 					elementIndex = i
 					break
 				}
@@ -634,9 +635,9 @@ func (tb *TextBox) InsertString(s string) {
 	var viewLocalPos int
 	if beforeView {
 		// viewLocalPos = textView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex)) - 1
-		viewLocalPos = textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), tb.bytePos)
+		viewLocalPos = textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), tb.bytePos.StartPosition)
 	} else {
-		viewLocalPos = textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), tb.bytePos)
+		viewLocalPos = textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), tb.bytePos.StartPosition)
 	}
 
 	moves := text.GraphemeLength(s)
@@ -669,7 +670,7 @@ func (tb *TextBox) InsertString(s string) {
 				//bPos.StartPosition.Column = 0
 				tb.lineAffinity = BeforeBreak
 			}
-			tb.bytePos = bPos.StartPosition
+			tb.bytePos = bPos
 
 			// tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
 			//break
@@ -681,10 +682,10 @@ func (tb *TextBox) InsertString(s string) {
 				if elementIndex+1 < tb.renderCache.GetItemCount() {
 					element = tb.renderCache.GetElement(elementIndex + 1)
 					textView = tb.TextEngine.Resolve(element)
-					tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0).StartPosition
+					tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
 				} else {
 					bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
-					tb.bytePos = bPos.StartPosition
+					tb.bytePos = bPos
 				}
 			} else {
 				//tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos).StartPosition
@@ -695,7 +696,7 @@ func (tb *TextBox) InsertString(s string) {
 					//bPos.StartPosition.Column = 0
 					tb.lineAffinity = BeforeBreak
 				}
-				tb.bytePos = bPos.StartPosition
+				tb.bytePos = bPos
 			}
 		}
 	}
