@@ -466,10 +466,21 @@ func (tb *TextBox) move(dir int) {
 					tb.bytePos = bPos
 				}
 			} else {
-				tb.viewPosition = elementStart + tvLen - 1
+				if elementIndex+1 < tb.renderCache.GetItemCount() {
 
-				bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen-1)
-				tb.bytePos = bPos
+					nextView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex + 1))
+					tb.viewPosition = elementStart + tvLen
+
+					// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
+					bPos := nextView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
+					tb.bytePos = bPos
+				} else {
+
+					tb.viewPosition = elementStart + tvLen - 1
+
+					bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen-1)
+					tb.bytePos = bPos
+				}
 			}
 		} else if dir == 1 {
 			tb.viewPosition = elementStart + tvLen
