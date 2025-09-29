@@ -446,7 +446,7 @@ func (tb *TextBox) move(dir int) {
 		tvLen := tview.MoveLength(ctx, tb.renderCache.GetElement(elementIndex))
 		if dir == 3 {
 
-			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok {
+			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok && elementIndex+1 < tb.renderCache.GetItemCount() {
 
 				nextView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex + 1))
 				relx := pLinebaseView.ConvertRelativeX(ctx, tb.renderCache.GetLayout(elementIndex), oldLocalViewPos)
@@ -466,9 +466,9 @@ func (tb *TextBox) move(dir int) {
 					tb.bytePos = bPos
 				}
 			} else {
-				tb.viewPosition = elementStart + tvLen
+				tb.viewPosition = elementStart + tvLen - 1
 
-				bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
+				bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen-1)
 				tb.bytePos = bPos
 			}
 		} else if dir == 1 {
