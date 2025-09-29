@@ -139,6 +139,9 @@ func (p *PlainTextView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoca
 	}
 	for _, cluster := range clusters {
 		runes := []rune(cluster)
+		if clusterCount == viewLocalPos {
+			return x, viewLine
+		}
 
 		if cluster == "\t" {
 			w := text.TabWidth - (x % text.TabWidth)
@@ -149,25 +152,17 @@ func (p *PlainTextView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoca
 			x += w
 		} else if len(runes) > 0 {
 			mainRune := runes[0]
-			width := runewidth.RuneWidth(mainRune)
+			w := runewidth.RuneWidth(mainRune)
 
-			if x+width > width {
+			if x+w > width {
 				viewLine++
 				x = 0
 			}
-			x += width
-		}
-		if clusterCount == viewLocalPos {
-			return x, viewLine
-		}
-		clusterCount++
-
-		if clusterCount == viewLocalPos {
-			return x + 1, viewLine
+			x += w
 		}
 		clusterCount++
 	}
-	panic("")
+	return x, viewLine
 }
 
 func (p *PlainTextView) ConvertModel(ctx Context, textLayout *TextLayout, viewLocalPos int) CharacterReference {
