@@ -3,6 +3,7 @@ package tui
 import (
 	"testing"
 
+	"github.com/desktopgame/ckro/internal/tui/extensions/litemark"
 	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/view"
 	"github.com/stretchr/testify/assert"
@@ -16,7 +17,6 @@ func TestTextBox01(t *testing.T) {
 	tb.Width = 10
 	tb.Height = 10
 	tb.InsertString("1234あ")
-	tb.ShowCursor = true
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, len("1234")+1)
@@ -30,7 +30,6 @@ func TestTextBox02(t *testing.T) {
 	tb.Width = 10
 	tb.Height = 10
 	tb.InsertString("1234\n1234\n123あ")
-	tb.ShowCursor = true
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, len("123")+1)
@@ -52,7 +51,6 @@ func TestTextBox03(t *testing.T) {
 		Bytes: 1,
 	}
 	tb.viewPosition = 0
-	tb.ShowCursor = true
 
 	tb.MoveRight()
 
@@ -76,7 +74,6 @@ func TestTextBox04(t *testing.T) {
 		Bytes: 1,
 	}
 	tb.viewPosition = 0
-	tb.ShowCursor = true
 
 	tb.MoveRight() // 2
 	tb.MoveRight() // 3
@@ -103,7 +100,6 @@ func TestTextBox05(t *testing.T) {
 		Bytes: 1,
 	}
 	tb.viewPosition = 0
-	tb.ShowCursor = true
 
 	tb.MoveRight() // 2
 	tb.MoveRight() // 3
@@ -114,4 +110,25 @@ func TestTextBox05(t *testing.T) {
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+}
+
+func TestTextBox06(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+	tb.InsertString("#")
+	tb.InsertString(" ")
+
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+
+	tb.InsertString("AAA")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 5)
 }
