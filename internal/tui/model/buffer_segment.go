@@ -5,11 +5,7 @@ type BufferSegment struct {
 	r      Range
 }
 
-func (bs BufferSegment) GetLine(lineIndex int) string {
-	type Span struct {
-		StartColumn int
-		EndColumn   int
-	}
+func (bs BufferSegment) GetSpan(lineIndex int) Span {
 	spans := []Span{}
 
 	if bs.r.StartPosition.Row == bs.r.EndPosition.Row {
@@ -37,6 +33,11 @@ func (bs BufferSegment) GetLine(lineIndex int) string {
 	}
 
 	span := spans[lineIndex]
+	return span
+}
+
+func (bs BufferSegment) GetLine(lineIndex int) string {
+	span := bs.GetSpan(lineIndex)
 	line := bs.buffer.GetLineAt(bs.r.StartPosition.Row + lineIndex)
 	return line.GetContent()[span.StartColumn:span.EndColumn]
 }
