@@ -62,19 +62,12 @@ func (buf *Buffer) Init() {
 func (buf *Buffer) InsertLine(row int, column int) *Line {
 	if column == 0 {
 		newLine := &Line{}
-		if len(buf.lines) == 1 {
-			buf.lines = append(buf.lines, newLine)
+		if column == len(buf.lines[row].GetContent()) {
+			buf.lines = slices.Insert(buf.lines, row+1, newLine)
 		} else {
-			if len(buf.lines[row].GetContent()) == 0 {
-				buf.lines = slices.Insert(buf.lines, row+1, newLine)
-				return newLine
-			}
-			if row == len(buf.lines)-1 {
-				buf.lines = append(buf.lines, newLine)
-			} else {
-				buf.lines = slices.Insert(buf.lines, row, newLine)
-			}
+			buf.lines = slices.Insert(buf.lines, row, newLine)
 		}
+
 		return newLine
 	} else if column == len(buf.lines[row].GetContent()) {
 		newLine := &Line{}
@@ -100,6 +93,11 @@ func (buf *Buffer) PrependString(row int, s string) (Position, error) {
 func (buf *Buffer) InsertString(row int, column int, s string) (Position, error) {
 	if row >= 0 && row < len(buf.lines) {
 		line := buf.lines[row]
+
+		if s == "\n" {
+			buf.InsertLine(row, column)
+			return Position{}, nil
+		}
 
 		insertLines := strings.Split(s, "\n")
 		position := Position{
