@@ -132,7 +132,7 @@ func (hv *HeadingView) ConvertModel(ctx view.Context, textLayout *view.TextLayou
 		return view.CharacterReference{
 			StartPosition: model.Position{
 				Row:    st.Row,
-				Column: st.Column + graphemes + (e.(*HeadingElement).Level + 1),
+				Column: st.Column + len(str) + (e.(*HeadingElement).Level + 1),
 			},
 			Bytes: 0,
 		}
