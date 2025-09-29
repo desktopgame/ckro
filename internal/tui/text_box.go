@@ -11,18 +11,6 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
-type Affinity int // 既存：インライン境界の内/外
-const (
-	Upstream Affinity = iota
-	Downstream
-)
-
-type LineAffinity int // 新規：行境界（ハード改行）の手前/後ろ
-const (
-	BeforeBreak LineAffinity = iota // 現行行の末（改行の手前）に“寄りつく”
-	AfterBreak                      // 次行先頭（改行の後）に“寄りつく”
-)
-
 type textSegment struct {
 	textLayout *view.TextLayout
 	segment    presenter.Segment
@@ -43,10 +31,8 @@ type TextBox struct {
 	scrollY      int
 	viewPosition int
 
-	renderCache  TextRenderCache
-	bytePos      view.CharacterReference
-	affinity     Affinity
-	lineAffinity LineAffinity
+	renderCache TextRenderCache
+	bytePos     view.CharacterReference
 }
 
 // Init is initialize TextBox.
@@ -472,46 +458,24 @@ func (tb *TextBox) move(dir int) {
 
 					bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen+offset)
 					tb.bytePos = bPos
-
-					if bPos.Bytes == 0 {
-						tb.lineAffinity = AfterBreak
-					} else {
-						tb.lineAffinity = BeforeBreak
-					}
 				} else {
 					tb.viewPosition = elementStart + tvLen
 
 					// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
 					bPos := nextView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
 					tb.bytePos = bPos
-
-					if bPos.Bytes == 0 {
-						tb.lineAffinity = AfterBreak
-					} else {
-						tb.lineAffinity = BeforeBreak
-					}
 				}
 			} else {
 				tb.viewPosition = elementStart + tvLen
 
 				bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
 				tb.bytePos = bPos
-
-				if bPos.Bytes == 0 {
-					tb.lineAffinity = AfterBreak
-				} else {
-					tb.lineAffinity = BeforeBreak
-				}
 			}
 		} else if dir == 1 {
 			tb.viewPosition = elementStart + tvLen
 
 			bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
 			tb.bytePos = bPos
-
-			if bPos.Bytes == 0 {
-				tb.lineAffinity = AfterBreak
-			}
 		}
 
 		if dir == 0 {
@@ -531,12 +495,6 @@ func (tb *TextBox) move(dir int) {
 
 					bPos := linebaseTV.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), offset)
 					tb.bytePos = bPos
-
-					if bPos.Bytes == 0 {
-						tb.lineAffinity = AfterBreak
-					} else {
-						tb.lineAffinity = BeforeBreak
-					}
 				} else {
 					tb.viewPosition = max(elementStart-1, 0)
 
@@ -546,10 +504,6 @@ func (tb *TextBox) move(dir int) {
 						// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
 						bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
 						tb.bytePos = bPos
-
-						if bPos.Bytes == 0 {
-							tb.lineAffinity = AfterBreak
-						}
 					}
 				}
 			} else {
@@ -561,10 +515,6 @@ func (tb *TextBox) move(dir int) {
 					// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
 					bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
 					tb.bytePos = bPos
-
-					if bPos.Bytes == 0 {
-						tb.lineAffinity = AfterBreak
-					}
 				}
 			}
 		}
@@ -573,12 +523,6 @@ func (tb *TextBox) move(dir int) {
 		tb.viewPosition = elementStart + newLocalViewPos
 		bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), newLocalViewPos)
 		tb.bytePos = bPos
-
-		if bPos.Bytes == 0 {
-			tb.lineAffinity = AfterBreak
-		} else {
-			tb.lineAffinity = BeforeBreak
-		}
 	}
 
 	//tb.viewPosition = min(max(tb.viewPosition, 0), ttl-1)
@@ -594,7 +538,6 @@ func (tb *TextBox) InsertString(s string) {
 	tb.renderCache.Update(ctx, tb.Width)
 
 	elementIndex := -1
-	beforeView := false
 	for i := 0; i < tb.renderCache.GetItemCount(); i++ {
 		element := tb.renderCache.GetElement(i)
 		r := element.GetRange(0)
@@ -617,10 +560,6 @@ func (tb *TextBox) InsertString(s string) {
 		}
 	}
 
-	if tb.lineAffinity == BeforeBreak {
-		beforeView = true
-	}
-
 	viewStart := 0
 	for i := 0; i < elementIndex; i++ {
 		element := tb.renderCache.GetElement(i)
@@ -631,14 +570,7 @@ func (tb *TextBox) InsertString(s string) {
 
 	element := tb.renderCache.GetElement(elementIndex)
 	textView := tb.TextEngine.Resolve(element)
-
-	var viewLocalPos int
-	if beforeView {
-		// viewLocalPos = textView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex)) - 1
-		viewLocalPos = textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), tb.bytePos.StartPosition)
-	} else {
-		viewLocalPos = textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), tb.bytePos.StartPosition)
-	}
+	viewLocalPos := textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), tb.bytePos.StartPosition)
 
 	moves := text.GraphemeLength(s)
 	for i := 0; i < moves; i++ {
@@ -655,7 +587,6 @@ func (tb *TextBox) InsertString(s string) {
 					tb.viewPosition = viewStart + 1
 				} else {
 					tb.viewPosition = viewStart
-					tb.lineAffinity = BeforeBreak
 				}
 			} else {
 				tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
@@ -665,11 +596,6 @@ func (tb *TextBox) InsertString(s string) {
 			textView = tb.TextEngine.Resolve(element)
 
 			bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
-			if bPos.Bytes == 0 {
-				//bPos.StartPosition.Row++
-				//bPos.StartPosition.Column = 0
-				tb.lineAffinity = BeforeBreak
-			}
 			tb.bytePos = bPos
 
 			// tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
@@ -691,11 +617,6 @@ func (tb *TextBox) InsertString(s string) {
 				//tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos).StartPosition
 
 				bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
-				if bPos.Bytes == 0 {
-					//bPos.StartPosition.Row++
-					//bPos.StartPosition.Column = 0
-					tb.lineAffinity = BeforeBreak
-				}
 				tb.bytePos = bPos
 			}
 		}
