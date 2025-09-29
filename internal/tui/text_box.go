@@ -474,7 +474,8 @@ func (tb *TextBox) move(dir int) {
 		} else if dir == 1 {
 			tb.viewPosition = elementStart + tvLen
 
-			bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
+			nView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex + 1))
+			bPos := nView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
 			tb.bytePos = bPos
 		}
 
