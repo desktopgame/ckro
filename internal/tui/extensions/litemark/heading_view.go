@@ -161,6 +161,6 @@ func (hv *HeadingView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Te
 		}
 		bytes += len(cluster)
 	}
-	return hv.MoveLength(ctx, textLayout.Element)
+	return hv.MoveLength(ctx, textLayout.Element) - 1
 	//panic("")
 }
