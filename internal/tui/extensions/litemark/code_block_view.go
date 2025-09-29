@@ -148,6 +148,13 @@ func (c *CodeBlockView) ConvertPos(ctx view.Context, textLayout *view.TextLayout
 	e := textLayout.Element
 	table, _ := c.ViewLengthTable(ctx, e)
 	index, col := c.findTableIndex(table, viewLocalPos)
+	if viewLocalPos == c.sumTableValue(table, len(table)-1) {
+		child := textLayout.Children[len(textLayout.Children)-1]
+		childView := ctx.Resolver.Resolve(child.Element)
+		childLen := childView.MoveLength(ctx, child.Element)
+		lx, ly := childView.ConvertPos(ctx, child, childLen-1)
+		return lx + 1, ly + 1
+	}
 
 	child := textLayout.Children[index]
 	v := ctx.Resolver.Resolve(child.Element)
