@@ -180,5 +180,5 @@ func (c *CodeBlockView) ConvertViewLocalPos(ctx view.Context, textLayout *view.T
 		}
 		bytes += len(cluster)
 	}
-	panic("")
+	return c.MoveLength(ctx, textLayout.Element)
 }
