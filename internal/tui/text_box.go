@@ -488,7 +488,7 @@ func (tb *TextBox) move(dir int) {
 			tb.bytePos = bPos
 		} else if dir == 2 {
 
-			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok {
+			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok && elementIndex > 0 {
 
 				prevView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
 				relx := pLinebaseView.ConvertRelativeX(ctx, tb.renderCache.GetLayout(elementIndex), oldLocalViewPos)
