@@ -176,7 +176,7 @@ func (p *PlainTextView) ConvertModel(ctx Context, textLayout *TextLayout, viewLo
 		return CharacterReference{
 			StartPosition: model.Position{
 				Row:    st.Row,
-				Column: st.Column + graphemes,
+				Column: st.Column + len(str),
 			},
 			Bytes: 0,
 		}

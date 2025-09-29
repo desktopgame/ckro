@@ -19,7 +19,7 @@ func TestTextBox01(t *testing.T) {
 	tb.InsertString("1234あ")
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, len("1234")+1)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, len("1234あ"))
 }
 
 func TestTextBox02(t *testing.T) {
@@ -32,7 +32,7 @@ func TestTextBox02(t *testing.T) {
 	tb.InsertString("1234\n1234\n123あ")
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, len("123")+1)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, len("123あ"))
 }
 
 func TestTextBox03(t *testing.T) {
