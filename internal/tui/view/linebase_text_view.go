@@ -5,7 +5,7 @@ import "github.com/desktopgame/ckro/internal/tui/model"
 type LinebaseTextView interface {
 	TextView
 
-	ConvertRelativeX(ctx Context, e model.Element, viewLocalPos int) int
+	ConvertRelativeX(ctx Context, textLayout *TextLayout, viewLocalPos int) int
 
 	MoveFirstLine(ctx Context, e model.Element, relX int) int
 

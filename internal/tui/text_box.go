@@ -449,14 +449,14 @@ func (tb *TextBox) move(dir int) {
 			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok {
 
 				nextView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex + 1))
-				relx := pLinebaseView.ConvertRelativeX(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
+				relx := pLinebaseView.ConvertRelativeX(ctx, tb.renderCache.GetLayout(elementIndex), oldLocalViewPos)
 
 				if linebaseTV, ok := nextView.(view.LinebaseTextView); ok {
 					offset := linebaseTV.MoveFirstLine(ctx, tb.renderCache.GetElement(elementIndex+1), relx)
 
 					tb.viewPosition = elementStart + tvLen + offset
 
-					bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen+offset)
+					bPos := linebaseTV.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), offset)
 					tb.bytePos = bPos
 				} else {
 					tb.viewPosition = elementStart + tvLen
@@ -491,7 +491,7 @@ func (tb *TextBox) move(dir int) {
 			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok {
 
 				prevView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
-				relx := pLinebaseView.ConvertRelativeX(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
+				relx := pLinebaseView.ConvertRelativeX(ctx, tb.renderCache.GetLayout(elementIndex), oldLocalViewPos)
 
 				if linebaseTV, ok := prevView.(view.LinebaseTextView); ok {
 					offset := linebaseTV.MoveLastLine(ctx, tb.renderCache.GetElement(elementIndex-1), relx)
@@ -499,7 +499,7 @@ func (tb *TextBox) move(dir int) {
 
 					tb.viewPosition = elementStart - l + offset
 
-					bPos := linebaseTV.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), offset)
+					bPos := linebaseTV.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), offset)
 					tb.bytePos = bPos
 				} else {
 					tb.viewPosition = max(elementStart-1, 0)
