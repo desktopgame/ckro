@@ -51,7 +51,7 @@ func (doc *StyledDocument) Render() []model.Element {
 					},
 					EndPosition: model.Position{
 						Row:    block.LineIndex,
-						Column: 1,
+						Column: 0,
 					},
 				},
 			})
