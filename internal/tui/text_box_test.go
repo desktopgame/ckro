@@ -189,7 +189,7 @@ func TestTextBox09(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
 }
 
-func TestTextBox010(t *testing.T) {
+func TestTextBox10(t *testing.T) {
 	tb := TextBox{}
 	tb.Init()
 	tb.X = 0
@@ -208,4 +208,26 @@ func TestTextBox010(t *testing.T) {
 	tb.MoveRight()
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+}
+
+func TestTextBox11(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+
+	tb.InsertString("a")
+	tb.InsertString("\n")
+
+	tb.InsertString("a")
+	tb.InsertString("\n")
+
+	tb.InsertString("a")
+
+	tb.MoveUp()
+
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
 }

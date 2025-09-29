@@ -649,34 +649,62 @@ func (tb *TextBox) RemoveChar() {
 
 	tb.renderCache.Update(ctx, tb.Width)
 
-	_, elementIndex, viewStart, viewLocalPos := tb.renderCache.Stats(tb.viewPosition)
+	elementIndex := -1
+	for i := 0; i < tb.renderCache.GetItemCount(); i++ {
+		element := tb.renderCache.GetElement(i)
+		r := element.GetRange(0)
+		st := r.StartPosition
+		ed := r.EndPosition
+
+		// 空行のフォロー
+		if st.Row == ed.Row && st.Column == ed.Column {
+			if tb.bytePos.StartPosition.Row == st.Row && tb.bytePos.StartPosition.Column == st.Column {
+				elementIndex = i
+				break
+			}
+		}
+
+		if tb.bytePos.StartPosition.Row >= st.Row && tb.bytePos.StartPosition.Row <= ed.Row {
+			if tb.bytePos.Bytes == 0 {
+				col := max(tb.bytePos.StartPosition.Column-1, 0)
+				if col >= st.Column && (col < ed.Column || ed.Row > st.Row) {
+					elementIndex = i
+					break
+				}
+			} else {
+				if tb.bytePos.StartPosition.Column >= st.Column && (tb.bytePos.StartPosition.Column < ed.Column || ed.Row > st.Row) {
+					elementIndex = i
+					break
+				}
+			}
+		}
+	}
+
+	viewStart := 0
+	for i := 0; i < elementIndex; i++ {
+		element := tb.renderCache.GetElement(i)
+		textView := tb.TextEngine.Resolve(element)
+
+		viewStart += textView.MoveLength(ctx, element)
+	}
+
 	element := tb.renderCache.GetElement(elementIndex)
-	tl := tb.renderCache.GetLayout(elementIndex)
 	textView := tb.TextEngine.Resolve(element)
+	viewLocalPos := textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), tb.bytePos.StartPosition)
 
 	newViewLocalPos := textView.MoveLeft(ctx, element, viewLocalPos)
-
-	if newViewLocalPos >= 0 {
-		viewLocalPos = newViewLocalPos
-		position := textView.ConvertModel(ctx, tl, viewLocalPos)
-		position.Bytes = max(position.Bytes, 1)
-
-		tb.Document.Remove(position.StartPosition.Row, position.StartPosition.Column, position.Bytes)
-		tb.renderCache.Update(ctx, tb.Width)
-		tb.viewPosition = viewStart + viewLocalPos
-	} else {
+	if newViewLocalPos == -1 {
 		element = tb.renderCache.GetElement(elementIndex - 1)
-		tl = tb.renderCache.GetLayout(elementIndex - 1)
-		textView = tb.TextEngine.Resolve(element)
-		viewLocalPos = textView.MoveLength(ctx, element) - 1
-
-		position := textView.ConvertModel(ctx, tl, viewLocalPos)
-		position.Bytes = max(position.Bytes, 1)
-
-		tb.Document.Remove(position.StartPosition.Row, position.StartPosition.Column, position.Bytes)
-		tb.renderCache.Update(ctx, tb.Width)
-		tb.viewPosition = viewStart - 1
+		prevView := tb.TextEngine.Resolve(element)
+		bPos := prevView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), prevView.MoveLength(ctx, element)-1)
+		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, bPos.Bytes)
+	} else {
+		bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), newViewLocalPos)
+		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, bPos.Bytes)
 	}
+
+	tb.renderCache.Update(ctx, tb.Width)
+
 }
 
 func (tb *TextBox) MoveLeft() {
