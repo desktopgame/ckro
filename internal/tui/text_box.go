@@ -709,9 +709,11 @@ func (tb *TextBox) RemoveChar() {
 		prevView := tb.TextEngine.Resolve(element)
 		bPos := prevView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), prevView.MoveLength(ctx, element)-1)
 		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, bPos.Bytes)
+		tb.bytePos = bPos
 	} else {
 		bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), newViewLocalPos)
 		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, bPos.Bytes)
+		tb.bytePos = bPos
 	}
 
 	tb.renderCache.Update(ctx, tb.Width)

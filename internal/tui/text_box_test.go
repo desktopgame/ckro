@@ -433,3 +433,23 @@ func TestTextBox17(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 6)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
 }
+
+func TestTextBox18(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+	tb.InsertString("1234")
+
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+
+	tb.RemoveChar()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+}
