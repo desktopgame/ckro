@@ -151,4 +151,6 @@ func TestTextBox07(t *testing.T) {
 	tb.viewPosition = 0
 
 	tb.InsertString("\n")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
 }

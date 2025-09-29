@@ -591,7 +591,7 @@ func (tb *TextBox) InsertString(s string) {
 			// 移動可能回数が1回かつテキストが存在する場合は行を継続する
 			// 移動可能回数が2回以上の場合、そのビューの開始位置までジャンプする
 			if textView.MoveLength(ctx, element) == 1 {
-				if blankable, ok := textView.(view.BlankTextView); ok && blankable.IsBlank(ctx, tb.renderCache.GetLayout(elementIndex)) {
+				if len(ctx.GetText(element)) == 0 {
 					tb.viewPosition = viewStart + 1
 				} else {
 					tb.viewPosition = viewStart
