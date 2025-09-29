@@ -132,3 +132,23 @@ func TestTextBox06(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 5)
 }
+
+func TestTextBox07(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+	tb.InsertString("1234\n\n\n```\n123\n```")
+	tb.bytePos = view.CharacterReference{
+		StartPosition: model.Position{
+			Row:    0,
+			Column: 0,
+		},
+		Bytes: 1,
+	}
+	tb.viewPosition = 0
+
+	tb.InsertString("\n")
+}

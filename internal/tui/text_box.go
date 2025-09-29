@@ -544,6 +544,14 @@ func (tb *TextBox) InsertString(s string) {
 		st := r.StartPosition
 		ed := r.EndPosition
 
+		// 空行のフォロー
+		if st.Row == ed.Row && st.Column == ed.Column {
+			if tb.bytePos.StartPosition.Row == st.Row && tb.bytePos.StartPosition.Column == st.Column {
+				elementIndex = i
+				break
+			}
+		}
+
 		if tb.bytePos.StartPosition.Row >= st.Row && tb.bytePos.StartPosition.Row <= ed.Row {
 			if tb.bytePos.Bytes == 0 {
 				col := max(tb.bytePos.StartPosition.Column-1, 0)
