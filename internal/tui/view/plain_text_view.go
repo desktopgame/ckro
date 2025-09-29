@@ -205,7 +205,7 @@ func (p *PlainTextView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout,
 		}
 		bytes += len(cluster)
 	}
-	return p.MoveLength(ctx, textLayout.Element)
+	return p.MoveLength(ctx, textLayout.Element) - 1
 }
 
 func (p *PlainTextView) ConvertRelativeX(ctx Context, textLayout *TextLayout, viewLocalPos int) int {

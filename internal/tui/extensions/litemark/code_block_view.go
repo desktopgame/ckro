@@ -1,7 +1,6 @@
 package litemark
 
 import (
-	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/view"
 	"github.com/gdamore/tcell/v2"
@@ -168,17 +167,25 @@ func (c *CodeBlockView) ConvertModel(ctx view.Context, textLayout *view.TextLayo
 }
 
 func (c *CodeBlockView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
-	e := textLayout.Element
-	r := e.GetRange(0)
-	str := ctx.Document.Read(r).GetLine(bytePos.Row - r.StartPosition.Row)
+	for i := 0; i < len(textLayout.Children); i++ {
+		child := textLayout.Children[i]
+		r := child.Element.GetRange(0)
+		st := r.StartPosition
+		ed := r.EndPosition
 
-	bytes := 0
-	clusters := text.GraphemeClusters(str)
-	for i, cluster := range clusters {
-		if bytes == bytePos.Column {
-			return i
+		if bytePos.Row >= st.Row && bytePos.Row <= ed.Row {
+			childView := ctx.Resolver.Resolve(child.Element)
+
+			if st.Row == ed.Row && st.Column == ed.Column {
+				if bytePos.Row == st.Row && bytePos.Column == st.Column {
+					return childView.ConvertViewLocalPos(ctx, child, bytePos)
+				}
+			}
+			if bytePos.Column >= st.Column && (bytePos.Column <= ed.Column || ed.Row > st.Row) {
+				return childView.ConvertViewLocalPos(ctx, child, bytePos)
+			}
 		}
-		bytes += len(cluster)
 	}
-	return c.MoveLength(ctx, textLayout.Element)
+
+	return c.MoveLength(ctx, textLayout.Element) - 1
 }
