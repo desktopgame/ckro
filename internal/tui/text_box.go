@@ -11,6 +11,18 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
+type Affinity int // 既存：インライン境界の内/外
+const (
+	Upstream Affinity = iota
+	Downstream
+)
+
+type LineAffinity int // 新規：行境界（ハード改行）の手前/後ろ
+const (
+	BeforeBreak LineAffinity = iota // 現行行の末（改行の手前）に“寄りつく”
+	AfterBreak                      // 次行先頭（改行の後）に“寄りつく”
+)
+
 type textSegment struct {
 	textLayout *view.TextLayout
 	segment    presenter.Segment
@@ -31,8 +43,10 @@ type TextBox struct {
 	scrollY      int
 	viewPosition int
 
-	renderCache TextRenderCache
-	bytePos     model.Position
+	renderCache  TextRenderCache
+	bytePos      model.Position
+	affinity     Affinity
+	lineAffinity LineAffinity
 }
 
 // Init is initialize TextBox.
@@ -427,7 +441,7 @@ func (tb *TextBox) move(dir int) {
 
 	tb.renderCache.Update(ctx, tb.Width)
 
-	ttl, elementIndex, elementStart, oldLocalViewPos := tb.renderCache.Stats(tb.viewPosition)
+	_, elementIndex, elementStart, oldLocalViewPos := tb.renderCache.Stats(tb.viewPosition)
 
 	tview := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex))
 	var newLocalViewPos int
@@ -443,6 +457,7 @@ func (tb *TextBox) move(dir int) {
 	}
 
 	if newLocalViewPos == -1 {
+		tvLen := tview.MoveLength(ctx, tb.renderCache.GetElement(elementIndex))
 		if dir == 3 {
 
 			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok {
@@ -453,16 +468,50 @@ func (tb *TextBox) move(dir int) {
 				if linebaseTV, ok := nextView.(view.LinebaseTextView); ok {
 					offset := linebaseTV.MoveFirstLine(ctx, tb.renderCache.GetElement(elementIndex+1), relx)
 
-					tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.renderCache.GetElement(elementIndex)) + offset
+					tb.viewPosition = elementStart + tvLen + offset
 
+					bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen+offset)
+					tb.bytePos = bPos.StartPosition
+
+					if bPos.Bytes == 0 {
+						tb.lineAffinity = AfterBreak
+					} else {
+						tb.lineAffinity = BeforeBreak
+					}
 				} else {
-					tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.renderCache.GetElement(elementIndex))
+					tb.viewPosition = elementStart + tvLen
+
+					// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
+					bPos := nextView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
+					tb.bytePos = bPos.StartPosition
+
+					if bPos.Bytes == 0 {
+						tb.lineAffinity = AfterBreak
+					} else {
+						tb.lineAffinity = BeforeBreak
+					}
 				}
 			} else {
-				tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.renderCache.GetElement(elementIndex))
+				tb.viewPosition = elementStart + tvLen
+
+				bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
+				tb.bytePos = bPos.StartPosition
+
+				if bPos.Bytes == 0 {
+					tb.lineAffinity = AfterBreak
+				} else {
+					tb.lineAffinity = BeforeBreak
+				}
 			}
 		} else if dir == 1 {
-			tb.viewPosition = elementStart + tview.MoveLength(ctx, tb.renderCache.GetElement(elementIndex))
+			tb.viewPosition = elementStart + tvLen
+
+			bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
+			tb.bytePos = bPos.StartPosition
+
+			if bPos.Bytes == 0 {
+				tb.lineAffinity = AfterBreak
+			}
 		}
 
 		if dir == 0 {
@@ -480,19 +529,59 @@ func (tb *TextBox) move(dir int) {
 
 					tb.viewPosition = elementStart - l + offset
 
+					bPos := linebaseTV.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), offset)
+					tb.bytePos = bPos.StartPosition
+
+					if bPos.Bytes == 0 {
+						tb.lineAffinity = AfterBreak
+					} else {
+						tb.lineAffinity = BeforeBreak
+					}
 				} else {
 					tb.viewPosition = max(elementStart-1, 0)
+
+					if elementIndex > 0 {
+						pView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
+						pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
+						// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
+						bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
+						tb.bytePos = bPos.StartPosition
+
+						if bPos.Bytes == 0 {
+							tb.lineAffinity = AfterBreak
+						}
+					}
 				}
 			} else {
 				tb.viewPosition = max(elementStart-1, 0)
+
+				if elementIndex > 0 {
+					pView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
+					pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
+					// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
+					bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
+					tb.bytePos = bPos.StartPosition
+
+					if bPos.Bytes == 0 {
+						tb.lineAffinity = AfterBreak
+					}
+				}
 			}
 		}
 	} else {
 		// moves := newLocalViewPos - oldLocalViewPos
 		tb.viewPosition = elementStart + newLocalViewPos
+		bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), newLocalViewPos)
+		tb.bytePos = bPos.StartPosition
+
+		if bPos.Bytes == 0 {
+			tb.lineAffinity = AfterBreak
+		} else {
+			tb.lineAffinity = BeforeBreak
+		}
 	}
 
-	tb.viewPosition = min(max(tb.viewPosition, 0), ttl-1)
+	//tb.viewPosition = min(max(tb.viewPosition, 0), ttl-1)
 }
 
 func (tb *TextBox) InsertString(s string) {
@@ -518,12 +607,17 @@ func (tb *TextBox) InsertString(s string) {
 				break
 			}
 			// 前の行のビューを見つける（tb.bytePos.Column <= ed.Column）
-			if tb.bytePos.Column >= st.Column && (tb.bytePos.Column <= ed.Column || ed.Row > st.Row) {
-				elementIndex = i
-				beforeView = true
-				break
+			if tb.lineAffinity == BeforeBreak {
+				if tb.bytePos.Column >= st.Column && (tb.bytePos.Column <= ed.Column || ed.Row > st.Row) {
+					elementIndex = i
+					break
+				}
 			}
 		}
+	}
+
+	if tb.lineAffinity == BeforeBreak {
+		beforeView = true
 	}
 
 	viewStart := 0
@@ -539,7 +633,8 @@ func (tb *TextBox) InsertString(s string) {
 
 	var viewLocalPos int
 	if beforeView {
-		viewLocalPos = textView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex)) - 1
+		// viewLocalPos = textView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex)) - 1
+		viewLocalPos = textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), tb.bytePos)
 	} else {
 		viewLocalPos = textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), tb.bytePos)
 	}
@@ -559,6 +654,7 @@ func (tb *TextBox) InsertString(s string) {
 					tb.viewPosition = viewStart + 1
 				} else {
 					tb.viewPosition = viewStart
+					tb.lineAffinity = BeforeBreak
 				}
 			} else {
 				tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
@@ -566,12 +662,41 @@ func (tb *TextBox) InsertString(s string) {
 			_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
 			element = tb.renderCache.GetElement(elementIndex)
 			textView = tb.TextEngine.Resolve(element)
-			tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos).StartPosition
+
+			bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
+			if bPos.Bytes == 0 {
+				//bPos.StartPosition.Row++
+				//bPos.StartPosition.Column = 0
+				tb.lineAffinity = BeforeBreak
+			}
+			tb.bytePos = bPos.StartPosition
+
 			// tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
 			//break
 		} else {
 			tb.viewPosition = viewStart + viewLocalPos
-			tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos).StartPosition
+
+			if viewLocalPos == textView.MoveLength(ctx, element) {
+
+				if elementIndex+1 < tb.renderCache.GetItemCount() {
+					element = tb.renderCache.GetElement(elementIndex + 1)
+					textView = tb.TextEngine.Resolve(element)
+					tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0).StartPosition
+				} else {
+					bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
+					tb.bytePos = bPos.StartPosition
+				}
+			} else {
+				//tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos).StartPosition
+
+				bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
+				if bPos.Bytes == 0 {
+					//bPos.StartPosition.Row++
+					//bPos.StartPosition.Column = 0
+					tb.lineAffinity = BeforeBreak
+				}
+				tb.bytePos = bPos.StartPosition
+			}
 		}
 	}
 }

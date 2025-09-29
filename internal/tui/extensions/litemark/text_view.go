@@ -115,7 +115,7 @@ func (t *TextView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLa
 		}
 		bytes += len(cluster)
 	}
-	panic("")
+	return t.MoveLength(ctx, textLayout.Element)
 }
 
 func (t *TextView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {

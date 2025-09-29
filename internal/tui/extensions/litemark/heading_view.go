@@ -109,7 +109,7 @@ func (hv *HeadingView) MoveLeft(ctx view.Context, e model.Element, viewLocalPos 
 }
 
 func (hv *HeadingView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int) int {
-	if viewLocalPos >= hv.MoveLength(ctx, e) {
+	if viewLocalPos >= hv.MoveLength(ctx, e)-1 {
 		return -1
 	}
 	return viewLocalPos + 1
@@ -157,9 +157,10 @@ func (hv *HeadingView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Te
 	clusters := text.GraphemeClusters(str)
 	for i, cluster := range clusters {
 		if bytes == bytePos.Column {
-			return i
+			return i - 2
 		}
 		bytes += len(cluster)
 	}
-	panic("")
+	return hv.MoveLength(ctx, textLayout.Element)
+	//panic("")
 }
