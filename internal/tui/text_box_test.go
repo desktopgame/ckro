@@ -386,3 +386,50 @@ func TestTextBox16(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
 }
+
+func TestTextBox17(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+	tb.InsertString("1234\n\n\n```\n123\n```\n\n")
+	tb.bytePos = view.CharacterReference{
+		StartPosition: model.Position{
+			Row:    0,
+			Column: 0,
+		},
+		Bytes: 1,
+	}
+	tb.viewPosition = 0
+
+	tb.MoveDown()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+
+	tb.MoveDown()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+
+	tb.MoveDown()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+
+	tb.MoveRight()
+	tb.MoveRight()
+	tb.MoveRight()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+
+	tb.InsertString("\n")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+
+	tb.InsertString("\n")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 6)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+}

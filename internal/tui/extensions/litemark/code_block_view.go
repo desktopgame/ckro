@@ -167,24 +167,26 @@ func (c *CodeBlockView) ConvertModel(ctx view.Context, textLayout *view.TextLayo
 }
 
 func (c *CodeBlockView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
+	viewOffset := 0
 	for i := 0; i < len(textLayout.Children); i++ {
 		child := textLayout.Children[i]
 		r := child.Element.GetRange(0)
 		st := r.StartPosition
 		ed := r.EndPosition
+		childView := ctx.Resolver.Resolve(child.Element)
 
 		if bytePos.Row >= st.Row && bytePos.Row <= ed.Row {
-			childView := ctx.Resolver.Resolve(child.Element)
 
 			if st.Row == ed.Row && st.Column == ed.Column {
 				if bytePos.Row == st.Row && bytePos.Column == st.Column {
-					return childView.ConvertViewLocalPos(ctx, child, bytePos)
+					return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos)
 				}
 			}
 			if bytePos.Column >= st.Column && (bytePos.Column <= ed.Column || ed.Row > st.Row) {
-				return childView.ConvertViewLocalPos(ctx, child, bytePos)
+				return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos)
 			}
 		}
+		viewOffset += childView.MoveLength(ctx, child.Element)
 	}
 
 	return c.MoveLength(ctx, textLayout.Element) - 1
