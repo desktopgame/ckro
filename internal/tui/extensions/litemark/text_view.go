@@ -145,7 +145,7 @@ func (t *TextView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, v
 	}
 }
 
-func (t *TextView) ConvertRelativeX(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (t *TextView) ConvertRelativeX(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return viewLocalPos
 }
 
