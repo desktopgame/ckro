@@ -148,7 +148,11 @@ func (c *CodeBlockView) ConvertPos(ctx view.Context, textLayout *view.TextLayout
 	e := textLayout.Element
 	table, _ := c.ViewLengthTable(ctx, e)
 	index, col := c.findTableIndex(table, viewLocalPos)
-	return col + 1, index + 1
+
+	child := textLayout.Children[index]
+	v := ctx.Resolver.Resolve(child.Element)
+	lx, _ := v.ConvertPos(ctx, child, col)
+	return lx + 1, index + 1
 }
 
 func (c *CodeBlockView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {
