@@ -11,22 +11,29 @@ type TextRenderCache struct {
 	layoutCache     []*view.TextLayout
 	totalViewLen    int
 	viewLenTable    []int
+	textBoxWidth    int
 }
 
 func (trc *TextRenderCache) Update(ctx view.Context, textBoxWidth int) {
+	layoutChanged := trc.textBoxWidth != textBoxWidth
 	newDocVersion := ctx.Document.GetVersion()
-	if trc.documentVersion > 0 && trc.documentVersion == newDocVersion {
+	if (trc.documentVersion > 0 && trc.documentVersion == newDocVersion) && !layoutChanged {
 		return
 	}
+	trc.textBoxWidth = textBoxWidth
+	trc.documentVersion = newDocVersion
 
 	elements := ctx.Document.Render()
 
 	entries := []*view.TextLayout{}
+	viewLine := 0
 	for i := 0; i < len(elements); i++ {
 		element := elements[i]
 		textView := ctx.Resolver.Resolve(element)
 		tl := textView.MinimumSize(ctx, element, textBoxWidth, 9999)
+		textView.Layout(ctx, tl, 0, viewLine, tl.MinimumWidth, tl.MinimumHeight)
 		entries = append(entries, tl)
+		viewLine += tl.Height
 	}
 
 	totalViewLen := 0
@@ -39,7 +46,6 @@ func (trc *TextRenderCache) Update(ctx view.Context, textBoxWidth int) {
 		totalViewLen += viewLen
 	}
 
-	trc.documentVersion = newDocVersion
 	trc.elements = elements
 	trc.layoutCache = entries
 	trc.totalViewLen = totalViewLen

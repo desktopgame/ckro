@@ -18,41 +18,36 @@ func (p *PlainTextView) Layout(ctx Context, textLayout *TextLayout, x, y, w, h i
 }
 
 func (p *PlainTextView) Draw(ctx Context, textLayout *TextLayout, renderer Renderer) {
-	// x := 0
-	// y := 0
-
-	// def := tcell.StyleDefault
 	clusters := text.GraphemeClusters(ctx.GetText(textLayout.Element))
 	x := 0
-	y := 0
+
+	viewLine := 0
+	width := textLayout.Width
 	for _, cluster := range clusters {
+		runes := []rune(cluster)
 
 		if cluster == "\t" {
-			spaces := text.TabWidth - (x % text.TabWidth)
-			for i := 0; i < spaces; i++ {
-				renderer.SetContent(x+i, y, ' ', nil, tcell.StyleDefault)
+			w := text.TabWidth - (x % text.TabWidth)
+			if x+w > width {
+				viewLine++
+				x = 0
 			}
-			x += spaces
+			for i := 0; i < w; i++ {
+				renderer.SetContent(x+i, viewLine, ' ', nil, tcell.StyleDefault)
+			}
+			x += w
+		} else if len(runes) > 0 {
+			mainRune := runes[0]
+			w := runewidth.RuneWidth(mainRune)
 
-		} else {
-			runes := []rune(cluster)
-
-			if len(runes) > 0 {
-				mainRune := runes[0]
-				var combining []rune
-
-				// 残りのruneをcombining charactersとして設定
-				if len(runes) > 1 {
-					combining = runes[1:]
-				}
-				width := runewidth.RuneWidth(mainRune)
-
-				renderer.SetContent(x, y, mainRune, combining, tcell.StyleDefault)
-				// 全角文字の場合、次のセルを空にする
-				if width == 2 {
-					x++
-					renderer.SetContent(x, y, 0, nil, tcell.StyleDefault)
-				}
+			if x+w > width {
+				viewLine++
+				x = 0
+			}
+			renderer.SetContent(x, viewLine, mainRune, runes[1:], tcell.StyleDefault)
+			if w == 2 {
+				x++
+				renderer.SetContent(x, viewLine, 0, nil, tcell.StyleDefault)
 			}
 			x++
 		}
@@ -60,10 +55,47 @@ func (p *PlainTextView) Draw(ctx Context, textLayout *TextLayout, renderer Rende
 }
 
 func (p *PlainTextView) MinimumSize(ctx Context, e model.Element, width int, height int) *TextLayout {
+	line := ctx.GetText(e)
+	lineWidth := text.DisplayWidth(line)
+
+	if lineWidth <= width {
+		return &TextLayout{
+			Element:       e,
+			MinimumWidth:  width,
+			MinimumHeight: 1,
+		}
+	}
+
+	x := 0
+	viewLine := 0
+
+	clusters := text.GraphemeClusters(line)
+	for _, cluster := range clusters {
+		runes := []rune(cluster)
+
+		if cluster == "\t" {
+			w := text.TabWidth - (x % text.TabWidth)
+			if x+w > width {
+				viewLine++
+				x = 0
+			}
+			x += w
+		} else if len(runes) > 0 {
+			mainRune := runes[0]
+			width := runewidth.RuneWidth(mainRune)
+
+			if x+width > width {
+				viewLine++
+				x = 0
+			}
+			x += width
+		}
+	}
+
 	return &TextLayout{
 		Element:       e,
-		MinimumWidth:  text.DisplayWidth(ctx.GetText(e)),
-		MinimumHeight: 1,
+		MinimumWidth:  width,
+		MinimumHeight: viewLine,
 	}
 }
 

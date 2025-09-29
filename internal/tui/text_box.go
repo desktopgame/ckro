@@ -612,165 +612,24 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 			Resolver: tb.TextEngine,
 			Document: tb.Document,
 		}
+		tb.renderCache.Update(ctx, tb.Width)
 
 		viewLine := 0
 		for i := 0; i < tb.renderCache.GetItemCount(); i++ {
 			entry := tb.renderCache.GetLayout(i)
 			element := entry.Element
 
-			lineWrap := entry.MinimumWidth > tb.Width
-
-			if lineWrap {
-				elementRange := element.GetRange(0)
-				lineCount := elementRange.EndPosition.Row - elementRange.StartPosition.Row + 1
-				for j := 0; j < lineCount; j++ {
-					lineNo := elementRange.StartPosition.Row + j
-					line := tb.Document.GetBuffer().GetLineAt(lineNo)
-					lineWidth := text.DisplayWidth(line.GetContent())
-
-					if lineWidth <= tb.Width {
-						//*
-						segment := presenter.Segment{
-							TextLayout: &view.TextLayout{
-								Element: &model.PlainElement{
-									Range: model.Range{
-										StartPosition: model.Position{
-											Row:    lineNo,
-											Column: 0,
-										},
-										EndPosition: model.Position{
-											Row:    lineNo,
-											Column: len(line.GetContent()),
-										},
-									},
-								},
-							},
-							ModelLine: lineNo,
-							ViewLine:  viewLine,
-						}
-						if !yield(segment) {
-							return
-						}
-						viewLine++
-						//*/
-					} else {
-						x := 0
-						bytes := 0
-						bytes2 := 0
-
-						clusters := text.GraphemeClusters(line.GetContent())
-						for _, cluster := range clusters {
-							runes := []rune(cluster)
-
-							if cluster == "\t" {
-								w := text.TabWidth - (x % text.TabWidth)
-								// w := text.TabWidth
-								if x+w > tb.Width {
-									segment := presenter.Segment{
-										TextLayout: &view.TextLayout{
-											Element: &model.PlainElement{
-												Range: model.Range{
-													StartPosition: model.Position{
-														Row:    lineNo,
-														Column: bytes,
-													},
-													EndPosition: model.Position{
-														Row:    lineNo,
-														Column: bytes2,
-													},
-												},
-											},
-										},
-										ModelLine: lineNo,
-										ViewLine:  viewLine,
-									}
-									if !yield(segment) {
-										return
-									}
-
-									viewLine++
-									bytes = bytes2
-									x = 0
-								}
-								x += w
-							} else if len(runes) > 0 {
-								mainRune := runes[0]
-								width := runewidth.RuneWidth(mainRune)
-
-								if x+width > tb.Width {
-									segment := presenter.Segment{
-										TextLayout: &view.TextLayout{
-											Element: &model.PlainElement{
-												Range: model.Range{
-													StartPosition: model.Position{
-														Row:    lineNo,
-														Column: bytes,
-													},
-													EndPosition: model.Position{
-														Row:    lineNo,
-														Column: bytes2,
-													},
-												},
-											},
-										},
-										ModelLine: lineNo,
-										ViewLine:  viewLine,
-									}
-									if !yield(segment) {
-										return
-									}
-
-									viewLine++
-									bytes = bytes2
-									x = 0
-								}
-								x += width
-							}
-
-							bytes2 += len(cluster)
-						}
-
-						if bytes2 > bytes {
-							segment := presenter.Segment{
-								TextLayout: &view.TextLayout{
-									Element: &model.PlainElement{
-										Range: model.Range{
-											StartPosition: model.Position{
-												Row:    lineNo,
-												Column: bytes,
-											},
-											EndPosition: model.Position{
-												Row:    lineNo,
-												Column: bytes2,
-											},
-										},
-									},
-								},
-								ModelLine: lineNo,
-								ViewLine:  viewLine,
-							}
-							if !yield(segment) {
-								return
-							}
-							viewLine++
-						}
-					}
+			for j := 0; j < entry.Height; j++ {
+				segment := presenter.Segment{
+					TextLayout:    entry,
+					ModelLine:     element.GetRange(0).StartPosition.Row,
+					ViewLine:      viewLine,
+					LocalViewLine: j,
 				}
-			} else {
-				textView := tb.TextEngine.Resolve(entry.Element)
-				textView.Layout(ctx, entry, 0, viewLine, entry.MinimumWidth, entry.MinimumHeight)
-				for j := 0; j < entry.MinimumHeight; j++ {
-					segment := presenter.Segment{
-						TextLayout:    entry,
-						ModelLine:     element.GetRange(0).StartPosition.Row,
-						ViewLine:      viewLine,
-						LocalViewLine: j,
-					}
-					if !yield(segment) {
-						return
-					}
-					viewLine++
+				if !yield(segment) {
+					return
 				}
+				viewLine++
 			}
 		}
 	}
