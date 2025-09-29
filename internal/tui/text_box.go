@@ -32,6 +32,7 @@ type TextBox struct {
 	viewPosition int
 
 	renderCache TextRenderCache
+	bytePos     model.Position
 }
 
 // Init is initialize TextBox.
@@ -500,21 +501,51 @@ func (tb *TextBox) InsertString(s string) {
 		Document: tb.Document,
 	}
 
+	tb.Document.WriteString(tb.bytePos.Row, tb.bytePos.Column, s)
 	tb.renderCache.Update(ctx, tb.Width)
 
-	_, elementIndex, _, viewLocalPos := tb.renderCache.Stats(tb.viewPosition)
-	tl := tb.renderCache.GetLayout(elementIndex)
+	elementIndex := -1
+	beforeView := false
+	for i := 0; i < tb.renderCache.GetItemCount(); i++ {
+		element := tb.renderCache.GetElement(i)
+		r := element.GetRange(0)
+		st := r.StartPosition
+		ed := r.EndPosition
+
+		if tb.bytePos.Row >= st.Row && tb.bytePos.Row <= ed.Row {
+			if tb.bytePos.Column >= st.Column && (tb.bytePos.Column < ed.Column || ed.Row > st.Row) {
+				elementIndex = i
+				break
+			}
+			// 前の行のビューを見つける（tb.bytePos.Column <= ed.Column）
+			if tb.bytePos.Column >= st.Column && (tb.bytePos.Column <= ed.Column || ed.Row > st.Row) {
+				elementIndex = i
+				beforeView = true
+				break
+			}
+		}
+	}
+
+	viewStart := 0
+	for i := 0; i < elementIndex; i++ {
+		element := tb.renderCache.GetElement(i)
+		textView := tb.TextEngine.Resolve(element)
+
+		viewStart += textView.MoveLength(ctx, element)
+	}
+
 	element := tb.renderCache.GetElement(elementIndex)
 	textView := tb.TextEngine.Resolve(element)
-	position := textView.ConvertModel(ctx, tl, viewLocalPos)
-	tb.Document.WriteString(position.StartPosition.Row, position.StartPosition.Column, s)
 
-	tb.renderCache.Update(ctx, tb.Width)
-	_, elementIndex, viewStart, viewLocalPos := tb.renderCache.Stats(tb.viewPosition)
-	element = tb.renderCache.GetElement(elementIndex)
-	textView = tb.TextEngine.Resolve(element)
+	var viewLocalPos int
+	if beforeView {
+		viewLocalPos = textView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex)) - 1
+	} else {
+		viewLocalPos = textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), tb.bytePos)
+	}
 
-	for i := 0; i < text.GraphemeLength(s); i++ {
+	moves := text.GraphemeLength(s)
+	for i := 0; i < moves; i++ {
 		viewLocalPos = textView.MoveRight(ctx, element, viewLocalPos)
 
 		if viewLocalPos == -1 {
@@ -524,21 +555,23 @@ func (tb *TextBox) InsertString(s string) {
 			// 移動可能回数が1回かつテキストが存在する場合は行を継続する
 			// 移動可能回数が2回以上の場合、そのビューの開始位置までジャンプする
 			if textView.MoveLength(ctx, element) == 1 {
-				if len(ctx.GetText(element)) == 0 {
+				if blankable, ok := textView.(view.BlankTextView); ok && blankable.IsBlank(ctx, tb.renderCache.GetLayout(elementIndex)) {
 					tb.viewPosition = viewStart + 1
 				} else {
 					tb.viewPosition = viewStart
 				}
 			} else {
-				tb.viewPosition = viewStart + textView.MoveLength(ctx, element) - 1
+				tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
 			}
 			_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
 			element = tb.renderCache.GetElement(elementIndex)
 			textView = tb.TextEngine.Resolve(element)
+			tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos).StartPosition
 			// tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
 			//break
 		} else {
 			tb.viewPosition = viewStart + viewLocalPos
+			tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos).StartPosition
 		}
 	}
 }

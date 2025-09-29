@@ -147,3 +147,19 @@ func (il *InlineView) ConvertModel(ctx view.Context, textLayout *view.TextLayout
 		Bytes: 0,
 	}
 }
+
+func (il *InlineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
+	e := textLayout.Element
+	r := e.GetRange(0)
+	str := ctx.Document.Read(r).GetLine(bytePos.Row - r.StartPosition.Row)
+
+	bytes := 0
+	clusters := text.GraphemeClusters(str)
+	for i, cluster := range clusters {
+		if bytes == bytePos.Column {
+			return i
+		}
+		bytes += len(cluster)
+	}
+	panic("")
+}

@@ -22,3 +22,7 @@ func (b *BlankLineElement) GetElement(index int) model.Element {
 func (b *BlankLineElement) GetElementCount() int {
 	return 0
 }
+
+func (b *BlankLineElement) IsBlank() bool {
+	return true
+}

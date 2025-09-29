@@ -1,6 +1,7 @@
 package litemark
 
 import (
+	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/view"
 	"github.com/gdamore/tcell/v2"
@@ -158,4 +159,20 @@ func (c *CodeBlockView) ConvertModel(ctx view.Context, textLayout *view.TextLayo
 
 	v := ctx.Resolver.Resolve(child.Element)
 	return v.ConvertModel(ctx, child, col)
+}
+
+func (c *CodeBlockView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
+	e := textLayout.Element
+	r := e.GetRange(0)
+	str := ctx.Document.Read(r).GetLine(bytePos.Row - r.StartPosition.Row)
+
+	bytes := 0
+	clusters := text.GraphemeClusters(str)
+	for i, cluster := range clusters {
+		if bytes == bytePos.Column {
+			return i
+		}
+		bytes += len(cluster)
+	}
+	panic("")
 }

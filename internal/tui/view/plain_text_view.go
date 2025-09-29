@@ -192,6 +192,22 @@ func (p *PlainTextView) ConvertModel(ctx Context, textLayout *TextLayout, viewLo
 	}
 }
 
+func (p *PlainTextView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout, bytePos model.Position) int {
+	e := textLayout.Element
+	r := e.GetRange(0)
+	str := ctx.Document.Read(r).GetLine(bytePos.Row - r.StartPosition.Row)
+
+	bytes := 0
+	clusters := text.GraphemeClusters(str)
+	for i, cluster := range clusters {
+		if bytes == bytePos.Column {
+			return i
+		}
+		bytes += len(cluster)
+	}
+	panic("")
+}
+
 func (p *PlainTextView) ConvertRelativeX(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
 	return viewLocalPos
 }

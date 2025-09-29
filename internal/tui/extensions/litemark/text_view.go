@@ -91,7 +91,7 @@ func (t *TextView) MoveLeft(ctx view.Context, e model.Element, viewLocalPos int)
 }
 
 func (t *TextView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int) int {
-	if viewLocalPos >= t.MoveLength(ctx, e) {
+	if viewLocalPos >= t.MoveLength(ctx, e)-1 {
 		return -1
 	}
 	return viewLocalPos + 1
@@ -100,6 +100,22 @@ func (t *TextView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int
 func (t *TextView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
 	e := textLayout.Element
 	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
+}
+
+func (t *TextView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
+	e := textLayout.Element
+	r := e.GetRange(0)
+	str := ctx.Document.Read(r).GetLine(bytePos.Row - r.StartPosition.Row)
+
+	bytes := 0
+	clusters := text.GraphemeClusters(str)
+	for i, cluster := range clusters {
+		if bytes == bytePos.Column {
+			return i
+		}
+		bytes += len(cluster)
+	}
+	panic("")
 }
 
 func (t *TextView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {
