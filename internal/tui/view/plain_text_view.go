@@ -134,6 +134,9 @@ func (p *PlainTextView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoca
 
 	width := textLayout.Width
 	clusters := text.GraphemeClusters(line)
+	if len(clusters) == 0 && viewLocalPos == 0 {
+		return 0, 0
+	}
 	for _, cluster := range clusters {
 		runes := []rune(cluster)
 
