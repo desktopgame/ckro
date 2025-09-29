@@ -130,11 +130,13 @@ func (il *InlineView) MoveRight(ctx view.Context, e model.Element, viewLocalPos 
 	return viewLocalPos + 1
 }
 
-func (il *InlineView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
+func (il *InlineView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
+	e := textLayout.Element
 	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
 }
 
-func (il *InlineView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) view.CharacterReference {
+func (il *InlineView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {
+	e := textLayout.Element
 	r := e.GetRange(0)
 	st := r.StartPosition
 	return view.CharacterReference{

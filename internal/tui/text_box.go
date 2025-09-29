@@ -64,7 +64,7 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	for i := 0; i < ei; i++ {
 		y += tb.renderCache.GetLayout(i).Height
 	}
-	_, vly := view.ConvertPos(ctx, tb.renderCache.GetElement(ei), eoff)
+	_, vly := view.ConvertPos(ctx, tb.renderCache.GetLayout(ei), eoff)
 	// ax := vlx
 	ay := y + vly
 
@@ -89,13 +89,13 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	// カーソルがある行での位置を正確に計算
 	// cursorLine := buf.GetLineAt(cursorRow).GetContent()
 	currentView := tb.TextEngine.Resolve(tb.renderCache.GetElement(ei))
-	relx, rely := currentView.ConvertPos(ctx, tb.renderCache.GetElement(ei), eoff)
+	relx, rely := currentView.ConvertPos(ctx, tb.renderCache.GetLayout(ei), eoff)
 	screenX := relx
 	screenY += rely
 	//screenX, additionalRows :=
 	//screenY += additionalRows
 
-	charRef := currentView.ConvertModel(ctx, tb.renderCache.GetElement(ei), eoff)
+	charRef := currentView.ConvertModel(ctx, tb.renderCache.GetLayout(ei), eoff)
 
 	if charRef.Bytes == 0 {
 		return screenX, screenY, ' ', nil
@@ -503,9 +503,10 @@ func (tb *TextBox) InsertString(s string) {
 	tb.renderCache.Update(ctx, tb.Width)
 
 	_, elementIndex, _, viewLocalPos := tb.renderCache.Stats(tb.viewPosition)
+	tl := tb.renderCache.GetLayout(elementIndex)
 	element := tb.renderCache.GetElement(elementIndex)
 	textView := tb.TextEngine.Resolve(element)
-	position := textView.ConvertModel(ctx, element, viewLocalPos)
+	position := textView.ConvertModel(ctx, tl, viewLocalPos)
 	tb.Document.WriteString(position.StartPosition.Row, position.StartPosition.Column, s)
 
 	tb.renderCache.Update(ctx, tb.Width)
@@ -556,13 +557,14 @@ func (tb *TextBox) RemoveChar() {
 
 	_, elementIndex, viewStart, viewLocalPos := tb.renderCache.Stats(tb.viewPosition)
 	element := tb.renderCache.GetElement(elementIndex)
+	tl := tb.renderCache.GetLayout(elementIndex)
 	textView := tb.TextEngine.Resolve(element)
 
 	newViewLocalPos := textView.MoveLeft(ctx, element, viewLocalPos)
 
 	if newViewLocalPos >= 0 {
 		viewLocalPos = newViewLocalPos
-		position := textView.ConvertModel(ctx, element, viewLocalPos)
+		position := textView.ConvertModel(ctx, tl, viewLocalPos)
 		position.Bytes = max(position.Bytes, 1)
 
 		tb.Document.Remove(position.StartPosition.Row, position.StartPosition.Column, position.Bytes)
@@ -570,10 +572,11 @@ func (tb *TextBox) RemoveChar() {
 		tb.viewPosition = viewStart + viewLocalPos
 	} else {
 		element = tb.renderCache.GetElement(elementIndex - 1)
+		tl = tb.renderCache.GetLayout(elementIndex - 1)
 		textView = tb.TextEngine.Resolve(element)
 		viewLocalPos = textView.MoveLength(ctx, element) - 1
 
-		position := textView.ConvertModel(ctx, element, viewLocalPos)
+		position := textView.ConvertModel(ctx, tl, viewLocalPos)
 		position.Bytes = max(position.Bytes, 1)
 
 		tb.Document.Remove(position.StartPosition.Row, position.StartPosition.Column, position.Bytes)

@@ -26,15 +26,61 @@ func (trc *TextRenderCache) Update(ctx view.Context, textBoxWidth int) {
 	elements := ctx.Document.Render()
 
 	entries := []*view.TextLayout{}
+	newElements := []model.Element{}
 	viewLine := 0
 	for i := 0; i < len(elements); i++ {
 		element := elements[i]
 		textView := ctx.Resolver.Resolve(element)
 		tl := textView.MinimumSize(ctx, element, textBoxWidth, 9999)
 		textView.Layout(ctx, tl, 0, viewLine, tl.MinimumWidth, tl.MinimumHeight)
-		entries = append(entries, tl)
-		viewLine += tl.Height
+
+		if tl.Width > textBoxWidth {
+			sg := ctx.Document.Read(element.GetRange(0))
+			if sg.GetLineCount() > 1 {
+				for j := 0; j < sg.GetLineCount(); j++ {
+					row := element.GetRange(0).StartPosition.Row + j
+					pElement := &model.PlainElement{
+						Range: model.Range{
+							StartPosition: model.Position{
+								Row:    row,
+								Column: sg.GetSpan(j).StartColumn,
+							},
+							EndPosition: model.Position{
+								Row:    row,
+								Column: sg.GetSpan(j).EndColumn,
+							},
+						},
+					}
+
+					textView = ctx.Resolver.Resolve(pElement)
+					tl = textView.MinimumSize(ctx, pElement, textBoxWidth, 9999)
+					textView.Layout(ctx, tl, 0, viewLine, tl.MinimumWidth, tl.MinimumHeight)
+
+					entries = append(entries, tl)
+					newElements = append(newElements, pElement)
+					viewLine += tl.Height
+				}
+			} else {
+				pElement := &model.PlainElement{
+					Range: element.GetRange(0),
+				}
+
+				textView = ctx.Resolver.Resolve(pElement)
+				tl = textView.MinimumSize(ctx, pElement, textBoxWidth, 9999)
+				textView.Layout(ctx, tl, 0, viewLine, tl.MinimumWidth, tl.MinimumHeight)
+
+				entries = append(entries, tl)
+				newElements = append(newElements, pElement)
+				viewLine += tl.Height
+			}
+		} else {
+			entries = append(entries, tl)
+			newElements = append(newElements, element)
+			viewLine += tl.Height
+		}
 	}
+
+	elements = newElements
 
 	totalViewLen := 0
 	viewLenTable := []int{}

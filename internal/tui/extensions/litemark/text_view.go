@@ -97,11 +97,13 @@ func (t *TextView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int
 	return viewLocalPos + 1
 }
 
-func (t *TextView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
+func (t *TextView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
+	e := textLayout.Element
 	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
 }
 
-func (t *TextView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) view.CharacterReference {
+func (t *TextView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {
+	e := textLayout.Element
 	r := e.GetRange(0)
 	str := ctx.Document.Read(r).GetLine(0)
 	st := r.StartPosition

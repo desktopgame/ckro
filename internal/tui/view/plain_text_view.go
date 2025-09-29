@@ -67,7 +67,7 @@ func (p *PlainTextView) MinimumSize(ctx Context, e model.Element, width int, hei
 	}
 
 	x := 0
-	viewLine := 0
+	viewLine := 1
 
 	clusters := text.GraphemeClusters(line)
 	for _, cluster := range clusters {
@@ -82,13 +82,13 @@ func (p *PlainTextView) MinimumSize(ctx Context, e model.Element, width int, hei
 			x += w
 		} else if len(runes) > 0 {
 			mainRune := runes[0]
-			width := runewidth.RuneWidth(mainRune)
+			w := runewidth.RuneWidth(mainRune)
 
-			if x+width > width {
+			if x+w > width {
 				viewLine++
 				x = 0
 			}
-			x += width
+			x += w
 		}
 	}
 
@@ -125,11 +125,50 @@ func (p *PlainTextView) MoveRight(ctx Context, e model.Element, viewLocalPos int
 	return viewLocalPos + 1
 }
 
-func (p *PlainTextView) ConvertPos(ctx Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
-	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
+func (p *PlainTextView) ConvertPos(ctx Context, textLayout *TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
+	line := ctx.GetText(textLayout.Element)
+
+	x := 0
+	clusterCount := 0
+	viewLine := 0
+
+	width := textLayout.Width
+	clusters := text.GraphemeClusters(line)
+	for _, cluster := range clusters {
+		runes := []rune(cluster)
+
+		if cluster == "\t" {
+			w := text.TabWidth - (x % text.TabWidth)
+			if x+w > width {
+				viewLine++
+				x = 0
+			}
+			x += w
+		} else if len(runes) > 0 {
+			mainRune := runes[0]
+			width := runewidth.RuneWidth(mainRune)
+
+			if x+width > width {
+				viewLine++
+				x = 0
+			}
+			x += width
+		}
+		if clusterCount == viewLocalPos {
+			return x, viewLine
+		}
+		clusterCount++
+
+		if clusterCount == viewLocalPos {
+			return x + 1, viewLine
+		}
+		clusterCount++
+	}
+	panic("")
 }
 
-func (p *PlainTextView) ConvertModel(ctx Context, e model.Element, viewLocalPos int) CharacterReference {
+func (p *PlainTextView) ConvertModel(ctx Context, textLayout *TextLayout, viewLocalPos int) CharacterReference {
+	e := textLayout.Element
 	r := e.GetRange(0)
 	str := ctx.Document.Read(r).GetLine(0)
 	st := r.StartPosition
@@ -155,7 +194,7 @@ func (p *PlainTextView) ConvertModel(ctx Context, e model.Element, viewLocalPos 
 	}
 }
 
-func (p *PlainTextView) ConvertRelativeX(ctx Context, e model.Element, viewLocalPos int) int {
+func (p *PlainTextView) ConvertRelativeX(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
 	return viewLocalPos
 }
 

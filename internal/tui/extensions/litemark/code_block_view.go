@@ -144,16 +144,18 @@ func (c *CodeBlockView) MoveRight(ctx view.Context, e model.Element, viewLocalPo
 	return viewLocalPos + 1
 }
 
-func (c *CodeBlockView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
+func (c *CodeBlockView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
+	e := textLayout.Element
 	table, _ := c.ViewLengthTable(ctx, e)
 	index, col := c.findTableIndex(table, viewLocalPos)
 	return col + 1, index + 1
 }
 
-func (c *CodeBlockView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) view.CharacterReference {
-	table, _ := c.ViewLengthTable(ctx, e)
+func (c *CodeBlockView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {
+	table, _ := c.ViewLengthTable(ctx, textLayout.Element)
 	index, col := c.findTableIndex(table, viewLocalPos)
+	child := textLayout.Children[index]
 
-	v := ctx.Resolver.Resolve(e.GetElement(index))
-	return v.ConvertModel(ctx, e.GetElement(index), col)
+	v := ctx.Resolver.Resolve(child.Element)
+	return v.ConvertModel(ctx, child, col)
 }

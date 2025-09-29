@@ -46,11 +46,12 @@ func (b *BlankLineView) MoveRight(ctx view.Context, e model.Element, viewLocalPo
 	return -1
 }
 
-func (b *BlankLineView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
+func (b *BlankLineView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
 	return 0, 0
 }
 
-func (b *BlankLineView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) view.CharacterReference {
+func (b *BlankLineView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {
+	e := textLayout.Element
 	r := e.GetRange(0)
 	st := r.StartPosition
 	return view.CharacterReference{

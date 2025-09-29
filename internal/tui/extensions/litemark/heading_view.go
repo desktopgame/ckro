@@ -115,11 +115,13 @@ func (hv *HeadingView) MoveRight(ctx view.Context, e model.Element, viewLocalPos
 	return viewLocalPos + 1
 }
 
-func (hv *HeadingView) ConvertPos(ctx view.Context, e model.Element, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
+func (hv *HeadingView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
+	e := textLayout.Element
 	return text.DisplayPos(ctx.GetSegment(e, 1).GetLine(0), viewLocalPos), 0
 }
 
-func (hv *HeadingView) ConvertModel(ctx view.Context, e model.Element, viewLocalPos int) view.CharacterReference {
+func (hv *HeadingView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {
+	e := textLayout.Element
 	rs := e.GetRange(0)
 	r := e.GetRange(1)
 	st := rs.StartPosition
