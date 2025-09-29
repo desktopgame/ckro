@@ -119,7 +119,7 @@ func (p *PlainTextView) MoveLeft(ctx Context, e model.Element, viewLocalPos int)
 }
 
 func (p *PlainTextView) MoveRight(ctx Context, e model.Element, viewLocalPos int) int {
-	if viewLocalPos > p.MoveLength(ctx, e) {
+	if viewLocalPos >= p.MoveLength(ctx, e)-1 {
 		return -1
 	}
 	return viewLocalPos + 1

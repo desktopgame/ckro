@@ -1,143 +1,35 @@
-package tui_test
+package tui
 
 import (
 	"testing"
 
-	"github.com/desktopgame/ckro/internal/tui"
-	"github.com/desktopgame/ckro/internal/tui/presenter"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTextBox(t *testing.T) {
-	msg :=
-		`
-Hello, world1
-👨‍👩‍👧‍👦
-Hello, world2
-あいうえお
-`
-
-	tb := tui.TextBox{}
+func TestTextBox01(t *testing.T) {
+	tb := TextBox{}
 	tb.Init()
 	tb.X = 0
 	tb.Y = 0
-	tb.Width = 20
-	tb.Height = 6
-	tb.Document.InsertString(msg)
+	tb.Width = 10
+	tb.Height = 10
+	tb.InsertString("1234あ")
 	tb.ShowCursor = true
 
-	tb.CursorUpdate()
-
-	cursorRow := tb.Document.GetCursorRow()
-	assert.Equal(t, cursorRow, 5)
-
-	tb.Document.InsertLine()
-	tb.CursorUpdate()
-
-	row := tb.GetScrollY()
-	assert.Equal(t, row, 1)
+	assert.Equal(t, tb.bytePos.Row, 0)
+	assert.Equal(t, tb.bytePos.Column, len("1234")+1)
 }
 
-func TestCursor(t *testing.T) {
-	tb := tui.TextBox{}
+func TestTextBox02(t *testing.T) {
+	tb := TextBox{}
 	tb.Init()
 	tb.X = 0
 	tb.Y = 0
-	tb.Width = 20
-	tb.Height = 6
-	tb.Document.InsertString("12345678901234567890")
+	tb.Width = 10
+	tb.Height = 10
+	tb.InsertString("1234\n1234\n123あ")
 	tb.ShowCursor = true
 
-	tb.CursorUpdate()
-
-	col, _, _, _ := tb.CursorPosition()
-	assert.Equal(t, col, 0)
-}
-
-func TestScroll(t *testing.T) {
-	tb := tui.TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 5
-	tb.Height = 2
-	tb.Document.InsertString("123456789")
-	tb.ShowCursor = true
-
-	tb.CursorUpdate()
-
-	col, row, _, _ := tb.CursorPosition()
-	assert.Equal(t, row-tb.GetScrollY(), 1)
-	assert.Equal(t, col, 4)
-
-	tb.Document.InsertString("0")
-	tb.CursorUpdate()
-
-	col, row, _, _ = tb.CursorPosition()
-	assert.Equal(t, row-tb.GetScrollY(), 1)
-	assert.Equal(t, col, 0)
-}
-
-func TestWrap(t *testing.T) {
-	tb := tui.TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 5
-	tb.Height = 2
-	tb.Document.InsertString("1234あ")
-	tb.ShowCursor = true
-
-	tb.CursorUpdate()
-
-	col, row, _, _ := tb.CursorPosition()
-	assert.Equal(t, row-tb.GetScrollY(), 1)
-	assert.Equal(t, col, 2)
-}
-
-func TestWrapWithTab(t *testing.T) {
-	tb := tui.TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 5
-	tb.Height = 2
-	tb.Document.InsertString("12345\t")
-	tb.ShowCursor = true
-
-	tb.CursorUpdate()
-
-	col, _, _, _ := tb.CursorPosition()
-	assert.Equal(t, col, 4)
-
-	tb.Document.MoveLeft()
-
-	tb.CursorUpdate()
-
-	col, _, _, _ = tb.CursorPosition()
-	assert.Equal(t, col, 0)
-}
-
-func TestBreak(t *testing.T) {
-	tb := tui.TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 5
-	tb.Height = 2
-	tb.Document.InsertString("1234あ")
-	tb.ShowCursor = true
-
-	tb.CursorUpdate()
-
-	segments := []presenter.Segment{}
-	for brk := range tb.BreakIter() {
-		segments = append(segments, brk)
-	}
-
-	c1 := tb.Document.Read(segments[0].TextLayout.Element.GetRange(0)).GetLine(0)
-	assert.Equal(t, c1, "1234")
-
-	c2 := tb.Document.Read(segments[1].TextLayout.Element.GetRange(0)).GetLine(0)
-	assert.Equal(t, c2, "あ")
+	assert.Equal(t, tb.bytePos.Row, 2)
+	assert.Equal(t, tb.bytePos.Column, len("123")+1)
 }
