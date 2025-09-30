@@ -624,4 +624,8 @@ func TestTextBox24(t *testing.T) {
 	tb.MoveLeft() // H
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 3)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+
+	tb.RemoveChar()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
 }

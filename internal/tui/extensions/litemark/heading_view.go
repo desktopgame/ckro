@@ -156,7 +156,7 @@ func (hv *HeadingView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Te
 	clusters := text.GraphemeClusters(str)
 	for i, cluster := range clusters {
 		if bytes == bytePos.Column {
-			return max(2, i) - 2
+			return max(3, i) - 3
 		}
 		bytes += len(cluster)
 	}
