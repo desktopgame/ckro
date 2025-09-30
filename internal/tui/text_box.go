@@ -2,6 +2,7 @@ package tui
 
 import (
 	"iter"
+	"strings"
 
 	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui/model"
@@ -563,6 +564,10 @@ func (tb *TextBox) InsertString(s string) {
 	}
 
 	tb.Document.WriteString(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, s)
+	if strings.HasPrefix(s, "\n") {
+		tb.bytePos.Bytes = 0
+	}
+
 	tb.renderCache.Update(ctx, tb.Width)
 
 	elementIndex := -1

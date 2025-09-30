@@ -674,3 +674,34 @@ func TestTextBox26(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 5)
 }
+
+func TestTextBox27(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 20
+	tb.Height = 20
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+
+	tb.InsertString("##")
+	tb.InsertString(" ")
+	tb.InsertString("H")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+
+	tb.InsertString("H")
+	tb.InsertString("H")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 6)
+
+	tb.MoveLeft()
+	tb.MoveLeft()
+	tb.MoveLeft()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+
+	tb.InsertString("\n")
+}
