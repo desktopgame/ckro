@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/desktopgame/ckro/internal/text"
+	"github.com/desktopgame/ckro/internal/tui/extensions/litemark"
 	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
 	"github.com/desktopgame/ckro/internal/tui/view"
@@ -457,6 +458,10 @@ func (tb *TextBox) modelToView() (ElementIndex int, ViewStart int, ViewLocalPos 
 		Document: tb.Document,
 	}
 
+	if tb.renderCache.GetItemCount() == 0 {
+		return 0, 0, 0
+	}
+
 	elementIndex := -1
 	for i := 0; i < tb.renderCache.GetItemCount(); i++ {
 		element := tb.renderCache.GetElement(i)
@@ -509,6 +514,32 @@ func (tb *TextBox) InsertString(s string) {
 		Document: tb.Document,
 	}
 
+	tb.renderCache.Update(ctx, tb.Width)
+
+	elementIndex, viewStart, viewLocalPos := tb.modelToView()
+	element := tb.renderCache.GetElement(elementIndex)
+	textView := tb.TextEngine.Resolve(element)
+
+	if viewLocalPos == 0 {
+		if strings.HasSuffix(s, "\n") {
+			if _, ok := element.(*litemark.HeadingElement); ok {
+				if elementIndex == 0 {
+					tb.bytePos.StartPosition.Row = 0
+					tb.bytePos.StartPosition.Column = 0
+
+				} else {
+					//element = tb.renderCache.GetElement(elementIndex - 1)
+					//textView = tb.TextEngine.Resolve(element)
+					//viewLocalPos = textView.MoveLength(ctx, element) - 1
+					//bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), viewLocalPos)
+					//tb.bytePos = bPos
+					tb.bytePos.StartPosition.Column = 0
+					tb.bytePos.Bytes = 0
+				}
+			}
+		}
+	}
+
 	tb.Document.WriteString(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, s)
 	if strings.HasPrefix(s, "\n") {
 		tb.bytePos.Bytes = 0
@@ -516,9 +547,9 @@ func (tb *TextBox) InsertString(s string) {
 
 	tb.renderCache.Update(ctx, tb.Width)
 
-	elementIndex, viewStart, viewLocalPos := tb.modelToView()
-	element := tb.renderCache.GetElement(elementIndex)
-	textView := tb.TextEngine.Resolve(element)
+	elementIndex, viewStart, viewLocalPos = tb.modelToView()
+	element = tb.renderCache.GetElement(elementIndex)
+	textView = tb.TextEngine.Resolve(element)
 
 	moves := text.GraphemeLength(s)
 	for i := 0; i < moves; i++ {
