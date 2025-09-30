@@ -587,3 +587,41 @@ func TestTextBox23(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
 }
+
+func TestTextBox24(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 20
+	tb.Height = 20
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+	tb.InsertString("\n")
+	tb.InsertString("#")
+	tb.InsertString(" ")
+	tb.InsertString("Heading")
+	tb.InsertString("\n")
+	tb.InsertString("\n")
+	tb.InsertString("##")
+	tb.InsertString(" ")
+	tb.InsertString("Heading2")
+
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 3)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 11)
+
+	tb.MoveLeft()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 3)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 10)
+
+	tb.MoveLeft()
+	tb.MoveLeft()
+	tb.MoveLeft()
+	tb.MoveLeft()
+	tb.MoveLeft()
+	tb.MoveLeft()
+	tb.MoveLeft() // H
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 3)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+}

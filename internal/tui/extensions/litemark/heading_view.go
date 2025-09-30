@@ -127,8 +127,7 @@ func (hv *HeadingView) ConvertModel(ctx view.Context, textLayout *view.TextLayou
 	st := rs.StartPosition
 	str := ctx.Document.Read(r).GetLine(0)
 
-	graphemes := text.GraphemeLength(str)
-	if viewLocalPos >= graphemes {
+	if viewLocalPos >= hv.MoveLength(ctx, e)-1 {
 		return view.CharacterReference{
 			StartPosition: model.Position{
 				Row:    st.Row,

@@ -126,6 +126,10 @@ func (trc *TextRenderCache) Stats(viewPosition int) (TotalViewLen int, ElementIn
 	return totalViewLen, elementIndex, elementStart, viewLocalPosition
 }
 
+func (trc *TextRenderCache) Total() int {
+	return trc.totalViewLen
+}
+
 func (trc *TextRenderCache) GetItem(index int) (Element model.Element, Layout *view.TextLayout) {
 	return trc.GetElement(index), trc.GetLayout(index)
 }

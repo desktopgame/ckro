@@ -626,6 +626,10 @@ func (tb *TextBox) InsertString(s string) {
 				}
 			} else {
 				tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
+
+				if tb.viewPosition >= tb.renderCache.Total() {
+					tb.viewPosition = tb.renderCache.Total() - 1
+				}
 			}
 			_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
 			element = tb.renderCache.GetElement(elementIndex)
