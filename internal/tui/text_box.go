@@ -639,6 +639,28 @@ func (tb *TextBox) RemoveChar() {
 	newViewLocalPos := textView.MoveLeft(ctx, element, viewLocalPos)
 	if newViewLocalPos == -1 {
 		element = tb.renderCache.GetElement(elementIndex - 1)
+
+		if _, ok := element.(*litemark.CodeBlockElement); ok {
+			r := element.GetRange(0)
+			bPos := view.CharacterReference{
+				StartPosition: model.Position{
+					Row:    r.EndPosition.Row,
+					Column: r.EndPosition.Column - 1,
+				},
+				Bytes: 1,
+			}
+			tb.bytePos = bPos
+			tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
+
+			//tb.bytePos.StartPosition.Column--
+			tb.bytePos.Bytes = 0
+
+			tb.renderCache.Update(ctx, tb.Width)
+
+			_, vs, vl := tb.modelToView()
+			tb.viewPosition = vs + vl
+			return
+		}
 		prevView := tb.TextEngine.Resolve(element)
 		bPos := prevView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), prevView.MoveLength(ctx, element)-1)
 
