@@ -121,112 +121,6 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	return screenX, screenY, currentRune, combining
 }
 
-// calculateCursorPosition is calculates the exact screen position considering line wrapping
-func (tb *TextBox) calculateCursorPosition(line string, cursorCol int) (screenX int, additionalRows int) {
-	if tb.Width <= 0 {
-		return 0, 0
-	}
-
-	currentX := 0
-	currentRow := 0
-	clusters := text.GraphemeClusters(line)
-
-	// カーソルが行末を超えている場合の処理
-	if cursorCol >= len(clusters) {
-		// 全ての文字を処理してから、カーソル位置を決定
-		for _, cluster := range clusters {
-			clusterWidth := tb.calculateClusterWidth(cluster, currentX)
-
-			// 現在の行に収まるかチェック
-			if currentX+clusterWidth > tb.Width {
-				// 次の行に移動
-				currentRow++
-				currentX = 0
-				// 行が変わったので幅を再計算
-				clusterWidth = tb.calculateClusterWidth(cluster, currentX)
-			}
-
-			currentX += clusterWidth
-		}
-
-		// 行末の場合、最後の文字の後の位置
-		if currentX >= tb.Width {
-			currentRow++
-			currentX = 0
-		}
-
-		return currentX, currentRow
-	}
-
-	// 通常の処理：指定された位置まで
-	for i := 0; i < cursorCol; i++ {
-		cluster := clusters[i]
-		clusterWidth := tb.calculateClusterWidth(cluster, currentX)
-
-		// 現在の行に収まるかチェック
-		if currentX+clusterWidth > tb.Width {
-			// 次の行に移動
-			currentRow++
-			currentX = 0
-			// 行が変わったので幅を再計算
-			clusterWidth = tb.calculateClusterWidth(cluster, currentX)
-		}
-
-		currentX += clusterWidth
-	}
-
-	// カーソルが特定の文字（タブなど）の上にある場合の特別処理
-	if cursorCol < len(clusters) {
-		cluster := clusters[cursorCol]
-		if cluster == "\t" {
-			// タブの場合、タブが次の行に移動するかチェック
-			clusterWidth := tb.calculateClusterWidth(cluster, currentX)
-			if currentX+clusterWidth > tb.Width {
-				// タブが次の行に移動する場合、次の行の先頭を返す
-				return 0, currentRow + 1
-			}
-		}
-	}
-
-	return currentX, currentRow
-}
-
-// calculateClusterWidth is calculates the display width of a cluster considering tabs
-func (tb *TextBox) calculateClusterWidth(cluster string, currentX int) int {
-	if cluster == "\t" {
-		return text.TabWidth - (currentX % text.TabWidth)
-	}
-	return runewidth.StringWidth(cluster)
-}
-
-// calculateWrappedLines is calculates how many screen lines a text line takes
-func (tb *TextBox) calculateWrappedLines(line string) int {
-	if tb.Width <= 0 {
-		return 1
-	}
-
-	currentX := 0
-	currentRow := 1
-	clusters := text.GraphemeClusters(line)
-
-	for _, cluster := range clusters {
-		clusterWidth := tb.calculateClusterWidth(cluster, currentX)
-
-		// 現在の行に収まるかチェック
-		if currentX+clusterWidth > tb.Width {
-			// 次の行に移動
-			currentRow++
-			currentX = 0
-			// 行が変わったので幅を再計算
-			clusterWidth = tb.calculateClusterWidth(cluster, currentX)
-		}
-
-		currentX += clusterWidth
-	}
-
-	return currentRow
-}
-
 // CursorUpdate is scroll to until cursor visible
 func (tb *TextBox) CursorUpdate() {
 	_, cursor, _, _ := tb.CursorPosition()
@@ -844,19 +738,6 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 			}
 		}
 	}
-}
-
-// WrappedLineCount returns count of lines, in consideration a wrap.
-func (tb *TextBox) WrappedLineCount() int {
-	lc := 0
-	buf := tb.Document.GetBuffer()
-
-	for i := 0; i < buf.GetLineCount(); i++ {
-		line := buf.GetLineAt(i)
-		lineContent := line.GetContent()
-		lc += tb.calculateWrappedLines(lineContent)
-	}
-	return lc
 }
 
 // GetDocument returns Document.
