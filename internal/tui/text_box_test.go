@@ -542,7 +542,7 @@ func TestTextBox22(t *testing.T) {
 
 	tb.RemoveChar()
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
 
 	tb.RemoveChar()
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
