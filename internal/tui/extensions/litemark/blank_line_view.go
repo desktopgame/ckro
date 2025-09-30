@@ -66,7 +66,3 @@ func (b *BlankLineView) ConvertModel(ctx view.Context, textLayout *view.TextLayo
 func (b *BlankLineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
 	return 0
 }
-
-func (b *BlankLineView) IsBlank(ctx view.Context, textLayout *view.TextLayout) bool {
-	return true
-}
