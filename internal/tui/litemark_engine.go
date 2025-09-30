@@ -22,6 +22,8 @@ func (l *LitemarkEngine) Resolve(e model.Element) view.TextView {
 	case *litemark.BlankLineElement:
 		return &litemark.BlankLineView{}
 	// Legacy elements
+	case *model.GhostElement:
+		return &view.GhostView{}
 	case *model.PlainElement:
 		return &view.PlainTextView{}
 	}

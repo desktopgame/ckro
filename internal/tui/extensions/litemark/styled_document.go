@@ -217,5 +217,20 @@ func (doc *StyledDocument) Render() []model.Element {
 			})
 		}
 	}
+	for i := 0; i < 10; i++ {
+		elements = append(elements, &model.GhostElement{
+			Index: i,
+			Range: model.Range{
+				StartPosition: model.Position{
+					Row:    doc.GetBuffer().GetLineCount() - 1,
+					Column: 0,
+				},
+				EndPosition: model.Position{
+					Row:    doc.GetBuffer().GetLineCount() - 1,
+					Column: len(doc.GetLineAt(doc.GetBuffer().GetLineCount() - 1)),
+				},
+			},
+		})
+	}
 	return elements
 }

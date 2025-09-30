@@ -52,11 +52,11 @@ func (g *GhostView) ConvertPos(ctx Context, textLayout *TextLayout, viewLocalPos
 func (g *GhostView) ConvertModel(ctx Context, textLayout *TextLayout, viewLocalPos int) CharacterReference {
 	e := textLayout.Element
 	r := e.GetRange(0)
-	st := r.StartPosition
+	ed := r.EndPosition
 	return CharacterReference{
 		StartPosition: model.Position{
-			Row:    st.Row,
-			Column: st.Column,
+			Row:    ed.Row,
+			Column: ed.Column,
 		},
 		Bytes: 0,
 	}
