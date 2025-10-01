@@ -31,7 +31,7 @@ func (hl *HorizontalLineView) MinimumSize(ctx view.Context, e model.Element, wid
 }
 
 func (hl *HorizontalLineView) MoveLength(ctx view.Context, e model.Element) int {
-	return 0
+	return 1
 }
 
 func (hl *HorizontalLineView) MoveUp(ctx view.Context, e model.Element, viewLocalPos int) int {
@@ -57,11 +57,11 @@ func (hl *HorizontalLineView) ConvertPos(ctx view.Context, textLayout *view.Text
 func (hl *HorizontalLineView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {
 	e := textLayout.Element
 	r := e.GetRange(0)
-	st := r.StartPosition
+	ed := r.EndPosition
 	return view.CharacterReference{
 		StartPosition: model.Position{
-			Row:    st.Row,
-			Column: st.Column,
+			Row:    ed.Row,
+			Column: ed.Column,
 		},
 		Bytes: 0,
 	}

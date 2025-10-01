@@ -939,3 +939,40 @@ func TestTextBox33(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 5)
 }
+
+func TestTextBox34(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+	tb.InsertString("1\n---\n")
+	tb.bytePos = view.CharacterReference{
+		StartPosition: model.Position{
+			Row:    0,
+			Column: 0,
+		},
+		Bytes: 1,
+	}
+	tb.viewPosition = 0
+
+	tb.MoveRight()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+
+	tb.MoveRight()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+
+	tb.MoveRight()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+
+	tb.RemoveChar()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+}
