@@ -76,10 +76,6 @@ func (doc *PlainDocument) GetVersion() uint {
 	return doc.version
 }
 
-func (doc *PlainDocument) GetLineAt(lineIndex int) string {
+func (doc *PlainDocument) GetLineString(lineIndex int) string {
 	return doc.buffer.GetLineAt(lineIndex).GetContent()
-}
-
-func (doc *PlainDocument) LineCount() int {
-	return doc.buffer.GetLineCount()
 }

@@ -26,7 +26,7 @@ func (doc *StyledDocument) Render() []model.Element {
 						},
 						EndPosition: model.Position{
 							Row:    block.LineIndex,
-							Column: len(doc.GetLineAt(block.LineIndex)),
+							Column: len(doc.GetLineString(block.LineIndex)),
 						},
 					},
 					{
@@ -59,7 +59,7 @@ func (doc *StyledDocument) Render() []model.Element {
 			codeLines := []model.Element{}
 			for i := 0; i < block.LineCount-2; i++ {
 				lineIndex := block.LineIndex + i + 1
-				if len(doc.GetLineAt(lineIndex)) == 0 {
+				if len(doc.GetLineString(lineIndex)) == 0 {
 					codeLines = append(codeLines, &BlankLineElement{
 						Range: model.Range{
 							StartPosition: model.Position{
@@ -81,7 +81,7 @@ func (doc *StyledDocument) Render() []model.Element {
 							},
 							EndPosition: model.Position{
 								Row:    lineIndex,
-								Column: len(doc.GetLineAt(lineIndex)),
+								Column: len(doc.GetLineString(lineIndex)),
 							},
 						},
 						Children: []model.Element{
@@ -94,7 +94,7 @@ func (doc *StyledDocument) Render() []model.Element {
 										},
 										EndPosition: model.Position{
 											Row:    lineIndex,
-											Column: len(doc.GetLineAt(lineIndex)),
+											Column: len(doc.GetLineString(lineIndex)),
 										},
 									},
 									{
@@ -104,7 +104,7 @@ func (doc *StyledDocument) Render() []model.Element {
 										},
 										EndPosition: model.Position{
 											Row:    lineIndex,
-											Column: len(doc.GetLineAt(lineIndex)),
+											Column: len(doc.GetLineString(lineIndex)),
 										},
 									},
 								},
@@ -122,7 +122,7 @@ func (doc *StyledDocument) Render() []model.Element {
 						},
 						EndPosition: model.Position{
 							Row:    block.LineIndex + block.LineCount - 1,
-							Column: len(doc.GetLineAt(block.LineIndex + block.LineCount - 1)),
+							Column: len(doc.GetLineString(block.LineIndex + block.LineCount - 1)),
 						},
 					},
 					{
@@ -217,7 +217,7 @@ func (doc *StyledDocument) Render() []model.Element {
 					},
 					EndPosition: model.Position{
 						Row:    block.LineIndex,
-						Column: len(doc.GetLineAt(block.LineIndex)),
+						Column: len(doc.GetLineString(block.LineIndex)),
 					},
 				},
 				Children: texts,
@@ -231,7 +231,7 @@ func (doc *StyledDocument) Render() []model.Element {
 					},
 					EndPosition: model.Position{
 						Row:    block.LineIndex,
-						Column: len(doc.GetLineAt(block.LineIndex)),
+						Column: len(doc.GetLineString(block.LineIndex)),
 					},
 				},
 			})

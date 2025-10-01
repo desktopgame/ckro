@@ -4,10 +4,10 @@ type StringReader struct {
 	Source []string
 }
 
-func (s *StringReader) GetLineAt(lineIndex int) string {
+func (s *StringReader) GetLineString(lineIndex int) string {
 	return s.Source[lineIndex]
 }
 
-func (s *StringReader) LineCount() int {
+func (s *StringReader) GetLineCount() int {
 	return len(s.Source)
 }

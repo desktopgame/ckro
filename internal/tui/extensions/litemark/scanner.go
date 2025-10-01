@@ -6,11 +6,11 @@ type Scanner struct {
 }
 
 func (s *Scanner) Next() string {
-	line := s.Reader.GetLineAt(s.lineIndex)
+	line := s.Reader.GetLineString(s.lineIndex)
 	s.lineIndex++
 	return line
 }
 
 func (s *Scanner) Ready() bool {
-	return s.lineIndex < s.Reader.LineCount()
+	return s.lineIndex < s.Reader.GetLineCount()
 }
