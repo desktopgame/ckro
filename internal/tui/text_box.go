@@ -223,6 +223,7 @@ func (tb *TextBox) TextHorizontal() {
 // TextClear is do reset to content.
 func (tb *TextBox) TextClear() {
 	tb.Document.Clear()
+	tb.MoveReset()
 }
 
 // Draw is render content.
