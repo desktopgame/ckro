@@ -33,6 +33,10 @@ type CodeBlock struct {
 	Span Span
 }
 
+type HorizontalLine struct {
+	Block
+}
+
 type Inline struct {
 	Spans []Span
 }

@@ -215,6 +215,19 @@ func (doc *StyledDocument) Render() []model.Element {
 				},
 				Children: texts,
 			})
+		case *HorizontalLine:
+			elements = append(elements, &HorizontalLineElement{
+				Range: model.Range{
+					StartPosition: model.Position{
+						Row:    block.LineIndex,
+						Column: 0,
+					},
+					EndPosition: model.Position{
+						Row:    block.LineIndex,
+						Column: len(doc.GetLineAt(block.LineIndex)),
+					},
+				},
+			})
 		}
 	}
 	for i := 0; i < 10; i++ {

@@ -118,6 +118,16 @@ func Parse(reader Reader) []AbstractBlock {
 			}
 		}
 
+		if line == "***" || line == "---" {
+			blocks = append(blocks, &HorizontalLine{
+				Block: Block{
+					LineIndex: lineIndex,
+					LineCount: 1,
+				},
+			})
+			continue
+		}
+
 		// Inline text
 		blocks = append(blocks, &Text{
 			Block: Block{
