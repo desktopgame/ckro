@@ -187,6 +187,8 @@ func (doc *StyledDocument) Render() []model.Element {
 				case *Italic:
 					pad = 1
 					isItalic = true
+				case *Strike:
+					pad = 2
 				case *Link:
 					isUnderline = true
 					fg = optional.Some(tcell.ColorBlue)

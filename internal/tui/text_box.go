@@ -560,10 +560,9 @@ func (tb *TextBox) InsertString(s string) {
 
 	tb.Document.WriteString(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, s)
 
-	breakLine := false
+	breakLine := strings.Contains(s, "\n")
 	if strings.HasPrefix(s, "\n") {
 		tb.bytePos.Bytes = 0
-		breakLine = true
 	}
 
 	tb.renderCache.Update(ctx, tb.Width)
