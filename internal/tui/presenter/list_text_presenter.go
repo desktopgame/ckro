@@ -12,33 +12,34 @@ type ListTextPresenter struct {
 }
 
 func (lp *ListTextPresenter) Present(view View) {
-	view.TextClear()
-	doc := view.GetDocument()
-
-	cursorChar := lp.CursorChar
-	if cursorChar == 0 {
-		cursorChar = '>'
-	}
-
-	prefix := lp.Prefix
-	if prefix == "" {
-		prefix = " "
-	}
-
-	// show list items.
-	for i, item := range lp.Items {
-		if i == lp.SelectedIndex {
-			doc.InsertString(string(cursorChar))
-		} else {
-			doc.InsertString(" ")
-		}
-
-		doc.InsertString(prefix + item)
-
-		if i < len(lp.Items)-1 {
-			doc.InsertLine()
-		}
-	}
+	// TODO: impl
+	//view.TextClear()
+	//doc := view.GetDocument()
+	//
+	//cursorChar := lp.CursorChar
+	//if cursorChar == 0 {
+	//	cursorChar = '>'
+	//}
+	//
+	//prefix := lp.Prefix
+	//if prefix == "" {
+	//	prefix = " "
+	//}
+	//
+	//// show list items.
+	//for i, item := range lp.Items {
+	//	if i == lp.SelectedIndex {
+	//		doc.InsertString(string(cursorChar))
+	//	} else {
+	//		doc.InsertString(" ")
+	//	}
+	//
+	//	doc.InsertString(prefix + item)
+	//
+	//	if i < len(lp.Items)-1 {
+	//		doc.InsertLine()
+	//	}
+	//}
 
 	lp.setCursorToSelectedItem(view)
 }

@@ -165,32 +165,33 @@ func (tb *TextBox) CursorReset() {
 
 // TextFrame is print a frame of TextBox region.
 func (tb *TextBox) TextFrame() {
-	tb.Document.Clear()
-
-	w := tb.Width
-	h := tb.Height
-
-	tb.Document.InsertString("*")
-	for i := 0; i < w-2; i++ {
-		tb.Document.InsertString("-")
-	}
-	tb.Document.InsertString("*")
-	tb.Document.InsertLine()
-
-	for i := 0; i < h-2; i++ {
-		tb.Document.InsertString("|")
-		for j := 0; j < w-2; j++ {
-			tb.Document.InsertString(" ")
-		}
-		tb.Document.InsertString("|")
-		tb.Document.InsertLine()
-	}
-
-	tb.Document.InsertString("*")
-	for i := 0; i < w-2; i++ {
-		tb.Document.InsertString("-")
-	}
-	tb.Document.InsertString("*")
+	// TODO: impl
+	//tb.Document.Clear()
+	//
+	//w := tb.Width
+	//h := tb.Height
+	//
+	//tb.Document.InsertString("*")
+	//for i := 0; i < w-2; i++ {
+	//	tb.Document.InsertString("-")
+	//}
+	//tb.Document.InsertString("*")
+	//tb.Document.InsertLine()
+	//
+	//for i := 0; i < h-2; i++ {
+	//	tb.Document.InsertString("|")
+	//	for j := 0; j < w-2; j++ {
+	//		tb.Document.InsertString(" ")
+	//	}
+	//	tb.Document.InsertString("|")
+	//	tb.Document.InsertLine()
+	//}
+	//
+	//tb.Document.InsertString("*")
+	//for i := 0; i < w-2; i++ {
+	//	tb.Document.InsertString("-")
+	//}
+	//tb.Document.InsertString("*")
 
 	// TODO: impl
 	// tb.Document.MoveReset()
@@ -198,27 +199,29 @@ func (tb *TextBox) TextFrame() {
 
 // TextVertical is print vertical line.
 func (tb *TextBox) TextVertical() {
-	tb.Document.Clear()
-
-	h := tb.Height
-
-	for i := 0; i < h; i++ {
-		tb.Document.InsertString("|\n")
-	}
-	tb.Document.RemoveChar()
+	// TODO: impl
+	//tb.Document.Clear()
+	//
+	//h := tb.Height
+	//
+	//for i := 0; i < h; i++ {
+	//	tb.Document.InsertString("|\n")
+	//}
+	//tb.Document.RemoveChar()
 	// TODO: impl
 	// tb.Document.MoveReset()
 }
 
 // TextHorizontal is print horizontal line.
 func (tb *TextBox) TextHorizontal() {
-	tb.Document.Clear()
-
-	w := tb.Width
-
-	for i := 0; i < w; i++ {
-		tb.Document.InsertString("-")
-	}
+	// TODO: impl
+	//tb.Document.Clear()
+	//
+	//w := tb.Width
+	//
+	//for i := 0; i < w; i++ {
+	//	tb.Document.InsertString("-")
+	//}
 	// TODO: impl
 	// tb.Document.MoveReset()
 }

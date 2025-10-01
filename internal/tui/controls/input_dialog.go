@@ -55,8 +55,9 @@ func (id *InputDialog) Init(title, prompt string) {
 
 	// 初期値を設定
 	if id.initialValue != "" {
-		doc := id.inputField.TextBox.GetDocument()
-		doc.InsertString(id.initialValue)
+		// TODO: impl
+		// doc := id.inputField.TextBox.GetDocument()
+		// doc.InsertString(id.initialValue)
 	}
 
 	// ボタン
@@ -193,11 +194,12 @@ func (id *InputDialog) Handle(ev base.Event) {
 
 func (id *InputDialog) getInputValue() string {
 	// 入力フィールドの内容を取得
-	doc := id.inputField.TextBox.GetDocument()
-	buffer := doc.GetBuffer()
-	if buffer.GetLineCount() > 0 {
-		return buffer.GetLineAt(0).GetContent()
-	}
+	// TODO: impl
+	// doc := id.inputField.TextBox.GetDocument()
+	// buffer := doc.GetBuffer()
+	// if buffer.GetLineCount() > 0 {
+	// 	return buffer.GetLineAt(0).GetContent()
+	// }
 	return ""
 }
 
@@ -296,9 +298,10 @@ func (id *InputDialog) SetPrompt(prompt string) {
 
 // SetInputValue sets the input field value
 func (id *InputDialog) SetInputValue(value string) {
-	doc := id.inputField.TextBox.GetDocument()
-	doc.Clear()
-	doc.InsertString(value)
+	// TODO: impl
+	// doc := id.inputField.TextBox.GetDocument()
+	// doc.Clear()
+	// doc.InsertString(value)
 }
 
 // GetInputValue returns the current input field value

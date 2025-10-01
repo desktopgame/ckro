@@ -6,19 +6,9 @@ type Document interface {
 
 	WriteString(row int, bytePos int, s string)
 	Remove(row int, bytePos int, byteLen int)
+	Clear()
 
 	GetLineBytes(index int) int
 	GetLineCount() int
 	GetVersion() uint
-
-	InsertLine()
-	InsertString(s string)
-	RemoveChar()
-	Clear()
-
-	FindPrev(searchStr string) bool
-	FindNext(searchStr string) bool
-	Replace(deleteCount int, replaceStr string) bool
-
-	GetBuffer() *Buffer
 }

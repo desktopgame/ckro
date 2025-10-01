@@ -1,13 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"context"
-	"errors"
 	"fmt"
 	"log"
-	"os"
-	"strings"
 	"sync"
 
 	"github.com/desktopgame/ckro/internal/llm"
@@ -53,69 +49,75 @@ func (app *Application) newFile() {
 }
 
 func (app *Application) openFile(filePath string) error {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	doc := app.textEdior.TextArea.TextBox.GetDocument()
-	doc.Clear()
-
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		doc.InsertString(scanner.Text())
-		doc.InsertLine()
-	}
-
-	app.filePath = filePath
-	app.modified = false
-	app.textEdior.TextArea.TextBox.CursorReset()
+	// TODO: impl
+	//file, err := os.Open(filePath)
+	//if err != nil {
+	//	return err
+	//}
+	//defer file.Close()
+	//
+	//doc := app.textEdior.TextArea.TextBox.GetDocument()
+	//doc.Clear()
+	//
+	//scanner := bufio.NewScanner(file)
+	//
+	//for scanner.Scan() {
+	//	doc.InsertString(scanner.Text())
+	//	doc.InsertLine()
+	//}
+	//
+	//app.filePath = filePath
+	//app.modified = false
+	//app.textEdior.TextArea.TextBox.CursorReset()
+	//return nil
 	return nil
 }
 
 func (app *Application) saveFile() error {
-	if app.filePath == "" {
-		return errors.New("filePath is empty")
-	}
-	sb := strings.Builder{}
-	buf := app.textEdior.TextArea.TextBox.GetDocument().GetBuffer()
-
-	for i := 0; i < buf.GetLineCount(); i++ {
-		sb.WriteString(buf.GetLineAt(i).GetContent())
-
-		if i < buf.GetLineCount()-1 {
-			sb.WriteRune('\n')
-		}
-	}
-
-	err := os.WriteFile(app.filePath, []byte(sb.String()), 0644)
-	if err == nil {
-		app.modified = false
-	}
-	return err
+	// TODO: impl
+	//if app.filePath == "" {
+	//	return errors.New("filePath is empty")
+	//}
+	//sb := strings.Builder{}
+	//buf := app.textEdior.TextArea.TextBox.GetDocument().GetBuffer()
+	//
+	//for i := 0; i < buf.GetLineCount(); i++ {
+	//	sb.WriteString(buf.GetLineAt(i).GetContent())
+	//
+	//	if i < buf.GetLineCount()-1 {
+	//		sb.WriteRune('\n')
+	//	}
+	//}
+	//
+	//err := os.WriteFile(app.filePath, []byte(sb.String()), 0644)
+	//if err == nil {
+	//	app.modified = false
+	//}
+	//return err
+	return nil
 }
 
 func (app *Application) saveFileAs(filePath string) error {
-	sb := strings.Builder{}
-	buf := app.textEdior.TextArea.TextBox.GetDocument().GetBuffer()
-
-	for i := 0; i < buf.GetLineCount(); i++ {
-		sb.WriteString(buf.GetLineAt(i).GetContent())
-
-		if i < buf.GetLineCount()-1 {
-			sb.WriteRune('\n')
-		}
-	}
-
-	err := os.WriteFile(filePath, []byte(sb.String()), 0644)
-	if err == nil {
-		app.filePath = filePath
-		app.modified = false
-		app.treePresenter.Reload()
-	}
-	return err
+	// TODO: impl
+	// sb := strings.Builder{}
+	// buf := app.textEdior.TextArea.TextBox.GetDocument().GetBuffer()
+	//
+	// for i := 0; i < buf.GetLineCount(); i++ {
+	// 	sb.WriteString(buf.GetLineAt(i).GetContent())
+	//
+	// 	if i < buf.GetLineCount()-1 {
+	// 		sb.WriteRune('\n')
+	// 	}
+	// }
+	//
+	// err := os.WriteFile(filePath, []byte(sb.String()), 0644)
+	// if err == nil {
+	// 	app.filePath = filePath
+	// 	app.modified = false
+	// 	app.treePresenter.Reload()
+	// }
+	// return err
+	return nil
 }
 
 func showSaveAsDialogAndThenForTree(app *Application, runtime base.Runtime, callback func()) {
@@ -372,11 +374,12 @@ func (app *Application) loopMiniBuffer() {
 
 		log.Println(s)
 
-		doc := app.textEdior.TextArea.TextBox.GetDocument()
-		marker := fmt.Sprintf("<chat_response_is_here:%d>", app.chatResponseId)
-		doc.InsertLine()
-		doc.InsertString(marker)
-		doc.InsertLine()
+		// TODO: impl
+		// doc := app.textEdior.TextArea.TextBox.GetDocument()
+		// marker := fmt.Sprintf("<chat_response_is_here:%d>", app.chatResponseId)
+		// doc.InsertLine()
+		// doc.InsertString(marker)
+		// doc.InsertLine()
 		app.modified = true
 		app.window.Repaint()
 

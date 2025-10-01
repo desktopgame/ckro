@@ -171,47 +171,48 @@ func (t *TreeTextPresenter) addNodeToFlat(node *TreeNode) {
 }
 
 func (t *TreeTextPresenter) renderTree(view View) {
-	view.TextClear()
-	doc := view.GetDocument()
-
-	for i, node := range t.flatNodes {
-		indent := strings.Repeat("  ", node.Level)
-
-		// icon for expand or collapse
-		var icon string
-		if node.IsDir {
-			if node.IsExpanded {
-				icon = "▼ "
-			} else {
-				icon = "▶ "
-			}
-		} else {
-			icon = "  "
-		}
-
-		// cursor
-		var prefix string
-		if i == t.selectedIndex {
-			prefix = "> "
-		} else {
-			prefix = "  "
-		}
-
-		// icon for file or directory
-		var typeIcon string
-		if node.IsDir {
-			typeIcon = "📁 "
-		} else {
-			typeIcon = "📄 "
-		}
-
-		line := prefix + indent + icon + typeIcon + node.Name
-		doc.InsertString(line)
-
-		if i < len(t.flatNodes)-1 {
-			doc.InsertLine()
-		}
-	}
+	// TODO: impl
+	//view.TextClear()
+	//doc := view.GetDocument()
+	//
+	//for i, node := range t.flatNodes {
+	//	indent := strings.Repeat("  ", node.Level)
+	//
+	//	// icon for expand or collapse
+	//	var icon string
+	//	if node.IsDir {
+	//		if node.IsExpanded {
+	//			icon = "▼ "
+	//		} else {
+	//			icon = "▶ "
+	//		}
+	//	} else {
+	//		icon = "  "
+	//	}
+	//
+	//	// cursor
+	//	var prefix string
+	//	if i == t.selectedIndex {
+	//		prefix = "> "
+	//	} else {
+	//		prefix = "  "
+	//	}
+	//
+	//	// icon for file or directory
+	//	var typeIcon string
+	//	if node.IsDir {
+	//		typeIcon = "📁 "
+	//	} else {
+	//		typeIcon = "📄 "
+	//	}
+	//
+	//	line := prefix + indent + icon + typeIcon + node.Name
+	//	doc.InsertString(line)
+	//
+	//	if i < len(t.flatNodes)-1 {
+	//		doc.InsertLine()
+	//	}
+	//}
 
 	t.moveToSelectedItem(view)
 }

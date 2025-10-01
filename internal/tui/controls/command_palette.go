@@ -139,8 +139,9 @@ func (cp *CommandPalette) Handle(ev base.Event) {
 
 func (cp *CommandPalette) addChar(r rune) {
 	// 検索入力フィールドに文字を追加
-	doc := cp.searchInput.TextBox.GetDocument()
-	doc.InsertString(string(r))
+	// TODO: impl
+	// doc := cp.searchInput.TextBox.GetDocument()
+	// doc.InsertString(string(r))
 }
 
 func (cp *CommandPalette) removeLastChar() {
@@ -154,11 +155,12 @@ func (cp *CommandPalette) removeLastChar() {
 
 func (cp *CommandPalette) getSearchQuery() string {
 	// 検索入力フィールドの内容を取得
-	doc := cp.searchInput.TextBox.GetDocument()
-	buffer := doc.GetBuffer()
-	if buffer.GetLineCount() > 0 {
-		return buffer.GetLineAt(0).GetContent()
-	}
+	// TODO: impl
+	// doc := cp.searchInput.TextBox.GetDocument()
+	// buffer := doc.GetBuffer()
+	// if buffer.GetLineCount() > 0 {
+	// 	return buffer.GetLineAt(0).GetContent()
+	// }
 	return ""
 }
 

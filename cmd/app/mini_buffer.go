@@ -51,7 +51,8 @@ func (m *MiniBuffer) Handle(ev tui.Event) {
 	case *tcell.EventKey:
 		switch e.Key() {
 		case tcell.KeyEnter:
-			m.onSubmit(m.tile.TextBox.GetDocument().GetBuffer().GetLineAt(0).GetContent())
+			// TODO: impl
+			// m.onSubmit(m.tile.TextBox.GetDocument().GetBuffer().GetLineAt(0).GetContent())
 			m.tile.TextBox.Document.Clear()
 			m.tile.TextBox.CursorReset()
 			return
