@@ -104,6 +104,7 @@ func (t *TextView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, vie
 
 func (t *TextView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
 
+	vls := 0
 	for i := 0; i < len(textLayout.Children); i++ {
 		child := textLayout.Children[i]
 		childElement := child.Element
@@ -111,10 +112,11 @@ func (t *TextView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLa
 		r := childElement.GetRange(0)
 		st := r.StartPosition
 		ed := r.EndPosition
+		childView := ctx.Resolver.Resolve(childElement)
 		if bytePos.Column >= st.Column && (bytePos.Column < ed.Column || ed.Row > st.Row) {
-			childView := ctx.Resolver.Resolve(childElement)
-			return childView.ConvertViewLocalPos(ctx, child, bytePos)
+			return vls + childView.ConvertViewLocalPos(ctx, child, bytePos)
 		}
+		vls += childView.MoveLength(ctx, childElement)
 	}
 	return t.MoveLength(ctx, textLayout.Element) - 1
 }
