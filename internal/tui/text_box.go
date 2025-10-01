@@ -559,8 +559,11 @@ func (tb *TextBox) InsertString(s string) {
 	}
 
 	tb.Document.WriteString(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, s)
+
+	breakLine := false
 	if strings.HasPrefix(s, "\n") {
 		tb.bytePos.Bytes = 0
+		breakLine = true
 	}
 
 	vs := tb.viewPosition
@@ -598,7 +601,7 @@ func (tb *TextBox) InsertString(s string) {
 					tb.viewPosition = viewStart
 				}
 			} else {
-				if _, ok := textView.(*litemark.TextView); ok {
+				if _, ok := textView.(*litemark.TextView); ok && !breakLine {
 					// *a* このときは-1
 					// *a*NL このときは0
 					tb.viewPosition = viewStart + textView.MoveLength(ctx, element) - 1
