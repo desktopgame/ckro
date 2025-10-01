@@ -97,6 +97,49 @@ func (t *TextView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int
 	return viewLocalPos + 1
 }
 
+func (t *TextView) RemoveCombine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (bool, view.CharacterReference) {
+	vls := 0
+	for i := 0; i < len(textLayout.Children); i++ {
+		child := textLayout.Children[i]
+		childElement := child.Element
+
+		childView := ctx.Resolver.Resolve(childElement)
+		childViewLen := childView.MoveLength(ctx, childElement)
+		if vls == viewLocalPos {
+			if i > 0 {
+				child = textLayout.Children[i-1]
+				childElement = child.Element
+				childView = ctx.Resolver.Resolve(childElement)
+				if childView.MoveLength(ctx, childElement)+1 == 1 {
+					bPos := childView.ConvertModel(ctx, child, 0)
+					return true, bPos
+				}
+			}
+		}
+		vls += childViewLen
+	}
+	if len(textLayout.Children) == 1 {
+		child := textLayout.Children[0]
+		childElement := child.Element
+
+		childView := ctx.Resolver.Resolve(childElement)
+		childViewLen := childView.MoveLength(ctx, childElement) + 1
+
+		if viewLocalPos == childViewLen-1 {
+			r := childElement.GetRange(0)
+			bPos := view.CharacterReference{
+				StartPosition: model.Position{
+					Row:    r.StartPosition.Row,
+					Column: r.StartPosition.Column,
+				},
+				Bytes: (r.EndPosition.Column - r.StartPosition.Column),
+			}
+			return true, bPos
+		}
+	}
+	return false, view.CharacterReference{}
+}
+
 func (t *TextView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
 	e := textLayout.Element
 	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
