@@ -7,6 +7,8 @@ type Document interface {
 	WriteString(row int, bytePos int, s string)
 	Remove(row int, bytePos int, byteLen int)
 
+	GetLineBytes(index int) int
+	GetLineCount() int
 	GetVersion() uint
 
 	InsertLine()

@@ -62,6 +62,14 @@ func (doc *PlainDocument) Remove(row int, bytePos int, byteLen int) {
 	doc.version++
 }
 
+func (doc *PlainDocument) GetLineBytes(index int) int {
+	return len(doc.buffer.GetLineAt(index).GetContent())
+}
+
+func (doc *PlainDocument) GetLineCount() int {
+	return doc.buffer.GetLineCount()
+}
+
 func (doc *PlainDocument) GetVersion() uint {
 	return doc.version
 }
