@@ -105,27 +105,7 @@ func (t *TextView) RemoveCombine(ctx view.Context, textLayout *view.TextLayout, 
 
 		childView := ctx.Resolver.Resolve(childElement)
 		childViewLen := childView.MoveLength(ctx, childElement)
-		if vls == viewLocalPos {
-			if i > 0 {
-				child = textLayout.Children[i-1]
-				childElement = child.Element
-				childView = ctx.Resolver.Resolve(childElement)
-				if childView.MoveLength(ctx, childElement)+1 == 1 {
-					bPos := childView.ConvertModel(ctx, child, 0)
-					return true, bPos
-				}
-			}
-		}
-		vls += childViewLen
-	}
-	if len(textLayout.Children) == 1 {
-		child := textLayout.Children[0]
-		childElement := child.Element
-
-		childView := ctx.Resolver.Resolve(childElement)
-		childViewLen := childView.MoveLength(ctx, childElement) + 1
-
-		if viewLocalPos == childViewLen-1 {
+		if childViewLen == 1 && vls+1 == viewLocalPos {
 			r := childElement.GetRange(0)
 			bPos := view.CharacterReference{
 				StartPosition: model.Position{
@@ -136,6 +116,10 @@ func (t *TextView) RemoveCombine(ctx view.Context, textLayout *view.TextLayout, 
 			}
 			return true, bPos
 		}
+		vls += childViewLen
+	}
+	if len(textLayout.Children) == 1 {
+
 	}
 	return false, view.CharacterReference{}
 }

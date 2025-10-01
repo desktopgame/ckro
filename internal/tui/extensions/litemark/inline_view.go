@@ -171,5 +171,5 @@ func (il *InlineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Tex
 		}
 		bytes += len(cluster)
 	}
-	return il.MoveLength(ctx, e) - 1
+	return il.MoveLength(ctx, e) //- 1
 }
