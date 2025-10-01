@@ -629,6 +629,12 @@ func (tb *TextBox) RemoveChar() {
 		return
 	}
 
+	_, ei, _, _ := tb.renderCache.Stats(tb.viewPosition)
+	if ge, ok := tb.renderCache.GetElement(ei).(*model.GhostElement); ok {
+		tb.viewPosition -= ge.Index + 1
+		return
+	}
+
 	ctx := view.Context{
 		Resolver: tb.TextEngine,
 		Document: tb.Document,

@@ -915,3 +915,27 @@ func TestTextBox32(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 5)
 }
+
+func TestTextBox33(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+
+	tb.MoveRight()
+	tb.MoveRight()
+	tb.InsertString("Hello")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 5)
+
+	tb.MoveRight()
+	tb.MoveRight()
+	tb.RemoveChar()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 5)
+}
