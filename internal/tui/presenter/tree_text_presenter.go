@@ -218,18 +218,19 @@ func (t *TreeTextPresenter) renderTree(view View) {
 
 // moveToSelectedItem is moves the document cursor to the selected item
 func (t *TreeTextPresenter) moveToSelectedItem(view View) {
-	doc := view.GetDocument()
-	if t.selectedIndex >= 0 && t.selectedIndex < len(t.flatNodes) {
-		doc.MoveReset()
-
-		for i := 0; i < t.selectedIndex; i++ {
-			doc.MoveDown()
-		}
-
-		for doc.GetCursorColumn() > 0 {
-			doc.MoveLeft()
-		}
-	}
+	// TODO: impl
+	//doc := view.GetDocument()
+	//if t.selectedIndex >= 0 && t.selectedIndex < len(t.flatNodes) {
+	//	doc.MoveReset()
+	//
+	//	for i := 0; i < t.selectedIndex; i++ {
+	//		doc.MoveDown()
+	//	}
+	//
+	//	for doc.GetCursorColumn() > 0 {
+	//		doc.MoveLeft()
+	//	}
+	//}
 }
 
 func (t *TreeTextPresenter) GetSelectedPath() string {

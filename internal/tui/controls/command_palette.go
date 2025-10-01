@@ -145,10 +145,11 @@ func (cp *CommandPalette) addChar(r rune) {
 
 func (cp *CommandPalette) removeLastChar() {
 	// 検索入力フィールドから最後の文字を削除
-	doc := cp.searchInput.TextBox.GetDocument()
-	if doc.GetCursorColumn() > 0 {
-		doc.RemoveChar()
-	}
+	// TODO: impl
+	// doc := cp.searchInput.TextBox.GetDocument()
+	// if doc.GetCursorColumn() > 0 {
+	// 	doc.RemoveChar()
+	// }
 }
 
 func (cp *CommandPalette) getSearchQuery() string {

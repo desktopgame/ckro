@@ -157,7 +157,8 @@ func (tb *TextBox) CursorUpdate() {
 
 // CursorReset is reset cursor position and scroll.
 func (tb *TextBox) CursorReset() {
-	tb.Document.MoveReset()
+	// TODO: impl
+	// tb.Document.MoveReset()
 	tb.scrollX = 0
 	tb.scrollY = 0
 }
@@ -191,7 +192,8 @@ func (tb *TextBox) TextFrame() {
 	}
 	tb.Document.InsertString("*")
 
-	tb.Document.MoveReset()
+	// TODO: impl
+	// tb.Document.MoveReset()
 }
 
 // TextVertical is print vertical line.
@@ -204,7 +206,8 @@ func (tb *TextBox) TextVertical() {
 		tb.Document.InsertString("|\n")
 	}
 	tb.Document.RemoveChar()
-	tb.Document.MoveReset()
+	// TODO: impl
+	// tb.Document.MoveReset()
 }
 
 // TextHorizontal is print horizontal line.
@@ -216,8 +219,8 @@ func (tb *TextBox) TextHorizontal() {
 	for i := 0; i < w; i++ {
 		tb.Document.InsertString("-")
 	}
-	tb.Document.MoveReset()
-
+	// TODO: impl
+	// tb.Document.MoveReset()
 }
 
 // TextClear is do reset to content.

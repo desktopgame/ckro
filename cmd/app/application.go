@@ -408,25 +408,30 @@ func (app *Application) loopMiniBuffer() {
 
 				ev.Consume(context.Background())
 
-				if msg, ok := ev.(*llm.MessageEvent); ok {
-					response := msg.GetResult().Choices[0].Message.Content
-					app.textEdior.TextArea.TextBox.CursorReset()
-					if doc.FindNext(marker) {
-						doc.Replace(len(marker), response)
-						doc.MoveRight()
-						app.textEdior.TextArea.TextBox.CursorUpdate()
-					}
-					break
-				}
+				// TODO: impl
+				// if msg, ok := ev.(*llm.MessageEvent); ok {
+				// 	response := msg.GetResult().Choices[0].Message.Content
+				// 	app.textEdior.TextArea.TextBox.CursorReset()
+				// 	if doc.FindNext(marker) {
+				// 		doc.Replace(len(marker), response)
+				// 		doc.MoveRight()
+				// 		app.textEdior.TextArea.TextBox.CursorUpdate()
+				// 	}
+				// 	break
+				// }
 
-				if e, ok := ev.(*llm.ErrorEvent); ok {
-					if doc.FindNext(marker) {
-						doc.Replace(len(marker), e.GetError().Error())
-						doc.MoveRight()
-						app.textEdior.TextArea.TextBox.CursorUpdate()
-					}
-					break
-				}
+				// TODO: impl
+				//if e, ok := ev.(*llm.ErrorEvent); ok {
+				//	if doc.FindNext(marker) {
+				//		doc.Replace(len(marker), e.GetError().Error())
+				//		doc.MoveRight()
+				//		app.textEdior.TextArea.TextBox.CursorUpdate()
+				//	}
+				//	break
+				//}
+
+				// 後で消す
+				break
 			}
 
 			app.miniBuffer.Editable()

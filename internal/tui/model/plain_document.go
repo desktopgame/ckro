@@ -318,63 +318,6 @@ func (doc *PlainDocument) Replace(deleteCount int, replaceStr string) bool {
 	return true
 }
 
-// MoveLeft is move cursor to left.
-func (doc *PlainDocument) MoveLeft() {
-	if doc.cursorColumn > 0 {
-		doc.cursorColumn--
-	} else {
-		if doc.cursorRow > 0 {
-			doc.cursorRow--
-			doc.cursorColumn = text.GraphemeLength(doc.buffer.GetLineAt(doc.cursorRow).GetContent())
-		}
-	}
-}
-
-// MoveRight is move cursor to right.
-func (doc *PlainDocument) MoveRight() {
-	currLine := doc.buffer.GetLineAt(doc.cursorRow)
-	if doc.cursorColumn < text.GraphemeLength(currLine.GetContent()) {
-		doc.cursorColumn++
-	} else {
-		if doc.cursorRow < doc.buffer.GetLineCount()-1 {
-			doc.cursorRow++
-			doc.cursorColumn = 0
-		}
-	}
-}
-
-// MoveUp is move cursor to up.
-func (doc *PlainDocument) MoveUp() {
-	if doc.cursorRow > 0 {
-		doc.cursorRow--
-
-		currLine := doc.buffer.GetLineAt(doc.cursorRow)
-		lineLength := text.GraphemeLength(currLine.GetContent())
-		if doc.cursorColumn > lineLength {
-			doc.cursorColumn = lineLength
-		}
-	}
-}
-
-// MoveDown is move cursor to down.
-func (doc *PlainDocument) MoveDown() {
-	if doc.cursorRow < doc.buffer.GetLineCount()-1 {
-		doc.cursorRow++
-
-		currLine := doc.buffer.GetLineAt(doc.cursorRow)
-		lineLength := text.GraphemeLength(currLine.GetContent())
-		if doc.cursorColumn > lineLength {
-			doc.cursorColumn = lineLength
-		}
-	}
-}
-
-// MoveReset is cursor position reset to zero.
-func (doc *PlainDocument) MoveReset() {
-	doc.cursorRow = 0
-	doc.cursorColumn = 0
-}
-
 func (doc *PlainDocument) GetLineAt(lineIndex int) string {
 	return doc.buffer.GetLineAt(lineIndex).GetContent()
 }
@@ -386,14 +329,4 @@ func (doc *PlainDocument) LineCount() int {
 // GetBuffer returns Buffer.
 func (doc *PlainDocument) GetBuffer() *Buffer {
 	return &doc.buffer
-}
-
-// GetCursorRow returns row of cursor.
-func (doc *PlainDocument) GetCursorRow() int {
-	return doc.cursorRow
-}
-
-// GetCursorColumn returns column of cursor.
-func (doc *PlainDocument) GetCursorColumn() int {
-	return doc.cursorColumn
 }

@@ -21,7 +21,7 @@ func (edit *EditTextPresenter) Present(view View) {
 }
 
 func (edit *EditTextPresenter) Handle(view View, ev tcell.Event) {
-	doc := view.GetDocument()
+	// doc := view.GetDocument()
 	switch e := ev.(type) {
 	case *tcell.EventKey:
 		switch e.Key() {
@@ -34,14 +34,16 @@ func (edit *EditTextPresenter) Handle(view View, ev tcell.Event) {
 		case tcell.KeyRight, tcell.KeyCtrlF:
 			view.MoveRight()
 		case tcell.KeyCtrlA:
-			for doc.GetCursorColumn() > 0 {
-				doc.MoveLeft()
-			}
+			// TODO: impl
+			// for doc.GetCursorColumn() > 0 {
+			// 	doc.MoveLeft()
+			// }
 		case tcell.KeyCtrlE:
-			line := doc.GetBuffer().GetLineAt(doc.GetCursorRow()).GetContent()
-			for doc.GetCursorColumn() < text.GraphemeLength(line) {
-				doc.MoveRight()
-			}
+			// TODO: impl
+			// line := doc.GetBuffer().GetLineAt(doc.GetCursorRow()).GetContent()
+			// for doc.GetCursorColumn() < text.GraphemeLength(line) {
+			// 	doc.MoveRight()
+			// }
 		case tcell.KeyBackspace, tcell.KeyBackspace2:
 			view.RemoveChar()
 		case tcell.KeyEnter:

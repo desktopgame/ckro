@@ -45,18 +45,19 @@ func (lp *ListTextPresenter) Present(view View) {
 
 // setCursorToSelectedItem is sets cursor to the selected item
 func (lp *ListTextPresenter) setCursorToSelectedItem(view View) {
-	doc := view.GetDocument()
-	doc.MoveReset()
-
-	for i := 0; i < lp.SelectedIndex && i < len(lp.Items)-1; i++ {
-		doc.MoveDown()
-	}
-
-	for doc.GetCursorColumn() > 0 {
-		doc.MoveLeft()
-	}
-
-	view.CursorUpdate()
+	// TODO: impl
+	//doc := view.GetDocument()
+	//doc.MoveReset()
+	//
+	//for i := 0; i < lp.SelectedIndex && i < len(lp.Items)-1; i++ {
+	//	doc.MoveDown()
+	//}
+	//
+	//for doc.GetCursorColumn() > 0 {
+	//	doc.MoveLeft()
+	//}
+	//
+	//view.CursorUpdate()
 }
 
 func (lp *ListTextPresenter) Handle(view View, ev tcell.Event) {

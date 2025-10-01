@@ -56,20 +56,21 @@ func (ln *LineNumberTextPresenter) Present(view View) {
 
 // syncCursorPosition is synchronizes cursor position with target view
 func (ln *LineNumberTextPresenter) syncCursorPosition(view View, targetDoc interface{}) {
-	if doc, ok := targetDoc.(interface{ GetCursorRow() int }); ok {
-		cursorRow := doc.GetCursorRow()
-
-		lineNumDoc := view.GetDocument()
-		lineNumDoc.MoveReset()
-
-		for i := 0; i < cursorRow && i < lineNumDoc.GetBuffer().GetLineCount()-1; i++ {
-			lineNumDoc.MoveDown()
-		}
-
-		for lineNumDoc.GetCursorColumn() > 0 {
-			lineNumDoc.MoveLeft()
-		}
-	}
+	// TODO: impl
+	//if doc, ok := targetDoc.(interface{ GetCursorRow() int }); ok {
+	//	cursorRow := doc.GetCursorRow()
+	//
+	//	lineNumDoc := view.GetDocument()
+	//	lineNumDoc.MoveReset()
+	//
+	//	for i := 0; i < cursorRow && i < lineNumDoc.GetBuffer().GetLineCount()-1; i++ {
+	//		lineNumDoc.MoveDown()
+	//	}
+	//
+	//	for lineNumDoc.GetCursorColumn() > 0 {
+	//		lineNumDoc.MoveLeft()
+	//	}
+	//}
 }
 
 func (ln *LineNumberTextPresenter) Handle(view View, ev tcell.Event) {
