@@ -514,6 +514,18 @@ func (tb *TextBox) modelToView() (ElementIndex int, ViewStart int, ViewLocalPos 
 	return elementIndex, viewStart, viewLocalPos
 }
 
+func (tb *TextBox) viewToModel() view.CharacterReference {
+	ctx := view.Context{
+		Resolver: tb.TextEngine,
+		Document: tb.Document,
+	}
+
+	_, ei, _, _ := tb.renderCache.Stats(tb.viewPosition)
+	element := tb.renderCache.GetElement(ei)
+	textView := tb.TextEngine.Resolve(element)
+	return textView.ConvertModel(ctx, tb.renderCache.GetLayout(ei), 0)
+}
+
 func (tb *TextBox) InsertString(s string) {
 	ctx := view.Context{
 		Resolver: tb.TextEngine,
@@ -854,7 +866,14 @@ func (tb *TextBox) MoveDown() {
 }
 
 func (tb *TextBox) MoveReset() {
+	ctx := view.Context{
+		Resolver: tb.TextEngine,
+		Document: tb.Document,
+	}
+
+	tb.renderCache.Update(ctx, tb.Width)
 	tb.viewPosition = 0
+	tb.bytePos = tb.viewToModel()
 }
 
 // BreakIter returns segment array by line, in consideration a wrap.
