@@ -136,7 +136,7 @@ func (t *TextView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLa
 		child := textLayout.Children[i]
 		childElement := child.Element
 
-		r := childElement.GetRange(0)
+		r := childElement.GetRange(1)
 		st := r.StartPosition
 		ed := r.EndPosition
 		childView := ctx.Resolver.Resolve(childElement)

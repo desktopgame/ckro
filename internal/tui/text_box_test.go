@@ -1232,4 +1232,5 @@ func TestTextBox43(t *testing.T) {
 	tb.RemoveChar()
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	assert.Equal(t, tb.viewPosition, 3)
 }
