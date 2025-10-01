@@ -566,23 +566,11 @@ func (tb *TextBox) InsertString(s string) {
 		breakLine = true
 	}
 
-	vs := tb.viewPosition
 	tb.renderCache.Update(ctx, tb.Width)
 
 	elementIndex, viewStart, viewLocalPos = tb.modelToView()
 	element = tb.renderCache.GetElement(elementIndex)
 	textView = tb.TextEngine.Resolve(element)
-
-	// **aa**
-	// 一時的にビューの位置が縮むことがある
-	if viewStart+viewLocalPos < vs {
-		tv := tb.TextEngine.Resolve(element)
-		tvLen := tv.MoveLength(ctx, element)
-		tb.viewPosition = viewStart + tvLen - 1
-		bPos := tv.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen-1)
-		tb.bytePos = bPos
-		return
-	}
 
 	moves := text.GraphemeLength(s)
 	for i := 0; i < moves; i++ {
