@@ -168,6 +168,13 @@ func (p *PlainTextView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoca
 func (p *PlainTextView) ConvertModel(ctx Context, textLayout *TextLayout, viewLocalPos int) CharacterReference {
 	e := textLayout.Element
 	r := e.GetRange(0)
+	if r.IsZero() {
+		return CharacterReference{
+			StartPosition: r.StartPosition,
+			Bytes:         0,
+		}
+	}
+
 	str := ctx.Document.Read(r).GetLine(0)
 	st := r.StartPosition
 

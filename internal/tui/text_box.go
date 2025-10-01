@@ -165,65 +165,59 @@ func (tb *TextBox) CursorReset() {
 
 // TextFrame is print a frame of TextBox region.
 func (tb *TextBox) TextFrame() {
-	// TODO: impl
-	//tb.Document.Clear()
-	//
-	//w := tb.Width
-	//h := tb.Height
-	//
-	//tb.Document.InsertString("*")
-	//for i := 0; i < w-2; i++ {
-	//	tb.Document.InsertString("-")
-	//}
-	//tb.Document.InsertString("*")
-	//tb.Document.InsertLine()
-	//
-	//for i := 0; i < h-2; i++ {
-	//	tb.Document.InsertString("|")
-	//	for j := 0; j < w-2; j++ {
-	//		tb.Document.InsertString(" ")
-	//	}
-	//	tb.Document.InsertString("|")
-	//	tb.Document.InsertLine()
-	//}
-	//
-	//tb.Document.InsertString("*")
-	//for i := 0; i < w-2; i++ {
-	//	tb.Document.InsertString("-")
-	//}
-	//tb.Document.InsertString("*")
+	tb.Document.Clear()
+	tb.MoveReset()
 
-	// TODO: impl
-	// tb.Document.MoveReset()
+	w := tb.Width
+	h := tb.Height
+
+	tb.InsertString("*")
+	for i := 0; i < w-2; i++ {
+		tb.InsertString("-")
+	}
+	tb.InsertString("*")
+	tb.InsertString("\n")
+
+	for i := 0; i < h-2; i++ {
+		tb.InsertString("|")
+		for j := 0; j < w-2; j++ {
+			tb.InsertString(" ")
+		}
+		tb.InsertString("|")
+		tb.InsertString("\n")
+	}
+
+	tb.InsertString("*")
+	for i := 0; i < w-2; i++ {
+		tb.InsertString("-")
+	}
+	tb.InsertString("*")
+
+	tb.MoveReset()
 }
 
 // TextVertical is print vertical line.
 func (tb *TextBox) TextVertical() {
-	// TODO: impl
-	//tb.Document.Clear()
-	//
-	//h := tb.Height
-	//
-	//for i := 0; i < h; i++ {
-	//	tb.Document.InsertString("|\n")
-	//}
-	//tb.Document.RemoveChar()
-	// TODO: impl
-	// tb.Document.MoveReset()
+	tb.Document.Clear()
+	tb.MoveReset()
+	h := tb.Height
+	for i := 0; i < h; i++ {
+		tb.InsertString("|\n")
+	}
+	tb.RemoveChar()
+	tb.MoveReset()
 }
 
 // TextHorizontal is print horizontal line.
 func (tb *TextBox) TextHorizontal() {
-	// TODO: impl
-	//tb.Document.Clear()
-	//
-	//w := tb.Width
-	//
-	//for i := 0; i < w; i++ {
-	//	tb.Document.InsertString("-")
-	//}
-	// TODO: impl
-	// tb.Document.MoveReset()
+	tb.Document.Clear()
+	tb.MoveReset()
+	w := tb.Width
+	for i := 0; i < w; i++ {
+		tb.InsertString("-")
+	}
+
+	tb.MoveReset()
 }
 
 // TextClear is do reset to content.

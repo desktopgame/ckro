@@ -57,6 +57,7 @@ func (doc *PlainDocument) Remove(row int, bytePos int, byteLen int) {
 func (doc *PlainDocument) Clear() {
 	doc.buffer = Buffer{}
 	doc.buffer.Init()
+	doc.version++
 }
 
 func (doc *PlainDocument) GetLineBytes(index int) int {
