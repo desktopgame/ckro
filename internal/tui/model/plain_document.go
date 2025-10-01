@@ -5,9 +5,6 @@ package model
 type PlainDocument struct {
 	buffer  Buffer
 	version uint
-
-	cursorRow    int
-	cursorColumn int
 }
 
 // Init is initialize Buffer.
@@ -60,8 +57,6 @@ func (doc *PlainDocument) Remove(row int, bytePos int, byteLen int) {
 func (doc *PlainDocument) Clear() {
 	doc.buffer = Buffer{}
 	doc.buffer.Init()
-	doc.cursorRow = 0
-	doc.cursorColumn = 0
 }
 
 func (doc *PlainDocument) GetLineBytes(index int) int {
