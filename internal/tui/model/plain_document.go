@@ -56,6 +56,14 @@ func (doc *PlainDocument) Remove(row int, bytePos int, byteLen int) {
 	doc.version++
 }
 
+// Clear is initialize Buffer.
+func (doc *PlainDocument) Clear() {
+	doc.buffer = Buffer{}
+	doc.buffer.Init()
+	doc.cursorRow = 0
+	doc.cursorColumn = 0
+}
+
 func (doc *PlainDocument) GetLineBytes(index int) int {
 	return len(doc.buffer.GetLineAt(index).GetContent())
 }
@@ -66,14 +74,6 @@ func (doc *PlainDocument) GetLineCount() int {
 
 func (doc *PlainDocument) GetVersion() uint {
 	return doc.version
-}
-
-// Clear is initialize Buffer.
-func (doc *PlainDocument) Clear() {
-	doc.buffer = Buffer{}
-	doc.buffer.Init()
-	doc.cursorRow = 0
-	doc.cursorColumn = 0
 }
 
 func (doc *PlainDocument) GetLineAt(lineIndex int) string {
