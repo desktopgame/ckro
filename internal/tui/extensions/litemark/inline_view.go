@@ -140,12 +140,13 @@ func (il *InlineView) ConvertModel(ctx view.Context, textLayout *view.TextLayout
 	inlineElement := e.(*InlineElement)
 	r := e.GetRange(0)
 	st := r.StartPosition
+	bPos, bLen := text.GraphemeToByteRange(ctx.GetSegment(e, 1).GetLine(0), viewLocalPos)
 	return view.CharacterReference{
 		StartPosition: model.Position{
 			Row:    st.Row,
-			Column: st.Column + inlineElement.Pad + viewLocalPos,
+			Column: st.Column + inlineElement.Pad + bPos,
 		},
-		Bytes: 0,
+		Bytes: bLen,
 	}
 }
 
