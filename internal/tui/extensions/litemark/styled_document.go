@@ -173,6 +173,7 @@ func (doc *StyledDocument) Render() []model.Element {
 					},
 				)
 
+				pad := 0
 				isBold := false
 				isItalic := false
 				isUnderline := false
@@ -181,19 +182,23 @@ func (doc *StyledDocument) Render() []model.Element {
 
 				switch aInline.(type) {
 				case *Bold:
+					pad = 2
 					isBold = true
 				case *Italic:
+					pad = 1
 					isItalic = true
 				case *Link:
 					isUnderline = true
 					fg = optional.Some(tcell.ColorBlue)
 				case *Code:
+					pad = 1
 					fg = optional.Some(tcell.ColorBlack)
 					bg = optional.Some(tcell.ColorWhite)
 				}
 
 				texts = append(texts, &InlineElement{
 					Ranges:      ranges,
+					Pad:         pad,
 					IsBold:      isBold,
 					IsItalic:    isItalic,
 					IsUnderline: isUnderline,

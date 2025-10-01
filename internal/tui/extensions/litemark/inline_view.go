@@ -124,7 +124,7 @@ func (il *InlineView) MoveLeft(ctx view.Context, e model.Element, viewLocalPos i
 }
 
 func (il *InlineView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int) int {
-	if viewLocalPos > il.MoveLength(ctx, e) {
+	if viewLocalPos >= il.MoveLength(ctx, e)-1 {
 		return -1
 	}
 	return viewLocalPos + 1
@@ -137,12 +137,13 @@ func (il *InlineView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, 
 
 func (il *InlineView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {
 	e := textLayout.Element
+	inlineElement := e.(*InlineElement)
 	r := e.GetRange(0)
 	st := r.StartPosition
 	return view.CharacterReference{
 		StartPosition: model.Position{
 			Row:    st.Row,
-			Column: st.Column,
+			Column: st.Column + inlineElement.Pad + viewLocalPos,
 		},
 		Bytes: 0,
 	}
@@ -150,16 +151,17 @@ func (il *InlineView) ConvertModel(ctx view.Context, textLayout *view.TextLayout
 
 func (il *InlineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
 	e := textLayout.Element
+	inlineElement := e.(*InlineElement)
 	r := e.GetRange(0)
 	str := ctx.Document.Read(r).GetLine(bytePos.Row - r.StartPosition.Row)
 
-	bytes := 0
+	bytes := inlineElement.Pad
 	clusters := text.GraphemeClusters(str)
 	for i, cluster := range clusters {
 		if bytes == bytePos.Column {
-			return i
+			return i - inlineElement.Pad
 		}
 		bytes += len(cluster)
 	}
-	panic("")
+	return il.MoveLength(ctx, e) - 1
 }

@@ -563,11 +563,21 @@ func (tb *TextBox) InsertString(s string) {
 		tb.bytePos.Bytes = 0
 	}
 
+	//vs := tb.viewPosition
 	tb.renderCache.Update(ctx, tb.Width)
 
 	elementIndex, viewStart, viewLocalPos = tb.modelToView()
 	element = tb.renderCache.GetElement(elementIndex)
 	textView = tb.TextEngine.Resolve(element)
+
+	//if viewStart+viewLocalPos < vs {
+	//	tv := tb.TextEngine.Resolve(element)
+	//	tvLen := tv.MoveLength(ctx, element)
+	//	tb.viewPosition = viewStart + tvLen - 1
+	//	bPos := tv.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen-1)
+	//	tb.bytePos = bPos
+	//	return
+	//}
 
 	moves := text.GraphemeLength(s)
 	for i := 0; i < moves; i++ {
@@ -586,7 +596,13 @@ func (tb *TextBox) InsertString(s string) {
 					tb.viewPosition = viewStart
 				}
 			} else {
-				tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
+				if _, ok := textView.(*litemark.TextView); ok {
+					// *a* このときは-1
+					// *a*NL このときは0
+					tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
+				} else {
+					tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
+				}
 
 				if tb.viewPosition >= tb.renderCache.Total() {
 					tb.viewPosition = tb.renderCache.Total() - 1

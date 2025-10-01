@@ -9,6 +9,7 @@ import (
 type InlineElement struct {
 	Ranges      []model.Range
 	Children    []model.Element
+	Pad         int
 	IsBold      bool
 	IsItalic    bool
 	IsUnderline bool

@@ -103,17 +103,18 @@ func (t *TextView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, vie
 }
 
 func (t *TextView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
-	e := textLayout.Element
-	r := e.GetRange(0)
-	str := ctx.Document.Read(r).GetLine(bytePos.Row - r.StartPosition.Row)
 
-	bytes := 0
-	clusters := text.GraphemeClusters(str)
-	for i, cluster := range clusters {
-		if bytes == bytePos.Column {
-			return i
+	for i := 0; i < len(textLayout.Children); i++ {
+		child := textLayout.Children[i]
+		childElement := child.Element
+
+		r := childElement.GetRange(0)
+		st := r.StartPosition
+		ed := r.EndPosition
+		if bytePos.Column >= st.Column && (bytePos.Column < ed.Column || ed.Row > st.Row) {
+			childView := ctx.Resolver.Resolve(childElement)
+			return childView.ConvertViewLocalPos(ctx, child, bytePos)
 		}
-		bytes += len(cluster)
 	}
 	return t.MoveLength(ctx, textLayout.Element) - 1
 }
@@ -123,6 +124,7 @@ func (t *TextView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, v
 	r := e.GetRange(0)
 	str := ctx.Document.Read(r).GetLine(0)
 	st := r.StartPosition
+	ed := r.EndPosition
 
 	graphemes := text.GraphemeLength(str)
 	if viewLocalPos >= graphemes {
@@ -135,13 +137,31 @@ func (t *TextView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, v
 		}
 	}
 
-	bPos, bLen := text.GraphemeToByteRange(str, viewLocalPos)
+	totalLen := 0
+	for i := 0; i < len(textLayout.Children); i++ {
+		child := textLayout.Children[i]
+		childElement := child.Element
+		childView := ctx.Resolver.Resolve(childElement)
+		childViewLen := childView.MoveLength(ctx, childElement)
+		start := totalLen
+		end := start + childViewLen
+
+		if viewLocalPos >= start && viewLocalPos < end {
+			return childView.ConvertModel(ctx, child, viewLocalPos-start)
+		}
+
+		totalLen += childViewLen
+	}
+	//lastElement := textLayout.Children[len(textLayout.Children)-1].Element
+	//lastView := ctx.Resolver.Resolve(lastElement)
+	//panic("")
+
 	return view.CharacterReference{
 		StartPosition: model.Position{
-			Row:    st.Row,
-			Column: st.Column + bPos,
+			Row:    ed.Row,
+			Column: ed.Column,
 		},
-		Bytes: bLen,
+		Bytes: 0,
 	}
 }
 
