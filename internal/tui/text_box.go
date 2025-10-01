@@ -564,7 +564,7 @@ func (tb *TextBox) InsertString(s string) {
 		}
 	}
 
-	tb.Document.WriteString(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, s)
+	tb.Document.InsertString(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, s)
 
 	breakLine := strings.Contains(s, "\n")
 	if strings.HasPrefix(s, "\n") {

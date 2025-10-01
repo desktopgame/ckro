@@ -46,7 +46,7 @@ func (doc *PlainDocument) Render() []Element {
 	return elements
 }
 
-func (doc *PlainDocument) WriteString(row int, bytePos int, s string) {
+func (doc *PlainDocument) InsertString(row int, bytePos int, s string) {
 	doc.buffer.InsertString(row, bytePos, s)
 	doc.version++
 }
