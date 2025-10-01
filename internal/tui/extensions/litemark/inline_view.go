@@ -166,7 +166,7 @@ func (il *InlineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Tex
 		if i <= inlineElement.Pad {
 			continue
 		}
-		if bytes == bytePos.Column {
+		if bytes == bytePos.Column-r.StartPosition.Column {
 			return i - inlineElement.Pad - 1
 		}
 		bytes += len(cluster)
