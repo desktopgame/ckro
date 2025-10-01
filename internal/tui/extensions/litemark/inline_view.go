@@ -156,11 +156,18 @@ func (il *InlineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Tex
 	r := e.GetRange(0)
 	str := ctx.Document.Read(r).GetLine(bytePos.Row - r.StartPosition.Row)
 
+	if bytePos.Column == e.GetRange(1).StartPosition.Column {
+		return 0
+	}
+
 	bytes := inlineElement.Pad
 	clusters := text.GraphemeClusters(str)
 	for i, cluster := range clusters {
+		if i <= inlineElement.Pad {
+			continue
+		}
 		if bytes == bytePos.Column {
-			return i - inlineElement.Pad
+			return i - inlineElement.Pad - 1
 		}
 		bytes += len(cluster)
 	}

@@ -601,7 +601,7 @@ func (tb *TextBox) InsertString(s string) {
 				if _, ok := textView.(*litemark.TextView); ok {
 					// *a* このときは-1
 					// *a*NL このときは0
-					tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
+					tb.viewPosition = viewStart + textView.MoveLength(ctx, element) - 1
 				} else {
 					tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
 				}
