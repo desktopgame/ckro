@@ -40,6 +40,9 @@ func (ln *LineNumberTextPresenter) Present(view View) {
 	for i, segment := range segments {
 		if segment.ViewLine >= scrollY {
 			lineNumber := fmt.Sprintf("%*d", maxDigits, segment.ModelLine+1)
+			if segment.IsGhostLine {
+				lineNumber = "~"
+			}
 			doc.InsertString(lineNumber)
 
 			if i < len(segments)-1 {

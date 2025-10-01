@@ -810,8 +810,10 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 			element := entry.Element
 
 			for j := 0; j < entry.Height; j++ {
+				_, isGhost := element.(*model.GhostElement)
 				segment := presenter.Segment{
 					TextLayout:    entry,
+					IsGhostLine:   isGhost,
 					ModelLine:     element.GetRange(0).StartPosition.Row,
 					ViewLine:      viewLine,
 					LocalViewLine: j,

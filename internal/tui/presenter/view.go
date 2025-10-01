@@ -9,6 +9,7 @@ import (
 
 type Segment struct {
 	TextLayout    *view.TextLayout
+	IsGhostLine   bool
 	ModelLine     int
 	ViewLine      int
 	LocalViewLine int
