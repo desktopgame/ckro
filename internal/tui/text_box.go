@@ -157,10 +157,7 @@ func (tb *TextBox) CursorUpdate() {
 
 // CursorReset is reset cursor position and scroll.
 func (tb *TextBox) CursorReset() {
-	// TODO: impl
-	// tb.Document.MoveReset()
-	tb.scrollX = 0
-	tb.scrollY = 0
+	tb.MoveReset()
 }
 
 // TextFrame is print a frame of TextBox region.
@@ -869,6 +866,8 @@ func (tb *TextBox) MoveReset() {
 	tb.renderCache.Update(ctx, tb.Width)
 	tb.viewPosition = 0
 	tb.bytePos = tb.viewToModel()
+	tb.scrollX = 0
+	tb.scrollY = 0
 }
 
 // BreakIter returns segment array by line, in consideration a wrap.
@@ -929,4 +928,8 @@ func (tb *TextBox) GetScrollX() int {
 // GetScrollY returns scroll amount by vertical.
 func (tb *TextBox) GetScrollY() int {
 	return tb.scrollY
+}
+
+func (tb *TextBox) GetViewPosition() int {
+	return tb.viewPosition
 }
