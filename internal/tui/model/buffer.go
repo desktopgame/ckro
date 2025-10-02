@@ -1,7 +1,9 @@
 package model
 
 import (
+	"bufio"
 	"errors"
+	"io"
 	"slices"
 	"strings"
 )
@@ -175,6 +177,19 @@ func (buf *Buffer) RemoveString(row int, column int, length int) {
 			}
 		}
 	}
+}
+
+func (buf *Buffer) ReplaceAll(r io.Reader) {
+	lines := []*Line{}
+	sc := bufio.NewScanner(r)
+	sc.Buffer(make([]byte, 0, 64<<10), 16<<20)
+	for sc.Scan() {
+		line := sc.Text()
+		lines = append(lines, &Line{
+			content: line,
+		})
+	}
+	buf.lines = lines
 }
 
 // GetLineAt returns specified line.

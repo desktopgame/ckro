@@ -1,5 +1,7 @@
 package model
 
+import "io"
+
 // PlainDocument is wrapper of Buffer.
 // track a current cursor position.
 type PlainDocument struct {
@@ -61,6 +63,11 @@ func (doc *PlainDocument) InsertString(row int, bytePos int, s string) {
 
 func (doc *PlainDocument) Remove(row int, bytePos int, byteLen int) {
 	doc.buffer.RemoveString(row, bytePos, byteLen)
+	doc.version++
+}
+
+func (doc *PlainDocument) ReplaceAll(r io.Reader) {
+	doc.buffer.ReplaceAll(r)
 	doc.version++
 }
 

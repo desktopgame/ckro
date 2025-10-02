@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"log"
@@ -57,19 +56,12 @@ func (app *Application) openFile(filePath string) error {
 	}
 	defer file.Close()
 
-	textBox := app.textEdior.TextArea.TextBox
-	textBox.TextClear()
-
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		textBox.InsertString(scanner.Text())
-		textBox.InsertString("\n")
-	}
+	doc := app.textEdior.TextArea.TextBox.Document
+	doc.ReplaceAll(file)
 
 	app.filePath = filePath
 	app.modified = false
-	textBox.MoveReset()
+	app.textEdior.TextArea.TextBox.MoveReset()
 	return nil
 }
 
