@@ -140,29 +140,31 @@ func (tb *TextBox) TextFrame() {
 
 	w := tb.Width
 	h := tb.Height
+	sb := strings.Builder{}
 
-	tb.InsertString("*")
+	sb.WriteString("*")
 	for i := 0; i < w-2; i++ {
-		tb.InsertString("-")
+		sb.WriteString("-")
 	}
-	tb.InsertString("*")
-	tb.InsertString("\n")
+	sb.WriteString("*")
+	sb.WriteString("\n")
 
 	for i := 0; i < h-2; i++ {
-		tb.InsertString("|")
+		sb.WriteString("|")
 		for j := 0; j < w-2; j++ {
-			tb.InsertString(" ")
+			sb.WriteString(" ")
 		}
-		tb.InsertString("|")
-		tb.InsertString("\n")
+		sb.WriteString("|")
+		sb.WriteString("\n")
 	}
 
-	tb.InsertString("*")
+	sb.WriteString("*")
 	for i := 0; i < w-2; i++ {
-		tb.InsertString("-")
+		sb.WriteString("-")
 	}
-	tb.InsertString("*")
+	sb.WriteString("*")
 
+	tb.Document.ReplaceAll(strings.NewReader(sb.String()))
 	tb.MoveReset()
 }
 
@@ -170,11 +172,17 @@ func (tb *TextBox) TextFrame() {
 func (tb *TextBox) TextVertical() {
 	tb.Document.Clear()
 	tb.MoveReset()
+	sb := strings.Builder{}
 	h := tb.Height
 	for i := 0; i < h; i++ {
-		tb.InsertString("|\n")
+		sb.WriteString("|")
+
+		if i < h-1 {
+			sb.WriteString("\n")
+		}
 	}
-	tb.RemoveChar()
+
+	tb.Document.ReplaceAll(strings.NewReader(sb.String()))
 	tb.MoveReset()
 }
 
@@ -182,11 +190,13 @@ func (tb *TextBox) TextVertical() {
 func (tb *TextBox) TextHorizontal() {
 	tb.Document.Clear()
 	tb.MoveReset()
+	sb := strings.Builder{}
 	w := tb.Width
 	for i := 0; i < w; i++ {
-		tb.InsertString("-")
+		sb.WriteString("-")
 	}
 
+	tb.Document.ReplaceAll(strings.NewReader(sb.String()))
 	tb.MoveReset()
 }
 
