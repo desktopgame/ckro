@@ -964,6 +964,10 @@ func (tb *TextBox) FindPrev(s string) bool {
 			}
 		}
 	}
+	if success {
+		_, vs, vl := tb.modelToView()
+		tb.viewPosition = vs + vl
+	}
 	return success
 }
 
@@ -1054,6 +1058,10 @@ func (tb *TextBox) FindNext(s string) bool {
 				break
 			}
 		}
+	}
+	if success {
+		_, vs, vl := tb.modelToView()
+		tb.viewPosition = vs + vl
 	}
 	return success
 }
