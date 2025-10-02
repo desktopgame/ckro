@@ -36,4 +36,6 @@ type View interface {
 	GetHeight() int
 	GetScrollX() int
 	GetScrollY() int
+	GetViewHeight() int
+	GetViewPosition() int
 }

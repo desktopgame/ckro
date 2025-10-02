@@ -958,6 +958,21 @@ func (tb *TextBox) GetScrollY() int {
 	return tb.scrollY
 }
 
+func (tb *TextBox) GetViewHeight() int {
+	ctx := view.Context{
+		Resolver: tb.TextEngine,
+		Document: tb.Document,
+	}
+
+	tb.renderCache.Update(ctx, tb.Width)
+
+	h := 0
+	for i := 0; i < tb.renderCache.GetItemCount(); i++ {
+		h += tb.renderCache.GetLayout(i).Height
+	}
+	return h
+}
+
 func (tb *TextBox) GetViewPosition() int {
 	return tb.viewPosition
 }
