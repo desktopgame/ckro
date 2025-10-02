@@ -1377,3 +1377,30 @@ func TestTextBoxFind05(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
 	assert.Equal(t, tb.bytePos.Bytes, len("あ"))
 }
+
+func TestTextBoxReplace01(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+	tb.InsertString("あいう\nbb\nかきく")
+
+	assert.True(t, tb.FindPrev("あいう"))
+	tb.Replace(len("あいう"), "ABC")
+	sg := tb.Document.Read(model.Range{
+		StartPosition: model.Position{
+			Row:    0,
+			Column: 0,
+		},
+		EndPosition: model.Position{
+			Row:    0,
+			Column: tb.Document.GetLineBytes(0),
+		},
+	})
+	assert.Equal(t, sg.GetLine(0), "ABC")
+}

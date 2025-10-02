@@ -960,6 +960,7 @@ func (tb *TextBox) FindPrev(s string) bool {
 					},
 					Bytes: len(text.GraphemeClusters(lines[0])[0]),
 				}
+				success = true
 				break
 			}
 		}
@@ -996,7 +997,7 @@ func (tb *TextBox) FindNext(s string) bool {
 			if linePos == 0 {
 				findPos := 0
 				if i == tb.bytePos.StartPosition.Row {
-					findPos = tb.bytePos.StartPosition.Column
+					findPos = tb.bytePos.StartPosition.Column + 1
 				}
 
 				if strings.HasSuffix(line[findPos:], lines[0]) {
@@ -1044,7 +1045,7 @@ func (tb *TextBox) FindNext(s string) bool {
 		} else {
 			findPos := 0
 			if i == tb.bytePos.StartPosition.Row {
-				findPos = tb.bytePos.StartPosition.Column
+				findPos = tb.bytePos.StartPosition.Column + 1
 			}
 			p := strings.Index(line[findPos:], lines[linePos])
 			if p >= 0 {
@@ -1055,6 +1056,7 @@ func (tb *TextBox) FindNext(s string) bool {
 					},
 					Bytes: len(text.GraphemeClusters(lines[0])[0]),
 				}
+				success = true
 				break
 			}
 		}
@@ -1064,6 +1066,84 @@ func (tb *TextBox) FindNext(s string) bool {
 		tb.viewPosition = vs + vl
 	}
 	return success
+}
+
+func (tb *TextBox) Replace(length int, s string) {
+	tb.Document.Remove(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, length)
+	tb.Document.InsertString(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, s)
+
+	ctx := view.Context{
+		Resolver: tb.TextEngine,
+		Document: tb.Document,
+	}
+
+	breakLine := strings.Contains(s, "\n")
+
+	tb.renderCache.Update(ctx, tb.Width)
+
+	elementIndex, viewStart, viewLocalPos := tb.modelToView()
+	element := tb.renderCache.GetElement(elementIndex)
+	textView := tb.TextEngine.Resolve(element)
+
+	moves := text.GraphemeLength(s)
+	for i := 0; i < moves; i++ {
+		viewLocalPos = textView.MoveRight(ctx, element, viewLocalPos)
+
+		if viewLocalPos == -1 {
+			// 文字挿入によってビューが分割された場合
+			// 移動可能な回数が1回かつテキストが存在しない場合は空行とみなす
+			// その場合には次の行へ降りる
+			// 移動可能回数が1回かつテキストが存在する場合は行を継続する
+			// 移動可能回数が2回以上の場合、そのビューの開始位置までジャンプする
+			if textView.MoveLength(ctx, element) == 1 {
+				if len(ctx.GetText(element)) == 0 {
+					tb.viewPosition = viewStart + 1
+				} else {
+					tb.viewPosition = viewStart
+				}
+			} else {
+				if _, ok := textView.(*litemark.TextView); ok && !breakLine {
+					// *a* このときは-1
+					// *a*NL このときは0
+					tb.viewPosition = viewStart + textView.MoveLength(ctx, element) - 1
+				} else {
+					tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
+				}
+
+				if tb.viewPosition >= tb.renderCache.Total() {
+					tb.viewPosition = tb.renderCache.Total() - 1
+				}
+			}
+			_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
+			element = tb.renderCache.GetElement(elementIndex)
+			textView = tb.TextEngine.Resolve(element)
+
+			bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
+			tb.bytePos = bPos
+
+			// tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
+			//break
+		} else {
+			tb.viewPosition = viewStart + viewLocalPos
+
+			if viewLocalPos == textView.MoveLength(ctx, element) {
+
+				if elementIndex+1 < tb.renderCache.GetItemCount() {
+					element = tb.renderCache.GetElement(elementIndex + 1)
+					textView = tb.TextEngine.Resolve(element)
+					tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
+				} else {
+					bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
+					tb.bytePos = bPos
+				}
+			} else {
+				//tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos).StartPosition
+
+				bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
+				tb.bytePos = bPos
+			}
+		}
+	}
 }
 
 // BreakIter returns segment array by line, in consideration a wrap.
