@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/desktopgame/ckro/internal/tui"
+	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
 	"github.com/gdamore/tcell/v2"
 )
@@ -51,8 +52,18 @@ func (m *MiniBuffer) Handle(ev tui.Event) {
 	case *tcell.EventKey:
 		switch e.Key() {
 		case tcell.KeyEnter:
-			// TODO: impl
-			// m.onSubmit(m.tile.TextBox.GetDocument().GetBuffer().GetLineAt(0).GetContent())
+			tb := m.tile.TextBox
+			sg := tb.Document.Read(model.Range{
+				StartPosition: model.Position{
+					Row:    0,
+					Column: 0,
+				},
+				EndPosition: model.Position{
+					Row:    0,
+					Column: tb.Document.GetLineBytes(tb.Document.GetLineCount() - 1),
+				},
+			})
+			m.onSubmit(sg.GetLine(0))
 			m.tile.TextBox.Document.Clear()
 			m.tile.TextBox.CursorReset()
 			return
