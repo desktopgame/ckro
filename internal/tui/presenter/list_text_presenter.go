@@ -12,53 +12,46 @@ type ListTextPresenter struct {
 }
 
 func (lp *ListTextPresenter) Present(view View) {
-	// TODO: impl
-	//view.TextClear()
-	//doc := view.GetDocument()
-	//
-	//cursorChar := lp.CursorChar
-	//if cursorChar == 0 {
-	//	cursorChar = '>'
-	//}
-	//
-	//prefix := lp.Prefix
-	//if prefix == "" {
-	//	prefix = " "
-	//}
-	//
-	//// show list items.
-	//for i, item := range lp.Items {
-	//	if i == lp.SelectedIndex {
-	//		doc.InsertString(string(cursorChar))
-	//	} else {
-	//		doc.InsertString(" ")
-	//	}
-	//
-	//	doc.InsertString(prefix + item)
-	//
-	//	if i < len(lp.Items)-1 {
-	//		doc.InsertLine()
-	//	}
-	//}
+	view.TextClear()
+
+	cursorChar := lp.CursorChar
+	if cursorChar == 0 {
+		cursorChar = '>'
+	}
+
+	prefix := lp.Prefix
+	if prefix == "" {
+		prefix = " "
+	}
+
+	// show list items.
+	for i, item := range lp.Items {
+		if i == lp.SelectedIndex {
+			view.InsertString(string(cursorChar))
+		} else {
+			view.InsertString(" ")
+		}
+
+		view.InsertString(prefix + item)
+
+		if i < len(lp.Items)-1 {
+			view.InsertString("\n")
+		}
+	}
 
 	lp.setCursorToSelectedItem(view)
 }
 
 // setCursorToSelectedItem is sets cursor to the selected item
 func (lp *ListTextPresenter) setCursorToSelectedItem(view View) {
-	// TODO: impl
-	//doc := view.GetDocument()
-	//doc.MoveReset()
-	//
-	//for i := 0; i < lp.SelectedIndex && i < len(lp.Items)-1; i++ {
-	//	doc.MoveDown()
-	//}
-	//
-	//for doc.GetCursorColumn() > 0 {
-	//	doc.MoveLeft()
-	//}
-	//
-	//view.CursorUpdate()
+	view.MoveReset()
+
+	for i := 0; i < lp.SelectedIndex && i < len(lp.Items)-1; i++ {
+		view.MoveDown()
+	}
+
+	view.MoveLineStart()
+	view.CursorUpdate()
 }
 
 func (lp *ListTextPresenter) Handle(view View, ev tcell.Event) {

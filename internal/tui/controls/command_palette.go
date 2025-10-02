@@ -5,6 +5,7 @@ import (
 
 	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/desktopgame/ckro/internal/tui/base"
+	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
 	"github.com/gdamore/tcell/v2"
 )
@@ -139,29 +140,28 @@ func (cp *CommandPalette) Handle(ev base.Event) {
 
 func (cp *CommandPalette) addChar(r rune) {
 	// 検索入力フィールドに文字を追加
-	// TODO: impl
-	// doc := cp.searchInput.TextBox.GetDocument()
-	// doc.InsertString(string(r))
+	cp.searchInput.TextBox.InsertString(string(r))
 }
 
 func (cp *CommandPalette) removeLastChar() {
 	// 検索入力フィールドから最後の文字を削除
-	// TODO: impl
-	// doc := cp.searchInput.TextBox.GetDocument()
-	// if doc.GetCursorColumn() > 0 {
-	// 	doc.RemoveChar()
-	// }
+	cp.searchInput.TextBox.RemoveChar()
 }
 
 func (cp *CommandPalette) getSearchQuery() string {
 	// 検索入力フィールドの内容を取得
-	// TODO: impl
-	// doc := cp.searchInput.TextBox.GetDocument()
-	// buffer := doc.GetBuffer()
-	// if buffer.GetLineCount() > 0 {
-	// 	return buffer.GetLineAt(0).GetContent()
-	// }
-	return ""
+	tb := cp.searchInput.TextBox
+	sg := tb.Document.Read(model.Range{
+		StartPosition: model.Position{
+			Row:    0,
+			Column: 0,
+		},
+		EndPosition: model.Position{
+			Row:    0,
+			Column: tb.Document.GetLineBytes(tb.Document.GetLineCount() - 1),
+		},
+	})
+	return sg.GetLine(0)
 }
 
 func (cp *CommandPalette) filterCommands() {
