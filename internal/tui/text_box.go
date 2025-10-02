@@ -988,7 +988,9 @@ func (tb *TextBox) FindNext(s string) {
 
 				if strings.HasSuffix(line[findPos:], lines[0]) {
 					findRow = i
-					findCol = len(line[0:findPos+1]) + findPos
+
+					p := strings.LastIndex(line[findPos:], lines[0])
+					findCol = len(line[0 : findPos+p])
 					linePos++
 				}
 			} else if linePos == len(lines)-1 {

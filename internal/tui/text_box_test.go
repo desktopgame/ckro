@@ -1308,12 +1308,40 @@ func TestTextBoxFind03(t *testing.T) {
 	tb.FindNext("a\nbb")
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	assert.Equal(t, tb.bytePos.Bytes, 1)
 
 	tb.FindNext("bb")
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	assert.Equal(t, tb.bytePos.Bytes, 1)
 
 	tb.FindNext("b\nc")
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	assert.Equal(t, tb.bytePos.Bytes, 1)
+}
+
+func TestTextBoxFind04(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+	tb.InsertString("あいう\nbb\nかきく")
+
+	tb.MoveReset()
+
+	tb.FindNext("あいう")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	assert.Equal(t, tb.bytePos.Bytes, len("あ"))
+
+	tb.FindNext("う\nbb")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, len("あい"))
+	assert.Equal(t, tb.bytePos.Bytes, len("う"))
 }
