@@ -52,6 +52,74 @@ func (tb *TextBox) Init() {
 	tb.scrollY = 0
 }
 
+func (tb *TextBox) CursorTo(y int) {
+	ctx := view.Context{
+		Resolver: tb.TextEngine,
+		Document: tb.Document,
+	}
+
+	tb.renderCache.Update(ctx, tb.Width)
+
+	totalHight := 0
+	for i := 0; i < tb.renderCache.GetItemCount(); i++ {
+		tl := tb.renderCache.GetLayout(i)
+		totalHight += tl.Height
+	}
+
+	screenY := 0
+	viewStart := 0
+	for i := 0; i < tb.renderCache.GetItemCount(); i++ {
+		startY := screenY
+		e := tb.renderCache.GetElement(i)
+		v := tb.TextEngine.Resolve(e)
+		tl := tb.renderCache.GetLayout(i)
+		h := tl.Height
+		endY := startY + h
+
+		if y >= startY && y < endY {
+			localY := y - startY
+
+			viewLocalPos := 0
+			_, ly := v.ConvertPos(ctx, tl, viewLocalPos)
+			if ly > localY {
+				for ly > localY {
+					nextVLS := v.MoveLeft(ctx, e, viewLocalPos)
+					if nextVLS == -1 {
+						break
+					}
+					viewLocalPos = nextVLS
+					_, ly = v.ConvertPos(ctx, tl, viewLocalPos)
+				}
+			} else if ly < localY {
+				for ly < localY {
+					nextVLS := v.MoveRight(ctx, e, viewLocalPos)
+					if nextVLS == -1 {
+						break
+					}
+					viewLocalPos = nextVLS
+					_, ly = v.ConvertPos(ctx, tl, viewLocalPos)
+				}
+			}
+
+			tb.viewPosition = viewStart + viewLocalPos
+			tb.bytePos = tb.viewToModel()
+
+			remains := totalHight - y
+			if remains < tb.Height {
+				tb.scrollY = max(totalHight-tb.Height, 0)
+			} else if totalHight < tb.Height {
+				tb.scrollY = 0
+			} else {
+				tb.scrollY = y
+			}
+			break
+		}
+
+		screenY += h
+		viewStart += v.MoveLength(ctx, e)
+	}
+}
+
 // CursorPosition returns position of cursor.
 // TODO: refactor
 func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {

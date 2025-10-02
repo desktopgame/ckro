@@ -20,6 +20,8 @@ type View interface {
 	TextVertical()
 	TextHorizontal()
 	TextClear()
+	// CursorTo(y int)
+	// CursorPosition() (X int, Y int, Rune rune, Combine []rune)
 	CursorUpdate()
 	InsertString(s string)
 	RemoveChar()
