@@ -1344,6 +1344,13 @@ func TestTextBoxFind04(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, len("あい"))
 	assert.Equal(t, tb.bytePos.Bytes, len("う"))
+
+	assert.False(t, tb.FindNext("う"))
+
+	tb.FindNext("か")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	assert.Equal(t, tb.bytePos.Bytes, len("か"))
 }
 
 func TestTextBoxFind05(t *testing.T) {
