@@ -1345,3 +1345,26 @@ func TestTextBoxFind04(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Column, len("あい"))
 	assert.Equal(t, tb.bytePos.Bytes, len("う"))
 }
+
+func TestTextBoxFind05(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+	tb.InsertString("あいう\nbb\nかきく")
+
+	tb.FindPrev("bb\nか")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	assert.Equal(t, tb.bytePos.Bytes, 1)
+
+	tb.FindPrev("あいう\n")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	assert.Equal(t, tb.bytePos.Bytes, len("あ"))
+}
