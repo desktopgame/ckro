@@ -5,6 +5,9 @@ package model
 type PlainDocument struct {
 	buffer  Buffer
 	version uint
+
+	cache        []Element
+	cacheVersion uint
 }
 
 // Init is initialize Buffer.
@@ -19,7 +22,7 @@ func (doc *PlainDocument) Read(r Range) Segment {
 	}
 }
 
-func (doc *PlainDocument) Render() []Element {
+func (doc *PlainDocument) doRender() []Element {
 	elements := []Element{}
 
 	// Fallback to plain text rendering
@@ -41,6 +44,14 @@ func (doc *PlainDocument) Render() []Element {
 		})
 	}
 	return elements
+}
+
+func (doc *PlainDocument) Render() []Element {
+	if doc.cacheVersion == 0 || (doc.cacheVersion != doc.version) {
+		doc.cache = doc.doRender()
+	}
+	doc.cacheVersion = doc.version
+	return doc.cache
 }
 
 func (doc *PlainDocument) InsertString(row int, bytePos int, s string) {

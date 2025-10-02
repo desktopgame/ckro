@@ -8,9 +8,12 @@ import (
 
 type StyledDocument struct {
 	model.PlainDocument
+
+	cache        []model.Element
+	cacheVersion uint
 }
 
-func (doc *StyledDocument) Render() []model.Element {
+func (doc *StyledDocument) doRender() []model.Element {
 	elements := []model.Element{}
 
 	blocks := Parse(doc)
@@ -254,4 +257,12 @@ func (doc *StyledDocument) Render() []model.Element {
 		})
 	}
 	return elements
+}
+
+func (doc *StyledDocument) Render() []model.Element {
+	if doc.cacheVersion == 0 || (doc.cacheVersion != doc.GetVersion()) {
+		doc.cache = doc.doRender()
+	}
+	doc.cacheVersion = doc.GetVersion()
+	return doc.cache
 }
