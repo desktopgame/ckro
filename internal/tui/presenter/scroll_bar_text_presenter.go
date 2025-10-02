@@ -59,27 +59,6 @@ func (sb *ScrollBarTextPresenter) Present(view View) {
 			view.InsertString("\n")
 		}
 	}
-
-	//sb.syncCursorPosition(view, targetDoc)
-}
-
-// syncCursorPosition is synchronizes cursor position with target view
-func (sb *ScrollBarTextPresenter) syncCursorPosition(view View, targetDoc interface{}) {
-	// TODO: impl
-	//if doc, ok := targetDoc.(interface{ GetCursorRow() int }); ok {
-	//	cursorRow := doc.GetCursorRow()
-	//
-	//	scrollBarDoc := view.GetDocument()
-	//	scrollBarDoc.MoveReset()
-	//
-	//	for i := 0; i < cursorRow && i < scrollBarDoc.GetBuffer().GetLineCount()-1; i++ {
-	//		scrollBarDoc.MoveDown()
-	//	}
-	//
-	//	for scrollBarDoc.GetCursorColumn() > 0 {
-	//		scrollBarDoc.MoveLeft()
-	//	}
-	//}
 }
 
 func (sb *ScrollBarTextPresenter) Handle(view View, ev tcell.Event) {
