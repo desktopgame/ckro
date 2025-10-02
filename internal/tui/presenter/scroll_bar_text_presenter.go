@@ -1,6 +1,8 @@
 package presenter
 
 import (
+	"strings"
+
 	"github.com/gdamore/tcell/v2"
 )
 
@@ -30,6 +32,7 @@ func (sb *ScrollBarTextPresenter) Present(view View) {
 	maxScrollY := max(0, totalLines-viewHeight)
 
 	// show scrollbar
+	buf := strings.Builder{}
 	for i := 0; i < scrollBarHeight; i++ {
 		var char rune
 
@@ -53,12 +56,15 @@ func (sb *ScrollBarTextPresenter) Present(view View) {
 			}
 		}
 
-		view.InsertString(string(char))
+		// view.InsertString(string(char))
+		buf.WriteString(string(char))
 
 		if i < scrollBarHeight-1 {
-			view.InsertString("\n")
+			// view.InsertString("\n")
+			buf.WriteString("\n")
 		}
 	}
+	view.GetDocument().ReplaceAll(strings.NewReader(buf.String()))
 }
 
 func (sb *ScrollBarTextPresenter) Handle(view View, ev tcell.Event) {

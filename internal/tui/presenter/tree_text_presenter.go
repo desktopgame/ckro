@@ -172,6 +172,7 @@ func (t *TreeTextPresenter) addNodeToFlat(node *TreeNode) {
 
 func (t *TreeTextPresenter) renderTree(view View) {
 	view.TextClear()
+	sb := strings.Builder{}
 
 	for i, node := range t.flatNodes {
 		indent := strings.Repeat("  ", node.Level)
@@ -205,12 +206,15 @@ func (t *TreeTextPresenter) renderTree(view View) {
 		}
 
 		line := prefix + indent + icon + typeIcon + node.Name
-		view.InsertString(line)
+		// view.InsertString(line)
+		sb.WriteString(line)
 
 		if i < len(t.flatNodes)-1 {
-			view.InsertString("\n")
+			// view.InsertString("\n")
+			sb.WriteString("\n")
 		}
 	}
+	view.GetDocument().ReplaceAll(strings.NewReader(sb.String()))
 
 	t.moveToSelectedItem(view)
 }

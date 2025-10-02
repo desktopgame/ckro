@@ -1,6 +1,8 @@
 package presenter
 
 import (
+	"strings"
+
 	"github.com/gdamore/tcell/v2"
 )
 
@@ -25,19 +27,25 @@ func (lp *ListTextPresenter) Present(view View) {
 	}
 
 	// show list items.
+	sb := strings.Builder{}
 	for i, item := range lp.Items {
 		if i == lp.SelectedIndex {
-			view.InsertString(string(cursorChar))
+			// view.InsertString(string(cursorChar))
+			sb.WriteString(string(cursorChar))
 		} else {
-			view.InsertString(" ")
+			// view.InsertString(" ")
+			sb.WriteString(" ")
 		}
 
-		view.InsertString(prefix + item)
+		// view.InsertString(prefix + item)
+		sb.WriteString(prefix + item)
 
 		if i < len(lp.Items)-1 {
-			view.InsertString("\n")
+			// view.InsertString("\n")
+			sb.WriteString("\n")
 		}
 	}
+	view.GetDocument().ReplaceAll(strings.NewReader(sb.String()))
 
 	lp.setCursorToSelectedItem(view)
 }

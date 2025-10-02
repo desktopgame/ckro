@@ -2,6 +2,7 @@ package presenter
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gdamore/tcell/v2"
 )
@@ -37,16 +38,19 @@ func (ln *LineNumberTextPresenter) Present(view View) {
 
 	// show line number.
 	count := 0
+	sb := strings.Builder{}
 	for _, segment := range segments {
 		if segment.ViewLine >= scrollY {
 			lineNumber := fmt.Sprintf("%*d", maxDigits, segment.ModelLine+1)
 			if segment.IsGhostLine {
 				lineNumber = "~"
 			}
-			view.InsertString(lineNumber)
+			// view.InsertString(lineNumber)
+			sb.WriteString(lineNumber)
 
 			if count < view.GetHeight() {
-				view.InsertString("\n")
+				// view.InsertString("\n")
+				sb.WriteString("\n")
 			}
 			count++
 			if count >= view.GetHeight() {
@@ -54,6 +58,7 @@ func (ln *LineNumberTextPresenter) Present(view View) {
 			}
 		}
 	}
+	view.GetDocument().ReplaceAll(strings.NewReader(sb.String()))
 
 	//view.CursorUpdate()
 	ln.syncCursorPosition(view, ln.TargetView)
