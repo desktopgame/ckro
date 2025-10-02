@@ -201,7 +201,7 @@ func (id *InputDialog) getInputValue() string {
 		},
 		EndPosition: model.Position{
 			Row:    0,
-			Column: tb.Document.GetLineBytes(tb.Document.GetLineCount() - 1),
+			Column: tb.Document.GetLineBytes(0),
 		},
 	})
 	return sg.GetLine(0)

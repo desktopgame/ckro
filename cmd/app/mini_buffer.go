@@ -60,7 +60,7 @@ func (m *MiniBuffer) Handle(ev tui.Event) {
 				},
 				EndPosition: model.Position{
 					Row:    0,
-					Column: tb.Document.GetLineBytes(tb.Document.GetLineCount() - 1),
+					Column: tb.Document.GetLineBytes(0),
 				},
 			})
 			m.onSubmit(sg.GetLine(0))
