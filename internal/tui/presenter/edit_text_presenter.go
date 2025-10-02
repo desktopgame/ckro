@@ -34,16 +34,9 @@ func (edit *EditTextPresenter) Handle(view View, ev tcell.Event) {
 		case tcell.KeyRight, tcell.KeyCtrlF:
 			view.MoveRight()
 		case tcell.KeyCtrlA:
-			// TODO: impl
-			// for doc.GetCursorColumn() > 0 {
-			// 	doc.MoveLeft()
-			// }
+			view.MoveLineStart()
 		case tcell.KeyCtrlE:
-			// TODO: impl
-			// line := doc.GetBuffer().GetLineAt(doc.GetCursorRow()).GetContent()
-			// for doc.GetCursorColumn() < text.GraphemeLength(line) {
-			// 	doc.MoveRight()
-			// }
+			view.MoveLineEnd()
 		case tcell.KeyBackspace, tcell.KeyBackspace2:
 			view.RemoveChar()
 		case tcell.KeyEnter:

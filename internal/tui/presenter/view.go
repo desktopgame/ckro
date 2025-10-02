@@ -27,6 +27,8 @@ type View interface {
 	MoveRight()
 	MoveUp()
 	MoveDown()
+	MoveLineStart()
+	MoveLineEnd()
 	MoveReset()
 	BreakIter() iter.Seq[Segment]
 	GetDocument() model.Document

@@ -835,6 +835,56 @@ func (tb *TextBox) MoveDown() {
 	tb.move(3)
 }
 
+func (tb *TextBox) MoveLineStart() {
+	ctx := view.Context{
+		Resolver: tb.TextEngine,
+		Document: tb.Document,
+	}
+
+	tb.renderCache.Update(ctx, tb.Width)
+
+	_, ei, estart, eoff := tb.renderCache.Stats(tb.viewPosition)
+	element := tb.renderCache.GetElement(ei)
+	tl := tb.renderCache.GetLayout(ei)
+	textView := tb.TextEngine.Resolve(element)
+
+	lx, _ := textView.ConvertPos(ctx, tl, eoff)
+	viewLocalPos := eoff
+	for lx > 0 {
+		nextLocalPos := textView.MoveLeft(ctx, element, viewLocalPos)
+		if nextLocalPos == -1 {
+			break
+		}
+		viewLocalPos = nextLocalPos
+	}
+	tb.viewPosition = estart + viewLocalPos
+	tb.bytePos = tb.viewToModel()
+}
+
+func (tb *TextBox) MoveLineEnd() {
+	ctx := view.Context{
+		Resolver: tb.TextEngine,
+		Document: tb.Document,
+	}
+
+	tb.renderCache.Update(ctx, tb.Width)
+
+	_, ei, estart, eoff := tb.renderCache.Stats(tb.viewPosition)
+	element := tb.renderCache.GetElement(ei)
+	textView := tb.TextEngine.Resolve(element)
+
+	viewLocalPos := eoff
+	for {
+		nextLocalPos := textView.MoveRight(ctx, element, viewLocalPos)
+		if nextLocalPos == -1 {
+			break
+		}
+		viewLocalPos = nextLocalPos
+	}
+	tb.viewPosition = estart + viewLocalPos
+	tb.bytePos = tb.viewToModel()
+}
+
 func (tb *TextBox) MoveReset() {
 	ctx := view.Context{
 		Resolver: tb.TextEngine,
