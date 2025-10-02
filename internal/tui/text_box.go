@@ -986,10 +986,9 @@ func (tb *TextBox) FindNext(s string) {
 					findPos = tb.bytePos.StartPosition.Column
 				}
 
-				if strings.HasSuffix(line[findPos:], lines[0]) {
+				p := strings.LastIndex(line[findPos:], lines[0])
+				if p >= 0 {
 					findRow = i
-
-					p := strings.LastIndex(line[findPos:], lines[0])
 					findCol = len(line[0 : findPos+p])
 					linePos++
 				}
