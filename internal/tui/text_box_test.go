@@ -1363,6 +1363,8 @@ func TestTextBoxFind05(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
 	assert.Equal(t, tb.bytePos.Bytes, 1)
 
+	assert.False(t, tb.FindPrev("あいう\nb"))
+
 	tb.FindPrev("あいう\n")
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)

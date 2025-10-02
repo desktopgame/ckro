@@ -893,7 +893,7 @@ func (tb *TextBox) MoveReset() {
 	tb.scrollY = 0
 }
 
-func (tb *TextBox) FindPrev(s string) {
+func (tb *TextBox) FindPrev(s string) bool {
 	r := model.Range{
 		StartPosition: model.Position{
 			Row:    0,
@@ -907,6 +907,7 @@ func (tb *TextBox) FindPrev(s string) {
 	sg := tb.Document.Read(r)
 	lines := strings.Split(s, "\n")
 	linePos := len(lines) - 1
+	success := false
 
 	for i := tb.bytePos.StartPosition.Row; i >= 0; i-- {
 		line := sg.GetLine(i)
@@ -922,6 +923,7 @@ func (tb *TextBox) FindPrev(s string) {
 						},
 						Bytes: len(text.GraphemeClusters(lines[0])[0]),
 					}
+					success = true
 					break
 				}
 			} else if linePos == len(lines)-1 {
@@ -957,9 +959,10 @@ func (tb *TextBox) FindPrev(s string) {
 			}
 		}
 	}
+	return success
 }
 
-func (tb *TextBox) FindNext(s string) {
+func (tb *TextBox) FindNext(s string) bool {
 	r := model.Range{
 		StartPosition: model.Position{
 			Row:    0,
@@ -975,6 +978,7 @@ func (tb *TextBox) FindNext(s string) {
 	linePos := 0
 	findRow := 0
 	findCol := 0
+	success := false
 
 	for i := tb.bytePos.StartPosition.Row; i < tb.Document.GetLineCount(); i++ {
 		line := sg.GetLine(i)
@@ -1002,6 +1006,7 @@ func (tb *TextBox) FindNext(s string) {
 						},
 						Bytes: bytes,
 					}
+					success = true
 					break
 				}
 			} else {
@@ -1027,6 +1032,7 @@ func (tb *TextBox) FindNext(s string) {
 			}
 		}
 	}
+	return success
 }
 
 // BreakIter returns segment array by line, in consideration a wrap.
