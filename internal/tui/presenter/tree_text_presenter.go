@@ -171,67 +171,60 @@ func (t *TreeTextPresenter) addNodeToFlat(node *TreeNode) {
 }
 
 func (t *TreeTextPresenter) renderTree(view View) {
-	// TODO: impl
-	//view.TextClear()
-	//doc := view.GetDocument()
-	//
-	//for i, node := range t.flatNodes {
-	//	indent := strings.Repeat("  ", node.Level)
-	//
-	//	// icon for expand or collapse
-	//	var icon string
-	//	if node.IsDir {
-	//		if node.IsExpanded {
-	//			icon = "▼ "
-	//		} else {
-	//			icon = "▶ "
-	//		}
-	//	} else {
-	//		icon = "  "
-	//	}
-	//
-	//	// cursor
-	//	var prefix string
-	//	if i == t.selectedIndex {
-	//		prefix = "> "
-	//	} else {
-	//		prefix = "  "
-	//	}
-	//
-	//	// icon for file or directory
-	//	var typeIcon string
-	//	if node.IsDir {
-	//		typeIcon = "📁 "
-	//	} else {
-	//		typeIcon = "📄 "
-	//	}
-	//
-	//	line := prefix + indent + icon + typeIcon + node.Name
-	//	doc.InsertString(line)
-	//
-	//	if i < len(t.flatNodes)-1 {
-	//		doc.InsertLine()
-	//	}
-	//}
+	view.TextClear()
+
+	for i, node := range t.flatNodes {
+		indent := strings.Repeat("  ", node.Level)
+
+		// icon for expand or collapse
+		var icon string
+		if node.IsDir {
+			if node.IsExpanded {
+				icon = "▼ "
+			} else {
+				icon = "▶ "
+			}
+		} else {
+			icon = "  "
+		}
+
+		// cursor
+		var prefix string
+		if i == t.selectedIndex {
+			prefix = "> "
+		} else {
+			prefix = "  "
+		}
+
+		// icon for file or directory
+		var typeIcon string
+		if node.IsDir {
+			typeIcon = "📁 "
+		} else {
+			typeIcon = "📄 "
+		}
+
+		line := prefix + indent + icon + typeIcon + node.Name
+		view.InsertString(line)
+
+		if i < len(t.flatNodes)-1 {
+			view.InsertString("\n")
+		}
+	}
 
 	t.moveToSelectedItem(view)
 }
 
 // moveToSelectedItem is moves the document cursor to the selected item
 func (t *TreeTextPresenter) moveToSelectedItem(view View) {
-	// TODO: impl
-	//doc := view.GetDocument()
-	//if t.selectedIndex >= 0 && t.selectedIndex < len(t.flatNodes) {
-	//	doc.MoveReset()
-	//
-	//	for i := 0; i < t.selectedIndex; i++ {
-	//		doc.MoveDown()
-	//	}
-	//
-	//	for doc.GetCursorColumn() > 0 {
-	//		doc.MoveLeft()
-	//	}
-	//}
+	if t.selectedIndex >= 0 && t.selectedIndex < len(t.flatNodes) {
+		view.MoveReset()
+
+		for i := 0; i < t.selectedIndex; i++ {
+			view.MoveDown()
+		}
+		view.MoveLineStart()
+	}
 }
 
 func (t *TreeTextPresenter) GetSelectedPath() string {

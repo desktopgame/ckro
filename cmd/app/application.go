@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"sync"
 
 	"github.com/desktopgame/ckro/internal/llm"
@@ -49,27 +51,25 @@ func (app *Application) newFile() {
 }
 
 func (app *Application) openFile(filePath string) error {
-	// TODO: impl
-	//file, err := os.Open(filePath)
-	//if err != nil {
-	//	return err
-	//}
-	//defer file.Close()
-	//
-	//doc := app.textEdior.TextArea.TextBox.GetDocument()
-	//doc.Clear()
-	//
-	//scanner := bufio.NewScanner(file)
-	//
-	//for scanner.Scan() {
-	//	doc.InsertString(scanner.Text())
-	//	doc.InsertLine()
-	//}
-	//
-	//app.filePath = filePath
-	//app.modified = false
-	//app.textEdior.TextArea.TextBox.CursorReset()
-	//return nil
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	textBox := app.textEdior.TextArea.TextBox
+	textBox.TextClear()
+
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		textBox.InsertString(scanner.Text())
+		textBox.InsertString("\n")
+	}
+
+	app.filePath = filePath
+	app.modified = false
+	textBox.MoveReset()
 	return nil
 }
 
