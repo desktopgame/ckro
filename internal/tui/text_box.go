@@ -578,6 +578,7 @@ func (tb *TextBox) RemoveChar() {
 	if newViewLocalPos == -1 {
 		element = tb.renderCache.GetElement(elementIndex - 1)
 
+		// コードブロックの一文字後ろでバックスペース押下時の処理
 		if _, ok := element.(*litemark.CodeBlockElement); ok {
 			r := element.GetRange(0)
 			bPos := view.CharacterReference{
