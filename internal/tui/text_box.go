@@ -925,6 +925,8 @@ func (tb *TextBox) FindPrev(s string) bool {
 					}
 					success = true
 					break
+				} else {
+					linePos = len(lines) - 1
 				}
 			} else if linePos == len(lines)-1 {
 				findPos := len(line)
@@ -935,10 +937,14 @@ func (tb *TextBox) FindPrev(s string) bool {
 				p := strings.Index(line[0:findPos], lines[linePos])
 				if p >= 0 {
 					linePos--
+				} else {
+					linePos = len(lines) - 1
 				}
 			} else {
 				if line == lines[linePos] {
 					linePos--
+				} else {
+					linePos = len(lines) - 1
 				}
 			}
 		} else {
@@ -995,6 +1001,10 @@ func (tb *TextBox) FindNext(s string) bool {
 					findRow = i
 					findCol = len(line[0 : findPos+p])
 					linePos++
+				} else {
+					linePos = 0
+					findRow = 0
+					findCol = 0
 				}
 			} else if linePos == len(lines)-1 {
 				bytes := len(text.GraphemeClusters(lines[0])[0])
@@ -1008,10 +1018,18 @@ func (tb *TextBox) FindNext(s string) bool {
 					}
 					success = true
 					break
+				} else {
+					linePos = 0
+					findRow = 0
+					findCol = 0
 				}
 			} else {
 				if line == lines[linePos] {
 					linePos++
+				} else {
+					linePos = 0
+					findRow = 0
+					findCol = 0
 				}
 			}
 		} else {
