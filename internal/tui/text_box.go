@@ -934,8 +934,7 @@ func (tb *TextBox) FindPrev(s string) bool {
 					findPos = tb.bytePos.StartPosition.Column
 				}
 
-				p := strings.Index(line[0:findPos], lines[linePos])
-				if p >= 0 {
+				if strings.HasPrefix(line[0:findPos], lines[linePos]) {
 					linePos--
 				} else {
 					linePos = len(lines) - 1
@@ -996,11 +995,17 @@ func (tb *TextBox) FindNext(s string) bool {
 					findPos = tb.bytePos.StartPosition.Column
 				}
 
-				p := strings.LastIndex(line[findPos:], lines[0])
-				if p >= 0 {
-					findRow = i
-					findCol = len(line[0 : findPos+p])
-					linePos++
+				if strings.HasSuffix(line[findPos:], lines[0]) {
+					p := strings.LastIndex(line[findPos:], lines[0])
+					if p >= 0 {
+						findRow = i
+						findCol = len(line[0 : findPos+p])
+						linePos++
+					} else {
+						linePos = 0
+						findRow = 0
+						findCol = 0
+					}
 				} else {
 					linePos = 0
 					findRow = 0
