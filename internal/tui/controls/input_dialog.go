@@ -3,6 +3,7 @@ package controls
 import (
 	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/desktopgame/ckro/internal/tui/base"
+	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
 	"github.com/gdamore/tcell/v2"
 )
@@ -55,9 +56,7 @@ func (id *InputDialog) Init(title, prompt string) {
 
 	// 初期値を設定
 	if id.initialValue != "" {
-		// TODO: impl
-		// doc := id.inputField.TextBox.GetDocument()
-		// doc.InsertString(id.initialValue)
+		id.inputField.TextBox.InsertString(id.initialValue)
 	}
 
 	// ボタン
@@ -194,13 +193,18 @@ func (id *InputDialog) Handle(ev base.Event) {
 
 func (id *InputDialog) getInputValue() string {
 	// 入力フィールドの内容を取得
-	// TODO: impl
-	// doc := id.inputField.TextBox.GetDocument()
-	// buffer := doc.GetBuffer()
-	// if buffer.GetLineCount() > 0 {
-	// 	return buffer.GetLineAt(0).GetContent()
-	// }
-	return ""
+	tb := id.inputField.TextBox
+	sg := tb.Document.Read(model.Range{
+		StartPosition: model.Position{
+			Row:    0,
+			Column: 0,
+		},
+		EndPosition: model.Position{
+			Row:    0,
+			Column: tb.Document.GetLineBytes(tb.Document.GetLineCount() - 1),
+		},
+	})
+	return sg.GetLine(0)
 }
 
 func (id *InputDialog) Traverse(fm *tui.FocusManager) {
@@ -298,10 +302,11 @@ func (id *InputDialog) SetPrompt(prompt string) {
 
 // SetInputValue sets the input field value
 func (id *InputDialog) SetInputValue(value string) {
-	// TODO: impl
-	// doc := id.inputField.TextBox.GetDocument()
-	// doc.Clear()
-	// doc.InsertString(value)
+	tb := id.inputField.TextBox
+	doc := tb.GetDocument()
+	doc.Clear()
+	doc.InsertString(0, 0, value)
+	tb.MoveReset()
 }
 
 // GetInputValue returns the current input field value

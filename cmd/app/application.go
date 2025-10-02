@@ -2,15 +2,18 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/desktopgame/ckro/internal/llm"
 	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/desktopgame/ckro/internal/tui/base"
 	"github.com/desktopgame/ckro/internal/tui/controls"
+	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/presenter"
 	"github.com/gdamore/tcell/v2"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -66,50 +69,66 @@ func (app *Application) openFile(filePath string) error {
 }
 
 func (app *Application) saveFile() error {
-	// TODO: impl
-	//if app.filePath == "" {
-	//	return errors.New("filePath is empty")
-	//}
-	//sb := strings.Builder{}
-	//buf := app.textEdior.TextArea.TextBox.GetDocument().GetBuffer()
-	//
-	//for i := 0; i < buf.GetLineCount(); i++ {
-	//	sb.WriteString(buf.GetLineAt(i).GetContent())
-	//
-	//	if i < buf.GetLineCount()-1 {
-	//		sb.WriteRune('\n')
-	//	}
-	//}
-	//
-	//err := os.WriteFile(app.filePath, []byte(sb.String()), 0644)
-	//if err == nil {
-	//	app.modified = false
-	//}
-	//return err
-	return nil
+	if app.filePath == "" {
+		return errors.New("filePath is empty")
+	}
+	sb := strings.Builder{}
+	doc := app.textEdior.TextArea.TextBox.GetDocument()
+
+	for i := 0; i < doc.GetLineCount(); i++ {
+		sg := doc.Read(model.Range{
+			StartPosition: model.Position{
+				Row:    i,
+				Column: 0,
+			},
+			EndPosition: model.Position{
+				Row:    i,
+				Column: doc.GetLineBytes(i),
+			},
+		})
+		sb.WriteString(sg.GetLine(0))
+
+		if i < doc.GetLineCount()-1 {
+			sb.WriteRune('\n')
+		}
+	}
+
+	err := os.WriteFile(app.filePath, []byte(sb.String()), 0644)
+	if err == nil {
+		app.modified = false
+	}
+	return err
 }
 
 func (app *Application) saveFileAs(filePath string) error {
-	// TODO: impl
-	// sb := strings.Builder{}
-	// buf := app.textEdior.TextArea.TextBox.GetDocument().GetBuffer()
-	//
-	// for i := 0; i < buf.GetLineCount(); i++ {
-	// 	sb.WriteString(buf.GetLineAt(i).GetContent())
-	//
-	// 	if i < buf.GetLineCount()-1 {
-	// 		sb.WriteRune('\n')
-	// 	}
-	// }
-	//
-	// err := os.WriteFile(filePath, []byte(sb.String()), 0644)
-	// if err == nil {
-	// 	app.filePath = filePath
-	// 	app.modified = false
-	// 	app.treePresenter.Reload()
-	// }
-	// return err
-	return nil
+	sb := strings.Builder{}
+	doc := app.textEdior.TextArea.TextBox.GetDocument()
+
+	for i := 0; i < doc.GetLineCount(); i++ {
+		sg := doc.Read(model.Range{
+			StartPosition: model.Position{
+				Row:    i,
+				Column: 0,
+			},
+			EndPosition: model.Position{
+				Row:    i,
+				Column: doc.GetLineBytes(i),
+			},
+		})
+		sb.WriteString(sg.GetLine(0))
+
+		if i < doc.GetLineCount()-1 {
+			sb.WriteRune('\n')
+		}
+	}
+
+	err := os.WriteFile(filePath, []byte(sb.String()), 0644)
+	if err == nil {
+		app.filePath = filePath
+		app.modified = false
+		app.treePresenter.Reload()
+	}
+	return err
 }
 
 func showSaveAsDialogAndThenForTree(app *Application, runtime base.Runtime, callback func()) {
