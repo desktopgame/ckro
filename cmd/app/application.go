@@ -385,12 +385,11 @@ func (app *Application) loopMiniBuffer() {
 
 		log.Println(s)
 
-		// TODO: impl
-		// doc := app.textEdior.TextArea.TextBox.GetDocument()
-		// marker := fmt.Sprintf("<chat_response_is_here:%d>", app.chatResponseId)
-		// doc.InsertLine()
-		// doc.InsertString(marker)
-		// doc.InsertLine()
+		tb := app.textEdior.TextArea.TextBox
+		marker := fmt.Sprintf("<chat_response_is_here:%d>", app.chatResponseId)
+		tb.InsertString("\n")
+		tb.InsertString(marker)
+		tb.InsertString("\n")
 		app.modified = true
 		app.window.Repaint()
 
@@ -422,30 +421,26 @@ func (app *Application) loopMiniBuffer() {
 
 				ev.Consume(context.Background())
 
-				// TODO: impl
-				// if msg, ok := ev.(*llm.MessageEvent); ok {
-				// 	response := msg.GetResult().Choices[0].Message.Content
-				// 	app.textEdior.TextArea.TextBox.CursorReset()
-				// 	if doc.FindNext(marker) {
-				// 		doc.Replace(len(marker), response)
-				// 		doc.MoveRight()
-				// 		app.textEdior.TextArea.TextBox.CursorUpdate()
-				// 	}
-				// 	break
-				// }
+				if msg, ok := ev.(*llm.MessageEvent); ok {
+					response := msg.GetResult().Choices[0].Message.Content
+					tb.CursorReset()
+					if tb.FindNext(marker) {
+						tb.Replace(len(marker), response)
+						tb.MoveRight()
+						app.textEdior.TextArea.TextBox.CursorUpdate()
+					}
+					break
+				}
 
-				// TODO: impl
-				//if e, ok := ev.(*llm.ErrorEvent); ok {
-				//	if doc.FindNext(marker) {
-				//		doc.Replace(len(marker), e.GetError().Error())
-				//		doc.MoveRight()
-				//		app.textEdior.TextArea.TextBox.CursorUpdate()
-				//	}
-				//	break
-				//}
-
-				// 後で消す
-				break
+				if e, ok := ev.(*llm.ErrorEvent); ok {
+					tb.CursorReset()
+					if tb.FindNext(marker) {
+						tb.Replace(len(marker), e.GetError().Error())
+						tb.MoveRight()
+						app.textEdior.TextArea.TextBox.CursorUpdate()
+					}
+					break
+				}
 			}
 
 			app.miniBuffer.Editable()

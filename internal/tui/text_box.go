@@ -931,7 +931,9 @@ func (tb *TextBox) FindPrev(s string) bool {
 			} else if linePos == len(lines)-1 {
 				findPos := len(line)
 				if i == tb.bytePos.StartPosition.Row {
-					findPos = tb.bytePos.StartPosition.Column
+					if tb.bytePos.Bytes > 0 {
+						findPos = tb.bytePos.StartPosition.Column
+					}
 				}
 
 				if strings.HasPrefix(line[0:findPos], lines[linePos]) {
@@ -949,7 +951,9 @@ func (tb *TextBox) FindPrev(s string) bool {
 		} else {
 			findPos := len(line)
 			if i == tb.bytePos.StartPosition.Row {
-				findPos = tb.bytePos.StartPosition.Column
+				if tb.bytePos.Bytes > 0 {
+					findPos = tb.bytePos.StartPosition.Column
+				}
 			}
 			p := strings.LastIndex(line[0:findPos], lines[linePos])
 			if p >= 0 {
@@ -997,7 +1001,9 @@ func (tb *TextBox) FindNext(s string) bool {
 			if linePos == 0 {
 				findPos := 0
 				if i == tb.bytePos.StartPosition.Row {
-					findPos = tb.bytePos.StartPosition.Column + 1
+					if tb.bytePos.Bytes > 0 {
+						findPos = tb.bytePos.StartPosition.Column + 1
+					}
 				}
 
 				if strings.HasSuffix(line[findPos:], lines[0]) {
@@ -1045,7 +1051,9 @@ func (tb *TextBox) FindNext(s string) bool {
 		} else {
 			findPos := 0
 			if i == tb.bytePos.StartPosition.Row {
-				findPos = tb.bytePos.StartPosition.Column + 1
+				if tb.bytePos.Bytes > 0 {
+					findPos = tb.bytePos.StartPosition.Column + 1
+				}
 			}
 			p := strings.Index(line[findPos:], lines[linePos])
 			if p >= 0 {
