@@ -1234,3 +1234,86 @@ func TestTextBox43(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
 	assert.Equal(t, tb.viewPosition, 3)
 }
+
+func TestTextBoxFind01(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+	tb.InsertString("aa\nbb\nccc")
+
+	tb.FindPrev("b\ncc")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+
+	tb.FindPrev("a\nb")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	assert.Equal(t, tb.bytePos.Bytes, 1)
+
+	tb.MoveLineEnd()
+	tb.MoveDown()
+	tb.MoveLineEnd()
+	tb.MoveDown()
+	tb.MoveLineEnd()
+	tb.MoveDown()
+	tb.FindPrev("a\nbb\nccc")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	assert.Equal(t, tb.bytePos.Bytes, 1)
+}
+
+func TestTextBoxFind02(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+	tb.InsertString("aa\nbb\nccc")
+
+	tb.FindPrev("cc")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	assert.Equal(t, tb.bytePos.Bytes, 1)
+
+	tb.FindPrev("bb")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	assert.Equal(t, tb.bytePos.Bytes, 1)
+}
+
+func TestTextBoxFind03(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 10
+	tb.Height = 10
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+	tb.InsertString("aa\nbb\nccc")
+
+	tb.MoveReset()
+
+	tb.FindNext("a\nbb")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+
+	tb.FindNext("bb")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+
+	tb.FindNext("b\nc")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+}

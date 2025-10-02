@@ -893,6 +893,141 @@ func (tb *TextBox) MoveReset() {
 	tb.scrollY = 0
 }
 
+func (tb *TextBox) FindPrev(s string) {
+	r := model.Range{
+		StartPosition: model.Position{
+			Row:    0,
+			Column: 0,
+		},
+		EndPosition: model.Position{
+			Row:    tb.Document.GetLineCount() - 1,
+			Column: tb.Document.GetLineBytes(tb.Document.GetLineCount() - 1),
+		},
+	}
+	sg := tb.Document.Read(r)
+	lines := strings.Split(s, "\n")
+	linePos := len(lines) - 1
+
+	for i := tb.bytePos.StartPosition.Row; i >= 0; i-- {
+		line := sg.GetLine(i)
+
+		if len(lines) > 1 {
+			if linePos == 0 {
+				p := strings.LastIndex(line, lines[0])
+				if p >= 0 {
+					tb.bytePos = view.CharacterReference{
+						StartPosition: model.Position{
+							Row:    i,
+							Column: len(line[0:p]),
+						},
+						Bytes: len(text.GraphemeClusters(lines[0])[0]),
+					}
+					break
+				}
+			} else if linePos == len(lines)-1 {
+				findPos := len(line)
+				if i == tb.bytePos.StartPosition.Row {
+					findPos = tb.bytePos.StartPosition.Column
+				}
+
+				p := strings.Index(line[0:findPos], lines[linePos])
+				if p >= 0 {
+					linePos--
+				}
+			} else {
+				if line == lines[linePos] {
+					linePos--
+				}
+			}
+		} else {
+			findPos := len(line)
+			if i == tb.bytePos.StartPosition.Row {
+				findPos = tb.bytePos.StartPosition.Column
+			}
+			p := strings.LastIndex(line[0:findPos], lines[linePos])
+			if p >= 0 {
+				tb.bytePos = view.CharacterReference{
+					StartPosition: model.Position{
+						Row:    i,
+						Column: len(line[0:p]),
+					},
+					Bytes: len(text.GraphemeClusters(lines[0])[0]),
+				}
+				break
+			}
+		}
+	}
+}
+
+func (tb *TextBox) FindNext(s string) {
+	r := model.Range{
+		StartPosition: model.Position{
+			Row:    0,
+			Column: 0,
+		},
+		EndPosition: model.Position{
+			Row:    tb.Document.GetLineCount() - 1,
+			Column: tb.Document.GetLineBytes(tb.Document.GetLineCount() - 1),
+		},
+	}
+	sg := tb.Document.Read(r)
+	lines := strings.Split(s, "\n")
+	linePos := 0
+	findRow := 0
+	findCol := 0
+
+	for i := tb.bytePos.StartPosition.Row; i < tb.Document.GetLineCount(); i++ {
+		line := sg.GetLine(i)
+
+		if len(lines) > 1 {
+			if linePos == 0 {
+				findPos := 0
+				if i == tb.bytePos.StartPosition.Row {
+					findPos = tb.bytePos.StartPosition.Column
+				}
+
+				if strings.HasSuffix(line[findPos:], lines[0]) {
+					findRow = i
+					findCol = len(line[0:findPos+1]) + findPos
+					linePos++
+				}
+			} else if linePos == len(lines)-1 {
+				bytes := len(text.GraphemeClusters(lines[0])[0])
+				if strings.HasPrefix(line, lines[linePos]) {
+					tb.bytePos = view.CharacterReference{
+						StartPosition: model.Position{
+							Row:    findRow,
+							Column: findCol,
+						},
+						Bytes: bytes,
+					}
+					break
+				}
+			} else {
+				if line == lines[linePos] {
+					linePos++
+				}
+			}
+		} else {
+			findPos := 0
+			if i == tb.bytePos.StartPosition.Row {
+				findPos = tb.bytePos.StartPosition.Column
+			}
+			p := strings.Index(line[findPos:], lines[linePos])
+			if p >= 0 {
+				tb.bytePos = view.CharacterReference{
+					StartPosition: model.Position{
+						Row:    i,
+						Column: len(line[0:p]),
+					},
+					Bytes: len(text.GraphemeClusters(lines[0])[0]),
+				}
+				break
+			}
+		}
+	}
+}
+
 // BreakIter returns segment array by line, in consideration a wrap.
 func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 	//buf := tb.Document.GetBuffer()
