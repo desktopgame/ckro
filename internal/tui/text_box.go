@@ -13,11 +13,6 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
-type textSegment struct {
-	textLayout *view.TextLayout
-	segment    presenter.Segment
-}
-
 // TextBox is editable text widget.
 // TextBox has region of rect, rendering text within that range.
 // long line is always wrap at right end of region.
