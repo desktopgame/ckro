@@ -537,7 +537,8 @@ func (tb *TextBox) RemoveChar() {
 				return
 			}
 		}
-	} else if _, ok := element.(*litemark.CodeBlockElement); ok && viewLocalPos == 0 {
+	}
+	if cb, ok := element.(*litemark.CodeBlockElement); ok && viewLocalPos == 0 && len(cb.Lang) == 0 {
 		r := element.GetRange(0)
 		sg := tb.Document.Read(r)
 		bPos := view.CharacterReference{
@@ -546,6 +547,26 @@ func (tb *TextBox) RemoveChar() {
 				Column: sg.GetSpan(0).EndColumn - 1,
 			},
 			Bytes: 1,
+		}
+		tb.bytePos = bPos
+		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
+		//		tb.bytePos.StartPosition.Column++
+		tb.bytePos.Bytes = 0
+
+		tb.renderCache.Update(ctx, tb.Width)
+
+		_, vs, vl := tb.modelToView()
+		tb.viewPosition = vs + vl
+		return
+	} else if cb, ok := element.(*litemark.CodeBlockElement); ok && viewLocalPos == 1 && len(cb.Lang) > 0 {
+		r1 := element.GetRange(1)
+		sg := tb.Document.Read(r1)
+		bPos := view.CharacterReference{
+			StartPosition: model.Position{
+				Row:    r1.StartPosition.Row,
+				Column: sg.GetSpan(0).StartColumn - 1,
+			},
+			Bytes: 2,
 		}
 		tb.bytePos = bPos
 		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
