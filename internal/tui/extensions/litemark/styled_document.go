@@ -116,6 +116,22 @@ func (doc *StyledDocument) doRender() []model.Element {
 					})
 				}
 			}
+
+			langRange := model.Range{
+				StartPosition: model.Position{
+					Row:    block.LineIndex,
+					Column: block.Span.StartColumn,
+				},
+				EndPosition: model.Position{
+					Row:    block.LineIndex,
+					Column: block.Span.EndColumn,
+				},
+			}
+			lang := ""
+			if !langRange.IsZero() {
+				sg := doc.Read(langRange)
+				lang = sg.GetLine(0)
+			}
 			elements = append(elements, &CodeBlockElement{
 				Ranges: []model.Range{
 					{
@@ -139,6 +155,7 @@ func (doc *StyledDocument) doRender() []model.Element {
 						},
 					},
 				},
+				Lang:     lang,
 				Children: codeLines,
 			})
 		case *Text:

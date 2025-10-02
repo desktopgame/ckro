@@ -5,6 +5,7 @@ import "github.com/desktopgame/ckro/internal/tui/model"
 type CodeBlockElement struct {
 	Ranges   []model.Range
 	Children []model.Element
+	Lang     string
 }
 
 func (c *CodeBlockElement) GetRange(index int) model.Range {
