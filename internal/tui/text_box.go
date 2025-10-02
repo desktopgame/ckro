@@ -353,10 +353,10 @@ func (tb *TextBox) viewToModel() view.CharacterReference {
 		Document: tb.Document,
 	}
 
-	_, ei, _, _ := tb.renderCache.Stats(tb.viewPosition)
+	_, ei, _, eoff := tb.renderCache.Stats(tb.viewPosition)
 	element := tb.renderCache.GetElement(ei)
 	textView := tb.TextEngine.Resolve(element)
-	return textView.ConvertModel(ctx, tb.renderCache.GetLayout(ei), 0)
+	return textView.ConvertModel(ctx, tb.renderCache.GetLayout(ei), eoff)
 }
 
 func (tb *TextBox) InsertString(s string) {
