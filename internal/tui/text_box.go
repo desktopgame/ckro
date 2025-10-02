@@ -62,29 +62,9 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 
 	tb.renderCache.Update(ctx, tb.Width)
 	_, ei, _, eoff := tb.renderCache.Stats(tb.viewPosition)
-	//view := tb.TextEngine.Resolve(tb.renderCache.GetElement(ei))
-	//y := 0
-	//for i := 0; i < ei; i++ {
-	//	y += tb.renderCache.GetLayout(i).Height
-	//}
-	//_, _ := view.ConvertPos(ctx, tb.renderCache.GetLayout(ei), eoff)
-	// ax := vlx
-	//ay := y + vly
-
-	//buf := tb.Document.GetBuffer()
-	//cursorRow := ay
-	// cursorCol := ax
-
-	//if cursorRow >= buf.GetLineCount() {
-	//	return 0, 0, ' ', nil
-	//}
 
 	// カーソルがある行までの画面行数を計算
 	screenY := 0
-	//for i := 0; i < cursorRow; i++ {
-	//	line := buf.GetLineAt(i).GetContent()
-	//	screenY += tb.calculateWrappedLines(line)
-	//}
 	for i := 0; i < ei; i++ {
 		screenY += tb.renderCache.GetLayout(i).Height
 	}
@@ -95,8 +75,6 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 	relx, rely := currentView.ConvertPos(ctx, tb.renderCache.GetLayout(ei), eoff)
 	screenX := relx
 	screenY += rely
-	//screenX, additionalRows :=
-	//screenY += additionalRows
 
 	charRef := currentView.ConvertModel(ctx, tb.renderCache.GetLayout(ei), eoff)
 
