@@ -291,143 +291,6 @@ func (tb *TextBox) isStyled() bool {
 	return !ok
 }
 
-func (tb *TextBox) move(dir int) {
-	ctx := view.Context{
-		Resolver: tb.TextEngine,
-		Document: tb.Document,
-	}
-
-	tb.renderCache.Update(ctx, tb.Width)
-
-	_, elementIndex, elementStart, oldLocalViewPos := tb.renderCache.Stats(tb.viewPosition)
-
-	tview := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex))
-	var newLocalViewPos int
-	switch dir {
-	case 0:
-		newLocalViewPos = tview.MoveLeft(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
-	case 1:
-		newLocalViewPos = tview.MoveRight(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
-	case 2:
-		newLocalViewPos = tview.MoveUp(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
-	case 3:
-		newLocalViewPos = tview.MoveDown(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
-	}
-
-	if newLocalViewPos == -1 {
-		tvLen := tview.MoveLength(ctx, tb.renderCache.GetElement(elementIndex))
-		if dir == 3 {
-
-			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok && elementIndex+1 < tb.renderCache.GetItemCount() {
-
-				nextView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex + 1))
-				relx := pLinebaseView.ConvertRelativeX(ctx, tb.renderCache.GetLayout(elementIndex), oldLocalViewPos)
-
-				if linebaseTV, ok := nextView.(view.LinebaseTextView); ok {
-					offset := linebaseTV.MoveFirstLine(ctx, tb.renderCache.GetElement(elementIndex+1), relx)
-
-					tb.viewPosition = elementStart + tvLen + offset
-
-					bPos := linebaseTV.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), offset)
-					tb.bytePos = bPos
-				} else {
-					tb.viewPosition = elementStart + tvLen
-
-					// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
-					bPos := nextView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
-					tb.bytePos = bPos
-				}
-			} else {
-				if elementIndex+1 < tb.renderCache.GetItemCount() {
-
-					nextView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex + 1))
-					tb.viewPosition = elementStart + tvLen
-
-					// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
-					bPos := nextView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
-					tb.bytePos = bPos
-				} else {
-
-					tb.viewPosition = elementStart + tvLen - 1
-
-					bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen-1)
-					tb.bytePos = bPos
-				}
-			}
-		} else if dir == 1 {
-			if elementIndex+1 < tb.renderCache.GetItemCount() {
-				tb.viewPosition = elementStart + tvLen
-
-				nView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex + 1))
-				bPos := nView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
-				tb.bytePos = bPos
-			} else {
-				tb.viewPosition = elementStart + tvLen - 1
-				bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen-1)
-				tb.bytePos = bPos
-			}
-		}
-
-		if dir == 0 {
-			tb.viewPosition = max(elementStart-1, 0)
-
-			if elementIndex > 0 {
-				pView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
-				pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
-				bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
-				tb.bytePos = bPos
-			} else {
-				bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), 0)
-				tb.bytePos = bPos
-			}
-		} else if dir == 2 {
-
-			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok && elementIndex > 0 {
-
-				prevView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
-				relx := pLinebaseView.ConvertRelativeX(ctx, tb.renderCache.GetLayout(elementIndex), oldLocalViewPos)
-
-				if linebaseTV, ok := prevView.(view.LinebaseTextView); ok {
-					offset := linebaseTV.MoveLastLine(ctx, tb.renderCache.GetElement(elementIndex-1), relx)
-					l := linebaseTV.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
-
-					tb.viewPosition = elementStart - l + offset
-
-					bPos := linebaseTV.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), offset)
-					tb.bytePos = bPos
-				} else {
-					tb.viewPosition = max(elementStart-1, 0)
-
-					if elementIndex > 0 {
-						pView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
-						pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
-						// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
-						bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
-						tb.bytePos = bPos
-					}
-				}
-			} else {
-				tb.viewPosition = max(elementStart-1, 0)
-
-				if elementIndex > 0 {
-					pView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
-					pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
-					// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
-					bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
-					tb.bytePos = bPos
-				}
-			}
-		}
-	} else {
-		// moves := newLocalViewPos - oldLocalViewPos
-		tb.viewPosition = elementStart + newLocalViewPos
-		bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), newLocalViewPos)
-		tb.bytePos = bPos
-	}
-
-	//tb.viewPosition = min(max(tb.viewPosition, 0), ttl-1)
-}
-
 func (tb *TextBox) modelToView() (ElementIndex int, ViewStart int, ViewLocalPos int) {
 	ctx := view.Context{
 		Resolver: tb.TextEngine,
@@ -817,6 +680,143 @@ func (tb *TextBox) RemoveChar() {
 	viewLocalPos = textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), tb.bytePos.StartPosition)
 
 	tb.viewPosition = viewStart + viewLocalPos
+}
+
+func (tb *TextBox) move(dir int) {
+	ctx := view.Context{
+		Resolver: tb.TextEngine,
+		Document: tb.Document,
+	}
+
+	tb.renderCache.Update(ctx, tb.Width)
+
+	_, elementIndex, elementStart, oldLocalViewPos := tb.renderCache.Stats(tb.viewPosition)
+
+	tview := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex))
+	var newLocalViewPos int
+	switch dir {
+	case 0:
+		newLocalViewPos = tview.MoveLeft(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
+	case 1:
+		newLocalViewPos = tview.MoveRight(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
+	case 2:
+		newLocalViewPos = tview.MoveUp(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
+	case 3:
+		newLocalViewPos = tview.MoveDown(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
+	}
+
+	if newLocalViewPos == -1 {
+		tvLen := tview.MoveLength(ctx, tb.renderCache.GetElement(elementIndex))
+		if dir == 3 {
+
+			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok && elementIndex+1 < tb.renderCache.GetItemCount() {
+
+				nextView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex + 1))
+				relx := pLinebaseView.ConvertRelativeX(ctx, tb.renderCache.GetLayout(elementIndex), oldLocalViewPos)
+
+				if linebaseTV, ok := nextView.(view.LinebaseTextView); ok {
+					offset := linebaseTV.MoveFirstLine(ctx, tb.renderCache.GetElement(elementIndex+1), relx)
+
+					tb.viewPosition = elementStart + tvLen + offset
+
+					bPos := linebaseTV.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), offset)
+					tb.bytePos = bPos
+				} else {
+					tb.viewPosition = elementStart + tvLen
+
+					// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
+					bPos := nextView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
+					tb.bytePos = bPos
+				}
+			} else {
+				if elementIndex+1 < tb.renderCache.GetItemCount() {
+
+					nextView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex + 1))
+					tb.viewPosition = elementStart + tvLen
+
+					// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
+					bPos := nextView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
+					tb.bytePos = bPos
+				} else {
+
+					tb.viewPosition = elementStart + tvLen - 1
+
+					bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen-1)
+					tb.bytePos = bPos
+				}
+			}
+		} else if dir == 1 {
+			if elementIndex+1 < tb.renderCache.GetItemCount() {
+				tb.viewPosition = elementStart + tvLen
+
+				nView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex + 1))
+				bPos := nView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
+				tb.bytePos = bPos
+			} else {
+				tb.viewPosition = elementStart + tvLen - 1
+				bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen-1)
+				tb.bytePos = bPos
+			}
+		}
+
+		if dir == 0 {
+			tb.viewPosition = max(elementStart-1, 0)
+
+			if elementIndex > 0 {
+				pView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
+				pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
+				bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
+				tb.bytePos = bPos
+			} else {
+				bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), 0)
+				tb.bytePos = bPos
+			}
+		} else if dir == 2 {
+
+			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok && elementIndex > 0 {
+
+				prevView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
+				relx := pLinebaseView.ConvertRelativeX(ctx, tb.renderCache.GetLayout(elementIndex), oldLocalViewPos)
+
+				if linebaseTV, ok := prevView.(view.LinebaseTextView); ok {
+					offset := linebaseTV.MoveLastLine(ctx, tb.renderCache.GetElement(elementIndex-1), relx)
+					l := linebaseTV.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
+
+					tb.viewPosition = elementStart - l + offset
+
+					bPos := linebaseTV.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), offset)
+					tb.bytePos = bPos
+				} else {
+					tb.viewPosition = max(elementStart-1, 0)
+
+					if elementIndex > 0 {
+						pView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
+						pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
+						// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
+						bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
+						tb.bytePos = bPos
+					}
+				}
+			} else {
+				tb.viewPosition = max(elementStart-1, 0)
+
+				if elementIndex > 0 {
+					pView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
+					pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
+					// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
+					bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
+					tb.bytePos = bPos
+				}
+			}
+		}
+	} else {
+		// moves := newLocalViewPos - oldLocalViewPos
+		tb.viewPosition = elementStart + newLocalViewPos
+		bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), newLocalViewPos)
+		tb.bytePos = bPos
+	}
+
+	//tb.viewPosition = min(max(tb.viewPosition, 0), ttl-1)
 }
 
 func (tb *TextBox) MoveLeft() {
