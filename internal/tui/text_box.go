@@ -1072,6 +1072,8 @@ func (tb *TextBox) Replace(length int, s string) {
 	tb.Document.Remove(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, length)
 	tb.Document.InsertString(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, s)
 
+	// TODO: コード統合
+
 	ctx := view.Context{
 		Resolver: tb.TextEngine,
 		Document: tb.Document,
