@@ -14,10 +14,18 @@ type TextRenderCache struct {
 	textBoxWidth    int
 }
 
+func (trc *TextRenderCache) ForceUpdate(ctx view.Context, textBoxWidth int) {
+	trc.updateImpl(ctx, textBoxWidth, true)
+}
+
 func (trc *TextRenderCache) Update(ctx view.Context, textBoxWidth int) {
+	trc.updateImpl(ctx, textBoxWidth, false)
+}
+
+func (trc *TextRenderCache) updateImpl(ctx view.Context, textBoxWidth int, forceUpdate bool) {
 	layoutChanged := trc.textBoxWidth != textBoxWidth
 	newDocVersion := ctx.Document.GetVersion()
-	if (trc.documentVersion > 0 && trc.documentVersion == newDocVersion) && !layoutChanged {
+	if (trc.documentVersion > 0 && trc.documentVersion == newDocVersion) && !layoutChanged && !forceUpdate {
 		return
 	}
 	trc.textBoxWidth = textBoxWidth

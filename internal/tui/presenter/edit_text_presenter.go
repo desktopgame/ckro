@@ -40,7 +40,9 @@ func (edit *EditTextPresenter) Handle(view View, ev tcell.Event) {
 		case tcell.KeyBackspace, tcell.KeyBackspace2:
 			view.RemoveChar()
 		case tcell.KeyEnter:
-			view.InsertString("\n")
+			if !view.Submit() {
+				view.InsertString("\n")
+			}
 			edit.modify()
 		case tcell.KeyTAB:
 			view.InsertString("\t")

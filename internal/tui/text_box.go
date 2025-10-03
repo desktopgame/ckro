@@ -696,6 +696,24 @@ func (tb *TextBox) RemoveChar() {
 	tb.viewPosition = viewStart + viewLocalPos
 }
 
+func (tb *TextBox) Submit() bool {
+	ctx := tb.context()
+	tb.renderCache.Update(ctx, tb.Width)
+
+	_, ei, _, _ := tb.renderCache.Stats(tb.viewPosition)
+	element := tb.renderCache.GetElement(ei)
+
+	if fold, ok := element.(*litemark.CodeBlockElement); ok {
+		tb.foldManager.AddFold(tb.Document, fold)
+		tb.renderCache.ForceUpdate(ctx, tb.Width)
+
+		_, vs, vl := tb.modelToView()
+		tb.viewPosition = vs + vl
+		return true
+	}
+	return false
+}
+
 func (tb *TextBox) move(dir int) {
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
