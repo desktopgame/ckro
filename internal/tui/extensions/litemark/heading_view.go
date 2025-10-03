@@ -88,28 +88,28 @@ func (hv *HeadingView) MinimumSize(ctx view.Context, e model.Element, width int,
 	}
 }
 
-func (hv *HeadingView) MoveLength(ctx view.Context, e model.Element) int {
-	line := ctx.GetSegment(e, 1).GetLine(0)
+func (hv *HeadingView) MoveLength(ctx view.Context, textLayout *view.TextLayout) int {
+	line := ctx.GetSegment(textLayout.Element, 1).GetLine(0)
 	return text.GraphemeLength(line) + 1 // include newline
 }
 
-func (hv *HeadingView) MoveUp(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (hv *HeadingView) MoveUp(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (hv *HeadingView) MoveDown(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (hv *HeadingView) MoveDown(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (hv *HeadingView) MoveLeft(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (hv *HeadingView) MoveLeft(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	if viewLocalPos <= 0 {
 		return -1
 	}
 	return viewLocalPos - 1
 }
 
-func (hv *HeadingView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int) int {
-	if viewLocalPos >= hv.MoveLength(ctx, e)-1 {
+func (hv *HeadingView) MoveRight(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
+	if viewLocalPos >= hv.MoveLength(ctx, textLayout)-1 {
 		return -1
 	}
 	return viewLocalPos + 1
@@ -127,7 +127,7 @@ func (hv *HeadingView) ConvertModel(ctx view.Context, textLayout *view.TextLayou
 	st := rs.StartPosition
 	str := ctx.Document.Read(r).GetLine(0)
 
-	if viewLocalPos >= hv.MoveLength(ctx, e)-1 {
+	if viewLocalPos >= hv.MoveLength(ctx, textLayout)-1 {
 		return view.CharacterReference{
 			StartPosition: model.Position{
 				Row:    st.Row,
@@ -165,6 +165,6 @@ func (hv *HeadingView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Te
 		}
 		bytes += len(cluster)
 	}
-	return hv.MoveLength(ctx, textLayout.Element) - 1
+	return hv.MoveLength(ctx, textLayout) - 1
 	//panic("")
 }

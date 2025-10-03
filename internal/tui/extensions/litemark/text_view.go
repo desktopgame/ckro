@@ -64,34 +64,34 @@ func (t *TextView) MinimumSize(ctx view.Context, e model.Element, width int, hei
 	}
 }
 
-func (t *TextView) MoveLength(ctx view.Context, e model.Element) int {
+func (t *TextView) MoveLength(ctx view.Context, textLayout *view.TextLayout) int {
 	totalLength := 0
-	for i := 0; i < e.GetElementCount(); i++ {
-		childElement := e.GetElement(i)
+	for i := 0; i < len(textLayout.Children); i++ {
+		childElement := textLayout.Children[i].Element
 		childView := ctx.Resolver.Resolve(childElement)
 
-		totalLength += childView.MoveLength(ctx, childElement)
+		totalLength += childView.MoveLength(ctx, textLayout.Children[i])
 	}
 	return totalLength + 1
 }
 
-func (t *TextView) MoveUp(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (t *TextView) MoveUp(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (t *TextView) MoveDown(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (t *TextView) MoveDown(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (t *TextView) MoveLeft(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (t *TextView) MoveLeft(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	if viewLocalPos <= 0 {
 		return -1
 	}
 	return viewLocalPos - 1
 }
 
-func (t *TextView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int) int {
-	if viewLocalPos >= t.MoveLength(ctx, e)-1 {
+func (t *TextView) MoveRight(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
+	if viewLocalPos >= t.MoveLength(ctx, textLayout)-1 {
 		return -1
 	}
 	return viewLocalPos + 1
@@ -104,7 +104,7 @@ func (t *TextView) RemoveCombine(ctx view.Context, textLayout *view.TextLayout, 
 		childElement := child.Element
 
 		childView := ctx.Resolver.Resolve(childElement)
-		childViewLen := childView.MoveLength(ctx, childElement)
+		childViewLen := childView.MoveLength(ctx, textLayout.Children[i])
 		if childViewLen == 1 && vls+1 == viewLocalPos {
 			r := childElement.GetRange(0)
 			bPos := view.CharacterReference{
@@ -143,9 +143,9 @@ func (t *TextView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLa
 		if bytePos.Column >= st.Column && (bytePos.Column < ed.Column || ed.Row > st.Row) {
 			return vls + childView.ConvertViewLocalPos(ctx, child, bytePos)
 		}
-		vls += childView.MoveLength(ctx, childElement)
+		vls += childView.MoveLength(ctx, textLayout.Children[i])
 	}
-	return t.MoveLength(ctx, textLayout.Element) - 1
+	return t.MoveLength(ctx, textLayout) - 1
 }
 
 func (t *TextView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {
@@ -171,7 +171,7 @@ func (t *TextView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, v
 		child := textLayout.Children[i]
 		childElement := child.Element
 		childView := ctx.Resolver.Resolve(childElement)
-		childViewLen := childView.MoveLength(ctx, childElement)
+		childViewLen := childView.MoveLength(ctx, child)
 		start := totalLen
 		end := start + childViewLen
 
@@ -198,12 +198,12 @@ func (t *TextView) ConvertRelativeX(ctx view.Context, textLayout *view.TextLayou
 	return viewLocalPos
 }
 
-func (t *TextView) MoveFirstLine(ctx view.Context, e model.Element, relX int) int {
-	l := t.MoveLength(ctx, e)
+func (t *TextView) MoveFirstLine(ctx view.Context, textLayout *view.TextLayout, relX int) int {
+	l := t.MoveLength(ctx, textLayout)
 	return min(relX, l-1)
 }
 
-func (t *TextView) MoveLastLine(ctx view.Context, e model.Element, relX int) int {
-	l := t.MoveLength(ctx, e)
+func (t *TextView) MoveLastLine(ctx view.Context, textLayout *view.TextLayout, relX int) int {
+	l := t.MoveLength(ctx, textLayout)
 	return min(relX, l-1)
 }

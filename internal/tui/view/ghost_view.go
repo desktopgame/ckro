@@ -25,23 +25,23 @@ func (g *GhostView) MinimumSize(ctx Context, e model.Element, width int, height 
 	}
 }
 
-func (g *GhostView) MoveLength(ctx Context, e model.Element) int {
+func (g *GhostView) MoveLength(ctx Context, textLayout *TextLayout) int {
 	return 1
 }
 
-func (g *GhostView) MoveUp(ctx Context, e model.Element, viewLocalPos int) int {
+func (g *GhostView) MoveUp(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (g *GhostView) MoveDown(ctx Context, e model.Element, viewLocalPos int) int {
+func (g *GhostView) MoveDown(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (g *GhostView) MoveLeft(ctx Context, e model.Element, viewLocalPos int) int {
+func (g *GhostView) MoveLeft(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (g *GhostView) MoveRight(ctx Context, e model.Element, viewLocalPos int) int {
+func (g *GhostView) MoveRight(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
 	return -1
 }
 

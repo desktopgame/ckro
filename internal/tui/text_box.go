@@ -339,10 +339,10 @@ func (tb *TextBox) modelToView() (ElementIndex int, ViewStart int, ViewLocalPos 
 
 	viewStart := 0
 	for i := 0; i < elementIndex; i++ {
-		element := tb.renderCache.GetElement(i)
-		textView := tb.TextEngine.Resolve(element)
+		layout := tb.renderCache.GetLayout(i)
+		textView := tb.TextEngine.Resolve(layout.Element)
 
-		viewStart += textView.MoveLength(ctx, element)
+		viewStart += textView.MoveLength(ctx, layout)
 	}
 
 	element := tb.renderCache.GetElement(elementIndex)
@@ -387,12 +387,12 @@ func (tb *TextBox) InsertString(s string) {
 	}
 
 	elementIndex, viewStart, viewLocalPos := tb.modelToView()
-	element := tb.renderCache.GetElement(elementIndex)
-	textView := tb.TextEngine.Resolve(element)
+	layout := tb.renderCache.GetLayout(elementIndex)
+	textView := tb.TextEngine.Resolve(layout.Element)
 
 	if viewLocalPos == 0 {
 		if strings.HasSuffix(s, "\n") {
-			if _, ok := element.(*litemark.HeadingElement); ok {
+			if _, ok := layout.Element.(*litemark.HeadingElement); ok {
 				if elementIndex == 0 {
 					tb.bytePos.StartPosition.Row = 0
 					tb.bytePos.StartPosition.Column = 0
@@ -420,12 +420,12 @@ func (tb *TextBox) InsertString(s string) {
 	tb.renderCache.Update(ctx, tb.Width)
 
 	elementIndex, viewStart, viewLocalPos = tb.modelToView()
-	element = tb.renderCache.GetElement(elementIndex)
-	textView = tb.TextEngine.Resolve(element)
+	layout = tb.renderCache.GetLayout(elementIndex)
+	textView = tb.TextEngine.Resolve(layout.Element)
 
 	moves := text.GraphemeLength(s)
 	for i := 0; i < moves; i++ {
-		viewLocalPos = textView.MoveRight(ctx, element, viewLocalPos)
+		viewLocalPos = textView.MoveRight(ctx, layout, viewLocalPos)
 
 		if viewLocalPos == -1 {
 			// 文字挿入によってビューが分割された場合
@@ -433,8 +433,8 @@ func (tb *TextBox) InsertString(s string) {
 			// その場合には次の行へ降りる
 			// 移動可能回数が1回かつテキストが存在する場合は行を継続する
 			// 移動可能回数が2回以上の場合、そのビューの開始位置までジャンプする
-			if textView.MoveLength(ctx, element) == 1 {
-				if len(ctx.GetText(element)) == 0 {
+			if textView.MoveLength(ctx, layout) == 1 {
+				if len(ctx.GetText(layout.Element)) == 0 {
 					tb.viewPosition = viewStart + 1
 				} else {
 					tb.viewPosition = viewStart
@@ -443,9 +443,9 @@ func (tb *TextBox) InsertString(s string) {
 				if _, ok := textView.(*litemark.TextView); ok && !breakLine {
 					// *a* このときは-1
 					// *a*NL このときは0
-					tb.viewPosition = viewStart + textView.MoveLength(ctx, element) - 1
+					tb.viewPosition = viewStart + textView.MoveLength(ctx, layout) - 1
 				} else {
-					tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
+					tb.viewPosition = viewStart + textView.MoveLength(ctx, layout)
 				}
 
 				if tb.viewPosition >= tb.renderCache.Total() {
@@ -453,8 +453,8 @@ func (tb *TextBox) InsertString(s string) {
 				}
 			}
 			_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
-			element = tb.renderCache.GetElement(elementIndex)
-			textView = tb.TextEngine.Resolve(element)
+			layout = tb.renderCache.GetLayout(elementIndex)
+			textView = tb.TextEngine.Resolve(layout.Element)
 
 			bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
 			tb.bytePos = bPos
@@ -464,11 +464,11 @@ func (tb *TextBox) InsertString(s string) {
 		} else {
 			tb.viewPosition = viewStart + viewLocalPos
 
-			if viewLocalPos == textView.MoveLength(ctx, element) {
+			if viewLocalPos == textView.MoveLength(ctx, layout) {
 
 				if elementIndex+1 < tb.renderCache.GetItemCount() {
-					element = tb.renderCache.GetElement(elementIndex + 1)
-					textView = tb.TextEngine.Resolve(element)
+					layout = tb.renderCache.GetLayout(elementIndex + 1)
+					textView = tb.TextEngine.Resolve(layout.Element)
 					tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
 				} else {
 					bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
@@ -503,12 +503,12 @@ func (tb *TextBox) RemoveChar() {
 	tb.renderCache.Update(ctx, tb.Width)
 
 	elementIndex, viewStart, viewLocalPos := tb.modelToView()
-	element := tb.renderCache.GetElement(elementIndex)
-	textView := tb.TextEngine.Resolve(element)
+	layout := tb.renderCache.GetLayout(elementIndex)
+	textView := tb.TextEngine.Resolve(layout.Element)
 
-	if textView.MoveLength(ctx, element) == 2 {
-		if _, ok := element.(*litemark.HeadingElement); ok {
-			r := element.GetRange(0)
+	if textView.MoveLength(ctx, layout) == 2 {
+		if _, ok := layout.Element.(*litemark.HeadingElement); ok {
+			r := layout.Element.GetRange(0)
 			bPos := view.CharacterReference{
 				StartPosition: r.StartPosition,
 				Bytes:         (r.EndPosition.Column - r.StartPosition.Column),
@@ -521,8 +521,8 @@ func (tb *TextBox) RemoveChar() {
 			combine, bPos := txView.RemoveCombine(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
 			if combine {
 				elementIndex, viewStart, viewLocalPos = tb.modelToView()
-				element = tb.renderCache.GetElement(elementIndex)
-				textView = tb.TextEngine.Resolve(element)
+				layout = tb.renderCache.GetLayout(elementIndex)
+				textView = tb.TextEngine.Resolve(layout.Element)
 				tb.bytePos = bPos
 				tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, bPos.Bytes)
 				tb.bytePos.Bytes = 0
@@ -534,8 +534,8 @@ func (tb *TextBox) RemoveChar() {
 			}
 		}
 	}
-	if cb, ok := element.(*litemark.CodeBlockElement); ok && viewLocalPos == 0 && len(cb.Lang) == 0 {
-		r := element.GetRange(0)
+	if cb, ok := layout.Element.(*litemark.CodeBlockElement); ok && viewLocalPos == 0 && len(cb.Lang) == 0 {
+		r := layout.Element.GetRange(0)
 		sg := tb.Document.Read(r)
 		bPos := view.CharacterReference{
 			StartPosition: model.Position{
@@ -554,8 +554,8 @@ func (tb *TextBox) RemoveChar() {
 		_, vs, vl := tb.modelToView()
 		tb.viewPosition = vs + vl
 		return
-	} else if cb, ok := element.(*litemark.CodeBlockElement); ok && viewLocalPos == 1 && len(cb.Lang) > 0 {
-		r1 := element.GetRange(1)
+	} else if cb, ok := layout.Element.(*litemark.CodeBlockElement); ok && viewLocalPos == 1 && len(cb.Lang) > 0 {
+		r1 := layout.Element.GetRange(1)
 		sg := tb.Document.Read(r1)
 		bPos := view.CharacterReference{
 			StartPosition: model.Position{
@@ -574,8 +574,8 @@ func (tb *TextBox) RemoveChar() {
 		_, vs, vl := tb.modelToView()
 		tb.viewPosition = vs + vl
 		return
-	} else if _, ok := element.(*model.FoldBlockElement); ok && viewLocalPos == 0 {
-		r := element.GetRange(0)
+	} else if _, ok := layout.Element.(*model.FoldBlockElement); ok && viewLocalPos == 0 {
+		r := layout.Element.GetRange(0)
 		sg := tb.Document.Read(r)
 		bPos := view.CharacterReference{
 			StartPosition: model.Position{
@@ -598,8 +598,8 @@ func (tb *TextBox) RemoveChar() {
 		combine, bPos := txView.RemoveCombine(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
 		if combine {
 			elementIndex, viewStart, viewLocalPos = tb.modelToView()
-			element = tb.renderCache.GetElement(elementIndex)
-			textView = tb.TextEngine.Resolve(element)
+			layout = tb.renderCache.GetLayout(elementIndex)
+			textView = tb.TextEngine.Resolve(layout.Element)
 			tb.bytePos = bPos
 			tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, bPos.Bytes)
 			tb.bytePos.Bytes = 0
@@ -611,13 +611,13 @@ func (tb *TextBox) RemoveChar() {
 		}
 	}
 
-	newViewLocalPos := textView.MoveLeft(ctx, element, viewLocalPos)
+	newViewLocalPos := textView.MoveLeft(ctx, layout, viewLocalPos)
 	if newViewLocalPos == -1 {
-		element = tb.renderCache.GetElement(elementIndex - 1)
+		layout = tb.renderCache.GetLayout(elementIndex - 1)
 
 		// コードブロックの一文字後ろでバックスペース押下時の処理
-		if _, ok := element.(*litemark.CodeBlockElement); ok {
-			r := element.GetRange(0)
+		if _, ok := layout.Element.(*litemark.CodeBlockElement); ok {
+			r := layout.Element.GetRange(0)
 			bPos := view.CharacterReference{
 				StartPosition: model.Position{
 					Row:    r.EndPosition.Row,
@@ -637,8 +637,8 @@ func (tb *TextBox) RemoveChar() {
 			tb.viewPosition = vs + vl
 			return
 		}
-		if _, ok := element.(*litemark.HorizontalLineElement); ok {
-			r := element.GetRange(0)
+		if _, ok := layout.Element.(*litemark.HorizontalLineElement); ok {
+			r := layout.Element.GetRange(0)
 			bPos := view.CharacterReference{
 				StartPosition: model.Position{
 					Row:    r.EndPosition.Row,
@@ -658,10 +658,10 @@ func (tb *TextBox) RemoveChar() {
 			tb.viewPosition = vs + vl
 			return
 		}
-		prevView := tb.TextEngine.Resolve(element)
-		bPos := prevView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), prevView.MoveLength(ctx, element)-1)
+		prevView := tb.TextEngine.Resolve(layout.Element)
+		bPos := prevView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), prevView.MoveLength(ctx, layout)-1)
 
-		charRef := prevView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), prevView.MoveLength(ctx, element)-1)
+		charRef := prevView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), prevView.MoveLength(ctx, layout)-1)
 		tb.bytePos = charRef
 
 		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
@@ -712,14 +712,14 @@ func (tb *TextBox) RemoveChar() {
 
 	viewStart = 0
 	for i := 0; i < elementIndex; i++ {
-		element := tb.renderCache.GetElement(i)
-		textView := tb.TextEngine.Resolve(element)
+		layout = tb.renderCache.GetLayout(i)
+		textView := tb.TextEngine.Resolve(layout.Element)
 
-		viewStart += textView.MoveLength(ctx, element)
+		viewStart += textView.MoveLength(ctx, layout)
 	}
 
-	element = tb.renderCache.GetElement(elementIndex)
-	textView = tb.TextEngine.Resolve(element)
+	layout = tb.renderCache.GetLayout(elementIndex)
+	textView = tb.TextEngine.Resolve(layout.Element)
 	viewLocalPos = textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), tb.bytePos.StartPosition)
 
 	tb.viewPosition = viewStart + viewLocalPos
@@ -775,17 +775,17 @@ func (tb *TextBox) move(dir int) {
 	var newLocalViewPos int
 	switch dir {
 	case 0:
-		newLocalViewPos = tview.MoveLeft(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
+		newLocalViewPos = tview.MoveLeft(ctx, tb.renderCache.GetLayout(elementIndex), oldLocalViewPos)
 	case 1:
-		newLocalViewPos = tview.MoveRight(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
+		newLocalViewPos = tview.MoveRight(ctx, tb.renderCache.GetLayout(elementIndex), oldLocalViewPos)
 	case 2:
-		newLocalViewPos = tview.MoveUp(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
+		newLocalViewPos = tview.MoveUp(ctx, tb.renderCache.GetLayout(elementIndex), oldLocalViewPos)
 	case 3:
-		newLocalViewPos = tview.MoveDown(ctx, tb.renderCache.GetElement(elementIndex), oldLocalViewPos)
+		newLocalViewPos = tview.MoveDown(ctx, tb.renderCache.GetLayout(elementIndex), oldLocalViewPos)
 	}
 
 	if newLocalViewPos == -1 {
-		tvLen := tview.MoveLength(ctx, tb.renderCache.GetElement(elementIndex))
+		tvLen := tview.MoveLength(ctx, tb.renderCache.GetLayout(elementIndex))
 		if dir == 3 {
 
 			if pLinebaseView, ok := tview.(view.LinebaseTextView); ok && elementIndex+1 < tb.renderCache.GetItemCount() {
@@ -794,7 +794,7 @@ func (tb *TextBox) move(dir int) {
 				relx := pLinebaseView.ConvertRelativeX(ctx, tb.renderCache.GetLayout(elementIndex), oldLocalViewPos)
 
 				if linebaseTV, ok := nextView.(view.LinebaseTextView); ok {
-					offset := linebaseTV.MoveFirstLine(ctx, tb.renderCache.GetElement(elementIndex+1), relx)
+					offset := linebaseTV.MoveFirstLine(ctx, tb.renderCache.GetLayout(elementIndex+1), relx)
 
 					tb.viewPosition = elementStart + tvLen + offset
 
@@ -843,7 +843,7 @@ func (tb *TextBox) move(dir int) {
 
 			if elementIndex > 0 {
 				pView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
-				pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
+				pViewLen := pView.MoveLength(ctx, tb.renderCache.GetLayout(elementIndex-1))
 				bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
 				tb.bytePos = bPos
 			} else {
@@ -858,8 +858,8 @@ func (tb *TextBox) move(dir int) {
 				relx := pLinebaseView.ConvertRelativeX(ctx, tb.renderCache.GetLayout(elementIndex), oldLocalViewPos)
 
 				if linebaseTV, ok := prevView.(view.LinebaseTextView); ok {
-					offset := linebaseTV.MoveLastLine(ctx, tb.renderCache.GetElement(elementIndex-1), relx)
-					l := linebaseTV.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
+					offset := linebaseTV.MoveLastLine(ctx, tb.renderCache.GetLayout(elementIndex-1), relx)
+					l := linebaseTV.MoveLength(ctx, tb.renderCache.GetLayout(elementIndex-1))
 
 					tb.viewPosition = elementStart - l + offset
 
@@ -870,7 +870,7 @@ func (tb *TextBox) move(dir int) {
 
 					if elementIndex > 0 {
 						pView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
-						pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
+						pViewLen := pView.MoveLength(ctx, tb.renderCache.GetLayout(elementIndex-1))
 						// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
 						bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
 						tb.bytePos = bPos
@@ -881,7 +881,7 @@ func (tb *TextBox) move(dir int) {
 
 				if elementIndex > 0 {
 					pView := tb.TextEngine.Resolve(tb.renderCache.GetElement(elementIndex - 1))
-					pViewLen := pView.MoveLength(ctx, tb.renderCache.GetElement(elementIndex-1))
+					pViewLen := pView.MoveLength(ctx, tb.renderCache.GetLayout(elementIndex-1))
 					// bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), tvLen)
 					bPos := pView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), pViewLen-1)
 					tb.bytePos = bPos
@@ -919,14 +919,14 @@ func (tb *TextBox) MoveLineStart() {
 	tb.renderCache.Update(ctx, tb.Width)
 
 	_, ei, estart, eoff := tb.renderCache.Stats(tb.viewPosition)
-	element := tb.renderCache.GetElement(ei)
+	layout := tb.renderCache.GetLayout(ei)
 	tl := tb.renderCache.GetLayout(ei)
-	textView := tb.TextEngine.Resolve(element)
+	textView := tb.TextEngine.Resolve(layout.Element)
 
 	lx, _ := textView.ConvertPos(ctx, tl, eoff)
 	viewLocalPos := eoff
 	for lx > 0 {
-		nextLocalPos := textView.MoveLeft(ctx, element, viewLocalPos)
+		nextLocalPos := textView.MoveLeft(ctx, layout, viewLocalPos)
 		if nextLocalPos == -1 {
 			break
 		}
@@ -941,12 +941,12 @@ func (tb *TextBox) MoveLineEnd() {
 	tb.renderCache.Update(ctx, tb.Width)
 
 	_, ei, estart, eoff := tb.renderCache.Stats(tb.viewPosition)
-	element := tb.renderCache.GetElement(ei)
-	textView := tb.TextEngine.Resolve(element)
+	layout := tb.renderCache.GetLayout(ei)
+	textView := tb.TextEngine.Resolve(layout.Element)
 
 	viewLocalPos := eoff
 	for {
-		nextLocalPos := textView.MoveRight(ctx, element, viewLocalPos)
+		nextLocalPos := textView.MoveRight(ctx, layout, viewLocalPos)
 		if nextLocalPos == -1 {
 			break
 		}
@@ -1160,12 +1160,12 @@ func (tb *TextBox) Replace(length int, s string) {
 	tb.renderCache.Update(ctx, tb.Width)
 
 	elementIndex, viewStart, viewLocalPos := tb.modelToView()
-	element := tb.renderCache.GetElement(elementIndex)
-	textView := tb.TextEngine.Resolve(element)
+	layout := tb.renderCache.GetLayout(elementIndex)
+	textView := tb.TextEngine.Resolve(layout.Element)
 
 	moves := text.GraphemeLength(s)
 	for i := 0; i < moves; i++ {
-		viewLocalPos = textView.MoveRight(ctx, element, viewLocalPos)
+		viewLocalPos = textView.MoveRight(ctx, layout, viewLocalPos)
 
 		if viewLocalPos == -1 {
 			// 文字挿入によってビューが分割された場合
@@ -1173,8 +1173,8 @@ func (tb *TextBox) Replace(length int, s string) {
 			// その場合には次の行へ降りる
 			// 移動可能回数が1回かつテキストが存在する場合は行を継続する
 			// 移動可能回数が2回以上の場合、そのビューの開始位置までジャンプする
-			if textView.MoveLength(ctx, element) == 1 {
-				if len(ctx.GetText(element)) == 0 {
+			if textView.MoveLength(ctx, layout) == 1 {
+				if len(ctx.GetText(layout.Element)) == 0 {
 					tb.viewPosition = viewStart + 1
 				} else {
 					tb.viewPosition = viewStart
@@ -1183,9 +1183,9 @@ func (tb *TextBox) Replace(length int, s string) {
 				if _, ok := textView.(*litemark.TextView); ok && !breakLine {
 					// *a* このときは-1
 					// *a*NL このときは0
-					tb.viewPosition = viewStart + textView.MoveLength(ctx, element) - 1
+					tb.viewPosition = viewStart + textView.MoveLength(ctx, layout) - 1
 				} else {
-					tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
+					tb.viewPosition = viewStart + textView.MoveLength(ctx, layout)
 				}
 
 				if tb.viewPosition >= tb.renderCache.Total() {
@@ -1193,8 +1193,8 @@ func (tb *TextBox) Replace(length int, s string) {
 				}
 			}
 			_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
-			element = tb.renderCache.GetElement(elementIndex)
-			textView = tb.TextEngine.Resolve(element)
+			layout = tb.renderCache.GetLayout(elementIndex)
+			textView = tb.TextEngine.Resolve(layout.Element)
 
 			bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
 			tb.bytePos = bPos
@@ -1204,11 +1204,11 @@ func (tb *TextBox) Replace(length int, s string) {
 		} else {
 			tb.viewPosition = viewStart + viewLocalPos
 
-			if viewLocalPos == textView.MoveLength(ctx, element) {
+			if viewLocalPos == textView.MoveLength(ctx, layout) {
 
 				if elementIndex+1 < tb.renderCache.GetItemCount() {
-					element = tb.renderCache.GetElement(elementIndex + 1)
-					textView = tb.TextEngine.Resolve(element)
+					layout = tb.renderCache.GetLayout(elementIndex + 1)
+					textView = tb.TextEngine.Resolve(layout.Element)
 					tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
 				} else {
 					bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)

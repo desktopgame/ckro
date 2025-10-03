@@ -26,23 +26,23 @@ func (b *BlankLineView) MinimumSize(ctx view.Context, e model.Element, width int
 	}
 }
 
-func (b *BlankLineView) MoveLength(ctx view.Context, e model.Element) int {
+func (b *BlankLineView) MoveLength(ctx view.Context, textLayout *view.TextLayout) int {
 	return 1
 }
 
-func (b *BlankLineView) MoveUp(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (b *BlankLineView) MoveUp(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (b *BlankLineView) MoveDown(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (b *BlankLineView) MoveDown(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (b *BlankLineView) MoveLeft(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (b *BlankLineView) MoveLeft(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (b *BlankLineView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (b *BlankLineView) MoveRight(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return -1
 }
 

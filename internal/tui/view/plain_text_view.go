@@ -99,27 +99,27 @@ func (p *PlainTextView) MinimumSize(ctx Context, e model.Element, width int, hei
 	}
 }
 
-func (p *PlainTextView) MoveLength(ctx Context, e model.Element) int {
-	return text.GraphemeLength(ctx.GetText(e)) + 1 // include newline
+func (p *PlainTextView) MoveLength(ctx Context, textLayout *TextLayout) int {
+	return text.GraphemeLength(ctx.GetText(textLayout.Element)) + 1 // include newline
 }
 
-func (p *PlainTextView) MoveUp(ctx Context, e model.Element, viewLocalPos int) int {
+func (p *PlainTextView) MoveUp(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (p *PlainTextView) MoveDown(ctx Context, e model.Element, viewLocalPos int) int {
+func (p *PlainTextView) MoveDown(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (p *PlainTextView) MoveLeft(ctx Context, e model.Element, viewLocalPos int) int {
+func (p *PlainTextView) MoveLeft(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
 	if viewLocalPos <= 0 {
 		return -1
 	}
 	return viewLocalPos - 1
 }
 
-func (p *PlainTextView) MoveRight(ctx Context, e model.Element, viewLocalPos int) int {
-	if viewLocalPos >= p.MoveLength(ctx, e)-1 {
+func (p *PlainTextView) MoveRight(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
+	if viewLocalPos >= p.MoveLength(ctx, textLayout)-1 {
 		return -1
 	}
 	return viewLocalPos + 1
@@ -212,19 +212,19 @@ func (p *PlainTextView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout,
 		}
 		bytes += len(cluster)
 	}
-	return p.MoveLength(ctx, textLayout.Element) - 1
+	return p.MoveLength(ctx, textLayout) - 1
 }
 
 func (p *PlainTextView) ConvertRelativeX(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
 	return viewLocalPos
 }
 
-func (p *PlainTextView) MoveFirstLine(ctx Context, e model.Element, relX int) int {
-	l := p.MoveLength(ctx, e)
+func (p *PlainTextView) MoveFirstLine(ctx Context, textLayout *TextLayout, relX int) int {
+	l := p.MoveLength(ctx, textLayout)
 	return min(relX, l-1)
 }
 
-func (p *PlainTextView) MoveLastLine(ctx Context, e model.Element, relX int) int {
-	l := p.MoveLength(ctx, e)
+func (p *PlainTextView) MoveLastLine(ctx Context, textLayout *TextLayout, relX int) int {
+	l := p.MoveLength(ctx, textLayout)
 	return min(relX, l-1)
 }

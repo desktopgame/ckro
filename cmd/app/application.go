@@ -386,10 +386,22 @@ func (app *Application) loopMiniBuffer() {
 		log.Println(s)
 
 		tb := app.textEdior.TextArea.TextBox
+		sb := strings.Builder{}
+		sb.WriteString("\n")
+		sb.WriteString("{{{\n")
+		sb.WriteString(s)
+		sb.WriteString("\n")
+		sb.WriteString("}}}\n")
+
 		marker := fmt.Sprintf("<chat_response_is_here:%d>", app.chatResponseId)
-		tb.InsertString("\n")
-		tb.InsertString(marker)
-		tb.InsertString("\n")
+		sb.WriteString("\n")
+		sb.WriteString(marker)
+		sb.WriteString("\n")
+		tb.Document.InsertString(
+			tb.Document.GetLineCount()-1,
+			tb.Document.GetLineBytes(tb.Document.GetLineCount()-1),
+			sb.String(),
+		)
 		app.modified = true
 		app.window.Repaint()
 
@@ -425,7 +437,13 @@ func (app *Application) loopMiniBuffer() {
 					response := msg.GetResult().Choices[0].Message.Content
 					tb.CursorReset()
 					if tb.FindNext(marker) {
-						tb.Replace(len(marker), response)
+						sb = strings.Builder{}
+						sb.WriteString("{{{\n")
+						sb.WriteString(response)
+						sb.WriteString("\n")
+						sb.WriteString("}}}\n")
+
+						tb.Replace(len(marker), sb.String())
 						tb.MoveRight()
 						app.textEdior.TextArea.TextBox.CursorUpdate()
 					}

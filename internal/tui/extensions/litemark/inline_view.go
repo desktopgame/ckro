@@ -103,28 +103,28 @@ func (il *InlineView) MinimumSize(ctx view.Context, e model.Element, width int, 
 	}
 }
 
-func (il *InlineView) MoveLength(ctx view.Context, e model.Element) int {
-	line := ctx.GetSegment(e, 1).GetLine(0)
+func (il *InlineView) MoveLength(ctx view.Context, textLayout *view.TextLayout) int {
+	line := ctx.GetSegment(textLayout.Element, 1).GetLine(0)
 	return text.GraphemeLength(line)
 }
 
-func (il *InlineView) MoveUp(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (il *InlineView) MoveUp(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (il *InlineView) MoveDown(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (il *InlineView) MoveDown(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (il *InlineView) MoveLeft(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (il *InlineView) MoveLeft(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	if viewLocalPos <= 0 {
 		return -1
 	}
 	return viewLocalPos - 1
 }
 
-func (il *InlineView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int) int {
-	if viewLocalPos >= il.MoveLength(ctx, e)-1 {
+func (il *InlineView) MoveRight(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
+	if viewLocalPos >= il.MoveLength(ctx, textLayout)-1 {
 		return -1
 	}
 	return viewLocalPos + 1
@@ -171,5 +171,5 @@ func (il *InlineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Tex
 		}
 		bytes += len(cluster)
 	}
-	return il.MoveLength(ctx, e) - 1
+	return il.MoveLength(ctx, textLayout) - 1
 }

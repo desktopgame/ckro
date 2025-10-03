@@ -30,23 +30,23 @@ func (hl *HorizontalLineView) MinimumSize(ctx view.Context, e model.Element, wid
 	}
 }
 
-func (hl *HorizontalLineView) MoveLength(ctx view.Context, e model.Element) int {
+func (hl *HorizontalLineView) MoveLength(ctx view.Context, textLayout *view.TextLayout) int {
 	return 1
 }
 
-func (hl *HorizontalLineView) MoveUp(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (hl *HorizontalLineView) MoveUp(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (hl *HorizontalLineView) MoveDown(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (hl *HorizontalLineView) MoveDown(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (hl *HorizontalLineView) MoveLeft(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (hl *HorizontalLineView) MoveLeft(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return -1
 }
 
-func (hl *HorizontalLineView) MoveRight(ctx view.Context, e model.Element, viewLocalPos int) int {
+func (hl *HorizontalLineView) MoveRight(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return -1
 }
 

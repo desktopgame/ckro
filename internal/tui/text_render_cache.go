@@ -92,9 +92,9 @@ func (trc *TextRenderCache) updateImpl(ctx view.Context, textBoxWidth int, force
 
 	totalViewLen := 0
 	viewLenTable := []int{}
-	for _, elem := range elements {
-		view := ctx.Resolver.Resolve(elem)
-		viewLen := view.MoveLength(ctx, elem)
+	for _, l := range entries {
+		view := ctx.Resolver.Resolve(l.Element)
+		viewLen := view.MoveLength(ctx, l)
 
 		viewLenTable = append(viewLenTable, viewLen)
 		totalViewLen += viewLen

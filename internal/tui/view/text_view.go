@@ -13,11 +13,11 @@ type TextView interface {
 	// width,height はこのビューに与えられたサイズ
 	MinimumSize(ctx Context, e model.Element, width int, height int) *TextLayout
 
-	MoveLength(ctx Context, e model.Element) int
-	MoveUp(ctx Context, e model.Element, viewLocalPos int) int
-	MoveDown(ctx Context, e model.Element, viewLocalPos int) int
-	MoveLeft(ctx Context, e model.Element, viewLocalPos int) int
-	MoveRight(ctx Context, e model.Element, viewLocalPos int) int
+	MoveLength(ctx Context, textLayout *TextLayout) int
+	MoveUp(ctx Context, textLayout *TextLayout, viewLocalPos int) int
+	MoveDown(ctx Context, textLayout *TextLayout, viewLocalPos int) int
+	MoveLeft(ctx Context, textLayout *TextLayout, viewLocalPos int) int
+	MoveRight(ctx Context, textLayout *TextLayout, viewLocalPos int) int
 	ConvertPos(ctx Context, textLayout *TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int)
 	ConvertModel(ctx Context, textLayout *TextLayout, viewLocalPos int) CharacterReference
 	ConvertViewLocalPos(ctx Context, textLayout *TextLayout, bytePos model.Position) int
