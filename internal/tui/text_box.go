@@ -220,6 +220,7 @@ func (tb *TextBox) Draw(g *Graphics) {
 
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
+	tb.foldManager.Refresh(tb.Document)
 
 	// バッファの内容を描画
 	clip := Clip{
@@ -700,11 +701,17 @@ func (tb *TextBox) Submit() bool {
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 
-	_, ei, _, _ := tb.renderCache.Stats(tb.viewPosition)
+	_, ei, _, vl := tb.renderCache.Stats(tb.viewPosition)
 	element := tb.renderCache.GetElement(ei)
 
 	if fold, ok := element.(*model.FoldBlockElement); ok {
-		tb.foldManager.AddFold(tb.Document, fold)
+		if vl > 0 {
+			if tb.foldManager.IsFolded(tb.Document, element) {
+				return true
+			}
+			return false
+		}
+		tb.foldManager.ToggleFold(tb.Document, fold)
 		tb.renderCache.ForceUpdate(ctx, tb.Width)
 
 		_, vs, vl := tb.modelToView()
