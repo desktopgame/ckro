@@ -80,7 +80,7 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 				Range: childElement.GetRange(0),
 			}
 			childView = &PlainTextView{}
-			child = childView.MinimumSize(ctx, childElement, width-4, 9999)
+			child = childView.MinimumSize(ctx, childElement, width-5, 9999)
 			minimumHeight += child.MinimumHeight
 		} else {
 			minimumHeight++
@@ -103,7 +103,7 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 					Range: childElement.GetRange(0),
 				}
 				childView = &PlainTextView{}
-				child = childView.MinimumSize(ctx, childElement, width-2, 9999)
+				child = childView.MinimumSize(ctx, childElement, width-3, 9999)
 				minimumHeight += child.MinimumHeight
 			} else {
 				minimumHeight++
