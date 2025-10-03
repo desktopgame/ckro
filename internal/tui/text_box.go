@@ -703,7 +703,7 @@ func (tb *TextBox) Submit() bool {
 	_, ei, _, _ := tb.renderCache.Stats(tb.viewPosition)
 	element := tb.renderCache.GetElement(ei)
 
-	if fold, ok := element.(*litemark.CodeBlockElement); ok {
+	if fold, ok := element.(*model.FoldBlockElement); ok {
 		tb.foldManager.AddFold(tb.Document, fold)
 		tb.renderCache.ForceUpdate(ctx, tb.Width)
 

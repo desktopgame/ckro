@@ -3,7 +3,6 @@ package model
 type FoldBlockElement struct {
 	Ranges   []Range
 	Children []Element
-	Lang     string
 }
 
 func (f *FoldBlockElement) GetRange(index int) Range {

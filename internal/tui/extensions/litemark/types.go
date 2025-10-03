@@ -33,6 +33,10 @@ type CodeBlock struct {
 	Span Span
 }
 
+type FoldBlock struct {
+	Block
+}
+
 type HorizontalLine struct {
 	Block
 }

@@ -24,6 +24,8 @@ func (l *LitemarkEngine) Resolve(e model.Element) view.TextView {
 	case *litemark.HorizontalLineElement:
 		return &litemark.HorizontalLineView{}
 	// Legacy elements
+	case *model.FoldBlockElement:
+		return &view.FoldBlockView{}
 	case *model.GhostElement:
 		return &view.GhostView{}
 	case *model.PlainElement:

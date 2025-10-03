@@ -238,6 +238,160 @@ func (doc *StyledDocument) doRender() []model.Element {
 					},
 				})
 			}
+		case *FoldBlock:
+			if block.LineCount > 2 {
+
+				codeLines := []model.Element{}
+				for i := 0; i < block.LineCount-2; i++ {
+					lineIndex := block.LineIndex + i + 1
+					if len(doc.GetLineString(lineIndex)) == 0 {
+						codeLines = append(codeLines, &BlankLineElement{
+							Range: model.Range{
+								StartPosition: model.Position{
+									Row:    lineIndex,
+									Column: 0,
+								},
+								EndPosition: model.Position{
+									Row:    lineIndex,
+									Column: 0,
+								},
+							},
+						})
+					} else {
+						codeLines = append(codeLines, &TextElement{
+							Range: model.Range{
+								StartPosition: model.Position{
+									Row:    lineIndex,
+									Column: 0,
+								},
+								EndPosition: model.Position{
+									Row:    lineIndex,
+									Column: len(doc.GetLineString(lineIndex)),
+								},
+							},
+							Children: []model.Element{
+								&InlineElement{
+									Ranges: []model.Range{
+										{
+											StartPosition: model.Position{
+												Row:    lineIndex,
+												Column: 0,
+											},
+											EndPosition: model.Position{
+												Row:    lineIndex,
+												Column: len(doc.GetLineString(lineIndex)),
+											},
+										},
+										{
+											StartPosition: model.Position{
+												Row:    lineIndex,
+												Column: 0,
+											},
+											EndPosition: model.Position{
+												Row:    lineIndex,
+												Column: len(doc.GetLineString(lineIndex)),
+											},
+										},
+									},
+								},
+							},
+						})
+					}
+				}
+
+				elements = append(elements, &model.FoldBlockElement{
+					Ranges: []model.Range{
+						{
+							StartPosition: model.Position{
+								Row:    block.LineIndex,
+								Column: 0,
+							},
+							EndPosition: model.Position{
+								Row:    block.LineIndex + block.LineCount - 1,
+								Column: len(doc.GetLineString(block.LineIndex + block.LineCount - 1)),
+							},
+						},
+					},
+					Children: codeLines,
+				})
+			} else {
+				elements = append(elements, &TextElement{
+					Range: model.Range{
+						StartPosition: model.Position{
+							Row:    block.LineIndex,
+							Column: 0,
+						},
+						EndPosition: model.Position{
+							Row:    block.LineIndex,
+							Column: len(doc.GetLineString(block.LineIndex)),
+						},
+					},
+					Children: []model.Element{
+						&InlineElement{
+							Ranges: []model.Range{
+								{
+									StartPosition: model.Position{
+										Row:    block.LineIndex,
+										Column: 0,
+									},
+									EndPosition: model.Position{
+										Row:    block.LineIndex,
+										Column: doc.GetLineBytes(block.LineIndex),
+									},
+								},
+								{
+									StartPosition: model.Position{
+										Row:    block.LineIndex,
+										Column: 0,
+									},
+									EndPosition: model.Position{
+										Row:    block.LineIndex,
+										Column: doc.GetLineBytes(block.LineIndex),
+									},
+								},
+							},
+						},
+					},
+				})
+				elements = append(elements, &TextElement{
+					Range: model.Range{
+						StartPosition: model.Position{
+							Row:    block.LineIndex + 1,
+							Column: 0,
+						},
+						EndPosition: model.Position{
+							Row:    block.LineIndex + 1,
+							Column: len(doc.GetLineString(block.LineIndex + 1)),
+						},
+					},
+					Children: []model.Element{
+						&InlineElement{
+							Ranges: []model.Range{
+								{
+									StartPosition: model.Position{
+										Row:    block.LineIndex + 1,
+										Column: 0,
+									},
+									EndPosition: model.Position{
+										Row:    block.LineIndex + 1,
+										Column: doc.GetLineBytes(block.LineIndex + 1),
+									},
+								},
+								{
+									StartPosition: model.Position{
+										Row:    block.LineIndex + 1,
+										Column: 0,
+									},
+									EndPosition: model.Position{
+										Row:    block.LineIndex + 1,
+										Column: doc.GetLineBytes(block.LineIndex + 1),
+									},
+								},
+							},
+						},
+					},
+				})
+			}
 		case *Text:
 			texts := []model.Element{}
 			for _, aInline := range block.Inlines {

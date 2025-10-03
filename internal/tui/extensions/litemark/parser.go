@@ -118,6 +118,50 @@ func Parse(reader Reader) []AbstractBlock {
 			}
 		}
 
+		// Fold
+		if line[0] == '{' {
+			column := 0
+			for column < len(line) && line[column] == '{' {
+				column++
+			}
+
+			if column >= 3 {
+				lineCount := 1
+				foldBlock := &FoldBlock{
+					Block: Block{
+						LineIndex: lineIndex,
+					},
+				}
+
+				foundClose := false
+				for sc.Ready() {
+					innerLine := sc.Next()
+
+					lineCount++
+
+					if innerLine == strings.Repeat("}", column) {
+						foundClose = true
+						break
+					}
+				}
+				if !foundClose {
+					sc.lineIndex = lineIndex + 1
+					blocks = append(blocks, &Text{
+						Block: Block{
+							LineIndex: lineIndex,
+							LineCount: 1,
+						},
+						Inlines: ParseInline(line),
+					})
+					continue
+				} else {
+					foldBlock.LineCount = lineCount
+					blocks = append(blocks, foldBlock)
+					continue
+				}
+			}
+		}
+
 		if line == "***" || line == "---" {
 			blocks = append(blocks, &HorizontalLine{
 				Block: Block{
