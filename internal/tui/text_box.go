@@ -30,6 +30,8 @@ type TextBox struct {
 
 	renderCache TextRenderCache
 	bytePos     view.CharacterReference
+
+	foldManager FoldManager
 }
 
 // Init is initialize TextBox.
@@ -47,14 +49,18 @@ func (tb *TextBox) Init() {
 	tb.scrollY = 0
 }
 
+func (tb *TextBox) context() view.Context {
+	return view.Context{
+		Resolver:    tb.TextEngine,
+		Document:    tb.Document,
+		FoldManager: &tb.foldManager,
+	}
+}
+
 // CursorPosition returns position of cursor.
 // TODO: refactor
 func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
-	ctx := view.Context{
-		Resolver: tb.TextEngine,
-		Document: tb.Document,
-	}
-
+	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 	_, ei, _, eoff := tb.renderCache.Stats(tb.viewPosition)
 
@@ -212,10 +218,7 @@ func (tb *TextBox) Draw(g *Graphics) {
 		return
 	}
 
-	ctx := view.Context{
-		Resolver: tb.TextEngine,
-		Document: tb.Document,
-	}
+	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 
 	// バッファの内容を描画
@@ -297,11 +300,7 @@ func (tb *TextBox) isStyled() bool {
 }
 
 func (tb *TextBox) modelToView() (ElementIndex int, ViewStart int, ViewLocalPos int) {
-	ctx := view.Context{
-		Resolver: tb.TextEngine,
-		Document: tb.Document,
-	}
-
+	ctx := tb.context()
 	if tb.renderCache.GetItemCount() == 0 {
 		return 0, 0, 0
 	}
@@ -353,11 +352,7 @@ func (tb *TextBox) modelToView() (ElementIndex int, ViewStart int, ViewLocalPos 
 }
 
 func (tb *TextBox) viewToModel() view.CharacterReference {
-	ctx := view.Context{
-		Resolver: tb.TextEngine,
-		Document: tb.Document,
-	}
-
+	ctx := tb.context()
 	_, ei, _, eoff := tb.renderCache.Stats(tb.viewPosition)
 	element := tb.renderCache.GetElement(ei)
 	textView := tb.TextEngine.Resolve(element)
@@ -365,11 +360,7 @@ func (tb *TextBox) viewToModel() view.CharacterReference {
 }
 
 func (tb *TextBox) InsertString(s string) {
-	ctx := view.Context{
-		Resolver: tb.TextEngine,
-		Document: tb.Document,
-	}
-
+	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 
 	_, ei, _, _ := tb.renderCache.Stats(tb.viewPosition)
@@ -499,11 +490,7 @@ func (tb *TextBox) RemoveChar() {
 		return
 	}
 
-	ctx := view.Context{
-		Resolver: tb.TextEngine,
-		Document: tb.Document,
-	}
-
+	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 
 	elementIndex, viewStart, viewLocalPos := tb.modelToView()
@@ -710,11 +697,7 @@ func (tb *TextBox) RemoveChar() {
 }
 
 func (tb *TextBox) move(dir int) {
-	ctx := view.Context{
-		Resolver: tb.TextEngine,
-		Document: tb.Document,
-	}
-
+	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 
 	_, elementIndex, elementStart, oldLocalViewPos := tb.renderCache.Stats(tb.viewPosition)
@@ -863,11 +846,7 @@ func (tb *TextBox) MoveDown() {
 }
 
 func (tb *TextBox) MoveLineStart() {
-	ctx := view.Context{
-		Resolver: tb.TextEngine,
-		Document: tb.Document,
-	}
-
+	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 
 	_, ei, estart, eoff := tb.renderCache.Stats(tb.viewPosition)
@@ -889,11 +868,7 @@ func (tb *TextBox) MoveLineStart() {
 }
 
 func (tb *TextBox) MoveLineEnd() {
-	ctx := view.Context{
-		Resolver: tb.TextEngine,
-		Document: tb.Document,
-	}
-
+	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 
 	_, ei, estart, eoff := tb.renderCache.Stats(tb.viewPosition)
@@ -913,11 +888,7 @@ func (tb *TextBox) MoveLineEnd() {
 }
 
 func (tb *TextBox) MoveReset() {
-	ctx := view.Context{
-		Resolver: tb.TextEngine,
-		Document: tb.Document,
-	}
-
+	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 	tb.viewPosition = 0
 	tb.bytePos = tb.viewToModel()
@@ -1114,11 +1085,7 @@ func (tb *TextBox) Replace(length int, s string) {
 
 	// TODO: コード統合
 
-	ctx := view.Context{
-		Resolver: tb.TextEngine,
-		Document: tb.Document,
-	}
-
+	ctx := tb.context()
 	breakLine := strings.Contains(s, "\n")
 
 	tb.renderCache.Update(ctx, tb.Width)
@@ -1194,10 +1161,7 @@ func (tb *TextBox) BreakIter() iter.Seq[presenter.Segment] {
 	//sb := strings.Builder{}
 
 	return func(yield func(presenter.Segment) bool) {
-		ctx := view.Context{
-			Resolver: tb.TextEngine,
-			Document: tb.Document,
-		}
+		ctx := tb.context()
 		tb.renderCache.Update(ctx, tb.Width)
 
 		viewLine := 0
@@ -1249,11 +1213,7 @@ func (tb *TextBox) GetScrollY() int {
 }
 
 func (tb *TextBox) GetViewHeight() int {
-	ctx := view.Context{
-		Resolver: tb.TextEngine,
-		Document: tb.Document,
-	}
-
+	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 
 	h := 0

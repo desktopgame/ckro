@@ -3,8 +3,9 @@ package view
 import "github.com/desktopgame/ckro/internal/tui/model"
 
 type Context struct {
-	Resolver TextViewResolver
-	Document model.Document
+	Resolver    TextViewResolver
+	Document    model.Document
+	FoldManager FoldManager
 }
 
 func (ctx Context) GetSegment(e model.Element, rangeIndex int) model.Segment {
