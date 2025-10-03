@@ -361,6 +361,10 @@ func (tb *TextBox) viewToModel() view.CharacterReference {
 }
 
 func (tb *TextBox) InsertString(s string) {
+	if !tb.CanEdit() {
+		return
+	}
+
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 
@@ -481,6 +485,10 @@ func (tb *TextBox) InsertString(s string) {
 }
 
 func (tb *TextBox) RemoveChar() {
+	if !tb.CanEdit() {
+		return
+	}
+
 	if tb.viewPosition == 0 {
 		return
 	}
@@ -695,6 +703,22 @@ func (tb *TextBox) RemoveChar() {
 	viewLocalPos = textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), tb.bytePos.StartPosition)
 
 	tb.viewPosition = viewStart + viewLocalPos
+}
+
+func (tb *TextBox) CanEdit() bool {
+	ctx := tb.context()
+	tb.renderCache.Update(ctx, tb.Width)
+
+	_, ei, _, _ := tb.renderCache.Stats(tb.viewPosition)
+	element := tb.renderCache.GetElement(ei)
+
+	if _, ok := element.(*model.FoldBlockElement); ok {
+		if tb.foldManager.IsFolded(tb.Document, element) {
+			return false
+		}
+		return true
+	}
+	return true
 }
 
 func (tb *TextBox) Submit() bool {
