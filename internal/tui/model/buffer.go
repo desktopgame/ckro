@@ -113,6 +113,7 @@ func (buf *Buffer) InsertString(row int, column int, s string) (Position, error)
 			position.Column = breakAt
 
 			insertedLines := 0
+			lastLineLen := 0
 			for i := 1; i < len(insertLines); i++ {
 				nextLine := buf.insertLine(row, breakAt)
 				nextLine.PrependString(insertLines[i])
@@ -121,10 +122,11 @@ func (buf *Buffer) InsertString(row int, column int, s string) (Position, error)
 				position.Column = len(insertLines[i])
 
 				breakAt = len(insertLines[i])
+				lastLineLen = len(insertLines[i])
 				row += 1
 				insertedLines++
 			}
-			buf.updateTracksAfterInsert(row-insertedLines, column, insertedLines, 0)
+			buf.updateTracksAfterMultiLineInsert(row-insertedLines, column, insertedLines, lastLineLen)
 		}
 		return position, nil
 	}
@@ -220,11 +222,11 @@ func (buf *Buffer) RemoveTrack(track *Track) {
 	}
 }
 
-// updateTracksAfterInsert updates all tracked positions after an insertion.
+// updateTracksAfterInsert updates all tracked positions after a single-line insertion.
 // Parameters:
 //   - row: the row where insertion occurred
 //   - column: the column where insertion occurred
-//   - insertedLines: number of lines inserted (0 for single-line insertion)
+//   - insertedLines: number of lines inserted (1 for newline, 0 for single-line)
 //   - insertedColumns: number of columns inserted (for single-line insertion)
 func (buf *Buffer) updateTracksAfterInsert(row int, column int, insertedLines int, insertedColumns int) {
 	for _, track := range buf.tracks {
@@ -233,13 +235,14 @@ func (buf *Buffer) updateTracksAfterInsert(row int, column int, insertedLines in
 		}
 
 		if insertedLines > 0 {
-			// Multi-line insertion
+			// Newline insertion
 			if track.Position.Row > row {
 				// Track is after insertion row → shift down
 				track.Position.Row += insertedLines
 			} else if track.Position.Row == row && track.Position.Column > column {
 				// Track is on same row, after insertion point → move to next line
 				track.Position.Row += insertedLines
+				track.Position.Column -= column
 			}
 		} else {
 			// Single-line insertion
@@ -247,6 +250,30 @@ func (buf *Buffer) updateTracksAfterInsert(row int, column int, insertedLines in
 				// Track is on same row, at or after insertion point → shift right
 				track.Position.Column += insertedColumns
 			}
+		}
+	}
+}
+
+// updateTracksAfterMultiLineInsert updates all tracked positions after a multi-line insertion.
+// Parameters:
+//   - row: the row where insertion occurred
+//   - column: the column where insertion occurred
+//   - insertedLines: number of lines inserted
+//   - lastLineLen: length of the last inserted line
+func (buf *Buffer) updateTracksAfterMultiLineInsert(row int, column int, insertedLines int, lastLineLen int) {
+	for _, track := range buf.tracks {
+		if track.Lost {
+			continue
+		}
+
+		if track.Position.Row > row {
+			// Track is after insertion row → shift down
+			track.Position.Row += insertedLines
+		} else if track.Position.Row == row && track.Position.Column >= column {
+			// Track is on same row, at or after insertion point
+			// Move to new line with adjusted column
+			track.Position.Row += insertedLines
+			track.Position.Column = lastLineLen + (track.Position.Column - column)
 		}
 	}
 }
