@@ -41,19 +41,9 @@ func (fm *FoldManager) ToggleFold(doc model.Document, e model.Element) {
 func (fm *FoldManager) Refresh(doc model.Document) {
 	newItems := []FoldItem{}
 
-	for _, element := range doc.Render() {
-		if _, ok := element.(*model.FoldBlockElement); !ok {
-			continue
-		}
-
-		for _, fold := range fm.items {
-			if fold.track.Lost {
-				continue
-			}
-			if fm.isMatchRange(fold.track, element) {
-				newItems = append(newItems, fold)
-				break
-			}
+	for _, fold := range fm.items {
+		if !fold.track.Lost {
+			newItems = append(newItems, fold)
 		}
 	}
 
