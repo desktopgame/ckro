@@ -56,7 +56,7 @@ func (p *PlainTextView) Draw(ctx Context, textLayout *TextLayout, renderer Rende
 
 func (p *PlainTextView) MinimumSize(ctx Context, e model.Element, width int, height int) *TextLayout {
 	line := ctx.GetText(e)
-	lineWidth := text.DisplayWidth(line)
+	lineWidth := text.DisplayWidth(line) + 1
 
 	if lineWidth <= width {
 		return &TextLayout{
@@ -90,6 +90,10 @@ func (p *PlainTextView) MinimumSize(ctx Context, e model.Element, width int, hei
 			}
 			x += w
 		}
+	}
+	if x == width {
+		x = 0
+		viewLine++
 	}
 
 	return &TextLayout{
@@ -140,6 +144,10 @@ func (p *PlainTextView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoca
 	for _, cluster := range clusters {
 		runes := []rune(cluster)
 		if clusterCount == viewLocalPos {
+			if x == width {
+				x = 0
+				viewLine++
+			}
 			return x, viewLine
 		}
 
@@ -161,6 +169,10 @@ func (p *PlainTextView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoca
 			x += w
 		}
 		clusterCount++
+	}
+	if x == width {
+		x = 0
+		viewLine++
 	}
 	return x, viewLine
 }

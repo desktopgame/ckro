@@ -58,7 +58,7 @@ func (t *TextView) MinimumSize(ctx view.Context, e model.Element, width int, hei
 	}
 	return &view.TextLayout{
 		Element:       e,
-		MinimumWidth:  totalWidth,
+		MinimumWidth:  totalWidth + 1,
 		MinimumHeight: 1,
 		Children:      children,
 	}

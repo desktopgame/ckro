@@ -73,14 +73,14 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 
 		childElement := e.GetElement(0)
 		childView := ctx.Resolver.Resolve(childElement)
-		child := childView.MinimumSize(ctx, childElement, width, 1)
+		child := childView.MinimumSize(ctx, childElement, width-4, 1)
 
-		if child.MinimumWidth+2 > width {
+		if child.MinimumWidth+4 > width {
 			childElement = &model.PlainElement{
 				Range: childElement.GetRange(0),
 			}
 			childView = &PlainTextView{}
-			child = childView.MinimumSize(ctx, childElement, width-5, 9999)
+			child = childView.MinimumSize(ctx, childElement, width-4, 9999)
 			minimumHeight += child.MinimumHeight
 		} else {
 			minimumHeight++
@@ -96,14 +96,14 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 			childElement := e.GetElement(i)
 			childView := ctx.Resolver.Resolve(childElement)
 
-			child := childView.MinimumSize(ctx, childElement, width, 1)
+			child := childView.MinimumSize(ctx, childElement, width-2, 1)
 
-			if child.MinimumWidth > width {
+			if child.MinimumWidth+2 > width {
 				childElement = &model.PlainElement{
 					Range: childElement.GetRange(0),
 				}
 				childView = &PlainTextView{}
-				child = childView.MinimumSize(ctx, childElement, width-3, 9999)
+				child = childView.MinimumSize(ctx, childElement, width-2, 9999)
 				minimumHeight += child.MinimumHeight
 			} else {
 				minimumHeight++
@@ -118,7 +118,7 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 	}
 	return &TextLayout{
 		Element:       e,
-		MinimumWidth:  min(width, maxWidth+2),
+		MinimumWidth:  width,
 		MinimumHeight: minimumHeight,
 		Children:      children,
 	}
@@ -229,8 +229,8 @@ func (fv *FoldBlockView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoc
 
 	child := textLayout.Children[index]
 	v := ctx.Resolver.Resolve(child.Element)
-	lx, _ := v.ConvertPos(ctx, child, col)
-	return lx + 1, index + 1
+	lx, ly := v.ConvertPos(ctx, child, col)
+	return lx + 1, ly + 1
 }
 
 func (fv *FoldBlockView) ConvertModel(ctx Context, textLayout *TextLayout, viewLocalPos int) CharacterReference {
