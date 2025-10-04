@@ -27,6 +27,9 @@ func (fm *FoldManager) addFold(doc model.Document, e model.Element) {
 
 func (fm *FoldManager) ToggleFold(doc model.Document, e model.Element) {
 	for i, fold := range fm.items {
+		if fold.track.Lost {
+			continue
+		}
 		if fm.isMatchRange(fold.track, e) {
 			fm.items = slices.Delete(fm.items, i, i+1)
 			return
@@ -44,6 +47,9 @@ func (fm *FoldManager) Refresh(doc model.Document) {
 		}
 
 		for _, fold := range fm.items {
+			if fold.track.Lost {
+				continue
+			}
 			if fm.isMatchRange(fold.track, element) {
 				newItems = append(newItems, fold)
 				break
