@@ -78,6 +78,10 @@ func (doc *PlainDocument) Clear() {
 	doc.version++
 }
 
+func (doc *PlainDocument) CreateTrack(row int, bytePos int) *Track {
+	return doc.buffer.CreateTrack(row, bytePos)
+}
+
 func (doc *PlainDocument) GetLineBytes(index int) int {
 	return len(doc.buffer.GetLineAt(index).GetContent())
 }

@@ -11,6 +11,8 @@ type Document interface {
 	ReplaceAll(r io.Reader)
 	Clear()
 
+	CreateTrack(row int, bytePos int) *Track
+
 	GetLineBytes(index int) int
 	GetLineCount() int
 	GetVersion() uint

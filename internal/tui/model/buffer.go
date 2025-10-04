@@ -50,7 +50,8 @@ func (l *Line) GetContent() string {
 // Buffer is array of line strings.
 // Buffer API's require and returns unit of codepoint positions.
 type Buffer struct {
-	lines []*Line
+	lines  []*Line
+	tracks []*Track
 }
 
 // Init is initialize Buffer.
@@ -180,6 +181,23 @@ func (buf *Buffer) ReplaceAll(r io.Reader) {
 		}
 	}
 	buf.lines = lines
+
+	for _, t := range buf.tracks {
+		t.Lost = true
+	}
+	buf.tracks = nil
+}
+
+func (buf *Buffer) CreateTrack(row int, bytePos int) *Track {
+	t := &Track{
+		Position: Position{
+			Row:    row,
+			Column: bytePos,
+		},
+		Lost: false,
+	}
+	buf.tracks = append(buf.tracks, t)
+	return t
 }
 
 // GetLineAt returns specified line.
