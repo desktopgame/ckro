@@ -1295,6 +1295,29 @@ func TestTextBox44(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
 }
 
+func TestTextBox45(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 68 + 2
+	tb.Height = 10
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+	tb.InsertString("{{{\n")
+	tb.InsertString("私はOpenAIによって開発された大規模言語モデル、ChatGPT（Chat Generative Pre‑trained Transformer）です。質問に答えたり、情報を整理したり、アイデアを提案したりするのが得意です。何か知りたいことや相談したいことがあれば、お気軽にどうぞ！\n")
+	tb.InsertString("}}}")
+
+	for i := 0; i < 17; i++ {
+		tb.MoveLeft()
+	}
+	x, y, _, _ := tb.CursorPosition()
+	y = y - tb.GetScrollY()
+	assert.Equal(t, x, 65)
+	assert.Equal(t, y, 3)
+}
+
 func TestTextBoxFind01(t *testing.T) {
 	tb := TextBox{}
 	tb.Init()
