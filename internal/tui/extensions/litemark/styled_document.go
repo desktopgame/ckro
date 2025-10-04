@@ -13,6 +13,92 @@ type StyledDocument struct {
 	cacheVersion uint
 }
 
+func (doc *StyledDocument) text2Element(block *Text) model.Element {
+	texts := []model.Element{}
+	for _, aInline := range block.Inlines {
+
+		ranges := []model.Range{
+			{
+				StartPosition: model.Position{
+					Row:    block.LineIndex,
+					Column: aInline.BaseInline().Spans[0].StartColumn,
+				},
+				EndPosition: model.Position{
+					Row:    block.LineIndex,
+					Column: aInline.BaseInline().Spans[0].EndColumn,
+				},
+			},
+		}
+
+		spanIndex := 1
+		if _, ok := aInline.(*PlainText); ok {
+			spanIndex = 0
+		}
+
+		ranges = append(ranges,
+			model.Range{
+				StartPosition: model.Position{
+					Row:    block.LineIndex,
+					Column: aInline.BaseInline().Spans[spanIndex].StartColumn,
+				},
+				EndPosition: model.Position{
+					Row:    block.LineIndex,
+					Column: aInline.BaseInline().Spans[spanIndex].EndColumn,
+				},
+			},
+		)
+
+		pad := 0
+		isBold := false
+		isItalic := false
+		isUnderline := false
+		fg := optional.None[tcell.Color]()
+		bg := optional.None[tcell.Color]()
+
+		switch aInline.(type) {
+		case *Bold:
+			pad = 2
+			isBold = true
+		case *Italic:
+			pad = 1
+			isItalic = true
+		case *Strike:
+			pad = 2
+		case *Link:
+			isUnderline = true
+			fg = optional.Some(tcell.ColorBlue)
+		case *Code:
+			pad = 1
+			fg = optional.Some(tcell.ColorBlack)
+			bg = optional.Some(tcell.ColorWhite)
+		}
+
+		texts = append(texts, &InlineElement{
+			Ranges:      ranges,
+			Pad:         pad,
+			IsBold:      isBold,
+			IsItalic:    isItalic,
+			IsUnderline: isUnderline,
+			Foreground:  fg,
+			Background:  bg,
+		})
+	}
+
+	return &TextElement{
+		Range: model.Range{
+			StartPosition: model.Position{
+				Row:    block.LineIndex,
+				Column: 0,
+			},
+			EndPosition: model.Position{
+				Row:    block.LineIndex,
+				Column: len(doc.GetLineString(block.LineIndex)),
+			},
+		},
+		Children: texts,
+	}
+}
+
 func (doc *StyledDocument) doRender() []model.Element {
 	elements := []model.Element{}
 
@@ -393,89 +479,7 @@ func (doc *StyledDocument) doRender() []model.Element {
 				})
 			}
 		case *Text:
-			texts := []model.Element{}
-			for _, aInline := range block.Inlines {
-
-				ranges := []model.Range{
-					{
-						StartPosition: model.Position{
-							Row:    block.LineIndex,
-							Column: aInline.BaseInline().Spans[0].StartColumn,
-						},
-						EndPosition: model.Position{
-							Row:    block.LineIndex,
-							Column: aInline.BaseInline().Spans[0].EndColumn,
-						},
-					},
-				}
-
-				spanIndex := 1
-				if _, ok := aInline.(*PlainText); ok {
-					spanIndex = 0
-				}
-
-				ranges = append(ranges,
-					model.Range{
-						StartPosition: model.Position{
-							Row:    block.LineIndex,
-							Column: aInline.BaseInline().Spans[spanIndex].StartColumn,
-						},
-						EndPosition: model.Position{
-							Row:    block.LineIndex,
-							Column: aInline.BaseInline().Spans[spanIndex].EndColumn,
-						},
-					},
-				)
-
-				pad := 0
-				isBold := false
-				isItalic := false
-				isUnderline := false
-				fg := optional.None[tcell.Color]()
-				bg := optional.None[tcell.Color]()
-
-				switch aInline.(type) {
-				case *Bold:
-					pad = 2
-					isBold = true
-				case *Italic:
-					pad = 1
-					isItalic = true
-				case *Strike:
-					pad = 2
-				case *Link:
-					isUnderline = true
-					fg = optional.Some(tcell.ColorBlue)
-				case *Code:
-					pad = 1
-					fg = optional.Some(tcell.ColorBlack)
-					bg = optional.Some(tcell.ColorWhite)
-				}
-
-				texts = append(texts, &InlineElement{
-					Ranges:      ranges,
-					Pad:         pad,
-					IsBold:      isBold,
-					IsItalic:    isItalic,
-					IsUnderline: isUnderline,
-					Foreground:  fg,
-					Background:  bg,
-				})
-			}
-
-			elements = append(elements, &TextElement{
-				Range: model.Range{
-					StartPosition: model.Position{
-						Row:    block.LineIndex,
-						Column: 0,
-					},
-					EndPosition: model.Position{
-						Row:    block.LineIndex,
-						Column: len(doc.GetLineString(block.LineIndex)),
-					},
-				},
-				Children: texts,
-			})
+			elements = append(elements, doc.text2Element(block))
 		case *HorizontalLine:
 			elements = append(elements, &HorizontalLineElement{
 				Range: model.Range{
