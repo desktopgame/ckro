@@ -99,10 +99,9 @@ func (doc *StyledDocument) text2Element(block *Text) model.Element {
 	}
 }
 
-func (doc *StyledDocument) doRender() []model.Element {
+func (doc *StyledDocument) renderElement(blocks []AbstractBlock) []model.Element {
 	elements := []model.Element{}
 
-	blocks := Parse(doc)
 	for _, aBlock := range blocks {
 		switch block := aBlock.(type) {
 		case *Heading:
@@ -495,6 +494,13 @@ func (doc *StyledDocument) doRender() []model.Element {
 			})
 		}
 	}
+	return elements
+}
+
+func (doc *StyledDocument) doRender() []model.Element {
+	blocks := Parse(doc)
+	elements := doc.renderElement(blocks)
+
 	for i := 0; i < 10; i++ {
 		bytes := doc.GetLineBytes(doc.GetLineCount() - 1)
 		elements = append(elements, &model.GhostElement{
