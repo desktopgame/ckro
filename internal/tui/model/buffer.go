@@ -60,8 +60,7 @@ func (buf *Buffer) Init() {
 	}
 }
 
-// InsertLine is break line at specified position.
-func (buf *Buffer) InsertLine(row int, column int) *Line {
+func (buf *Buffer) insertLine(row int, column int) *Line {
 	if column == 0 {
 		newLine := &Line{}
 		if column == len(buf.lines[row].GetContent()) {
@@ -86,18 +85,13 @@ func (buf *Buffer) InsertLine(row int, column int) *Line {
 	}
 }
 
-// PrependString is insert string into specified line ahead.
-func (buf *Buffer) PrependString(row int, s string) (Position, error) {
-	return buf.InsertString(row, 0, s)
-}
-
 // InsertString is insert string into specified position.
 func (buf *Buffer) InsertString(row int, column int, s string) (Position, error) {
 	if row >= 0 && row < len(buf.lines) {
 		line := buf.lines[row]
 
 		if s == "\n" {
-			buf.InsertLine(row, column)
+			buf.insertLine(row, column)
 			return Position{}, nil
 		}
 
@@ -116,7 +110,7 @@ func (buf *Buffer) InsertString(row int, column int, s string) (Position, error)
 			position.Column = breakAt
 
 			for i := 1; i < len(insertLines); i++ {
-				nextLine := buf.InsertLine(row, breakAt)
+				nextLine := buf.insertLine(row, breakAt)
 				nextLine.PrependString(insertLines[i])
 
 				position.Row += 1
@@ -131,17 +125,8 @@ func (buf *Buffer) InsertString(row int, column int, s string) (Position, error)
 	return Position{}, errors.New("out of range")
 }
 
-// AppendString is appending string into tail.
-func (buf *Buffer) AppendString(row int, s string) (Position, error) {
-	if row >= 0 && row < len(buf.lines) {
-		line := buf.lines[row]
-		return buf.InsertString(row, len(line.GetContent()), s)
-	}
-	return Position{}, errors.New("out of range")
-}
-
 // RemoveLine is remove specified line.
-func (buf *Buffer) RemoveLine(row int) {
+func (buf *Buffer) removeLine(row int) {
 	if row >= 0 && row < len(buf.lines) {
 		buf.lines = slices.Delete(buf.lines, row, row+1)
 	}
@@ -155,12 +140,12 @@ func (buf *Buffer) RemoveString(row int, column int, length int) {
 		for length > 0 {
 			lineLen := len(line.GetContent())
 			if lineLen == 0 {
-				buf.RemoveLine(row)
+				buf.removeLine(row)
 				length--
 			} else if column == lineLen {
 				nextLine := buf.GetLineAt(row + 1)
 				buf.GetLineAt(row).AppendString(nextLine.GetContent())
-				buf.RemoveLine(row + 1)
+				buf.removeLine(row + 1)
 				length--
 			} else {
 				removeChars := min(lineLen-column, length)
