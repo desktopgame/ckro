@@ -72,7 +72,7 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 
 	// カーソルがある行での位置を正確に計算
 	// cursorLine := buf.GetLineAt(cursorRow).GetContent()
-	currentView := tb.TextEngine.Resolve(tb.renderCache.GetElement(ei))
+	currentView := tb.TextEngine.Resolve(tb.renderCache.GetLayout(ei).Element)
 	relx, rely := currentView.ConvertPos(ctx, tb.renderCache.GetLayout(ei), eoff)
 	screenX := relx
 	screenY += rely

@@ -212,7 +212,7 @@ func (fv *FoldBlockView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoc
 	e := textLayout.Element
 
 	if ctx.FoldManager.IsFolded(ctx.Document, e) {
-		childElement := e.GetElement(0)
+		childElement := textLayout.Children[0].Element
 		childView := ctx.Resolver.Resolve(childElement)
 		lx, ly := childView.ConvertPos(ctx, textLayout.Children[0], viewLocalPos)
 		return 1 + lx + 2, 1 + ly
@@ -234,9 +234,8 @@ func (fv *FoldBlockView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoc
 }
 
 func (fv *FoldBlockView) ConvertModel(ctx Context, textLayout *TextLayout, viewLocalPos int) CharacterReference {
-	e := textLayout.Element
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
-		childElement := e.GetElement(0)
+		childElement := textLayout.Children[0].Element
 		childView := ctx.Resolver.Resolve(childElement)
 		return childView.ConvertModel(ctx, textLayout.Children[0], viewLocalPos)
 	} else {
