@@ -145,22 +145,30 @@ func (buf *Buffer) RemoveString(row int, column int, length int) {
 	if row >= 0 && row < len(buf.lines) {
 		startRow := row
 		startColumn := column
+		endRow := row
+		endColumn := column
 		line := buf.lines[row]
 
 		for length > 0 {
 			lineLen := len(line.GetContent())
 			if lineLen == 0 {
 				buf.removeLine(row)
+				endRow = row
+				endColumn = 0
 				length--
 			} else if column == lineLen {
 				nextLine := buf.GetLineAt(row + 1)
 				buf.GetLineAt(row).AppendString(nextLine.GetContent())
 				buf.removeLine(row + 1)
+				endRow = row + 1
+				endColumn = 0
 				length--
 			} else {
 				removeChars := min(lineLen-column, length)
 
 				line.Remove(column, removeChars)
+				endRow = row
+				endColumn = column + removeChars
 				length -= removeChars
 				length -= 1
 
@@ -172,7 +180,7 @@ func (buf *Buffer) RemoveString(row int, column int, length int) {
 			}
 		}
 
-		buf.updateTracksAfterRemove(startRow, startColumn, row, column)
+		buf.updateTracksAfterRemove(startRow, startColumn, endRow, endColumn)
 	}
 }
 
