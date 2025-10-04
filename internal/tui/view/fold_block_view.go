@@ -219,18 +219,16 @@ func (fv *FoldBlockView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoc
 	}
 	table, _ := fv.ViewLengthTable(ctx, textLayout)
 	index, col := fv.findTableIndex(table, viewLocalPos)
-	if viewLocalPos == fv.sumTableValue(table, len(table)-1) {
-		child := textLayout.Children[len(textLayout.Children)-1]
-		childView := ctx.Resolver.Resolve(child.Element)
-		childLen := childView.MoveLength(ctx, child)
-		lx, ly := childView.ConvertPos(ctx, child, childLen-1)
-		return lx + 1, ly + 1
+
+	h := 0
+	for i := 0; i < index; i++ {
+		h += textLayout.Children[i].Height
 	}
 
 	child := textLayout.Children[index]
 	v := ctx.Resolver.Resolve(child.Element)
 	lx, ly := v.ConvertPos(ctx, child, col)
-	return lx + 1, ly + 1
+	return lx + 1, h + ly + 1
 }
 
 func (fv *FoldBlockView) ConvertModel(ctx Context, textLayout *TextLayout, viewLocalPos int) CharacterReference {
@@ -242,12 +240,12 @@ func (fv *FoldBlockView) ConvertModel(ctx Context, textLayout *TextLayout, viewL
 
 		table, _ := fv.ViewLengthTable(ctx, textLayout)
 		index, col := fv.findTableIndex(table, viewLocalPos)
-		if viewLocalPos == fv.sumTableValue(table, len(table)-1) {
-			child := textLayout.Children[len(textLayout.Children)-1]
-			childView := ctx.Resolver.Resolve(child.Element)
-			childLen := childView.MoveLength(ctx, child)
-			return childView.ConvertModel(ctx, child, childLen-1)
-		}
+		//if viewLocalPos == fv.sumTableValue(table, len(table)-1) {
+		//	child := textLayout.Children[len(textLayout.Children)-1]
+		//	childView := ctx.Resolver.Resolve(child.Element)
+		//	childLen := childView.MoveLength(ctx, child)
+		//	return childView.ConvertModel(ctx, child, childLen-1)
+		//}
 		child := textLayout.Children[index]
 
 		v := ctx.Resolver.Resolve(child.Element)
