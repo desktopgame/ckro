@@ -55,3 +55,70 @@ func TestInsertEmptyLine(t *testing.T) {
 	assert.Equal(t, at.Row, 2)
 	assert.Equal(t, at.Column, 0)
 }
+
+func TestTrack01(t *testing.T) {
+	buf := model.Buffer{}
+	buf.Init()
+
+	tr := buf.CreateTrack(0, 0)
+	assert.Equal(t, tr.Position.Row, 0)
+	assert.Equal(t, tr.Position.Column, 0)
+
+	buf.InsertString(0, 0, "123456789")
+	assert.Equal(t, tr.Position.Row, 0)
+	assert.Equal(t, tr.Position.Column, 9)
+
+	buf.RemoveString(0, 0, 9)
+	assert.Equal(t, tr.Lost, false)
+}
+
+func TestTrack02(t *testing.T) {
+	buf := model.Buffer{}
+	buf.Init()
+
+	buf.InsertString(0, 0, "123456789")
+
+	tr := buf.CreateTrack(0, 1)
+
+	buf.RemoveString(0, 2, 7)
+	assert.Equal(t, tr.Position.Row, 0)
+	assert.Equal(t, tr.Position.Column, 1)
+
+	buf.InsertString(0, 0, "ABC")
+	assert.Equal(t, tr.Position.Row, 0)
+	assert.Equal(t, tr.Position.Column, 4)
+}
+
+func TestTrack03(t *testing.T) {
+	buf := model.Buffer{}
+	buf.Init()
+
+	buf.InsertString(0, 0, "123456789")
+
+	tr := buf.CreateTrack(0, 1)
+
+	buf.RemoveString(0, 2, 7)
+	assert.Equal(t, tr.Position.Row, 0)
+	assert.Equal(t, tr.Position.Column, 1)
+
+	buf.InsertString(0, 0, "ABC\n")
+	assert.Equal(t, tr.Position.Row, 1)
+	assert.Equal(t, tr.Position.Column, 1)
+}
+
+func TestTrack04(t *testing.T) {
+	buf := model.Buffer{}
+	buf.Init()
+
+	buf.InsertString(0, 0, "123456789")
+
+	tr := buf.CreateTrack(0, 1)
+
+	buf.RemoveString(0, 2, 7)
+	assert.Equal(t, tr.Position.Row, 0)
+	assert.Equal(t, tr.Position.Column, 1)
+
+	buf.InsertString(0, 0, "ABC\nAAA")
+	assert.Equal(t, tr.Position.Row, 1)
+	assert.Equal(t, tr.Position.Column, 4)
+}

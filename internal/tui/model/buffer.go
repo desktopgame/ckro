@@ -93,6 +93,7 @@ func (buf *Buffer) InsertString(row int, column int, s string) (Position, error)
 
 		if s == "\n" {
 			buf.insertLine(row, column)
+			buf.updateTracksAfterInsert(row, column, 1, 0)
 			return Position{}, nil
 		}
 
@@ -105,11 +106,13 @@ func (buf *Buffer) InsertString(row int, column int, s string) (Position, error)
 		if len(insertLines) == 1 {
 			line.InsertString(column, s)
 			position.Column += len(s)
+			buf.updateTracksAfterInsert(row, column, 0, len(s))
 		} else {
 			line.InsertString(column, insertLines[0])
 			breakAt := column + len(insertLines[0])
 			position.Column = breakAt
 
+			insertedLines := 0
 			for i := 1; i < len(insertLines); i++ {
 				nextLine := buf.insertLine(row, breakAt)
 				nextLine.PrependString(insertLines[i])
@@ -119,7 +122,9 @@ func (buf *Buffer) InsertString(row int, column int, s string) (Position, error)
 
 				breakAt = len(insertLines[i])
 				row += 1
+				insertedLines++
 			}
+			buf.updateTracksAfterInsert(row-insertedLines, column, insertedLines, 0)
 		}
 		return position, nil
 	}
@@ -136,6 +141,8 @@ func (buf *Buffer) removeLine(row int) {
 // RemoveString is remove string specified range.
 func (buf *Buffer) RemoveString(row int, column int, length int) {
 	if row >= 0 && row < len(buf.lines) {
+		startRow := row
+		startColumn := column
 		line := buf.lines[row]
 
 		for length > 0 {
@@ -162,6 +169,8 @@ func (buf *Buffer) RemoveString(row int, column int, length int) {
 				}
 			}
 		}
+
+		buf.updateTracksAfterRemove(startRow, startColumn, row, column)
 	}
 }
 
@@ -188,6 +197,7 @@ func (buf *Buffer) ReplaceAll(r io.Reader) {
 	buf.tracks = nil
 }
 
+// CreateTrack creates a new position tracker.
 func (buf *Buffer) CreateTrack(row int, bytePos int) *Track {
 	t := &Track{
 		Position: Position{
@@ -198,6 +208,97 @@ func (buf *Buffer) CreateTrack(row int, bytePos int) *Track {
 	}
 	buf.tracks = append(buf.tracks, t)
 	return t
+}
+
+// RemoveTrack removes a position tracker from the buffer.
+func (buf *Buffer) RemoveTrack(track *Track) {
+	for i, t := range buf.tracks {
+		if t == track {
+			buf.tracks = slices.Delete(buf.tracks, i, i+1)
+			return
+		}
+	}
+}
+
+// updateTracksAfterInsert updates all tracked positions after an insertion.
+// Parameters:
+//   - row: the row where insertion occurred
+//   - column: the column where insertion occurred
+//   - insertedLines: number of lines inserted (0 for single-line insertion)
+//   - insertedColumns: number of columns inserted (for single-line insertion)
+func (buf *Buffer) updateTracksAfterInsert(row int, column int, insertedLines int, insertedColumns int) {
+	for _, track := range buf.tracks {
+		if track.Lost {
+			continue
+		}
+
+		if insertedLines > 0 {
+			// Multi-line insertion
+			if track.Position.Row > row {
+				// Track is after insertion row → shift down
+				track.Position.Row += insertedLines
+			} else if track.Position.Row == row && track.Position.Column > column {
+				// Track is on same row, after insertion point → move to next line
+				track.Position.Row += insertedLines
+			}
+		} else {
+			// Single-line insertion
+			if track.Position.Row == row && track.Position.Column >= column {
+				// Track is on same row, at or after insertion point → shift right
+				track.Position.Column += insertedColumns
+			}
+		}
+	}
+}
+
+// updateTracksAfterRemove updates all tracked positions after a removal.
+// Parameters:
+//   - startRow: the row where removal started
+//   - startColumn: the column where removal started
+//   - endRow: the row where removal ended
+//   - endColumn: the column where removal ended
+func (buf *Buffer) updateTracksAfterRemove(startRow int, startColumn int, endRow int, endColumn int) {
+	removedLines := endRow - startRow
+
+	for _, track := range buf.tracks {
+		if track.Lost {
+			continue
+		}
+
+		trackPos := track.Position
+
+		if removedLines == 0 {
+			// Single-line removal
+			if trackPos.Row == startRow {
+				if trackPos.Column >= startColumn && trackPos.Column < endColumn {
+					// Track is within removed range → mark as lost
+					track.Lost = true
+				} else if trackPos.Column >= endColumn {
+					// Track is after removed range → shift left
+					track.Position.Column -= (endColumn - startColumn)
+				}
+			}
+		} else {
+			// Multi-line removal
+			if trackPos.Row >= startRow && trackPos.Row <= endRow {
+				// Track is within removed line range
+				if trackPos.Row == startRow && trackPos.Column < startColumn {
+					// Track is before removal start on start line → keep as is
+					continue
+				} else if trackPos.Row == endRow && trackPos.Column >= endColumn {
+					// Track is after removal end on end line → move to start line
+					track.Position.Row = startRow
+					track.Position.Column = startColumn + (trackPos.Column - endColumn)
+				} else {
+					// Track is within removed range → mark as lost
+					track.Lost = true
+				}
+			} else if trackPos.Row > endRow {
+				// Track is after removed range → shift up
+				track.Position.Row -= removedLines
+			}
+		}
+	}
 }
 
 // GetLineAt returns specified line.
