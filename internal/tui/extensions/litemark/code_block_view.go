@@ -165,14 +165,23 @@ func (c *CodeBlockView) MoveLength(ctx view.Context, textLayout *view.TextLayout
 }
 
 func (c *CodeBlockView) MoveUp(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
-	// e := textLayout.Element
+	e := textLayout.Element
+	cbe := e.(*CodeBlockElement)
+	additionalMoves := 0
+	if len(cbe.Lang) > 0 {
+		additionalMoves = runewidth.StringWidth(cbe.Lang) + 1
+	}
+
 	table, _ := c.ViewLengthTable(ctx, textLayout)
 	index, _ := c.findTableIndex(textLayout, table, viewLocalPos)
-	if index <= 0 {
+	if index == -1 {
 		return -1
 	}
-	if index == 1 {
-		return 0
+	if index <= 0 {
+		if len(cbe.Lang) > 0 {
+			return additionalMoves - 1
+		}
+		return -1
 	}
 	return c.sumTableValue(textLayout, table, index-2)
 }

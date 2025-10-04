@@ -325,63 +325,25 @@ func (doc *StyledDocument) renderElement(blocks []AbstractBlock) []model.Element
 			}
 		case *FoldBlock:
 			if block.LineCount > 2 {
-
-				codeLines := []model.Element{}
-				for i := 0; i < block.LineCount-2; i++ {
-					lineIndex := block.LineIndex + i + 1
-					if len(doc.GetLineString(lineIndex)) == 0 {
-						codeLines = append(codeLines, &BlankLineElement{
-							Range: model.Range{
-								StartPosition: model.Position{
-									Row:    lineIndex,
-									Column: 0,
-								},
-								EndPosition: model.Position{
-									Row:    lineIndex,
-									Column: 0,
-								},
-							},
-						})
-					} else {
-						codeLines = append(codeLines, &TextElement{
-							Range: model.Range{
-								StartPosition: model.Position{
-									Row:    lineIndex,
-									Column: 0,
-								},
-								EndPosition: model.Position{
-									Row:    lineIndex,
-									Column: len(doc.GetLineString(lineIndex)),
-								},
-							},
-							Children: []model.Element{
-								&InlineElement{
-									Ranges: []model.Range{
-										{
-											StartPosition: model.Position{
-												Row:    lineIndex,
-												Column: 0,
-											},
-											EndPosition: model.Position{
-												Row:    lineIndex,
-												Column: len(doc.GetLineString(lineIndex)),
-											},
-										},
-										{
-											StartPosition: model.Position{
-												Row:    lineIndex,
-												Column: 0,
-											},
-											EndPosition: model.Position{
-												Row:    lineIndex,
-												Column: len(doc.GetLineString(lineIndex)),
-											},
-										},
-									},
-								},
-							},
-						})
-					}
+				r := model.Range{
+					StartPosition: model.Position{
+						Row:    block.LineIndex + 1,
+						Column: 0,
+					},
+					EndPosition: model.Position{
+						Row:    block.LineIndex + (block.LineCount - 2),
+						Column: doc.GetLineBytes(block.LineIndex + (block.LineCount - 2)),
+					},
+				}
+				sg := doc.Read(r)
+				lines := []string{}
+				for i := 0; i < sg.GetLineCount(); i++ {
+					lines = append(lines, sg.GetLine(i))
+				}
+				sr := &StringReader{Source: lines}
+				aBlocks := Parse(sr)
+				for _, aBlock := range aBlocks {
+					aBlock.BaseBlock().LineIndex += block.LineIndex + 1
 				}
 
 				elements = append(elements, &model.FoldBlockElement{
@@ -397,7 +359,7 @@ func (doc *StyledDocument) renderElement(blocks []AbstractBlock) []model.Element
 							},
 						},
 					},
-					Children: codeLines,
+					Children: doc.renderElement(aBlocks),
 				})
 			} else {
 				elements = append(elements, &TextElement{

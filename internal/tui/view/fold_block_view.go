@@ -25,7 +25,7 @@ func (fv *FoldBlockView) Layout(ctx Context, textLayout *TextLayout, x, y, w, h 
 			mw := textLayout.Children[i].MinimumWidth
 			mh := textLayout.Children[i].MinimumHeight
 			childView.Layout(ctx, textLayout.Children[i], 1, offsetY, mw, mh)
-			offsetY += mh
+			offsetY += textLayout.Children[i].Height
 		}
 	}
 	textLayout.RelativeX = x
@@ -96,7 +96,7 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 			childElement := e.GetElement(i)
 			childView := ctx.Resolver.Resolve(childElement)
 
-			child := childView.MinimumSize(ctx, childElement, width-2, 1)
+			child := childView.MinimumSize(ctx, childElement, width-2, 9999)
 
 			if child.MinimumWidth+2 > width {
 				childElement = &model.PlainElement{
@@ -106,7 +106,7 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 				child = childView.MinimumSize(ctx, childElement, width-2, 9999)
 				minimumHeight += child.MinimumHeight
 			} else {
-				minimumHeight++
+				minimumHeight += child.MinimumHeight
 			}
 
 			children = append(children, child)
@@ -174,24 +174,26 @@ func (fv *FoldBlockView) MoveLength(ctx Context, textLayout *TextLayout) int {
 }
 
 func (fv *FoldBlockView) MoveUp(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
-	table, _ := fv.ViewLengthTable(ctx, textLayout)
-	index, _ := fv.findTableIndex(table, viewLocalPos)
-	if index <= 0 {
-		return -1
-	}
-	if index == 1 {
-		return 0
-	}
-	return fv.sumTableValue(table, index-2)
+	//table, _ := fv.ViewLengthTable(ctx, textLayout)
+	//index, _ := fv.findTableIndex(table, viewLocalPos)
+	//if index <= 0 {
+	//	return -1
+	//}
+	//if index == 1 {
+	//	return 0
+	//}
+	//return fv.sumTableValue(table, index-2)
+	return CompositeMoveUp(ctx, textLayout, viewLocalPos)
 }
 
 func (fv *FoldBlockView) MoveDown(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
-	table, _ := fv.ViewLengthTable(ctx, textLayout)
-	index, _ := fv.findTableIndex(table, viewLocalPos)
-	if index == len(table)-1 {
-		return -1
-	}
-	return fv.sumTableValue(table, index)
+	//table, _ := fv.ViewLengthTable(ctx, textLayout)
+	//index, _ := fv.findTableIndex(table, viewLocalPos)
+	//if index == len(table)-1 {
+	//	return -1
+	//}
+	//return fv.sumTableValue(table, index)
+	return CompositeMoveDown(ctx, textLayout, viewLocalPos)
 }
 
 func (fv *FoldBlockView) MoveLeft(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
