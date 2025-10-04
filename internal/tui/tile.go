@@ -66,8 +66,11 @@ func (t *Tile) Move(x int, y int) {
 
 // Layout is resize the TextBox.
 func (t *Tile) Layout(w int, h int) {
-	t.TextBox.Width = w
-	t.TextBox.Height = h
+	if t.TextBox.Width != w || t.TextBox.Height != h {
+		t.TextBox.Width = w
+		t.TextBox.Height = h
+		t.TextBox.CursorUpdate()
+	}
 }
 
 // IsFlexibleWidth returns Tile fields to direct.
