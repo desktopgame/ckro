@@ -79,7 +79,7 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 
 	charRef := currentView.ConvertModel(ctx, tb.renderCache.GetLayout(ei), eoff)
 
-	if charRef.Bytes == 0 {
+	if charRef.Bytes == 0 || charRef.LineWrap {
 		return screenX, screenY, ' ', nil
 	}
 

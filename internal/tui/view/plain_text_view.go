@@ -189,13 +189,77 @@ func (p *PlainTextView) ConvertModel(ctx Context, textLayout *TextLayout, viewLo
 		}
 	}
 
-	bPos, bLen := text.GraphemeToByteRange(str, viewLocalPos)
+	x := 0
+	clusterCount := 0
+	viewLine := 0
+	bytes := 0
+
+	lineWrap := false
+
+	width := textLayout.Width
+	clusters := text.GraphemeClusters(str)
+	for i, cluster := range clusters {
+		runes := []rune(cluster)
+		if clusterCount == viewLocalPos {
+			lineWrap := false
+			if i+1 < len(clusters) {
+				cluster = clusters[i+1]
+				runes = []rune(cluster)
+
+				if cluster == "\t" {
+					w := text.TabWidth - (x % text.TabWidth)
+					if x+w > width {
+						lineWrap = true
+					}
+				} else if len(runes) > 0 {
+					mainRune := runes[0]
+					w := runewidth.RuneWidth(mainRune)
+
+					if x+w > width {
+						lineWrap = true
+					}
+				}
+
+				cluster = clusters[i]
+			}
+
+			return CharacterReference{
+				StartPosition: model.Position{
+					Row:    st.Row,
+					Column: st.Column + bytes,
+				},
+				Bytes:    len(cluster),
+				LineWrap: lineWrap,
+			}
+		}
+
+		if cluster == "\t" {
+			w := text.TabWidth - (x % text.TabWidth)
+			if x+w > width {
+				viewLine++
+				x = 0
+			}
+			x += w
+		} else if len(runes) > 0 {
+			mainRune := runes[0]
+			w := runewidth.RuneWidth(mainRune)
+
+			if x+w > width {
+				viewLine++
+				x = 0
+			}
+			x += w
+		}
+		bytes += len(cluster)
+		clusterCount++
+	}
 	return CharacterReference{
 		StartPosition: model.Position{
 			Row:    st.Row,
-			Column: st.Column + bPos,
+			Column: st.Column + bytes,
 		},
-		Bytes: bLen,
+		Bytes:    0,
+		LineWrap: lineWrap,
 	}
 }
 
