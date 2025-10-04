@@ -138,4 +138,9 @@ func TestTrack05(t *testing.T) {
 	buf.InsertString(0, 0, "ABC\nAAA\nAAA")
 	assert.Equal(t, tr.Position.Row, 2)
 	assert.Equal(t, tr.Position.Column, 4)
+
+	buf.RemoveString(0, 3, 1)
+	assert.Equal(t, tr.Lost, false)
+	assert.Equal(t, tr.Position.Row, 1)
+	assert.Equal(t, tr.Position.Column, 4)
 }
