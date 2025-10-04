@@ -189,6 +189,11 @@ func (buf *Buffer) ReplaceAll(r io.Reader) {
 			content: line,
 		})
 	}
+	if len(lines) == 0 {
+		lines = []*Line{
+			new(Line),
+		}
+	}
 	buf.lines = lines
 }
 
