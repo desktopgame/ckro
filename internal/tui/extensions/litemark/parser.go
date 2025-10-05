@@ -131,6 +131,10 @@ func Parse(reader Reader) []AbstractBlock {
 					Block: Block{
 						LineIndex: lineIndex,
 					},
+					Span: Span{
+						StartColumn: column,
+						EndColumn:   len(line),
+					},
 				}
 
 				foundClose := false

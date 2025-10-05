@@ -538,27 +538,7 @@ func (tb *TextBox) RemoveChar() {
 		tb.viewPosition = vs + vl
 		return
 	}
-	if _, ok := layout.Element.(*model.FoldBlockElement); ok && viewLocalPos == 0 {
-		r := layout.Element.GetRange(0)
-		sg := tb.Document.Read(r)
-		bPos := view.CharacterReference{
-			StartPosition: model.Position{
-				Row:    r.StartPosition.Row,
-				Column: sg.GetSpan(0).EndColumn - 1,
-			},
-			Bytes: 1,
-		}
-		tb.bytePos = bPos
-		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
-		//		tb.bytePos.StartPosition.Column++
-		tb.bytePos.Bytes = 0
-
-		tb.renderCache.Update(ctx, tb.Width)
-
-		_, vs, vl := tb.modelToView()
-		tb.viewPosition = vs + vl
-		return
-	} else if txView, ok := textView.(*litemark.TextView); ok {
+	if txView, ok := textView.(*litemark.TextView); ok {
 		combine, bPos := txView.RemoveCombine(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
 		if combine {
 			elementIndex, viewStart, viewLocalPos = tb.modelToView()

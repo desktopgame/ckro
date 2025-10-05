@@ -295,6 +295,13 @@ func (fv *FoldBlockView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayou
 }
 
 func (fv *FoldBlockView) ShouldRemoveWithSpecifiedColumnAfter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool) {
+	if viewLocalPos == 0 {
+		r2 := textLayout.Element.GetRange(1)
+		return model.Position{
+			Row:    r2.EndPosition.Row,
+			Column: r2.EndPosition.Column - 1,
+		}, true
+	}
 	return model.Position{}, false
 }
 

@@ -358,6 +358,16 @@ func (doc *StyledDocument) renderElement(blocks []AbstractBlock) []model.Element
 								Column: len(doc.GetLineString(block.LineIndex + block.LineCount - 1)),
 							},
 						},
+						{
+							StartPosition: model.Position{
+								Row:    block.LineIndex,
+								Column: block.Span.StartColumn,
+							},
+							EndPosition: model.Position{
+								Row:    block.LineIndex,
+								Column: block.Span.EndColumn,
+							},
+						},
 					},
 					Children: doc.renderElement(aBlocks),
 				})
