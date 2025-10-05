@@ -64,7 +64,6 @@ func (fv *FoldBlockView) Draw(ctx Context, textLayout *TextLayout, renderer Rend
 }
 
 func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, height int) *TextLayout {
-	maxWidth := -1
 	children := []*TextLayout{}
 
 	var minimumHeight int
@@ -87,8 +86,6 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 		}
 
 		children = append(children, child)
-
-		maxWidth = child.MinimumWidth + 2
 	} else {
 		minimumHeight = 2
 
@@ -110,10 +107,6 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 			}
 
 			children = append(children, child)
-
-			if child.MinimumWidth > maxWidth {
-				maxWidth = child.MinimumWidth
-			}
 		}
 	}
 	return &TextLayout{
