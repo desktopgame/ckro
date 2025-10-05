@@ -172,3 +172,7 @@ func (hv *HeadingView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Te
 func (hv *HeadingView) ShouldBeforeInsertionOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
 	return viewLocalPos == 0
 }
+
+func (hv *HeadingView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
+	return viewLocalPos == 1 && hv.MoveLength(ctx, textLayout) == 2
+}

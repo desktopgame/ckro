@@ -67,6 +67,10 @@ func (b *BlankLineView) ShouldBeforeInsertionOnLineBegin(ctx view.Context, textL
 	return false
 }
 
+func (b *BlankLineView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
+	return false
+}
+
 func (b *BlankLineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
 	return 0
 }

@@ -267,6 +267,10 @@ func (p *PlainTextView) ShouldBeforeInsertionOnLineBegin(ctx Context, textLayout
 	return false
 }
 
+func (p *PlainTextView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
+	return false
+}
+
 func (p *PlainTextView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout, bytePos model.Position) int {
 	e := textLayout.Element
 	r := e.GetRange(0)

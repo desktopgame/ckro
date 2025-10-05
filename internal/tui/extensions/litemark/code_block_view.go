@@ -321,3 +321,7 @@ func (c *CodeBlockView) ConvertViewLocalPos(ctx view.Context, textLayout *view.T
 func (c *CodeBlockView) ShouldBeforeInsertionOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
 	return false
 }
+
+func (c *CodeBlockView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
+	return false
+}

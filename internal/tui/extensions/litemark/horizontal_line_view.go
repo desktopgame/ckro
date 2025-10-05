@@ -74,3 +74,7 @@ func (hl *HorizontalLineView) ConvertViewLocalPos(ctx view.Context, textLayout *
 func (hl *HorizontalLineView) ShouldBeforeInsertionOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
 	return false
 }
+
+func (hl *HorizontalLineView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
+	return false
+}

@@ -182,3 +182,7 @@ func (il *InlineView) ShouldBeforeInsertionOnLineBegin(ctx view.Context, textLay
 	}
 	return false
 }
+
+func (il *InlineView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
+	return false
+}

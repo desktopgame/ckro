@@ -470,19 +470,20 @@ func (tb *TextBox) RemoveChar() {
 	layout := tb.renderCache.GetLayout(elementIndex)
 	textView := tb.TextEngine.Resolve(layout.Element)
 
-	if textView.MoveLength(ctx, layout) == 2 {
-		if _, ok := layout.Element.(*litemark.HeadingElement); ok {
-			r := layout.Element.GetRange(0)
-			bPos := view.CharacterReference{
-				StartPosition: r.StartPosition,
-				Bytes:         (r.EndPosition.Column - r.StartPosition.Column),
-			}
-			tb.bytePos = bPos
-			tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
+	if textView.ShouldRemoveWithLine(ctx, layout, viewLocalPos) {
+		r := layout.Element.GetRange(0)
+		bPos := view.CharacterReference{
+			StartPosition: r.StartPosition,
+			Bytes:         (r.EndPosition.Column - r.StartPosition.Column),
+		}
+		tb.bytePos = bPos
+		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
 
-			tb.bytePos.Bytes = 0
-			tb.viewPosition = viewStart
-			return
+		tb.bytePos.Bytes = 0
+		tb.viewPosition = viewStart
+		return
+	} else if textView.MoveLength(ctx, layout) == 2 {
+		if _, ok := layout.Element.(*litemark.HeadingElement); ok {
 		} else if txView, ok := textView.(*litemark.TextView); ok {
 			combine, bPos := txView.RemoveCombine(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
 			if combine {

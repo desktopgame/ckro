@@ -289,3 +289,7 @@ func (fv *FoldBlockView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout
 func (fv *FoldBlockView) ShouldBeforeInsertionOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
 	return false
 }
+
+func (fv *FoldBlockView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
+	return false
+}

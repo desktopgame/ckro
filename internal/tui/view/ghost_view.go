@@ -69,3 +69,7 @@ func (g *GhostView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout, byt
 func (g *GhostView) ShouldBeforeInsertionOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
 	return false
 }
+
+func (g *GhostView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
+	return false
+}
