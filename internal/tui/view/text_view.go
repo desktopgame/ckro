@@ -29,5 +29,5 @@ type TextView interface {
 	ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, viewLocalPos int) bool
 
 	// 指定のローカルビュー位置における削除で指定位置以降の列をすべて削除するべきなら true を返す
-	ShouldRemoveWithSpecifiedLine(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool)
+	ShouldRemoveWithSpecifiedColumnAfter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool)
 }

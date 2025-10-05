@@ -177,6 +177,6 @@ func (hv *HeadingView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.T
 	return viewLocalPos == 1 && hv.MoveLength(ctx, textLayout) == 2
 }
 
-func (hv *HeadingView) ShouldRemoveWithSpecifiedLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {
+func (hv *HeadingView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {
 	return model.Position{}, false
 }

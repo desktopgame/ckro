@@ -79,6 +79,6 @@ func (hl *HorizontalLineView) ShouldRemoveWithLine(ctx view.Context, textLayout 
 	return false
 }
 
-func (hl *HorizontalLineView) ShouldRemoveWithSpecifiedLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {
+func (hl *HorizontalLineView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {
 	return model.Position{}, false
 }

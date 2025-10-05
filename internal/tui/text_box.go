@@ -501,7 +501,7 @@ func (tb *TextBox) RemoveChar() {
 			}
 		}
 	}
-	if pos, ok := textView.ShouldRemoveWithSpecifiedLine(ctx, layout, viewLocalPos); ok {
+	if pos, ok := textView.ShouldRemoveWithSpecifiedColumnAfter(ctx, layout, viewLocalPos); ok {
 		bPos := view.CharacterReference{
 			StartPosition: model.Position{
 				Row:    pos.Row,

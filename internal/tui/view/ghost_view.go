@@ -74,6 +74,6 @@ func (g *GhostView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, vi
 	return false
 }
 
-func (g *GhostView) ShouldRemoveWithSpecifiedLine(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool) {
+func (g *GhostView) ShouldRemoveWithSpecifiedColumnAfter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool) {
 	return model.Position{}, false
 }

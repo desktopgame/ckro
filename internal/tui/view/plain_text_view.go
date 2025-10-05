@@ -271,7 +271,7 @@ func (p *PlainTextView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayout
 	return false
 }
 
-func (p *PlainTextView) ShouldRemoveWithSpecifiedLine(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool) {
+func (p *PlainTextView) ShouldRemoveWithSpecifiedColumnAfter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool) {
 	return model.Position{}, false
 }
 

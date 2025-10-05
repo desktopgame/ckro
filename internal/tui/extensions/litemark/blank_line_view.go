@@ -71,7 +71,7 @@ func (b *BlankLineView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.
 	return false
 }
 
-func (b *BlankLineView) ShouldRemoveWithSpecifiedLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {
+func (b *BlankLineView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {
 	return model.Position{}, false
 }
 
