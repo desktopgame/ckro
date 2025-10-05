@@ -175,5 +175,10 @@ func (il *InlineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Tex
 }
 
 func (il *InlineView) ShouldBeforeInsertionOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
+	ile := textLayout.Element.(*InlineElement)
+	hasColor := ile.Foreground.IsSome() || ile.Background.IsSome()
+	if ile.IsBold || ile.IsItalic || ile.IsUnderline || hasColor {
+		return viewLocalPos == 0
+	}
 	return false
 }

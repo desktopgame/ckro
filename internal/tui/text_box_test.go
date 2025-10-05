@@ -1318,6 +1318,37 @@ func TestTextBox45(t *testing.T) {
 	assert.Equal(t, y, 3)
 }
 
+func TestTextBox46(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 68 + 2
+	tb.Height = 10
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+	tb.InsertString("**BOLD**")
+
+	for i := 0; i < 4; i++ {
+		tb.MoveLeft()
+	}
+	tb.InsertString("\n")
+
+	r := model.Range{
+		StartPosition: model.Position{
+			Row:    0,
+			Column: 0,
+		},
+		EndPosition: model.Position{
+			Row:    0,
+			Column: tb.Document.GetLineBytes(0),
+		},
+	}
+	sg := tb.Document.Read(r)
+	assert.Equal(t, len(sg.GetLine(0)), 0)
+}
+
 func TestTextBoxFind01(t *testing.T) {
 	tb := TextBox{}
 	tb.Init()
