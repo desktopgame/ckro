@@ -186,3 +186,7 @@ func (il *InlineView) ShouldBeforeInsertionNewLineOnLineBegin(ctx view.Context, 
 func (il *InlineView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
 	return false
 }
+
+func (il *InlineView) ShouldRemoveWithSpecifiedLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {
+	return model.Position{}, false
+}

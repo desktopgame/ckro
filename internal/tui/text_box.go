@@ -501,15 +501,13 @@ func (tb *TextBox) RemoveChar() {
 			}
 		}
 	}
-	if cb, ok := layout.Element.(*litemark.CodeBlockElement); ok && viewLocalPos == 0 && len(cb.Lang) == 0 {
-		r := layout.Element.GetRange(0)
-		sg := tb.Document.Read(r)
+	if pos, ok := textView.ShouldRemoveWithSpecifiedLine(ctx, layout, viewLocalPos); ok {
 		bPos := view.CharacterReference{
 			StartPosition: model.Position{
-				Row:    r.StartPosition.Row,
-				Column: sg.GetSpan(0).EndColumn - 1,
+				Row:    pos.Row,
+				Column: pos.Column,
 			},
-			Bytes: 1,
+			Bytes: tb.Document.GetLineBytes(pos.Row) - pos.Column,
 		}
 		tb.bytePos = bPos
 		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
@@ -521,7 +519,8 @@ func (tb *TextBox) RemoveChar() {
 		_, vs, vl := tb.modelToView()
 		tb.viewPosition = vs + vl
 		return
-	} else if cb, ok := layout.Element.(*litemark.CodeBlockElement); ok && viewLocalPos == 1 && len(cb.Lang) > 0 {
+	}
+	if cb, ok := layout.Element.(*litemark.CodeBlockElement); ok && viewLocalPos == 1 && len(cb.Lang) > 0 {
 		r1 := layout.Element.GetRange(1)
 		sg := tb.Document.Read(r1)
 		bPos := view.CharacterReference{

@@ -176,3 +176,7 @@ func (hv *HeadingView) ShouldBeforeInsertionNewLineOnLineBegin(ctx view.Context,
 func (hv *HeadingView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
 	return viewLocalPos == 1 && hv.MoveLength(ctx, textLayout) == 2
 }
+
+func (hv *HeadingView) ShouldRemoveWithSpecifiedLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {
+	return model.Position{}, false
+}

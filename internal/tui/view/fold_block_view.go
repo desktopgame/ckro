@@ -293,3 +293,7 @@ func (fv *FoldBlockView) ShouldBeforeInsertionNewLineOnLineBegin(ctx Context, te
 func (fv *FoldBlockView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
 	return false
 }
+
+func (fv *FoldBlockView) ShouldRemoveWithSpecifiedLine(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool) {
+	return model.Position{}, false
+}

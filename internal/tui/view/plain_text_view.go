@@ -271,6 +271,10 @@ func (p *PlainTextView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayout
 	return false
 }
 
+func (p *PlainTextView) ShouldRemoveWithSpecifiedLine(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool) {
+	return model.Position{}, false
+}
+
 func (p *PlainTextView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout, bytePos model.Position) int {
 	e := textLayout.Element
 	r := e.GetRange(0)

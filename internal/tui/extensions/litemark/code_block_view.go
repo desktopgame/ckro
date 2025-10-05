@@ -325,3 +325,17 @@ func (c *CodeBlockView) ShouldBeforeInsertionNewLineOnLineBegin(ctx view.Context
 func (c *CodeBlockView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
 	return false
 }
+
+func (c *CodeBlockView) ShouldRemoveWithSpecifiedLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {
+	e := textLayout.Element
+	cbe := e.(*CodeBlockElement)
+
+	if viewLocalPos == 0 && len(cbe.Lang) == 0 {
+		r := e.GetRange(1)
+		return model.Position{
+			Row:    r.EndPosition.Row,
+			Column: r.EndPosition.Column - 1,
+		}, true
+	}
+	return model.Position{}, false
+}

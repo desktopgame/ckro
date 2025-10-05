@@ -210,6 +210,10 @@ func (t *TextView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.TextL
 	return false
 }
 
+func (t *TextView) ShouldRemoveWithSpecifiedLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {
+	return model.Position{}, false
+}
+
 func (t *TextView) ConvertRelativeX(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return viewLocalPos
 }
