@@ -194,6 +194,10 @@ func (t *TextView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, v
 	}
 }
 
+func (t *TextView) ShouldBeforeInsertionOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
+	return false
+}
+
 func (t *TextView) ConvertRelativeX(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return viewLocalPos
 }

@@ -65,3 +65,7 @@ func (g *GhostView) ConvertModel(ctx Context, textLayout *TextLayout, viewLocalP
 func (g *GhostView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout, bytePos model.Position) int {
 	return 0
 }
+
+func (g *GhostView) ShouldBeforeInsertionOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
+	return false
+}

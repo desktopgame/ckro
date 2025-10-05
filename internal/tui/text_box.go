@@ -368,23 +368,9 @@ func (tb *TextBox) InsertString(s string) {
 	layout := tb.renderCache.GetLayout(elementIndex)
 	textView := tb.TextEngine.Resolve(layout.Element)
 
-	if viewLocalPos == 0 {
-		if strings.HasSuffix(s, "\n") {
-			if _, ok := layout.Element.(*litemark.HeadingElement); ok {
-				if elementIndex == 0 {
-					//tb.bytePos.StartPosition.Row = 0
-					tb.bytePos.StartPosition.Column = 0
-
-				} else {
-					//element = tb.renderCache.GetElement(elementIndex - 1)
-					//textView = tb.TextEngine.Resolve(element)
-					//viewLocalPos = textView.MoveLength(ctx, element) - 1
-					//bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), viewLocalPos)
-					//tb.bytePos = bPos
-					tb.bytePos.StartPosition.Column = 0
-					//tb.bytePos.Bytes = 0
-				}
-			}
+	if strings.HasSuffix(s, "\n") {
+		if textView.ShouldBeforeInsertionOnLineBegin(ctx, layout, viewLocalPos) {
+			tb.bytePos.StartPosition.Column = 0
 		}
 	}
 

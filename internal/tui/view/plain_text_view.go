@@ -263,6 +263,10 @@ func (p *PlainTextView) ConvertModel(ctx Context, textLayout *TextLayout, viewLo
 	}
 }
 
+func (p *PlainTextView) ShouldBeforeInsertionOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
+	return false
+}
+
 func (p *PlainTextView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout, bytePos model.Position) int {
 	e := textLayout.Element
 	r := e.GetRange(0)

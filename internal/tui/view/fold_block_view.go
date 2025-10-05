@@ -285,3 +285,7 @@ func (fv *FoldBlockView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout
 		return fv.MoveLength(ctx, textLayout) - 1
 	}
 }
+
+func (fv *FoldBlockView) ShouldBeforeInsertionOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
+	return false
+}

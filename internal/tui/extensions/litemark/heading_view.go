@@ -168,3 +168,7 @@ func (hv *HeadingView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Te
 	return hv.MoveLength(ctx, textLayout) - 1
 	//panic("")
 }
+
+func (hv *HeadingView) ShouldBeforeInsertionOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
+	return viewLocalPos == 0
+}

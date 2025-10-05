@@ -63,6 +63,10 @@ func (b *BlankLineView) ConvertModel(ctx view.Context, textLayout *view.TextLayo
 	}
 }
 
+func (b *BlankLineView) ShouldBeforeInsertionOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
+	return false
+}
+
 func (b *BlankLineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
 	return 0
 }

@@ -70,3 +70,7 @@ func (hl *HorizontalLineView) ConvertModel(ctx view.Context, textLayout *view.Te
 func (hl *HorizontalLineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
 	return 0
 }
+
+func (hl *HorizontalLineView) ShouldBeforeInsertionOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
+	return false
+}

@@ -173,3 +173,7 @@ func (il *InlineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Tex
 	}
 	return il.MoveLength(ctx, textLayout) - 1
 }
+
+func (il *InlineView) ShouldBeforeInsertionOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
+	return false
+}
