@@ -222,11 +222,12 @@ func (tb *TextBox) Draw(g *Graphics) {
 		return
 	}
 
+	// update elements
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 	tb.foldManager.Refresh(tb.Document)
 
-	// バッファの内容を描画
+	// draw all view when visible in terminal window.
 	clip := Clip{
 		Graphics:   g,
 		X:          tb.X,
@@ -256,19 +257,17 @@ func (tb *TextBox) Draw(g *Graphics) {
 
 	screenX, cursorRow, currentRune, combining := tb.CursorPosition()
 
-	// カーソル位置の文字を反転表示
+	// draw character on current cursor by reverse color
 	cursorStyle := def.Reverse(true)
 	clip.SetCursor(screenX, cursorRow-tb.scrollY, currentRune, combining, cursorStyle)
 
-	// 全角文字の場合、隣接するセルもカーソル表示
+	// fill neighbor cells, if two width character
 	if currentRune != ' ' {
 		width := runewidth.RuneWidth(currentRune)
 		if width == 2 {
-			// 隣接するセルにもカーソルを表示（空文字で反転）
 			clip.SetCursor(screenX+1, cursorRow-tb.scrollY, 0, nil, cursorStyle)
 		}
 	}
-
 }
 
 func (tb *TextBox) modelToView() (ElementIndex int, ViewStart int, ViewLocalPos int) {
