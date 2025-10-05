@@ -58,31 +58,37 @@ func (tb *TextBox) context() view.Context {
 }
 
 // CursorPosition returns position of cursor.
-// TODO: refactor
 func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
+	// update elements
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
-	_, ei, _, eoff := tb.renderCache.Stats(tb.viewPosition)
 
-	// カーソルがある行までの画面行数を計算
+	// get view info from viewPosition
+	_, ei, _, vl := tb.renderCache.Stats(tb.viewPosition)
+
+	// calculate a total line count until just before on current view
 	screenY := 0
 	for i := 0; i < ei; i++ {
 		screenY += tb.renderCache.GetLayout(i).Height
 	}
 
-	// カーソルがある行での位置を正確に計算
-	// cursorLine := buf.GetLineAt(cursorRow).GetContent()
+	// calculate local position on current view
 	currentView := tb.TextEngine.Resolve(tb.renderCache.GetLayout(ei).Element)
-	relx, rely := currentView.ConvertPos(ctx, tb.renderCache.GetLayout(ei), eoff)
-	screenX := relx
-	screenY += rely
+	vlx, vly := currentView.ConvertPos(ctx, tb.renderCache.GetLayout(ei), vl)
 
-	charRef := currentView.ConvertModel(ctx, tb.renderCache.GetLayout(ei), eoff)
+	// determine cursor position
+	screenX := vlx
+	screenY += vly
 
+	// get character on current cursor
+	charRef := currentView.ConvertModel(ctx, tb.renderCache.GetLayout(ei), vl)
+
+	// return space if line end or linewrap.
 	if charRef.Bytes == 0 || charRef.LineWrap {
 		return screenX, screenY, ' ', nil
 	}
 
+	// otherwise, return character on current cursor
 	r := model.Range{
 		StartPosition: charRef.StartPosition,
 		EndPosition: model.Position{
