@@ -75,17 +75,41 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 		child := childView.MinimumSize(ctx, childElement, width-4, 1)
 
 		if child.MinimumWidth+4 > width {
-			childElement = &model.PlainElement{
-				Range: childElement.GetRange(0),
+			r := childElement.GetRange(0)
+			if r.StartPosition.Row == r.EndPosition.Row {
+				childElement = &model.PlainElement{
+					Range: r,
+				}
+				childView = &PlainTextView{}
+				child = childView.MinimumSize(ctx, childElement, width-4, 9999)
+				minimumHeight += child.MinimumHeight
+				children = append(children, child)
+			} else {
+				for j := r.StartPosition.Row; j <= r.EndPosition.Row; j++ {
+					r2 := model.Range{
+						StartPosition: model.Position{
+							Row:    j,
+							Column: 0,
+						},
+						EndPosition: model.Position{
+							Row:    j,
+							Column: ctx.Document.GetLineBytes(j),
+						},
+					}
+					childElement = &model.PlainElement{
+						Range: r2,
+					}
+					childView = &PlainTextView{}
+					child = childView.MinimumSize(ctx, childElement, width-4, 9999)
+					minimumHeight += child.MinimumHeight
+					children = append(children, child)
+				}
 			}
-			childView = &PlainTextView{}
-			child = childView.MinimumSize(ctx, childElement, width-4, 9999)
-			minimumHeight += child.MinimumHeight
 		} else {
 			minimumHeight++
+			children = append(children, child)
 		}
 
-		children = append(children, child)
 	} else {
 		minimumHeight = 2
 
@@ -96,17 +120,43 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 			child := childView.MinimumSize(ctx, childElement, width-2, 9999)
 
 			if child.MinimumWidth+2 > width {
-				childElement = &model.PlainElement{
-					Range: childElement.GetRange(0),
+
+				r := childElement.GetRange(0)
+				if r.StartPosition.Row == r.EndPosition.Row {
+					childElement = &model.PlainElement{
+						Range: r,
+					}
+					childView = &PlainTextView{}
+					child = childView.MinimumSize(ctx, childElement, width-2, 9999)
+					minimumHeight += child.MinimumHeight
+					children = append(children, child)
+				} else {
+
+					for j := r.StartPosition.Row; j <= r.EndPosition.Row; j++ {
+						r2 := model.Range{
+							StartPosition: model.Position{
+								Row:    j,
+								Column: 0,
+							},
+							EndPosition: model.Position{
+								Row:    j,
+								Column: ctx.Document.GetLineBytes(j),
+							},
+						}
+						childElement = &model.PlainElement{
+							Range: r2,
+						}
+						childView = &PlainTextView{}
+						child = childView.MinimumSize(ctx, childElement, width-2, 9999)
+						minimumHeight += child.MinimumHeight
+						children = append(children, child)
+					}
 				}
-				childView = &PlainTextView{}
-				child = childView.MinimumSize(ctx, childElement, width-2, 9999)
-				minimumHeight += child.MinimumHeight
 			} else {
 				minimumHeight += child.MinimumHeight
+				children = append(children, child)
 			}
 
-			children = append(children, child)
 		}
 	}
 	return &TextLayout{
