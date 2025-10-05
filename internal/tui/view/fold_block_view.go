@@ -124,75 +124,22 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 	}
 }
 
-func (fv *FoldBlockView) ViewLengthTable(ctx Context, textLayout *TextLayout) ([]int, int) {
-	var table []int
-	total := 0
-	for i := 0; i < len(textLayout.Children); i++ {
-		childElement := textLayout.Children[i].Element
-		childView := ctx.Resolver.Resolve(childElement)
-
-		l := childView.MoveLength(ctx, textLayout.Children[i])
-		table = append(table, l)
-		total += l
-	}
-	return table, total
-}
-
-func (fv *FoldBlockView) findTableIndex(table []int, viewLocalPos int) (Row int, Column int) {
-	n := 0
-	index := -1
-	col := -1
-	for i, l := range table {
-		start := n
-		if viewLocalPos >= start && viewLocalPos < n+l {
-			index = i
-			col = viewLocalPos - start
-			break
-		}
-		n += l
-	}
-	return index, col
-}
-
-func (fv *FoldBlockView) sumTableValue(table []int, index int) int {
-	v := 0
-	for i := 0; i <= index; i++ {
-		v += table[i]
-	}
-	return v
-}
-
 func (fv *FoldBlockView) MoveLength(ctx Context, textLayout *TextLayout) int {
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		childElement := textLayout.Children[0].Element
 		childView := ctx.Resolver.Resolve(childElement)
 		return childView.MoveLength(ctx, textLayout.Children[0])
 	} else {
-		_, ttl := fv.ViewLengthTable(ctx, textLayout)
+		_, ttl := CompositeViewLengthTable(ctx, textLayout)
 		return ttl
 	}
 }
 
 func (fv *FoldBlockView) MoveUp(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
-	//table, _ := fv.ViewLengthTable(ctx, textLayout)
-	//index, _ := fv.findTableIndex(table, viewLocalPos)
-	//if index <= 0 {
-	//	return -1
-	//}
-	//if index == 1 {
-	//	return 0
-	//}
-	//return fv.sumTableValue(table, index-2)
 	return CompositeMoveUp(ctx, textLayout, viewLocalPos)
 }
 
 func (fv *FoldBlockView) MoveDown(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
-	//table, _ := fv.ViewLengthTable(ctx, textLayout)
-	//index, _ := fv.findTableIndex(table, viewLocalPos)
-	//if index == len(table)-1 {
-	//	return -1
-	//}
-	//return fv.sumTableValue(table, index)
 	return CompositeMoveDown(ctx, textLayout, viewLocalPos)
 }
 
@@ -219,8 +166,8 @@ func (fv *FoldBlockView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoc
 		lx, ly := childView.ConvertPos(ctx, textLayout.Children[0], viewLocalPos)
 		return 1 + lx + 2, 1 + ly
 	}
-	table, _ := fv.ViewLengthTable(ctx, textLayout)
-	index, col := fv.findTableIndex(table, viewLocalPos)
+	table, _ := CompositeViewLengthTable(ctx, textLayout)
+	index, col := CompositeViewIndex(table, viewLocalPos)
 
 	h := 0
 	for i := 0; i < index; i++ {
@@ -240,8 +187,8 @@ func (fv *FoldBlockView) ConvertModel(ctx Context, textLayout *TextLayout, viewL
 		return childView.ConvertModel(ctx, textLayout.Children[0], viewLocalPos)
 	} else {
 
-		table, _ := fv.ViewLengthTable(ctx, textLayout)
-		index, col := fv.findTableIndex(table, viewLocalPos)
+		table, _ := CompositeViewLengthTable(ctx, textLayout)
+		index, col := CompositeViewIndex(table, viewLocalPos)
 		//if viewLocalPos == fv.sumTableValue(table, len(table)-1) {
 		//	child := textLayout.Children[len(textLayout.Children)-1]
 		//	childView := ctx.Resolver.Resolve(child.Element)
