@@ -297,3 +297,7 @@ func (fv *FoldBlockView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayou
 func (fv *FoldBlockView) ShouldRemoveWithSpecifiedColumnAfter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool) {
 	return model.Position{}, false
 }
+
+func (fv *FoldBlockView) ShouldRemoveWithSpecifiedRange(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Range, bool) {
+	return model.Range{}, false
+}

@@ -519,28 +519,26 @@ func (tb *TextBox) RemoveChar() {
 		_, vs, vl := tb.modelToView()
 		tb.viewPosition = vs + vl
 		return
-	}
-	if cb, ok := layout.Element.(*litemark.CodeBlockElement); ok && viewLocalPos == 1 && len(cb.Lang) > 0 {
-		r1 := layout.Element.GetRange(1)
-		sg := tb.Document.Read(r1)
+	} else if rng, ok := textView.ShouldRemoveWithSpecifiedRange(ctx, layout, viewLocalPos); ok {
+		sg := tb.Document.Read(rng)
+		for i := sg.GetLineCount() - 1; i >= 0; i-- {
+			sp := sg.GetSpan(i)
+			tb.Document.Remove(rng.StartPosition.Row+i, sp.StartColumn, sp.EndColumn-sp.StartColumn)
+		}
+
 		bPos := view.CharacterReference{
-			StartPosition: model.Position{
-				Row:    r1.StartPosition.Row,
-				Column: sg.GetSpan(0).StartColumn - 1,
-			},
-			Bytes: 2,
+			StartPosition: rng.StartPosition,
+			Bytes:         0,
 		}
 		tb.bytePos = bPos
-		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
-		//		tb.bytePos.StartPosition.Column++
-		tb.bytePos.Bytes = 0
 
 		tb.renderCache.Update(ctx, tb.Width)
 
 		_, vs, vl := tb.modelToView()
 		tb.viewPosition = vs + vl
 		return
-	} else if _, ok := layout.Element.(*model.FoldBlockElement); ok && viewLocalPos == 0 {
+	}
+	if _, ok := layout.Element.(*model.FoldBlockElement); ok && viewLocalPos == 0 {
 		r := layout.Element.GetRange(0)
 		sg := tb.Document.Read(r)
 		bPos := view.CharacterReference{

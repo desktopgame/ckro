@@ -190,3 +190,7 @@ func (il *InlineView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.Te
 func (il *InlineView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {
 	return model.Position{}, false
 }
+
+func (il *InlineView) ShouldRemoveWithSpecifiedRange(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
+	return model.Range{}, false
+}

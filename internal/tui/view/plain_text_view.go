@@ -275,6 +275,10 @@ func (p *PlainTextView) ShouldRemoveWithSpecifiedColumnAfter(ctx Context, textLa
 	return model.Position{}, false
 }
 
+func (p *PlainTextView) ShouldRemoveWithSpecifiedRange(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Range, bool) {
+	return model.Range{}, false
+}
+
 func (p *PlainTextView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout, bytePos model.Position) int {
 	e := textLayout.Element
 	r := e.GetRange(0)

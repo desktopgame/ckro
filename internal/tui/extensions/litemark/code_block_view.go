@@ -339,3 +339,24 @@ func (c *CodeBlockView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, t
 	}
 	return model.Position{}, false
 }
+
+func (c *CodeBlockView) ShouldRemoveWithSpecifiedRange(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
+	e := textLayout.Element
+	cbe := e.(*CodeBlockElement)
+
+	if viewLocalPos == 1 && len(cbe.Lang) == 1 {
+		r2 := e.GetRange(1)
+		return model.Range{
+			StartPosition: model.Position{
+				Row:    r2.StartPosition.Row,
+				Column: r2.StartPosition.Column - 1,
+			},
+			EndPosition: model.Position{
+				Row:    r2.StartPosition.Row,
+				Column: r2.EndPosition.Column,
+			},
+		}, true
+	}
+
+	return model.Range{}, false
+}
