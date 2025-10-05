@@ -214,7 +214,7 @@ func (t *TextView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, textLa
 	return model.Position{}, false
 }
 
-func (t *TextView) ShouldRemoveWithSpecifiedRange(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
+func (t *TextView) ShouldRemoveWithSpecifiedRangeLines(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
 	return model.Range{}, false
 }
 

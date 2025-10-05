@@ -519,7 +519,7 @@ func (tb *TextBox) RemoveChar() {
 		_, vs, vl := tb.modelToView()
 		tb.viewPosition = vs + vl
 		return
-	} else if rng, ok := textView.ShouldRemoveWithSpecifiedRange(ctx, layout, viewLocalPos); ok {
+	} else if rng, ok := textView.ShouldRemoveWithSpecifiedRangeLines(ctx, layout, viewLocalPos); ok {
 		sg := tb.Document.Read(rng)
 		for i := sg.GetLineCount() - 1; i >= 0; i-- {
 			sp := sg.GetSpan(i)

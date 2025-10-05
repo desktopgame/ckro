@@ -78,6 +78,6 @@ func (g *GhostView) ShouldRemoveWithSpecifiedColumnAfter(ctx Context, textLayout
 	return model.Position{}, false
 }
 
-func (g *GhostView) ShouldRemoveWithSpecifiedRange(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Range, bool) {
+func (g *GhostView) ShouldRemoveWithSpecifiedRangeLines(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Range, bool) {
 	return model.Range{}, false
 }

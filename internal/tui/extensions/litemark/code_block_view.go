@@ -340,7 +340,7 @@ func (c *CodeBlockView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, t
 	return model.Position{}, false
 }
 
-func (c *CodeBlockView) ShouldRemoveWithSpecifiedRange(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
+func (c *CodeBlockView) ShouldRemoveWithSpecifiedRangeLines(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
 	e := textLayout.Element
 	cbe := e.(*CodeBlockElement)
 

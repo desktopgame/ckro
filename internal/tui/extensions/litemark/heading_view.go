@@ -181,6 +181,6 @@ func (hv *HeadingView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, te
 	return model.Position{}, false
 }
 
-func (hv *HeadingView) ShouldRemoveWithSpecifiedRange(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
+func (hv *HeadingView) ShouldRemoveWithSpecifiedRangeLines(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
 	return model.Range{}, false
 }
