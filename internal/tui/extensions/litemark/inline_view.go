@@ -198,3 +198,7 @@ func (il *InlineView) ShouldRemoveWithSpecifiedRangeLines(ctx view.Context, text
 func (il *InlineView) ShouldRemoveWithSpecifiedRangeColumns(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
 	panic("ShouldRemoveWithSpecifiedRangeColumns is not implemented")
 }
+
+func (il *InlineView) ShouldRemoveLastCharacter(ctx view.Context, textLayout *view.TextLayout) bool {
+	return false
+}

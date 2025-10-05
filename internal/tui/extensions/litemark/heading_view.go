@@ -188,3 +188,7 @@ func (hv *HeadingView) ShouldRemoveWithSpecifiedRangeLines(ctx view.Context, tex
 func (hv *HeadingView) ShouldRemoveWithSpecifiedRangeColumns(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
 	return model.Range{}, false
 }
+
+func (hv *HeadingView) ShouldRemoveLastCharacter(ctx view.Context, textLayout *view.TextLayout) bool {
+	return false
+}

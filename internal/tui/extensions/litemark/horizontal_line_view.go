@@ -90,3 +90,7 @@ func (hl *HorizontalLineView) ShouldRemoveWithSpecifiedRangeLines(ctx view.Conte
 func (hl *HorizontalLineView) ShouldRemoveWithSpecifiedRangeColumns(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
 	return model.Range{}, false
 }
+
+func (hl *HorizontalLineView) ShouldRemoveLastCharacter(ctx view.Context, textLayout *view.TextLayout) bool {
+	return true
+}

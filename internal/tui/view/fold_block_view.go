@@ -312,3 +312,7 @@ func (fv *FoldBlockView) ShouldRemoveWithSpecifiedRangeLines(ctx Context, textLa
 func (fv *FoldBlockView) ShouldRemoveWithSpecifiedRangeColumns(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Range, bool) {
 	return model.Range{}, false
 }
+
+func (fv *FoldBlockView) ShouldRemoveLastCharacter(ctx Context, textLayout *TextLayout) bool {
+	return false
+}
