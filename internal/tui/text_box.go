@@ -286,6 +286,9 @@ func (tb *TextBox) modelToView() (ElementIndex int, ViewStart int, ViewLocalPos 
 		// 空行のフォロー
 		if st.Row == ed.Row && st.Column == ed.Column {
 			if tb.bytePos.StartPosition.Row == st.Row && tb.bytePos.StartPosition.Column == st.Column {
+				if tb.bytePos.Bytes > 0 {
+					panic("")
+				}
 				elementIndex = i
 				break
 			}
@@ -485,6 +488,8 @@ func (tb *TextBox) RemoveChar() {
 			}
 			tb.bytePos = bPos
 			tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
+
+			tb.bytePos.Bytes = 0
 			tb.viewPosition = viewStart
 			return
 		} else if txView, ok := textView.(*litemark.TextView); ok {
