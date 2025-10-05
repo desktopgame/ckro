@@ -130,7 +130,9 @@ func (t *TextView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, vie
 }
 
 func (t *TextView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
-
+	if bytePos.Column == 0 {
+		return 0
+	}
 	vls := 0
 	for i := 0; i < len(textLayout.Children); i++ {
 		child := textLayout.Children[i]

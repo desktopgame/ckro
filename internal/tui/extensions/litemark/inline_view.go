@@ -23,7 +23,7 @@ func (il *InlineView) Draw(ctx view.Context, textLayout *view.TextLayout, render
 	style := tcell.StyleDefault
 
 	if inlineElement.IsBold {
-		style = style.Bold(true)
+		style = style.Bold(true).Foreground(tcell.ColorDarkRed)
 	}
 
 	if inlineElement.IsItalic {
