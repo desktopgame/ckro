@@ -194,3 +194,7 @@ func (il *InlineView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, tex
 func (il *InlineView) ShouldRemoveWithSpecifiedRangeLines(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
 	return model.Range{}, false
 }
+
+func (il *InlineView) ShouldRemoveWithSpecifiedRangeColumns(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
+	panic("ShouldRemoveWithSpecifiedRangeColumns is not implemented")
+}

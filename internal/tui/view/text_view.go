@@ -33,4 +33,7 @@ type TextView interface {
 
 	// 指定のローカルビュー位置における削除で指定範囲をすべて削除するべきなら true を返す
 	ShouldRemoveWithSpecifiedRangeLines(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Range, bool)
+
+	// 指定のローカルビュー位置における削除で指定範囲をすべて削除するべきなら true を返す
+	ShouldRemoveWithSpecifiedRangeColumns(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Range, bool)
 }

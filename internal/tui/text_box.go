@@ -482,24 +482,24 @@ func (tb *TextBox) RemoveChar() {
 		tb.bytePos.Bytes = 0
 		tb.viewPosition = viewStart
 		return
-	} else if textView.MoveLength(ctx, layout) == 2 {
-		if _, ok := layout.Element.(*litemark.HeadingElement); ok {
-		} else if txView, ok := textView.(*litemark.TextView); ok {
-			combine, bPos := txView.RemoveCombine(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
-			if combine {
-				elementIndex, viewStart, viewLocalPos = tb.modelToView()
-				layout = tb.renderCache.GetLayout(elementIndex)
-				textView = tb.TextEngine.Resolve(layout.Element)
-				tb.bytePos = bPos
-				tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, bPos.Bytes)
-				tb.bytePos.Bytes = 0
-				tb.renderCache.Update(ctx, tb.Width)
-
-				elementIndex, viewStart, viewLocalPos = tb.modelToView()
-				tb.viewPosition = viewStart + viewLocalPos
-				return
-			}
+	} else if rng, ok := textView.ShouldRemoveWithSpecifiedRangeColumns(ctx, layout, viewLocalPos); ok {
+		bPos := view.CharacterReference{
+			StartPosition: model.Position{
+				Row:    rng.StartPosition.Row,
+				Column: rng.StartPosition.Column,
+			},
+			Bytes: rng.EndPosition.Column - rng.StartPosition.Column,
 		}
+		tb.bytePos = bPos
+		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
+
+		tb.bytePos.Bytes = 0
+
+		tb.renderCache.Update(ctx, tb.Width)
+
+		_, vs, vl := tb.modelToView()
+		tb.viewPosition = vs + vl
+		return
 	}
 	if pos, ok := textView.ShouldRemoveWithSpecifiedColumnAfter(ctx, layout, viewLocalPos); ok {
 		bPos := view.CharacterReference{
@@ -537,22 +537,6 @@ func (tb *TextBox) RemoveChar() {
 		_, vs, vl := tb.modelToView()
 		tb.viewPosition = vs + vl
 		return
-	}
-	if txView, ok := textView.(*litemark.TextView); ok {
-		combine, bPos := txView.RemoveCombine(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
-		if combine {
-			elementIndex, viewStart, viewLocalPos = tb.modelToView()
-			layout = tb.renderCache.GetLayout(elementIndex)
-			textView = tb.TextEngine.Resolve(layout.Element)
-			tb.bytePos = bPos
-			tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, bPos.Bytes)
-			tb.bytePos.Bytes = 0
-			tb.renderCache.Update(ctx, tb.Width)
-
-			elementIndex, viewStart, viewLocalPos = tb.modelToView()
-			tb.viewPosition = viewStart + viewLocalPos
-			return
-		}
 	}
 
 	newViewLocalPos := textView.MoveLeft(ctx, layout, viewLocalPos)

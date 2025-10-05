@@ -218,6 +218,23 @@ func (t *TextView) ShouldRemoveWithSpecifiedRangeLines(ctx view.Context, textLay
 	return model.Range{}, false
 }
 
+func (t *TextView) ShouldRemoveWithSpecifiedRangeColumns(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
+	vls := 0
+	for i := 0; i < len(textLayout.Children); i++ {
+		child := textLayout.Children[i]
+		childElement := child.Element
+
+		childView := ctx.Resolver.Resolve(childElement)
+		childViewLen := childView.MoveLength(ctx, textLayout.Children[i])
+		if childViewLen == 1 && vls+1 == viewLocalPos {
+			r := childElement.GetRange(0)
+			return r, true
+		}
+		vls += childViewLen
+	}
+	return model.Range{}, false
+}
+
 func (t *TextView) ConvertRelativeX(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	return viewLocalPos
 }

@@ -360,3 +360,7 @@ func (c *CodeBlockView) ShouldRemoveWithSpecifiedRangeLines(ctx view.Context, te
 
 	return model.Range{}, false
 }
+
+func (c *CodeBlockView) ShouldRemoveWithSpecifiedRangeColumns(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
+	return model.Range{}, false
+}

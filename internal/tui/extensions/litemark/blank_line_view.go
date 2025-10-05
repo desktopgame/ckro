@@ -79,6 +79,10 @@ func (b *BlankLineView) ShouldRemoveWithSpecifiedRangeLines(ctx view.Context, te
 	return model.Range{}, false
 }
 
+func (b *BlankLineView) ShouldRemoveWithSpecifiedRangeColumns(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
+	return model.Range{}, false
+}
+
 func (b *BlankLineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
 	return 0
 }
