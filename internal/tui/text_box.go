@@ -109,32 +109,30 @@ func (tb *TextBox) CursorPosition() (X int, Y int, Rune rune, Combine []rune) {
 
 // CursorUpdate is scroll to until cursor visible
 func (tb *TextBox) CursorUpdate() {
-	_, cursor, _, _ := tb.CursorPosition()
-	// cursor := tb.Document.GetCursorRow()
-	// lc := tb.WrappedLineCount()
+	_, cursorY, _, _ := tb.CursorPosition()
 
 	startY := tb.scrollY
 	endY := startY + tb.Height
 
-	if cursor >= endY {
-		for cursor >= endY {
+	if cursorY >= endY {
+		for cursorY >= endY {
 			tb.scrollY++
 
 			startY = tb.scrollY
 			endY = startY + tb.Height
 		}
-	} else if cursor <= startY {
-		if cursor == 0 {
+	} else if cursorY <= startY {
+		if cursorY == 0 {
 			tb.scrollY = 0
 		} else {
-			for cursor <= startY && cursor > 0 {
+			for cursorY <= startY && cursorY > 0 {
 				tb.scrollY--
 
 				startY = tb.scrollY
 			}
 		}
-	} else if cursor > startY && cursor < endY {
-		if cursor < tb.Height {
+	} else if cursorY > startY && cursorY < endY {
+		if cursorY < tb.Height {
 			tb.scrollY = 0
 		}
 	}
