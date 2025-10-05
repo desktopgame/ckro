@@ -35,18 +35,19 @@ func (fv *FoldBlockView) Layout(ctx Context, textLayout *TextLayout, x, y, w, h 
 }
 
 func (fv *FoldBlockView) Draw(ctx Context, textLayout *TextLayout, renderer Renderer) {
+	foldFrameStyle := tcell.StyleDefault.Foreground(tcell.ColorYellow)
 	for i := 1; i < textLayout.Width-1; i++ {
-		renderer.SetContent(i, 0, '-', nil, tcell.StyleDefault)
-		renderer.SetContent(i, textLayout.Height-1, '-', nil, tcell.StyleDefault)
+		renderer.SetContent(i, 0, '-', nil, foldFrameStyle)
+		renderer.SetContent(i, textLayout.Height-1, '-', nil, foldFrameStyle)
 	}
 	for i := 1; i < textLayout.Height-1; i++ {
-		renderer.SetContent(0, i, '|', nil, tcell.StyleDefault)
-		renderer.SetContent(textLayout.Width-1, i, '|', nil, tcell.StyleDefault)
+		renderer.SetContent(0, i, '|', nil, foldFrameStyle)
+		renderer.SetContent(textLayout.Width-1, i, '|', nil, foldFrameStyle)
 	}
-	renderer.SetContent(0, 0, '+', nil, tcell.StyleDefault)
-	renderer.SetContent(textLayout.Width-1, 0, '+', nil, tcell.StyleDefault)
-	renderer.SetContent(0, textLayout.Height-1, '+', nil, tcell.StyleDefault)
-	renderer.SetContent(textLayout.Width-1, textLayout.Height-1, '+', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 0, '+', nil, foldFrameStyle)
+	renderer.SetContent(textLayout.Width-1, 0, '+', nil, foldFrameStyle)
+	renderer.SetContent(0, textLayout.Height-1, '+', nil, foldFrameStyle)
+	renderer.SetContent(textLayout.Width-1, textLayout.Height-1, '+', nil, foldFrameStyle)
 
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		renderer.SetContent(1, 1, '>', nil, tcell.StyleDefault)

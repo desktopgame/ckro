@@ -34,37 +34,38 @@ func (c *CodeBlockView) Layout(ctx view.Context, textLayout *view.TextLayout, x,
 
 func (c *CodeBlockView) Draw(ctx view.Context, textLayout *view.TextLayout, renderer view.Renderer) {
 	cbe := textLayout.Element.(*CodeBlockElement)
+	codeBockFrame := tcell.StyleDefault.Foreground(tcell.ColorBlue)
 
 	subLines := 0
 	if len(cbe.Lang) > 0 {
 		w := runewidth.StringWidth(cbe.Lang)
-		renderer.SetContent(0, 0, '*', nil, tcell.StyleDefault)
+		renderer.SetContent(0, 0, '*', nil, codeBockFrame)
 		for i := 1; i < w+2; i++ {
-			renderer.SetContent(i, 0, '-', nil, tcell.StyleDefault)
+			renderer.SetContent(i, 0, '-', nil, codeBockFrame)
 		}
-		renderer.SetContent(w+2, 0, '*', nil, tcell.StyleDefault)
+		renderer.SetContent(w+2, 0, '*', nil, codeBockFrame)
 
 		for i, r := range cbe.Lang {
-			renderer.SetContent(i+1, 1, r, nil, tcell.StyleDefault)
+			renderer.SetContent(i+1, 1, r, nil, codeBockFrame)
 		}
-		renderer.SetContent(0, 1, '|', nil, tcell.StyleDefault)
-		renderer.SetContent(w+2, 1, '|', nil, tcell.StyleDefault)
+		renderer.SetContent(0, 1, '|', nil, codeBockFrame)
+		renderer.SetContent(w+2, 1, '|', nil, codeBockFrame)
 		renderer = renderer.Translate(0, 2)
 		subLines = 2
 	}
 
 	for i := 1; i < textLayout.Width-1; i++ {
-		renderer.SetContent(i, 0, '-', nil, tcell.StyleDefault)
-		renderer.SetContent(i, textLayout.Height-1-subLines, '-', nil, tcell.StyleDefault)
+		renderer.SetContent(i, 0, '-', nil, codeBockFrame)
+		renderer.SetContent(i, textLayout.Height-1-subLines, '-', nil, codeBockFrame)
 	}
 	for i := 1; i < textLayout.Height-1-subLines; i++ {
-		renderer.SetContent(0, i, '|', nil, tcell.StyleDefault)
-		renderer.SetContent(textLayout.Width-1, i, '|', nil, tcell.StyleDefault)
+		renderer.SetContent(0, i, '|', nil, codeBockFrame)
+		renderer.SetContent(textLayout.Width-1, i, '|', nil, codeBockFrame)
 	}
-	renderer.SetContent(0, 0, '*', nil, tcell.StyleDefault)
-	renderer.SetContent(textLayout.Width-1, 0, '*', nil, tcell.StyleDefault)
-	renderer.SetContent(0, textLayout.Height-1-subLines, '*', nil, tcell.StyleDefault)
-	renderer.SetContent(textLayout.Width-1, textLayout.Height-1-subLines, '*', nil, tcell.StyleDefault)
+	renderer.SetContent(0, 0, '*', nil, codeBockFrame)
+	renderer.SetContent(textLayout.Width-1, 0, '*', nil, codeBockFrame)
+	renderer.SetContent(0, textLayout.Height-1-subLines, '*', nil, codeBockFrame)
+	renderer.SetContent(textLayout.Width-1, textLayout.Height-1-subLines, '*', nil, codeBockFrame)
 	for _, child := range textLayout.Children {
 		childView := ctx.Resolver.Resolve(child.Element)
 		childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY-subLines))
