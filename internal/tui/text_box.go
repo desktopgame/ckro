@@ -300,12 +300,13 @@ func (tb *TextBox) modelToView() (ElementIndex int, ViewStart int, ViewLocalPos 
 
 		if tb.bytePos.StartPosition.Row >= st.Row && tb.bytePos.StartPosition.Row <= ed.Row {
 			if tb.bytePos.Bytes == 0 {
-				col := max(tb.bytePos.StartPosition.Column-1, 0)
-				if col >= st.Column && (col < ed.Column || ed.Row > st.Row) {
+				// when cursor at line end
+				if tb.bytePos.StartPosition.Column >= st.Column && (tb.bytePos.StartPosition.Column <= ed.Column || ed.Row > st.Row) {
 					elementIndex = i
 					break
 				}
 			} else {
+				// otherwise, judge by Half-open section
 				if tb.bytePos.StartPosition.Column >= st.Column && (tb.bytePos.StartPosition.Column < ed.Column || ed.Row > st.Row) {
 					elementIndex = i
 					break
