@@ -286,7 +286,7 @@ func (fv *FoldBlockView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout
 	}
 }
 
-func (fv *FoldBlockView) ShouldBeforeInsertionOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
+func (fv *FoldBlockView) ShouldBeforeInsertionNewLineOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
 	return false
 }
 

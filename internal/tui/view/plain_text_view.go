@@ -263,7 +263,7 @@ func (p *PlainTextView) ConvertModel(ctx Context, textLayout *TextLayout, viewLo
 	}
 }
 
-func (p *PlainTextView) ShouldBeforeInsertionOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
+func (p *PlainTextView) ShouldBeforeInsertionNewLineOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
 	return false
 }
 

@@ -369,7 +369,7 @@ func (tb *TextBox) InsertString(s string) {
 	textView := tb.TextEngine.Resolve(layout.Element)
 
 	if strings.HasSuffix(s, "\n") {
-		if textView.ShouldBeforeInsertionOnLineBegin(ctx, layout, viewLocalPos) {
+		if textView.ShouldBeforeInsertionNewLineOnLineBegin(ctx, layout, viewLocalPos) {
 			tb.bytePos.StartPosition.Column = 0
 		}
 	}

@@ -23,7 +23,7 @@ type TextView interface {
 	ConvertViewLocalPos(ctx Context, textLayout *TextLayout, bytePos model.Position) int
 
 	// 指定のローカルビュー位置における改行を行の前に移動するなら true を返す
-	ShouldBeforeInsertionOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool
+	ShouldBeforeInsertionNewLineOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool
 
 	// 指定のローカルビュー位置における削除で行全体を削除するべきなら true を返す
 	ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, viewLocalPos int) bool

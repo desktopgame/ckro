@@ -196,12 +196,12 @@ func (t *TextView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, v
 	}
 }
 
-func (t *TextView) ShouldBeforeInsertionOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
+func (t *TextView) ShouldBeforeInsertionNewLineOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
 	if viewLocalPos == 0 {
 		child := textLayout.Children[0]
 		childElement := child.Element
 		childView := ctx.Resolver.Resolve(childElement)
-		return childView.ShouldBeforeInsertionOnLineBegin(ctx, child, 0)
+		return childView.ShouldBeforeInsertionNewLineOnLineBegin(ctx, child, 0)
 	}
 	return false
 }
