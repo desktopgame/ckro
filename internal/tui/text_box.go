@@ -250,34 +250,6 @@ func (tb *TextBox) Draw(g *Graphics) {
 
 	clip = cursor
 
-	if tb.isStyled() {
-		//_, ei, _, eoff := tb.currentViewState(ctx, tb.elements)
-		//view := tb.TextEngine.Resolve(tb.elements[ei])
-		//y := 0
-		//for i := 0; i < ei; i++ {
-		//	y += tb.layoutCache[i].Height
-		//}
-		//vlx, vly := view.ConvertPos(ctx, tb.elements[ei], eoff)
-		//ax := vlx
-		//ay := y + vly
-
-		screenX, cursorRow, currentRune, combining := tb.CursorPosition()
-
-		// カーソル位置の文字を反転表示
-		cursorStyle := def.Reverse(true)
-		clip.SetCursor(screenX, cursorRow-tb.scrollY, currentRune, combining, cursorStyle)
-
-		// 全角文字の場合、隣接するセルもカーソル表示
-		if currentRune != ' ' {
-			width := runewidth.RuneWidth(currentRune)
-			if width == 2 {
-				// 隣接するセルにもカーソルを表示（空文字で反転）
-				clip.SetCursor(screenX+1, cursorRow-tb.scrollY, 0, nil, cursorStyle)
-			}
-		}
-		return
-	}
-
 	screenX, cursorRow, currentRune, combining := tb.CursorPosition()
 
 	// カーソル位置の文字を反転表示
@@ -293,11 +265,6 @@ func (tb *TextBox) Draw(g *Graphics) {
 		}
 	}
 
-}
-
-func (tb *TextBox) isStyled() bool {
-	_, ok := tb.Document.(*model.PlainDocument)
-	return !ok
 }
 
 func (tb *TextBox) modelToView() (ElementIndex int, ViewStart int, ViewLocalPos int) {
