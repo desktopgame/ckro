@@ -372,7 +372,7 @@ func (tb *TextBox) InsertString(s string) {
 		if strings.HasSuffix(s, "\n") {
 			if _, ok := layout.Element.(*litemark.HeadingElement); ok {
 				if elementIndex == 0 {
-					tb.bytePos.StartPosition.Row = 0
+					//tb.bytePos.StartPosition.Row = 0
 					tb.bytePos.StartPosition.Column = 0
 
 				} else {
@@ -382,7 +382,7 @@ func (tb *TextBox) InsertString(s string) {
 					//bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), viewLocalPos)
 					//tb.bytePos = bPos
 					tb.bytePos.StartPosition.Column = 0
-					tb.bytePos.Bytes = 0
+					//tb.bytePos.Bytes = 0
 				}
 			}
 		}
