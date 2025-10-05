@@ -283,11 +283,15 @@ func (tb *TextBox) modelToView() (ElementIndex int, ViewStart int, ViewLocalPos 
 		st := r.StartPosition
 		ed := r.EndPosition
 
-		// 空行のフォロー
+		// special support for blank line
+		// in normally, range is Half-open section
+		// but, length is zero when blank line
+		// inclusive the end column in this case
 		if st.Row == ed.Row && st.Column == ed.Column {
 			if tb.bytePos.StartPosition.Row == st.Row && tb.bytePos.StartPosition.Column == st.Column {
+				// should be zero length when cursor at blank line
 				if tb.bytePos.Bytes > 0 {
-					panic("")
+					panic("should be zero length when cursor at blank line")
 				}
 				elementIndex = i
 				break
