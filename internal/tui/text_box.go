@@ -433,7 +433,7 @@ func (tb *TextBox) InsertString(s string) {
 			//	}
 			//}
 			moveLen := textView.MoveLength(ctx, layout)
-			if moveLen == 1 {
+			{
 				tb.viewPosition = viewStart
 				_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
 				layout = tb.renderCache.GetLayout(elementIndex)
