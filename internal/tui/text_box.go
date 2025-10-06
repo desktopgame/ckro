@@ -975,14 +975,27 @@ func (tb *TextBox) Replace(length int, s string) {
 	tb.Document.Remove(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, length)
 	tb.Document.InsertString(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, s)
 
+	startPosition := model.Position{
+		Row:    tb.bytePos.StartPosition.Row,
+		Column: tb.bytePos.StartPosition.Column,
+	}
+
+	for i := 0; i < len(s); i++ {
+		b := s[i]
+
+		if b == '\n' {
+			startPosition.Row++
+			startPosition.Column = 0
+		} else {
+			startPosition.Column++
+		}
+	}
+
 	r := model.Range{
-		StartPosition: model.Position{
-			Row:    tb.bytePos.StartPosition.Row,
-			Column: tb.bytePos.StartPosition.Column + len(s),
-		},
+		StartPosition: startPosition,
 		EndPosition: model.Position{
-			Row:    tb.bytePos.StartPosition.Row,
-			Column: tb.Document.GetLineBytes(tb.bytePos.StartPosition.Row),
+			Row:    startPosition.Row,
+			Column: tb.Document.GetLineBytes(startPosition.Row),
 		},
 	}
 
