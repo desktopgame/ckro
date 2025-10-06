@@ -203,6 +203,9 @@ func (t *TextView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, v
 
 func (t *TextView) ShouldBeforeInsertionNewLineOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
 	if viewLocalPos == 0 {
+		if len(textLayout.Children) == 0 {
+			return false
+		}
 		child := textLayout.Children[0]
 		childElement := child.Element
 		childView := ctx.Resolver.Resolve(childElement)
