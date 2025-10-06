@@ -342,10 +342,16 @@ func (tb *TextBox) InsertString(s string) {
 		return
 	}
 
+	// update elements
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 
+	// get view info from viewPosition
 	_, ei, _, _ := tb.renderCache.Stats(tb.viewPosition)
+
+	// special support for "ghost element"
+	// "ghost element" is locatable a cursor, but does not exist string
+	// blank line inserted when type text on this element
 	if ge, ok := tb.renderCache.GetElement(ei).(*model.GhostElement); ok {
 		lines := strings.Repeat("\n", ge.Index+1)
 		tb.viewPosition -= ge.Index + 1
@@ -363,19 +369,23 @@ func (tb *TextBox) InsertString(s string) {
 		return
 	}
 
+	// get view before edit
 	elementIndex, viewStart, viewLocalPos := tb.modelToView()
 	layout := tb.renderCache.GetLayout(elementIndex)
 	textView := tb.TextEngine.Resolve(layout.Element)
 
+	// control a insert position, if exist hidden string in line starts
 	if strings.HasSuffix(s, "\n") {
 		if textView.ShouldBeforeInsertionNewLineOnLineBegin(ctx, layout, viewLocalPos) {
 			tb.bytePos.StartPosition.Column = 0
 		}
 	}
 
+	// update document
 	tb.Document.InsertString(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, s)
 	tb.renderCache.Update(ctx, tb.Width)
 
+	// calculate new model position
 	insertedPos := tb.bytePos.StartPosition
 	for i := 0; i < len(s); i++ {
 		b := s[i]
@@ -388,6 +398,7 @@ func (tb *TextBox) InsertString(s string) {
 		}
 	}
 
+	// update view position
 	tb.bytePos = view.CharacterReference{
 		StartPosition: insertedPos,
 		Bytes:         tb.bytePos.Bytes,
