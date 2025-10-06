@@ -401,7 +401,11 @@ func (tb *TextBox) InsertString(s string) {
 				if len(ctx.GetText(layout.Element)) == 0 {
 					tb.viewPosition = viewStart + 1
 				} else {
-					tb.viewPosition = viewStart
+					if i == moves-1 {
+						tb.viewPosition = viewStart
+					} else {
+						tb.viewPosition = viewStart + 1
+					}
 				}
 			} else {
 				if _, ok := textView.(*litemark.TextView); ok && !breakLine {
