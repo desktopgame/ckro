@@ -663,6 +663,8 @@ func TestTextBox26(t *testing.T) {
 	tb.Document = newDoc
 	tb.InsertString("\n")
 	tb.MoveLeft()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
 
 	tb.InsertString("##")
 	tb.InsertString(" ")

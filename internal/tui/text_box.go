@@ -376,7 +376,7 @@ func (tb *TextBox) InsertString(s string) {
 
 	tb.Document.InsertString(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, s)
 
-	breakLine := strings.Contains(s, "\n")
+	// breakLine := strings.Contains(s, "\n")
 	if strings.HasPrefix(s, "\n") {
 		tb.bytePos.Bytes = 0
 	}
@@ -409,28 +409,46 @@ func (tb *TextBox) InsertString(s string) {
 			// その場合には次の行へ降りる
 			// 移動可能回数が1回かつテキストが存在する場合は行を継続する
 			// 移動可能回数が2回以上の場合、そのビューの開始位置までジャンプする
-			if textView.MoveLength(ctx, layout) == 1 {
-				if len(ctx.GetText(layout.Element)) == 0 {
-					tb.viewPosition = viewStart + 1
-				} else {
-					if i == moves-1 {
-						tb.viewPosition = viewStart
-					} else {
-						tb.viewPosition = viewStart + 1
-					}
-				}
-			} else {
-				if _, ok := textView.(*litemark.TextView); ok && !breakLine {
-					// *a* このときは-1
-					// *a*NL このときは0
-					tb.viewPosition = viewStart + textView.MoveLength(ctx, layout) - 1
-				} else {
-					tb.viewPosition = viewStart + textView.MoveLength(ctx, layout)
-				}
+			//if textView.MoveLength(ctx, layout) == 1 {
+			//	if len(ctx.GetText(layout.Element)) == 0 {
+			//		tb.viewPosition = viewStart + 1
+			//	} else {
+			//		if i == moves-1 {
+			//			tb.viewPosition = viewStart
+			//		} else {
+			//			tb.viewPosition = viewStart + 1
+			//		}
+			//	}
+			//} else {
+			//	if _, ok := textView.(*litemark.TextView); ok && !breakLine {
+			//		// *a* このときは-1
+			//		// *a*NL このときは0
+			//		tb.viewPosition = viewStart + textView.MoveLength(ctx, layout) - 1
+			//	} else {
+			//		tb.viewPosition = viewStart + textView.MoveLength(ctx, layout)
+			//	}
+			//
+			//	if tb.viewPosition >= tb.renderCache.Total() {
+			//		tb.viewPosition = tb.renderCache.Total() - 1
+			//	}
+			//}
+			moveLen := textView.MoveLength(ctx, layout)
+			if moveLen == 1 {
+				tb.viewPosition = viewStart
+				_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
+				layout = tb.renderCache.GetLayout(elementIndex)
+				textView = tb.TextEngine.Resolve(layout.Element)
 
-				if tb.viewPosition >= tb.renderCache.Total() {
-					tb.viewPosition = tb.renderCache.Total() - 1
+				bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
+				tb.bytePos = bPos
+
+				if bPos.StartPosition.Row > insertedPos.Row || (bPos.StartPosition.Row == insertedPos.Row && bPos.StartPosition.Column >= insertedPos.Column) {
+					break
 				}
+			}
+			tb.viewPosition = viewStart + moveLen
+			if elementIndex == tb.renderCache.GetItemCount()-10-1 {
+				tb.viewPosition--
 			}
 			_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
 			layout = tb.renderCache.GetLayout(elementIndex)
