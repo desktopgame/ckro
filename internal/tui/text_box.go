@@ -417,19 +417,29 @@ func (tb *TextBox) RemoveChar() {
 		return
 	}
 
+	// get view info from viewPosition
 	_, ei, _, _ := tb.renderCache.Stats(tb.viewPosition)
+
+	// special support for "ghost element"
+	// "ghost element" is locatable a cursor, but does not exist string
+	// in this case, cant remove string
 	if ge, ok := tb.renderCache.GetElement(ei).(*model.GhostElement); ok {
 		tb.viewPosition -= ge.Index + 1
 		return
 	}
 
+	// update elements
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 
+	// get view before edit
 	elementIndex, viewStart, viewLocalPos := tb.modelToView()
 	layout := tb.renderCache.GetLayout(elementIndex)
 	textView := tb.TextEngine.Resolve(layout.Element)
 
+	// special supports...
+	// can't define perfect completely "general remove operation" when text editor is handle a rich content
+	// so, process some edge cases in here
 	if textView.ShouldRemoveWithLine(ctx, layout, viewLocalPos) {
 		r := layout.Element.GetRange(0)
 		bPos := view.CharacterReference{
@@ -498,12 +508,17 @@ func (tb *TextBox) RemoveChar() {
 		return
 	}
 
+	// fallback to "general remove operation"
 	newViewLocalPos := textView.MoveLeft(ctx, layout, viewLocalPos)
+
+	// can't move left by current view
+	// in other words, curosr into previous view
 	if newViewLocalPos == -1 {
 		layout = tb.renderCache.GetLayout(elementIndex - 1)
 		prevView := tb.TextEngine.Resolve(layout.Element)
 
-		// コードブロックの一文字後ろでバックスペース押下時の処理
+		// special suports...
+		// remove last character of previous view, inclusive invisible content
 		if prevView.ShouldRemoveLastCharacter(ctx, layout) {
 			r := layout.Element.GetRange(0)
 			bPos := view.CharacterReference{
