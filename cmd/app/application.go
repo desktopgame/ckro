@@ -389,6 +389,7 @@ func (app *Application) loopMiniBuffer() {
 		sb := strings.Builder{}
 		sb.WriteString("\n")
 		sb.WriteString("{{{\n")
+		sb.WriteString("USER:\n")
 		sb.WriteString(s)
 		sb.WriteString("\n")
 		sb.WriteString("}}}\n")
@@ -439,6 +440,7 @@ func (app *Application) loopMiniBuffer() {
 					if tb.FindNext(marker) {
 						sb = strings.Builder{}
 						sb.WriteString("{{{\n")
+						sb.WriteString("BOT:\n")
 						sb.WriteString(response)
 						sb.WriteString("\n")
 						sb.WriteString("}}}\n")
