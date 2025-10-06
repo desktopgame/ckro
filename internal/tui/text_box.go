@@ -374,17 +374,7 @@ func (tb *TextBox) InsertString(s string) {
 	}
 
 	tb.Document.InsertString(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, s)
-
-	// breakLine := strings.Contains(s, "\n")
-	if strings.HasPrefix(s, "\n") {
-		tb.bytePos.Bytes = 0
-	}
-
 	tb.renderCache.Update(ctx, tb.Width)
-
-	// elementIndex, viewStart, viewLocalPos = tb.modelToView()
-	// layout = tb.renderCache.GetLayout(elementIndex)
-	// textView = tb.TextEngine.Resolve(layout.Element)
 
 	insertedPos := tb.bytePos.StartPosition
 	for i := 0; i < len(s); i++ {
