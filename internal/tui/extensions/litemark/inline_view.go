@@ -153,12 +153,24 @@ func (il *InlineView) ConvertModel(ctx view.Context, textLayout *view.TextLayout
 func (il *InlineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
 	e := textLayout.Element
 	inlineElement := e.(*InlineElement)
-	r := e.GetRange(0)
-	str := ctx.Document.Read(r).GetLine(bytePos.Row - r.StartPosition.Row)
+	r := e.GetRange(1)
 
-	if bytePos.Column == e.GetRange(1).StartPosition.Column {
+	if bytePos.Row < r.StartPosition.Row {
 		return 0
 	}
+	if bytePos.Row > r.EndPosition.Row {
+		return il.MoveLength(ctx, textLayout)
+	}
+
+	if bytePos.Column < r.StartPosition.Column {
+		return 0
+	}
+	if bytePos.Column >= r.EndPosition.Column {
+		return il.MoveLength(ctx, textLayout)
+	}
+
+	r = e.GetRange(0)
+	str := ctx.Document.Read(r).GetLine(bytePos.Row - r.StartPosition.Row)
 
 	bytes := inlineElement.Pad
 	clusters := text.GraphemeClusters(str)
@@ -171,7 +183,7 @@ func (il *InlineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Tex
 		}
 		bytes += len(cluster)
 	}
-	return il.MoveLength(ctx, textLayout) - 1
+	return il.MoveLength(ctx, textLayout)
 }
 
 func (il *InlineView) ShouldBeforeInsertionNewLineOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {

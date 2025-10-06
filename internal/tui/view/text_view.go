@@ -20,6 +20,9 @@ type TextView interface {
 	MoveRight(ctx Context, textLayout *TextLayout, viewLocalPos int) int
 	ConvertPos(ctx Context, textLayout *TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int)
 	ConvertModel(ctx Context, textLayout *TextLayout, viewLocalPos int) CharacterReference
+
+	// バイト座標をローカルビュー座標に変換する
+	// 飾りと重なるときは内側に寄せる
 	ConvertViewLocalPos(ctx Context, textLayout *TextLayout, bytePos model.Position) int
 
 	// 指定のローカルビュー位置における改行を行の前に移動するなら true を返す

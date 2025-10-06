@@ -1485,7 +1485,7 @@ func TestTextBox53(t *testing.T) {
 
 	tb.InsertString("**aa**")
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 6)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 10)
 }
 
 func TestTextBoxFind01(t *testing.T) {

@@ -250,15 +250,14 @@ func (fv *FoldBlockView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout
 	e := textLayout.Element
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		r := e.GetRange(0)
-		if bytePos.Row == r.StartPosition.Row {
-			return 0
-		} else if bytePos.Row == r.EndPosition.Row {
-			return fv.MoveLength(ctx, textLayout) - 1
-		}
-
+		child := textLayout.Children[0]
 		childElement := textLayout.Children[0].Element
 		childView := ctx.Resolver.Resolve(childElement)
-		return childView.ConvertViewLocalPos(ctx, textLayout.Children[0], bytePos)
+		if bytePos.Row == r.StartPosition.Row {
+			return childView.ConvertViewLocalPos(ctx, textLayout.Children[0], bytePos)
+		}
+		return childView.MoveLength(ctx, child) - 1
+
 	} else {
 		viewOffset := 0
 		for i := 0; i < len(textLayout.Children); i++ {
@@ -275,7 +274,7 @@ func (fv *FoldBlockView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout
 						return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos)
 					}
 				}
-				if bytePos.Column >= st.Column && (bytePos.Column <= ed.Column || ed.Row > st.Row) {
+				if bytePos.Column >= st.Column && (bytePos.Column < ed.Column || ed.Row > st.Row) {
 					return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos)
 				}
 			}

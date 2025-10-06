@@ -149,12 +149,24 @@ func (hv *HeadingView) ConvertModel(ctx view.Context, textLayout *view.TextLayou
 
 func (hv *HeadingView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
 	e := textLayout.Element
-	r := e.GetRange(0)
-	str := ctx.Document.Read(r).GetLine(bytePos.Row - r.StartPosition.Row)
+	r := e.GetRange(1)
 
-	if bytePos.Column == e.GetRange(1).StartPosition.Column {
+	if bytePos.Row < r.StartPosition.Row {
 		return 0
 	}
+	if bytePos.Row > r.EndPosition.Row {
+		return hv.MoveLength(ctx, textLayout) - 1
+	}
+
+	if bytePos.Column < r.StartPosition.Column+1 {
+		return 0
+	}
+	if bytePos.Column >= r.EndPosition.Column {
+		return hv.MoveLength(ctx, textLayout) - 1
+	}
+
+	r = e.GetRange(1)
+	str := ctx.Document.Read(r).GetLine(bytePos.Row - r.StartPosition.Row)
 
 	bytes := 0
 	clusters := text.GraphemeClusters(str)

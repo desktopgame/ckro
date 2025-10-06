@@ -383,9 +383,9 @@ func (tb *TextBox) InsertString(s string) {
 
 	tb.renderCache.Update(ctx, tb.Width)
 
-	elementIndex, viewStart, viewLocalPos = tb.modelToView()
-	layout = tb.renderCache.GetLayout(elementIndex)
-	textView = tb.TextEngine.Resolve(layout.Element)
+	// elementIndex, viewStart, viewLocalPos = tb.modelToView()
+	// layout = tb.renderCache.GetLayout(elementIndex)
+	// textView = tb.TextEngine.Resolve(layout.Element)
 
 	insertedPos := tb.bytePos.StartPosition
 	for i := 0; i < len(s); i++ {
@@ -399,110 +399,13 @@ func (tb *TextBox) InsertString(s string) {
 		}
 	}
 
-	{
-		vs := viewStart
-		vl := viewLocalPos
-		tb.viewPosition = viewStart
-		_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
-		layout = tb.renderCache.GetLayout(elementIndex)
-		textView = tb.TextEngine.Resolve(layout.Element)
-
-		bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
-		tb.bytePos = bPos
-
-		if bPos.StartPosition.Row > insertedPos.Row || (bPos.StartPosition.Row == insertedPos.Row && bPos.StartPosition.Column >= insertedPos.Column) {
-			return
-		}
-		viewStart = vs
-		viewLocalPos = vl
+	tb.bytePos = view.CharacterReference{
+		StartPosition: insertedPos,
+		Bytes:         tb.bytePos.Bytes,
 	}
-	moves := text.GraphemeLength(s)
-	for i := 0; i < moves; i++ {
-		viewLocalPos = textView.MoveRight(ctx, layout, viewLocalPos)
-
-		if viewLocalPos == -1 {
-			// 文字挿入によってビューが分割された場合
-			// 移動可能な回数が1回かつテキストが存在しない場合は空行とみなす
-			// その場合には次の行へ降りる
-			// 移動可能回数が1回かつテキストが存在する場合は行を継続する
-			// 移動可能回数が2回以上の場合、そのビューの開始位置までジャンプする
-			//if textView.MoveLength(ctx, layout) == 1 {
-			//	if len(ctx.GetText(layout.Element)) == 0 {
-			//		tb.viewPosition = viewStart + 1
-			//	} else {
-			//		if i == moves-1 {
-			//			tb.viewPosition = viewStart
-			//		} else {
-			//			tb.viewPosition = viewStart + 1
-			//		}
-			//	}
-			//} else {
-			//	if _, ok := textView.(*litemark.TextView); ok && !breakLine {
-			//		// *a* このときは-1
-			//		// *a*NL このときは0
-			//		tb.viewPosition = viewStart + textView.MoveLength(ctx, layout) - 1
-			//	} else {
-			//		tb.viewPosition = viewStart + textView.MoveLength(ctx, layout)
-			//	}
-			//
-			//	if tb.viewPosition >= tb.renderCache.Total() {
-			//		tb.viewPosition = tb.renderCache.Total() - 1
-			//	}
-			//}
-			moveLen := textView.MoveLength(ctx, layout)
-			tb.viewPosition = viewStart + moveLen
-			if elementIndex == tb.renderCache.GetItemCount()-10-1 {
-				tb.viewPosition--
-			}
-			_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
-			layout = tb.renderCache.GetLayout(elementIndex)
-			textView = tb.TextEngine.Resolve(layout.Element)
-
-			bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
-			tb.bytePos = bPos
-
-			if bPos.StartPosition.Row > insertedPos.Row || (bPos.StartPosition.Row == insertedPos.Row && bPos.StartPosition.Column >= insertedPos.Column) {
-				break
-			}
-
-			// tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
-			//break
-		} else {
-			tb.viewPosition = viewStart + viewLocalPos
-
-			if viewLocalPos == textView.MoveLength(ctx, layout) {
-
-				if elementIndex+1 < tb.renderCache.GetItemCount() {
-					layout = tb.renderCache.GetLayout(elementIndex + 1)
-					textView = tb.TextEngine.Resolve(layout.Element)
-
-					bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
-					tb.bytePos = bPos
-
-					if bPos.StartPosition.Row > insertedPos.Row || (bPos.StartPosition.Row == insertedPos.Row && bPos.StartPosition.Column >= insertedPos.Column) {
-						break
-					}
-
-				} else {
-					bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
-					tb.bytePos = bPos
-
-					if bPos.StartPosition.Row > insertedPos.Row || (bPos.StartPosition.Row == insertedPos.Row && bPos.StartPosition.Column >= insertedPos.Column) {
-						break
-					}
-				}
-			} else {
-				//tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos).StartPosition
-
-				bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
-				tb.bytePos = bPos
-
-				if bPos.StartPosition.Row > insertedPos.Row || (bPos.StartPosition.Row == insertedPos.Row && bPos.StartPosition.Column >= insertedPos.Column) {
-					break
-				}
-			}
-		}
-	}
+	_, viewStart, viewLocalPos = tb.modelToView()
+	tb.viewPosition = viewStart + viewLocalPos
+	tb.bytePos = tb.viewToModel()
 }
 
 func (tb *TextBox) RemoveChar() {

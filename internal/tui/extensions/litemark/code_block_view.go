@@ -281,8 +281,6 @@ func (c *CodeBlockView) ConvertViewLocalPos(ctx view.Context, textLayout *view.T
 
 	moves := 0
 	if len(cbe.Lang) > 0 {
-	}
-	if len(cbe.Lang) > 0 {
 		r := e.GetRange(1)
 
 		if bytePos.Row == r.StartPosition.Row {

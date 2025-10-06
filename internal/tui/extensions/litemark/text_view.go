@@ -138,12 +138,17 @@ func (t *TextView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLa
 		child := textLayout.Children[i]
 		childElement := child.Element
 
-		r := childElement.GetRange(1)
+		r := childElement.GetRange(0)
 		st := r.StartPosition
 		ed := r.EndPosition
+		if il, ok := childElement.(*InlineElement); ok {
+			if il.IsBold || il.IsItalic || il.IsUnderline || il.Foreground.IsSome() || il.Background.IsSome() {
+				ed.Column++
+			}
+		}
 		childView := ctx.Resolver.Resolve(childElement)
 		if bytePos.Column >= st.Column && (bytePos.Column < ed.Column || ed.Row > st.Row) {
-			return vls + childView.ConvertViewLocalPos(ctx, child, bytePos)
+			return vls + childView.ConvertViewLocalPos(ctx, child, bytePos) // + 1
 		}
 		vls += childView.MoveLength(ctx, textLayout.Children[i])
 	}
