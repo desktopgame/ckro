@@ -530,12 +530,9 @@ func (tb *TextBox) RemoveChar() {
 			}
 			tb.bytePos = bPos
 			tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
-
-			//tb.bytePos.StartPosition.Column--
-			tb.bytePos.Bytes = 0
-
 			tb.renderCache.Update(ctx, tb.Width)
 
+			tb.bytePos.Bytes = 0
 			_, vs, vl := tb.modelToView()
 			tb.viewPosition = vs + vl
 			return
