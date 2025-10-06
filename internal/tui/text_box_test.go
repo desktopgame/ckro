@@ -1437,6 +1437,27 @@ func TestTextBox51(t *testing.T) {
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 13)
 }
 
+func TestTextBox52(t *testing.T) {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = 68 + 2
+	tb.Height = 10
+	newDoc := &litemark.StyledDocument{}
+	newDoc.Init()
+	tb.Document = newDoc
+	tb.InsertString("\n")
+
+	tb.MoveLeft()
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+
+	tb.InsertString("**aa** a\nb **bb**")
+	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
+	assert.Equal(t, tb.bytePos.StartPosition.Column, 8)
+}
+
 func TestTextBoxFind01(t *testing.T) {
 	tb := TextBox{}
 	tb.Init()
