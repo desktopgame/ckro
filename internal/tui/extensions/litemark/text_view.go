@@ -158,20 +158,7 @@ func (t *TextView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLa
 func (t *TextView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {
 	e := textLayout.Element
 	r := e.GetRange(0)
-	str := ctx.Document.Read(r).GetLine(0)
-	st := r.StartPosition
 	ed := r.EndPosition
-
-	graphemes := text.GraphemeLength(str)
-	if viewLocalPos >= graphemes {
-		return view.CharacterReference{
-			StartPosition: model.Position{
-				Row:    st.Row,
-				Column: st.Column + len(str),
-			},
-			Bytes: 0,
-		}
-	}
 
 	totalLen := 0
 	for i := 0; i < len(textLayout.Children); i++ {
@@ -188,9 +175,6 @@ func (t *TextView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, v
 
 		totalLen += childViewLen
 	}
-	//lastElement := textLayout.Children[len(textLayout.Children)-1].Element
-	//lastView := ctx.Resolver.Resolve(lastElement)
-	//panic("")
 
 	return view.CharacterReference{
 		StartPosition: model.Position{
