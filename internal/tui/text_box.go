@@ -387,6 +387,18 @@ func (tb *TextBox) InsertString(s string) {
 	layout = tb.renderCache.GetLayout(elementIndex)
 	textView = tb.TextEngine.Resolve(layout.Element)
 
+	insertedPos := tb.bytePos.StartPosition
+	for i := 0; i < len(s); i++ {
+		b := s[i]
+
+		if b == '\n' {
+			insertedPos.Row++
+			insertedPos.Column = 0
+		} else {
+			insertedPos.Column++
+		}
+	}
+
 	moves := text.GraphemeLength(s)
 	for i := 0; i < moves; i++ {
 		viewLocalPos = textView.MoveRight(ctx, layout, viewLocalPos)
@@ -427,6 +439,10 @@ func (tb *TextBox) InsertString(s string) {
 			bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
 			tb.bytePos = bPos
 
+			if bPos.StartPosition.Row > insertedPos.Row || (bPos.StartPosition.Row == insertedPos.Row && bPos.StartPosition.Column >= insertedPos.Column) {
+				break
+			}
+
 			// tb.viewPosition = viewStart + textView.MoveLength(ctx, element)
 			//break
 		} else {
@@ -437,16 +453,31 @@ func (tb *TextBox) InsertString(s string) {
 				if elementIndex+1 < tb.renderCache.GetItemCount() {
 					layout = tb.renderCache.GetLayout(elementIndex + 1)
 					textView = tb.TextEngine.Resolve(layout.Element)
-					tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
+
+					bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex+1), 0)
+					tb.bytePos = bPos
+
+					if bPos.StartPosition.Row > insertedPos.Row || (bPos.StartPosition.Row == insertedPos.Row && bPos.StartPosition.Column >= insertedPos.Column) {
+						break
+					}
+
 				} else {
 					bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
 					tb.bytePos = bPos
+
+					if bPos.StartPosition.Row > insertedPos.Row || (bPos.StartPosition.Row == insertedPos.Row && bPos.StartPosition.Column >= insertedPos.Column) {
+						break
+					}
 				}
 			} else {
 				//tb.bytePos = textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos).StartPosition
 
 				bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
 				tb.bytePos = bPos
+
+				if bPos.StartPosition.Row > insertedPos.Row || (bPos.StartPosition.Row == insertedPos.Row && bPos.StartPosition.Column >= insertedPos.Column) {
+					break
+				}
 			}
 		}
 	}
