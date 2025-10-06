@@ -399,6 +399,23 @@ func (tb *TextBox) InsertString(s string) {
 		}
 	}
 
+	{
+		vs := viewStart
+		vl := viewLocalPos
+		tb.viewPosition = viewStart
+		_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
+		layout = tb.renderCache.GetLayout(elementIndex)
+		textView = tb.TextEngine.Resolve(layout.Element)
+
+		bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
+		tb.bytePos = bPos
+
+		if bPos.StartPosition.Row > insertedPos.Row || (bPos.StartPosition.Row == insertedPos.Row && bPos.StartPosition.Column >= insertedPos.Column) {
+			return
+		}
+		viewStart = vs
+		viewLocalPos = vl
+	}
 	moves := text.GraphemeLength(s)
 	for i := 0; i < moves; i++ {
 		viewLocalPos = textView.MoveRight(ctx, layout, viewLocalPos)
@@ -433,19 +450,6 @@ func (tb *TextBox) InsertString(s string) {
 			//	}
 			//}
 			moveLen := textView.MoveLength(ctx, layout)
-			{
-				tb.viewPosition = viewStart
-				_, elementIndex, viewStart, viewLocalPos = tb.renderCache.Stats(tb.viewPosition)
-				layout = tb.renderCache.GetLayout(elementIndex)
-				textView = tb.TextEngine.Resolve(layout.Element)
-
-				bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), viewLocalPos)
-				tb.bytePos = bPos
-
-				if bPos.StartPosition.Row > insertedPos.Row || (bPos.StartPosition.Row == insertedPos.Row && bPos.StartPosition.Column >= insertedPos.Column) {
-					break
-				}
-			}
 			tb.viewPosition = viewStart + moveLen
 			if elementIndex == tb.renderCache.GetItemCount()-10-1 {
 				tb.viewPosition--
