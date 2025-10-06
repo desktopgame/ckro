@@ -183,7 +183,7 @@ func (il *InlineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Tex
 		}
 		bytes += len(cluster)
 	}
-	return il.MoveLength(ctx, textLayout)
+	return il.MoveLength(ctx, textLayout) - 1
 }
 
 func (il *InlineView) ShouldBeforeInsertionNewLineOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
