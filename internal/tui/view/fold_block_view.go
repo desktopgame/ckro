@@ -268,13 +268,13 @@ func (fv *FoldBlockView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout
 			childView := ctx.Resolver.Resolve(child.Element)
 
 			if bytePos.Row >= st.Row && bytePos.Row <= ed.Row {
-
 				if st.Row == ed.Row && st.Column == ed.Column {
 					if bytePos.Row == st.Row && bytePos.Column == st.Column {
 						return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos)
 					}
 				}
-				if bytePos.Column >= st.Column && (bytePos.Column < ed.Column || ed.Row > st.Row) {
+				// inclusive line end, because of FoldBlockView is only contain line orientated view
+				if bytePos.Column >= st.Column && (bytePos.Column <= ed.Column || ed.Row > st.Row) {
 					return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos)
 				}
 			}
@@ -286,7 +286,16 @@ func (fv *FoldBlockView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout
 }
 
 func (fv *FoldBlockView) ShouldBeforeInsertionNewLineOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
-	return false
+	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
+		return false
+	} else {
+		table, _ := CompositeViewLengthTable(ctx, textLayout)
+		index, col := CompositeViewIndex(table, viewLocalPos)
+		child := textLayout.Children[index]
+
+		v := ctx.Resolver.Resolve(child.Element)
+		return v.ShouldBeforeInsertionNewLineOnLineBegin(ctx, child, col)
+	}
 }
 
 func (fv *FoldBlockView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
