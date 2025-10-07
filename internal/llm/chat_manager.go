@@ -75,7 +75,17 @@ func (cm *ChatManager) Setup() {
 	go cm.background(context.TODO())
 }
 
-func (cm *ChatManager) toolUse(ctx context.Context, response *mcp.CallToolResult, toolCall openai.ChatCompletionMessageToolCallUnion, input chan Status) ChatEvent {
+func (cm *ChatManager) addLog(message openai.ChatCompletionMessageParamUnion, output chan Event) {
+	cm.inputList = append(cm.inputList, message)
+
+	logEvent := LogEvent{
+		Body:      message,
+		EventBase: EventBase[LogResult]{},
+	}
+	output <- &logEvent
+}
+
+func (cm *ChatManager) toolUse(ctx context.Context, response *mcp.CallToolResult, toolCall openai.ChatCompletionMessageToolCallUnion, input chan Status, output chan Event) ChatEvent {
 	sb := strings.Builder{}
 	for i := 0; i < len(response.Content); i++ {
 		c := response.Content[i]
@@ -86,7 +96,7 @@ func (cm *ChatManager) toolUse(ctx context.Context, response *mcp.CallToolResult
 		default:
 		}
 	}
-	cm.inputList = append(cm.inputList, openai.ToolMessage(sb.String(), toolCall.ID))
+	cm.addLog(openai.ToolMessage(sb.String(), toolCall.ID), output)
 	return ChatEvent{
 		client:     cm.client,
 		inputList:  cm.inputList,
@@ -99,7 +109,7 @@ func (cm *ChatManager) toolUse(ctx context.Context, response *mcp.CallToolResult
 }
 
 func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion, input chan Status, output chan Event) error {
-	cm.inputList = append(cm.inputList, response.Choices[0].Message.ToParam())
+	cm.addLog(response.Choices[0].Message.ToParam(), output)
 	toolCalls := response.Choices[0].Message.ToolCalls
 	if len(toolCalls) > 0 {
 		for _, toolCall := range toolCalls {
@@ -133,7 +143,7 @@ func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion
 							status = <-input
 							switch status {
 							case Complete:
-								chatEvent := cm.toolUse(ctx, toolEvent.result, toolCall, input)
+								chatEvent := cm.toolUse(ctx, toolEvent.result, toolCall, input, output)
 								output <- &chatEvent
 
 								status = <-input
@@ -148,7 +158,7 @@ func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion
 							}
 						} else {
 							message := fmt.Sprintf("user rejected a %s execute", fn.Name)
-							cm.inputList = append(cm.inputList, openai.UserMessage(message))
+							cm.addLog(openai.UserMessage(message), output)
 
 							chatEvent := ChatEvent{
 								client:     cm.client,
@@ -172,7 +182,7 @@ func (cm *ChatManager) turn(ctx context.Context, response *openai.ChatCompletion
 					}
 				} else {
 					message := fmt.Sprintf("%s is not found.", fn.Name)
-					cm.inputList = append(cm.inputList, openai.SystemMessage(message))
+					cm.addLog(openai.SystemMessage(message), output)
 
 					chatEvent := ChatEvent{
 						client:     cm.client,
@@ -211,7 +221,7 @@ func (cm *ChatManager) Post(ctx context.Context, message string, output chan Eve
 		<-cm.backgroundToken
 		cm.backgroundDone = true
 	}
-	cm.inputList = append(cm.inputList, openai.UserMessage(message))
+	cm.addLog(openai.UserMessage(message), output)
 
 	input := make(chan Status)
 	defer close(input)
