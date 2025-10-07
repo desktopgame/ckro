@@ -413,10 +413,6 @@ func (tb *TextBox) RemoveChar() {
 		return
 	}
 
-	if tb.viewPosition == 0 {
-		return
-	}
-
 	// get view info from viewPosition
 	_, ei, _, _ := tb.renderCache.Stats(tb.viewPosition)
 
@@ -504,6 +500,10 @@ func (tb *TextBox) RemoveChar() {
 
 		_, vs, vl := tb.modelToView()
 		tb.viewPosition = vs + vl
+		return
+	}
+
+	if tb.viewPosition == 0 {
 		return
 	}
 
