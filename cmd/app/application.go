@@ -390,19 +390,6 @@ func (app *Application) loopMiniBuffer() {
 
 		tb := app.textEdior.TextArea.TextBox
 		sb := strings.Builder{}
-		sb.WriteString("\n")
-		sb.WriteString("{{{\n")
-		sb.WriteString("USER:\n")
-		sb.WriteString(s)
-		sb.WriteString("\n")
-		sb.WriteString("}}}\n")
-
-		tb.Document.InsertString(
-			tb.Document.GetLineCount()-1,
-			tb.Document.GetLineBytes(tb.Document.GetLineCount()-1),
-			sb.String(),
-		)
-		app.modified = true
 		app.window.Repaint()
 
 		app.miniBuffer.ReadOnly()
