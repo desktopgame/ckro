@@ -464,6 +464,15 @@ func (app *Application) loopMiniBuffer() {
 						}
 
 						tb.InsertString(sb.String())
+					} else if log.Body.OfUser != nil {
+						sb = strings.Builder{}
+						sb.WriteString("{{{\n")
+						sb.WriteString("USER:\n")
+						sb.WriteString(log.Body.OfUser.Content.OfString.Value)
+						sb.WriteString("\n")
+						sb.WriteString("}}}\n")
+
+						tb.InsertString(sb.String())
 					} else if log.Body.OfTool != nil {
 						sb = strings.Builder{}
 						sb.WriteString("{{{\n")
