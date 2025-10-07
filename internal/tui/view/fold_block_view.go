@@ -312,6 +312,19 @@ func (fv *FoldBlockView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayou
 }
 
 func (fv *FoldBlockView) ShouldRemoveWithSpecifiedColumnAfter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool) {
+	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
+		return model.Position{}, false
+	} else {
+		table, _ := CompositeViewLengthTable(ctx, textLayout)
+		index, col := CompositeViewIndex(table, viewLocalPos)
+		child := textLayout.Children[index]
+
+		v := ctx.Resolver.Resolve(child.Element)
+		p, ok := v.ShouldRemoveWithSpecifiedColumnAfter(ctx, child, col)
+		if ok {
+			return p, ok
+		}
+	}
 	if viewLocalPos == 0 {
 		r2 := textLayout.Element.GetRange(1)
 		return model.Position{
