@@ -435,17 +435,39 @@ func (app *Application) loopMiniBuffer() {
 					if log, ok := ev.(*llm.LogEvent); ok {
 						if log.Body.OfAssistant != nil {
 							sb = strings.Builder{}
-							sb.WriteString("{{{\n")
-							sb.WriteString("BOT:\n")
-							sb.WriteString(log.Body.OfAssistant.Content.OfString.Value)
-							sb.WriteString("\n")
-							sb.WriteString("}}}\n")
+							if len(log.Body.GetToolCalls()) > 0 {
+								for _, toolCall := range log.Body.GetToolCalls() {
+									bytes, err := toolCall.MarshalJSON()
+									if err != nil {
+										sb.WriteString("{{{\n")
+										sb.WriteString("CALL:\n")
+										sb.WriteString(err.Error())
+										sb.WriteString("\n")
+										sb.WriteString("}}}\n")
+									} else {
+										sb.WriteString("{{{\n")
+										sb.WriteString("CALL:\n")
+										sb.WriteString(string(bytes))
+										sb.WriteString("\n")
+										sb.WriteString("}}}\n")
+									}
+									sb.WriteString("\n")
+								}
+							} else {
+								sb.WriteString("{{{\n")
+								sb.WriteString("BOT:\n")
+								sb.WriteString(log.Body.OfAssistant.Content.OfString.Value)
+								sb.WriteString("\n")
+								sb.WriteString("}}}\n")
+							}
 
 							tb.InsertString(sb.String())
 						} else if log.Body.OfTool != nil {
 							sb = strings.Builder{}
 							sb.WriteString("{{{\n")
 							sb.WriteString("TOOL:\n")
+							sb.WriteString(log.Body.OfTool.ToolCallID)
+							sb.WriteString("\n")
 							sb.WriteString(log.Body.OfTool.Content.OfString.Value)
 							sb.WriteString("\n")
 							sb.WriteString("}}}\n")
@@ -461,9 +483,9 @@ func (app *Application) loopMiniBuffer() {
 
 							tb.InsertString(sb.String())
 						}
+						tb.MoveRight()
+						tb.CursorUpdate()
 					}
-					tb.MoveRight()
-					tb.CursorUpdate()
 				}
 
 				if _, ok := ev.(*llm.MessageEvent); ok {
