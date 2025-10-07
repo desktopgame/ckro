@@ -440,17 +440,20 @@ func (tb *TextBox) RemoveChar() {
 	// special supports...
 	// can't define perfect completely "general remove operation" when text editor is handle a rich content
 	// so, process some edge cases in here
-	if textView.ShouldRemoveWithLine(ctx, layout, viewLocalPos) {
-		r := layout.Element.GetRange(0)
+	if lineIndex, ok := textView.ShouldRemoveWithLine(ctx, layout, viewLocalPos); ok {
 		bPos := view.CharacterReference{
-			StartPosition: r.StartPosition,
-			Bytes:         (r.EndPosition.Column - r.StartPosition.Column),
+			StartPosition: model.Position{
+				Row:    lineIndex,
+				Column: 0,
+			},
+			Bytes: tb.Document.GetLineBytes(lineIndex),
 		}
 		tb.bytePos = bPos
 		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
 
 		tb.bytePos.Bytes = 0
-		tb.viewPosition = viewStart
+		_, viewStart, viewLocalPos = tb.modelToView()
+		tb.viewPosition = viewStart + viewLocalPos
 		return
 	} else if rng, ok := textView.ShouldRemoveWithSpecifiedRangeColumns(ctx, layout, viewLocalPos); ok {
 		bPos := view.CharacterReference{

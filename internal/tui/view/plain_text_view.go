@@ -267,8 +267,8 @@ func (p *PlainTextView) ShouldBeforeInsertionNewLineOnLineBegin(ctx Context, tex
 	return false
 }
 
-func (p *PlainTextView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
-	return false
+func (p *PlainTextView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, viewLocalPos int) (int, bool) {
+	return -1, false
 }
 
 func (p *PlainTextView) ShouldRemoveWithSpecifiedColumnAfter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool) {

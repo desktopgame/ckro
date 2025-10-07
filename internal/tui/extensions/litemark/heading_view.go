@@ -185,8 +185,9 @@ func (hv *HeadingView) ShouldBeforeInsertionNewLineOnLineBegin(ctx view.Context,
 	return viewLocalPos == 0
 }
 
-func (hv *HeadingView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
-	return viewLocalPos == 1 && hv.MoveLength(ctx, textLayout) == 2
+func (hv *HeadingView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (int, bool) {
+	r := textLayout.Element.GetRange(0)
+	return r.StartPosition.Row, viewLocalPos == 1 && hv.MoveLength(ctx, textLayout) == 2
 }
 
 func (hv *HeadingView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {

@@ -75,8 +75,8 @@ func (hl *HorizontalLineView) ShouldBeforeInsertionNewLineOnLineBegin(ctx view.C
 	return false
 }
 
-func (hl *HorizontalLineView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
-	return false
+func (hl *HorizontalLineView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (int, bool) {
+	return -1, false
 }
 
 func (hl *HorizontalLineView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {

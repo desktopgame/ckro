@@ -67,8 +67,8 @@ func (b *BlankLineView) ShouldBeforeInsertionNewLineOnLineBegin(ctx view.Context
 	return false
 }
 
-func (b *BlankLineView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
-	return false
+func (b *BlankLineView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (int, bool) {
+	return -1, false
 }
 
 func (b *BlankLineView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {

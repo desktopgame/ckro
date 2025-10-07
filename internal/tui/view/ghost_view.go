@@ -70,8 +70,8 @@ func (g *GhostView) ShouldBeforeInsertionNewLineOnLineBegin(ctx Context, textLay
 	return false
 }
 
-func (g *GhostView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
-	return false
+func (g *GhostView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, viewLocalPos int) (int, bool) {
+	return -1, false
 }
 
 func (g *GhostView) ShouldRemoveWithSpecifiedColumnAfter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool) {

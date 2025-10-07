@@ -298,8 +298,17 @@ func (fv *FoldBlockView) ShouldBeforeInsertionNewLineOnLineBegin(ctx Context, te
 	}
 }
 
-func (fv *FoldBlockView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
-	return false
+func (fv *FoldBlockView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, viewLocalPos int) (int, bool) {
+	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
+		return -1, false
+	} else {
+		table, _ := CompositeViewLengthTable(ctx, textLayout)
+		index, col := CompositeViewIndex(table, viewLocalPos)
+		child := textLayout.Children[index]
+
+		v := ctx.Resolver.Resolve(child.Element)
+		return v.ShouldRemoveWithLine(ctx, child, col)
+	}
 }
 
 func (fv *FoldBlockView) ShouldRemoveWithSpecifiedColumnAfter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool) {
