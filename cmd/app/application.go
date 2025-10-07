@@ -431,61 +431,59 @@ func (app *Application) loopMiniBuffer() {
 				ev.Consume(context.Background())
 
 				tb.MoveTextEnd()
-				{
-					if log, ok := ev.(*llm.LogEvent); ok {
-						if log.Body.OfAssistant != nil {
-							sb = strings.Builder{}
-							if len(log.Body.GetToolCalls()) > 0 {
-								for _, toolCall := range log.Body.GetToolCalls() {
-									bytes, err := toolCall.MarshalJSON()
-									if err != nil {
-										sb.WriteString("{{{\n")
-										sb.WriteString("CALL:\n")
-										sb.WriteString(err.Error())
-										sb.WriteString("\n")
-										sb.WriteString("}}}\n")
-									} else {
-										sb.WriteString("{{{\n")
-										sb.WriteString("CALL:\n")
-										sb.WriteString(string(bytes))
-										sb.WriteString("\n")
-										sb.WriteString("}}}\n")
-									}
+				if log, ok := ev.(*llm.LogEvent); ok {
+					if log.Body.OfAssistant != nil {
+						sb = strings.Builder{}
+						if len(log.Body.GetToolCalls()) > 0 {
+							for _, toolCall := range log.Body.GetToolCalls() {
+								bytes, err := toolCall.MarshalJSON()
+								if err != nil {
+									sb.WriteString("{{{\n")
+									sb.WriteString("CALL:\n")
+									sb.WriteString(err.Error())
 									sb.WriteString("\n")
+									sb.WriteString("}}}\n")
+								} else {
+									sb.WriteString("{{{\n")
+									sb.WriteString("CALL:\n")
+									sb.WriteString(string(bytes))
+									sb.WriteString("\n")
+									sb.WriteString("}}}\n")
 								}
-							} else {
-								sb.WriteString("{{{\n")
-								sb.WriteString("BOT:\n")
-								sb.WriteString(log.Body.OfAssistant.Content.OfString.Value)
 								sb.WriteString("\n")
-								sb.WriteString("}}}\n")
 							}
-
-							tb.InsertString(sb.String())
-						} else if log.Body.OfTool != nil {
-							sb = strings.Builder{}
+						} else {
 							sb.WriteString("{{{\n")
-							sb.WriteString("TOOL:\n")
-							sb.WriteString(log.Body.OfTool.ToolCallID)
-							sb.WriteString("\n")
-							sb.WriteString(log.Body.OfTool.Content.OfString.Value)
+							sb.WriteString("BOT:\n")
+							sb.WriteString(log.Body.OfAssistant.Content.OfString.Value)
 							sb.WriteString("\n")
 							sb.WriteString("}}}\n")
-
-							tb.InsertString(sb.String())
-						} else if log.Body.OfSystem != nil {
-							sb = strings.Builder{}
-							sb.WriteString("{{{\n")
-							sb.WriteString("SYSTEM:\n")
-							sb.WriteString(log.Body.OfSystem.Content.OfString.Value)
-							sb.WriteString("\n")
-							sb.WriteString("}}}\n")
-
-							tb.InsertString(sb.String())
 						}
-						tb.MoveRight()
-						tb.CursorUpdate()
+
+						tb.InsertString(sb.String())
+					} else if log.Body.OfTool != nil {
+						sb = strings.Builder{}
+						sb.WriteString("{{{\n")
+						sb.WriteString("TOOL:\n")
+						sb.WriteString(log.Body.OfTool.ToolCallID)
+						sb.WriteString("\n")
+						sb.WriteString(log.Body.OfTool.Content.OfString.Value)
+						sb.WriteString("\n")
+						sb.WriteString("}}}\n")
+
+						tb.InsertString(sb.String())
+					} else if log.Body.OfSystem != nil {
+						sb = strings.Builder{}
+						sb.WriteString("{{{\n")
+						sb.WriteString("SYSTEM:\n")
+						sb.WriteString(log.Body.OfSystem.Content.OfString.Value)
+						sb.WriteString("\n")
+						sb.WriteString("}}}\n")
+
+						tb.InsertString(sb.String())
 					}
+					tb.MoveRight()
+					tb.CursorUpdate()
 				}
 
 				if _, ok := ev.(*llm.MessageEvent); ok {
