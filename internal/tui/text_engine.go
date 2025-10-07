@@ -7,5 +7,4 @@ import (
 
 type TextEngine interface {
 	Resolve(e model.Element) view.TextView
-	ProvideInputHandler(e model.Element) TextInputHandler
 }

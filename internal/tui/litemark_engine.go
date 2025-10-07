@@ -33,7 +33,3 @@ func (l *LitemarkEngine) Resolve(e model.Element) view.TextView {
 	}
 	return nil
 }
-
-func (l *LitemarkEngine) ProvideInputHandler(e model.Element) TextInputHandler {
-	return nil
-}

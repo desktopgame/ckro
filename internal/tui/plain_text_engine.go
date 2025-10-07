@@ -15,7 +15,3 @@ func (p *PlainTextEngine) Resolve(e model.Element) view.TextView {
 	}
 	return nil
 }
-
-func (p *PlainTextEngine) ProvideInputHandler(e model.Element) TextInputHandler {
-	return nil
-}
