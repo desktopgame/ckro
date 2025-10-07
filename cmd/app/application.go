@@ -394,10 +394,6 @@ func (app *Application) loopMiniBuffer() {
 		sb.WriteString("\n")
 		sb.WriteString("}}}\n")
 
-		marker := fmt.Sprintf("<chat_response_is_here:%d>", app.chatResponseId)
-		sb.WriteString("\n")
-		sb.WriteString(marker)
-		sb.WriteString("\n")
 		tb.Document.InsertString(
 			tb.Document.GetLineCount()-1,
 			tb.Document.GetLineBytes(tb.Document.GetLineCount()-1),
@@ -434,31 +430,51 @@ func (app *Application) loopMiniBuffer() {
 
 				ev.Consume(context.Background())
 
-				if msg, ok := ev.(*llm.MessageEvent); ok {
-					response := msg.GetResult().Choices[0].Message.Content
-					tb.CursorReset()
-					if tb.FindNext(marker) {
-						sb = strings.Builder{}
-						sb.WriteString("{{{\n")
-						sb.WriteString("BOT:\n")
-						sb.WriteString(response)
-						sb.WriteString("\n")
-						sb.WriteString("}}}\n")
+				tb.MoveTextEnd()
+				{
+					if log, ok := ev.(*llm.LogEvent); ok {
+						if log.Body.OfAssistant != nil {
+							sb = strings.Builder{}
+							sb.WriteString("{{{\n")
+							sb.WriteString("BOT:\n")
+							sb.WriteString(log.Body.OfAssistant.Content.OfString.Value)
+							sb.WriteString("\n")
+							sb.WriteString("}}}\n")
 
-						tb.Replace(len(marker), sb.String())
-						tb.MoveRight()
-						app.textEdior.TextArea.TextBox.CursorUpdate()
+							tb.InsertString(sb.String())
+						} else if log.Body.OfTool != nil {
+							sb = strings.Builder{}
+							sb.WriteString("{{{\n")
+							sb.WriteString("TOOL:\n")
+							sb.WriteString(log.Body.OfTool.Content.OfString.Value)
+							sb.WriteString("\n")
+							sb.WriteString("}}}\n")
+
+							tb.InsertString(sb.String())
+						} else if log.Body.OfSystem != nil {
+							sb = strings.Builder{}
+							sb.WriteString("{{{\n")
+							sb.WriteString("SYSTEM:\n")
+							sb.WriteString(log.Body.OfSystem.Content.OfString.Value)
+							sb.WriteString("\n")
+							sb.WriteString("}}}\n")
+
+							tb.InsertString(sb.String())
+						}
 					}
+					tb.MoveRight()
+					tb.CursorUpdate()
+				}
+
+				if _, ok := ev.(*llm.MessageEvent); ok {
 					break
 				}
 
 				if e, ok := ev.(*llm.ErrorEvent); ok {
-					tb.CursorReset()
-					if tb.FindNext(marker) {
-						tb.Replace(len(marker), e.GetError().Error())
-						tb.MoveRight()
-						app.textEdior.TextArea.TextBox.CursorUpdate()
-					}
+					tb.MoveTextEnd()
+					tb.InsertString(e.GetError().Error())
+					tb.MoveRight()
+					tb.CursorUpdate()
 					break
 				}
 			}
