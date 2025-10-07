@@ -134,6 +134,18 @@ func (trc *TextRenderCache) Stats(viewPosition int) (TotalViewLen int, ElementIn
 	return totalViewLen, elementIndex, elementStart, viewLocalPosition
 }
 
+func (trc *TextRenderCache) Ghosts() int {
+	ghosts := 0
+	for i := len(trc.elements) - 1; i >= 0; i-- {
+		e := trc.elements[i]
+		if _, ok := e.(*model.GhostElement); !ok {
+			break
+		}
+		ghosts++
+	}
+	return ghosts
+}
+
 func (trc *TextRenderCache) Total() int {
 	return trc.totalViewLen
 }

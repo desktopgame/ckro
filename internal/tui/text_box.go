@@ -355,7 +355,7 @@ func (tb *TextBox) InsertString(s string) {
 	if ge, ok := tb.renderCache.GetElement(ei).(*model.GhostElement); ok {
 		lines := strings.Repeat("\n", ge.Index+1)
 		tb.viewPosition -= ge.Index + 1
-		lastElement := tb.renderCache.GetElement(tb.renderCache.GetItemCount() - 10 - 1)
+		lastElement := tb.renderCache.GetElement(tb.renderCache.GetItemCount() - tb.renderCache.Ghosts() - 1)
 		r := lastElement.GetRange(0)
 		tb.bytePos = view.CharacterReference{
 			StartPosition: model.Position{
@@ -810,7 +810,7 @@ func (tb *TextBox) MoveTextEnd() {
 	tb.renderCache.Update(ctx, tb.Width)
 
 	vp := 0
-	for i := 0; i < tb.renderCache.GetItemCount()-10; i++ {
+	for i := 0; i < tb.renderCache.GetItemCount()-tb.renderCache.Ghosts(); i++ {
 		layout := tb.renderCache.GetLayout(i)
 		element := layout.Element
 		textView := tb.TextEngine.Resolve(element)
