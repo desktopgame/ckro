@@ -538,12 +538,9 @@ func (tb *TextBox) RemoveChar() {
 		}
 
 		bPos := prevView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), prevView.MoveLength(ctx, layout)-1)
-
-		charRef := prevView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex-1), prevView.MoveLength(ctx, layout)-1)
-		tb.bytePos = charRef
+		tb.bytePos = bPos
 
 		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
-
 		tb.bytePos.Bytes = 0
 	} else {
 		// special suports...
@@ -569,9 +566,7 @@ func (tb *TextBox) RemoveChar() {
 
 		bytes := tb.bytePos.Bytes
 		bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), newViewLocalPos)
-
-		charRef := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), newViewLocalPos)
-		tb.bytePos = charRef
+		tb.bytePos = bPos
 
 		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
 
