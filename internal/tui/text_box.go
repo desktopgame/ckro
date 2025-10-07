@@ -779,6 +779,28 @@ func (tb *TextBox) MoveLineEnd() {
 	tb.bytePos = tb.viewToModel()
 }
 
+func (tb *TextBox) MoveTextStart() {
+	tb.renderCache.Update(tb.context(), tb.Width)
+
+	tb.viewPosition = 0
+	tb.bytePos = tb.viewToModel()
+}
+
+func (tb *TextBox) MoveTextEnd() {
+	ctx := tb.context()
+	tb.renderCache.Update(ctx, tb.Width)
+
+	vp := 0
+	for i := 0; i < tb.renderCache.GetItemCount()-10; i++ {
+		layout := tb.renderCache.GetLayout(i)
+		element := layout.Element
+		textView := tb.TextEngine.Resolve(element)
+		vp += textView.MoveLength(ctx, layout)
+	}
+	tb.viewPosition = vp
+	tb.bytePos = tb.viewToModel()
+}
+
 func (tb *TextBox) MoveReset() {
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
