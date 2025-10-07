@@ -349,7 +349,16 @@ func (fv *FoldBlockView) ShouldRemoveWithSpecifiedRangeLines(ctx Context, textLa
 }
 
 func (fv *FoldBlockView) ShouldRemoveWithSpecifiedRangeColumns(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Range, bool) {
-	return model.Range{}, false
+	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
+		return model.Range{}, false
+	} else {
+		table, _ := CompositeViewLengthTable(ctx, textLayout)
+		index, col := CompositeViewIndex(table, viewLocalPos)
+		child := textLayout.Children[index]
+
+		v := ctx.Resolver.Resolve(child.Element)
+		return v.ShouldRemoveWithSpecifiedRangeColumns(ctx, child, col)
+	}
 }
 
 func (fv *FoldBlockView) ShouldRemoveLastCharacter(ctx Context, textLayout *TextLayout) bool {
