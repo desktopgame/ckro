@@ -435,23 +435,23 @@ func (app *Application) loopMiniBuffer() {
 					if log.Body.OfAssistant != nil {
 						sb = strings.Builder{}
 						if len(log.Body.GetToolCalls()) > 0 {
-							for _, toolCall := range log.Body.GetToolCalls() {
-								bytes, err := toolCall.MarshalJSON()
-								if err != nil {
-									sb.WriteString("{{{\n")
-									sb.WriteString("CALL:\n")
-									sb.WriteString(err.Error())
-									sb.WriteString("\n")
-									sb.WriteString("}}}\n")
-								} else {
-									sb.WriteString("{{{\n")
-									sb.WriteString("CALL:\n")
-									sb.WriteString(string(bytes))
-									sb.WriteString("\n")
-									sb.WriteString("}}}\n")
-								}
+							sb.WriteString("{{{\n")
+							sb.WriteString("CALL:\n")
+							toolCalls := log.Body.GetToolCalls()
+							for i, toolCall := range toolCalls {
+								sb.WriteString(*toolCall.GetID())
 								sb.WriteString("\n")
+								sb.WriteString(toolCall.OfFunction.Function.Name)
+								sb.WriteString("\n")
+								sb.WriteString(toolCall.OfFunction.Function.Arguments)
+								sb.WriteString("\n")
+
+								if i != len(toolCalls)-1 {
+									sb.WriteString("---")
+									sb.WriteString("\n")
+								}
 							}
+							sb.WriteString("}}}\n")
 						} else {
 							sb.WriteString("{{{\n")
 							sb.WriteString("BOT:\n")
