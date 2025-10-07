@@ -518,8 +518,8 @@ func (tb *TextBox) RemoveChar() {
 
 		// special suports...
 		// remove last character of previous view, inclusive invisible content
-		if prevView.ShouldRemoveLastCharacter(ctx, layout) {
-			r := layout.Element.GetRange(0)
+		if elem, ok := prevView.ShouldRemoveLastCharacter(ctx, layout, prevView.MoveLength(ctx, layout)-1); ok {
+			r := elem.GetRange(0)
 			bPos := view.CharacterReference{
 				StartPosition: model.Position{
 					Row:    r.EndPosition.Row,
@@ -546,6 +546,27 @@ func (tb *TextBox) RemoveChar() {
 
 		tb.bytePos.Bytes = 0
 	} else {
+		// special suports...
+		// remove last character of previous view, inclusive invisible content
+		if elem, ok := textView.ShouldRemoveLastCharacter(ctx, layout, newViewLocalPos); ok {
+			r := elem.GetRange(0)
+			bPos := view.CharacterReference{
+				StartPosition: model.Position{
+					Row:    r.EndPosition.Row,
+					Column: r.EndPosition.Column - 1,
+				},
+				Bytes: 1,
+			}
+			tb.bytePos = bPos
+			tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
+			tb.renderCache.Update(ctx, tb.Width)
+
+			tb.bytePos.Bytes = 0
+			_, vs, vl := tb.modelToView()
+			tb.viewPosition = vs + vl
+			return
+		}
+
 		bytes := tb.bytePos.Bytes
 		bPos := textView.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), newViewLocalPos)
 

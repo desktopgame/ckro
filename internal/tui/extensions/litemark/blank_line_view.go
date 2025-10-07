@@ -83,8 +83,8 @@ func (b *BlankLineView) ShouldRemoveWithSpecifiedRangeColumns(ctx view.Context, 
 	return model.Range{}, false
 }
 
-func (b *BlankLineView) ShouldRemoveLastCharacter(ctx view.Context, textLayout *view.TextLayout) bool {
-	return false
+func (b *BlankLineView) ShouldRemoveLastCharacter(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Element, bool) {
+	return nil, false
 }
 
 func (b *BlankLineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {

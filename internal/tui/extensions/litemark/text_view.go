@@ -195,8 +195,8 @@ func (t *TextView) ShouldRemoveWithSpecifiedRangeColumns(ctx view.Context, textL
 	return model.Range{}, false
 }
 
-func (t *TextView) ShouldRemoveLastCharacter(ctx view.Context, textLayout *view.TextLayout) bool {
-	return false
+func (t *TextView) ShouldRemoveLastCharacter(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Element, bool) {
+	return nil, false
 }
 
 func (t *TextView) ConvertRelativeX(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {

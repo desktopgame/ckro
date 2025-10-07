@@ -202,6 +202,6 @@ func (hv *HeadingView) ShouldRemoveWithSpecifiedRangeColumns(ctx view.Context, t
 	return model.Range{}, false
 }
 
-func (hv *HeadingView) ShouldRemoveLastCharacter(ctx view.Context, textLayout *view.TextLayout) bool {
-	return false
+func (hv *HeadingView) ShouldRemoveLastCharacter(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Element, bool) {
+	return nil, false
 }

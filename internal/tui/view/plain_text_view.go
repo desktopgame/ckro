@@ -283,8 +283,8 @@ func (p *PlainTextView) ShouldRemoveWithSpecifiedRangeColumns(ctx Context, textL
 	return model.Range{}, false
 }
 
-func (p *PlainTextView) ShouldRemoveLastCharacter(ctx Context, textLayout *TextLayout) bool {
-	return false
+func (p *PlainTextView) ShouldRemoveLastCharacter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Element, bool) {
+	return nil, false
 }
 
 func (p *PlainTextView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout, bytePos model.Position) int {

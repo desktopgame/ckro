@@ -91,6 +91,6 @@ func (hl *HorizontalLineView) ShouldRemoveWithSpecifiedRangeColumns(ctx view.Con
 	return model.Range{}, false
 }
 
-func (hl *HorizontalLineView) ShouldRemoveLastCharacter(ctx view.Context, textLayout *view.TextLayout) bool {
-	return true
+func (hl *HorizontalLineView) ShouldRemoveLastCharacter(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Element, bool) {
+	return textLayout.Element, viewLocalPos == hl.MoveLength(ctx, textLayout)-1
 }

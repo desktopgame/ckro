@@ -41,5 +41,5 @@ type TextView interface {
 	ShouldRemoveWithSpecifiedRangeColumns(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Range, bool)
 
 	// このビューの直後の削除が直前のこのビューに食い込むなら true を返す
-	ShouldRemoveLastCharacter(ctx Context, textLayout *TextLayout) bool
+	ShouldRemoveLastCharacter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Element, bool)
 }

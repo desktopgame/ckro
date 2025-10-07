@@ -361,6 +361,15 @@ func (fv *FoldBlockView) ShouldRemoveWithSpecifiedRangeColumns(ctx Context, text
 	}
 }
 
-func (fv *FoldBlockView) ShouldRemoveLastCharacter(ctx Context, textLayout *TextLayout) bool {
-	return false
+func (fv *FoldBlockView) ShouldRemoveLastCharacter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Element, bool) {
+	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
+		return nil, false
+	} else {
+		table, _ := CompositeViewLengthTable(ctx, textLayout)
+		index, col := CompositeViewIndex(table, viewLocalPos)
+		child := textLayout.Children[index]
+
+		v := ctx.Resolver.Resolve(child.Element)
+		return v.ShouldRemoveLastCharacter(ctx, child, col)
+	}
 }

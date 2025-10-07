@@ -364,6 +364,6 @@ func (c *CodeBlockView) ShouldRemoveWithSpecifiedRangeColumns(ctx view.Context, 
 	return model.Range{}, false
 }
 
-func (c *CodeBlockView) ShouldRemoveLastCharacter(ctx view.Context, textLayout *view.TextLayout) bool {
-	return true
+func (c *CodeBlockView) ShouldRemoveLastCharacter(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Element, bool) {
+	return textLayout.Element, viewLocalPos == c.MoveLength(ctx, textLayout)-1
 }
