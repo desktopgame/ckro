@@ -62,6 +62,9 @@ func (app *Application) openFile(filePath string) error {
 	doc := app.textEdior.TextArea.TextBox.Document
 	doc.ReplaceAll(file)
 
+	file.Seek(0, 0)
+	app.chatManager.LoadHistory(file)
+
 	app.filePath = filePath
 	app.modified = false
 	app.textEdior.TextArea.TextBox.MoveReset()

@@ -1,9 +1,11 @@
 package llm
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -247,4 +249,96 @@ func (cm *ChatManager) Post(ctx context.Context, message string, output chan Eve
 		output <- &ErrorEvent{e: err}
 	}
 	return err
+}
+
+func (cm *ChatManager) ClearHistory() {
+	cm.inputList = nil
+}
+
+func (cm *ChatManager) LoadHistory(r io.Reader) {
+	sc := bufio.NewScanner(r)
+	cm.inputList = nil
+	for sc.Scan() {
+		line := sc.Text()
+
+		if len(line) == 0 {
+			continue
+		}
+
+		if line[0] != '{' {
+			continue
+		}
+
+		openBraces := 0
+		for openBraces < len(line) && line[openBraces] == '{' {
+			openBraces++
+		}
+
+		if line != strings.Repeat("{", openBraces) {
+			continue
+		}
+
+		lines := []string{}
+		closeBrace := false
+		for sc.Scan() {
+			line := sc.Text()
+
+			if line == strings.Repeat("}", openBraces) {
+				closeBrace = true
+				break
+			}
+			lines = append(lines, line)
+		}
+
+		if !closeBrace {
+			continue
+		}
+
+		if lines[0] == "USER:" {
+			m := openai.UserMessage(strings.Join(lines[1:], "\n"))
+			cm.inputList = append(cm.inputList, m)
+		} else if lines[0] == "BOT:" {
+			m := openai.UserMessage(strings.Join(lines[1:], "\n"))
+			cm.inputList = append(cm.inputList, m)
+		} else if lines[0] == "CALL:" {
+			startLine := 1
+			calls := []openai.ChatCompletionMessageToolCallUnionParam{}
+			for {
+				callID := lines[startLine]
+				fnName := lines[startLine+1]
+				fnArgs := []string{}
+
+				for j := startLine + 2; j < len(lines); j++ {
+					if lines[j] == "---" {
+						break
+					}
+					fnArgs = append(fnArgs, lines[j])
+				}
+				startLine = startLine + 1 + len(fnArgs) + 1
+				calls = append(calls, openai.ChatCompletionMessageToolCallUnionParam{
+					OfFunction: &openai.ChatCompletionMessageFunctionToolCallParam{
+						ID:   callID,
+						Type: "function",
+						Function: openai.ChatCompletionMessageFunctionToolCallFunctionParam{
+							Name:      fnName,
+							Arguments: strings.Join(fnArgs, "\n"),
+						},
+					},
+				})
+
+				if startLine >= len(lines) {
+					break
+				}
+			}
+			cm.inputList = append(cm.inputList, openai.ChatCompletionMessageParamUnion{
+				OfAssistant: &openai.ChatCompletionAssistantMessageParam{
+					ToolCalls: calls,
+				},
+			})
+		} else if lines[0] == "TOOL:" {
+			callID := lines[1]
+			returnValue := lines[2:]
+			cm.inputList = append(cm.inputList, openai.ToolMessage(strings.Join(returnValue, "\n"), callID))
+		}
+	}
 }
