@@ -132,7 +132,7 @@ func (il *InlineView) MoveRight(ctx view.Context, textLayout *view.TextLayout, v
 
 func (il *InlineView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
 	e := textLayout.Element
-	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
+	return text.DisplayPos(ctx.GetSegment(e, 1).GetLine(0), viewLocalPos), 0
 }
 
 func (il *InlineView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {

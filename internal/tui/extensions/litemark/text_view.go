@@ -1,7 +1,6 @@
 package litemark
 
 import (
-	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/view"
 )
@@ -98,8 +97,25 @@ func (t *TextView) MoveRight(ctx view.Context, textLayout *view.TextLayout, view
 }
 
 func (t *TextView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
-	e := textLayout.Element
-	return text.DisplayPos(ctx.GetText(e), viewLocalPos), 0
+	totalLen := 0
+	vlx, vly := 0, 0
+	for i := 0; i < len(textLayout.Children); i++ {
+		child := textLayout.Children[i]
+		childElement := child.Element
+		childView := ctx.Resolver.Resolve(childElement)
+		childViewLen := childView.MoveLength(ctx, child)
+		start := totalLen
+		end := start + childViewLen
+
+		nvlx, _ := childView.ConvertPos(ctx, child, viewLocalPos-start)
+		vlx += nvlx
+		if viewLocalPos >= start && viewLocalPos < end {
+			return vlx, vly
+		}
+
+		totalLen += childViewLen
+	}
+	return vlx, vly
 }
 
 func (t *TextView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
