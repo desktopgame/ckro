@@ -10,11 +10,53 @@ import (
 	"github.com/desktopgame/ckro/internal/text"
 	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/desktopgame/ckro/internal/tui/base"
+	"github.com/desktopgame/ckro/internal/tui/extensions/litemark"
+	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/gdamore/tcell/v2"
 	"github.com/mattn/go-runewidth"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/html"
 )
+
+//
+// Testing Library
+//
+
+func newPlainTextBox(width int, height int) *tui.TextBox {
+	tb := tui.TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = width
+	tb.Height = height
+	tb.ShowCursor = true
+
+	doc := model.PlainDocument{}
+	doc.Init()
+	tb.Document = &doc
+
+	engine := tui.PlainTextEngine{}
+	tb.TextEngine = &engine
+	return &tb
+}
+
+func newStyledTextBox(width int, height int) *tui.TextBox {
+	tb := tui.TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = width
+	tb.Height = height
+	tb.ShowCursor = true
+
+	doc := litemark.StyledDocument{}
+	doc.Init()
+	tb.Document = &doc
+
+	engine := tui.LitemarkEngine{}
+	tb.TextEngine = &engine
+	return &tb
+}
 
 func parseToCell(r io.Reader, width int, height int) []tcell.SimCell {
 	sc := bufio.NewScanner(r)
@@ -99,6 +141,22 @@ func parseToCell(r io.Reader, width int, height int) []tcell.SimCell {
 	return table
 }
 
+func renderAndCompare(t *testing.T, tb *tui.TextBox, expected io.Reader) {
+	screen := tcell.NewSimulationScreen("UTF-8")
+	screen.Init()
+	screen.SetSize(tb.Width, tb.Height)
+
+	g := base.Graphics{}
+	g.Init(screen)
+	g.Resize(tb.Width, tb.Height)
+
+	tb.Draw(&g)
+	screen.Show()
+
+	cells, _, _ := screen.GetContents()
+	assert.True(t, deepEquals(cells, parseToCell(expected, tb.Width, tb.Height)))
+}
+
 func deepEquals(a []tcell.SimCell, b []tcell.SimCell) bool {
 	if len(a) != len(b) {
 		return false
@@ -130,28 +188,13 @@ func deepEquals(a []tcell.SimCell, b []tcell.SimCell) bool {
 	return true
 }
 
-func TestTextBox01(t *testing.T) {
-	tb := tui.TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	tb.ShowCursor = true
+//
+// Tests
+//
+
+func TestTextBoxN01(t *testing.T) {
+	tb := newPlainTextBox(10, 10)
 	tb.InsertString("1234あ")
 
-	screen := tcell.NewSimulationScreen("UTF-8")
-	screen.Init()
-	screen.SetSize(tb.Width, tb.Height)
-
-	g := base.Graphics{}
-	g.Init(screen)
-	g.Resize(tb.Width, tb.Height)
-
-	tb.Draw(&g)
-	screen.Show()
-
-	cells, _, _ := screen.GetContents()
-	r := strings.NewReader("1234あ<c/>")
-	assert.True(t, deepEquals(cells, parseToCell(r, tb.Width, tb.Height)))
+	renderAndCompare(t, tb, strings.NewReader("1234あ<c/>"))
 }
