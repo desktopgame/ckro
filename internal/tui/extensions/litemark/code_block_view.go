@@ -113,24 +113,13 @@ func (c *CodeBlockView) startOffset(textLayout *view.TextLayout) int {
 }
 
 func (c *CodeBlockView) MoveLength(ctx view.Context, textLayout *view.TextLayout) int {
-	e := textLayout.Element
-	cbe := e.(*CodeBlockElement)
-	additionalMoves := 0
-	if len(cbe.Lang) > 0 {
-		additionalMoves = runewidth.StringWidth(cbe.Lang) + 1
-	}
-
 	_, ttl := view.CompositeViewLengthTable(ctx, textLayout)
-	return ttl + additionalMoves
+	return ttl + c.startOffset(textLayout)
 }
 
 func (c *CodeBlockView) MoveUp(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	e := textLayout.Element
 	cbe := e.(*CodeBlockElement)
-	additionalMoves := 0
-	if len(cbe.Lang) > 0 {
-		additionalMoves = runewidth.StringWidth(cbe.Lang) + 1
-	}
 
 	table, _ := view.CompositeViewLengthTable(ctx, textLayout)
 	index, _ := view.CompositeViewIndex(table, viewLocalPos-c.startOffset(textLayout))
@@ -139,7 +128,7 @@ func (c *CodeBlockView) MoveUp(ctx view.Context, textLayout *view.TextLayout, vi
 	}
 	if index <= 0 {
 		if len(cbe.Lang) > 0 {
-			return additionalMoves - 1
+			return c.startOffset(textLayout) - 1
 		}
 		return -1
 	}
