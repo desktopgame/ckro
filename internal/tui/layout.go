@@ -2,14 +2,14 @@ package tui
 
 import "github.com/desktopgame/ckro/internal/tui/presenter"
 
-// Frame wrapper
+// WithFrame returns Frame as wrapper of specified Control.
 func WithFrame(ctrl Control) *Frame {
 	fr := Frame{}
 	fr.Control = ctrl
 	return &fr
 }
 
-// Center wrapper
+// WithCenter returns Center as wrapper of specified Control.
 func WithCenter(ctrl Control, width int, height int) *Center {
 	c := Center{}
 	c.Control = ctrl
