@@ -18,15 +18,25 @@ func (p *PlainTextView) Layout(ctx Context, textLayout *TextLayout, x, y, w, h i
 }
 
 func (p *PlainTextView) Draw(ctx Context, textLayout *TextLayout, renderer Renderer) {
-	clusters := text.GraphemeClusters(ctx.GetText(textLayout.Element))
-	x := 0
-
-	viewLine := 0
-	width := textLayout.Width
 	r := textLayout.Element.GetRange(0)
 	selectStyle := tcell.StyleDefault.Reverse(true)
 	at := r.StartPosition
 	sel := ctx.TextSelection
+
+	str := ctx.GetText(textLayout.Element)
+	clusters := text.GraphemeClusters(str)
+
+	if len(str) == 0 {
+		if sel.Contain(at) {
+			renderer.SetContent(0, 0, ' ', nil, selectStyle)
+		}
+		return
+	}
+
+	x := 0
+
+	viewLine := 0
+	width := textLayout.Width
 	for _, cluster := range clusters {
 		next := at
 		next.Column += len(cluster)

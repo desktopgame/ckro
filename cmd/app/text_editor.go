@@ -24,6 +24,8 @@ func (t *TextEditor) Init(onModified func()) {
 	newDoc := &litemark.StyledDocument{}
 	newDoc.Init()
 	t.TextArea.TextBox.Document = newDoc
+	litemarkEngine := tui.LitemarkEngine{}
+	t.TextArea.TextBox.TextEngine = &litemarkEngine
 	// 行番号エリア
 	lineNumbers := tui.Tile{}
 	lineNumbers.Init()

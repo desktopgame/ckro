@@ -3,6 +3,7 @@ package litemark
 import (
 	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/desktopgame/ckro/internal/tui/view"
+	"github.com/gdamore/tcell/v2"
 )
 
 type BlankLineView struct {
@@ -16,6 +17,14 @@ func (b *BlankLineView) Layout(ctx view.Context, textLayout *view.TextLayout, x,
 }
 
 func (b *BlankLineView) Draw(ctx view.Context, textLayout *view.TextLayout, renderer view.Renderer) {
+	r := textLayout.Element.GetRange(0)
+	at := r.StartPosition
+	sel := ctx.TextSelection
+
+	if sel.Contain(at) {
+		selectStyle := tcell.StyleDefault.Reverse(true)
+		renderer.SetContent(0, 0, ' ', nil, selectStyle)
+	}
 }
 
 func (b *BlankLineView) MinimumSize(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
