@@ -25,9 +25,16 @@ func (t *TextView) Layout(ctx view.Context, textLayout *view.TextLayout, x, y, w
 }
 
 func (t *TextView) Draw(ctx view.Context, textLayout *view.TextLayout, renderer view.Renderer) {
+	column := 0
 	for _, child := range textLayout.Children {
 		childView := ctx.Resolver.Resolve(child.Element)
-		childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY))
+
+		if tsv, ok := childView.(view.TabStopTextView); ok {
+			column = tsv.DrawWithTabStop(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY), column)
+		} else {
+			childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY))
+			column += child.Width
+		}
 	}
 }
 
@@ -99,6 +106,7 @@ func (t *TextView) MoveRight(ctx view.Context, textLayout *view.TextLayout, view
 func (t *TextView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
 	totalLen := 0
 	vlx, vly := 0, 0
+	column := 0
 	for i := 0; i < len(textLayout.Children); i++ {
 		child := textLayout.Children[i]
 		childElement := child.Element
@@ -107,10 +115,22 @@ func (t *TextView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, vie
 		start := totalLen
 		end := start + childViewLen
 
-		nvlx, _ := childView.ConvertPos(ctx, child, viewLocalPos-start)
-		vlx += nvlx
-		if viewLocalPos >= start && viewLocalPos < end {
-			return vlx, vly
+		if tsv, ok := childView.(view.TabStopTextView); ok {
+			if viewLocalPos >= start && viewLocalPos < end {
+				nvlx, _ := childView.ConvertPos(ctx, child, viewLocalPos-start)
+				vlx += nvlx
+				return vlx, vly
+			} else {
+				width := tsv.WidthWithTabStop(ctx, childElement, column)
+				vlx += width
+				column += width
+			}
+		} else {
+			nvlx, _ := childView.ConvertPos(ctx, child, viewLocalPos-start)
+			vlx += nvlx
+			if viewLocalPos >= start && viewLocalPos < end {
+				return vlx, vly
+			}
 		}
 
 		totalLen += childViewLen

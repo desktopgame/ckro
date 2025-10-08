@@ -18,7 +18,7 @@ func (il *InlineView) Layout(ctx view.Context, textLayout *view.TextLayout, x, y
 	textLayout.Height = h
 }
 
-func (il *InlineView) Draw(ctx view.Context, textLayout *view.TextLayout, renderer view.Renderer) {
+func (il *InlineView) DrawWithTabStop(ctx view.Context, textLayout *view.TextLayout, renderer view.Renderer, column int) int {
 	inlineElement := textLayout.Element.(*InlineElement)
 	style := tcell.StyleDefault
 
@@ -48,11 +48,12 @@ func (il *InlineView) Draw(ctx view.Context, textLayout *view.TextLayout, render
 	for _, cluster := range clusters {
 
 		if cluster == "\t" {
-			spaces := text.TabWidth - (x % text.TabWidth)
+			spaces := text.TabWidth - (column % text.TabWidth)
 			for i := 0; i < spaces; i++ {
 				renderer.SetContent(x+i, y, ' ', nil, tcell.StyleDefault)
 			}
 			x += spaces
+			column += spaces
 
 		} else {
 			runes := []rune(cluster)
@@ -71,16 +72,23 @@ func (il *InlineView) Draw(ctx view.Context, textLayout *view.TextLayout, render
 				// 全角文字の場合、次のセルを空にする
 				if width == 2 {
 					x++
+					column++
 					renderer.SetContent(x, y, 0, nil, style)
 				}
 			}
 			x++
+			column++
 		}
 	}
+	return column
 }
 
-func (il *InlineView) WidthWithTabStop(ctx view.Context, textLayout *view.TextLayout, column int) int {
-	clusters := text.GraphemeClusters(ctx.GetSegment(textLayout.Element, 1).GetLine(0))
+func (il *InlineView) Draw(ctx view.Context, textLayout *view.TextLayout, renderer view.Renderer) {
+	il.DrawWithTabStop(ctx, textLayout, renderer, 0)
+}
+
+func (il *InlineView) WidthWithTabStop(ctx view.Context, e model.Element, column int) int {
+	clusters := text.GraphemeClusters(ctx.GetSegment(e, 1).GetLine(0))
 	totalWidth := 0
 	for _, cluster := range clusters {
 		width := 0
