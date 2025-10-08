@@ -1213,3 +1213,7 @@ func (tb *TextBox) GetBytePosition() view.CharacterReference {
 func (tb *TextBox) GetViewPosition() int {
 	return tb.viewPosition
 }
+
+func (tb *TextBox) GetSelection() view.TextSelection {
+	return tb.textSelection
+}

@@ -200,14 +200,23 @@ func (il *InlineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Tex
 
 	bytes := inlineElement.Pad
 	clusters := text.GraphemeClusters(str)
-	for i, cluster := range clusters {
-		if i <= inlineElement.Pad {
-			continue
+	if inlineElement.Pad == 0 {
+		for i, cluster := range clusters {
+			if bytes == bytePos.Column-r.StartPosition.Column {
+				return i
+			}
+			bytes += len(cluster)
 		}
-		if bytes == bytePos.Column-r.StartPosition.Column {
-			return i - inlineElement.Pad - 1
+	} else {
+		for i, cluster := range clusters {
+			if i <= inlineElement.Pad {
+				continue
+			}
+			if bytes == bytePos.Column-r.StartPosition.Column {
+				return i - inlineElement.Pad - 1
+			}
+			bytes += len(cluster)
 		}
-		bytes += len(cluster)
 	}
 	return il.MoveLength(ctx, textLayout) - 1
 }

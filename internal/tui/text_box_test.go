@@ -920,6 +920,80 @@ func TestTextBox54(t *testing.T) {
 	tb.RemoveChar()
 }
 
+func TestTextBox55(t *testing.T) {
+	tb := newStyledTextBox(20, 20)
+	tb.InsertString("abcd")
+	tb.SelectionStart()
+	tb.MoveLeft()
+	tb.MoveLeft()
+
+	ts := tb.GetSelection()
+	first, last := ts.Ordered()
+	r := model.Range{
+		StartPosition: first.StartPosition,
+		EndPosition:   last.StartPosition,
+	}
+	sg := tb.Document.Read(r)
+	assert.Equal(t, sg.GetLine(0), "cd")
+
+	tb.RemoveSelection()
+	tb.SelectionEnd()
+	mustBytePos(t, tb, 0, 2)
+	assert.Equal(t, tb.GetViewPosition(), 2)
+}
+
+func TestTextBox56(t *testing.T) {
+	tb := newStyledTextBox(20, 20)
+	tb.InsertString("abcd\nefgh\nijkl")
+	tb.MoveLeft()
+	tb.MoveLeft()
+	tb.SelectionStart()
+	tb.MoveUp()
+	tb.MoveUp()
+
+	ts := tb.GetSelection()
+	first, last := ts.Ordered()
+	r := model.Range{
+		StartPosition: first.StartPosition,
+		EndPosition:   last.StartPosition,
+	}
+	sg := tb.Document.Read(r)
+	assert.Equal(t, sg.GetLine(0), "cd")
+	assert.Equal(t, sg.GetLine(1), "efgh")
+	assert.Equal(t, sg.GetLine(2), "ij")
+
+	tb.RemoveSelection()
+	tb.SelectionEnd()
+	mustBytePos(t, tb, 0, 2)
+	assert.Equal(t, tb.GetViewPosition(), 2)
+}
+
+func TestTextBox57(t *testing.T) {
+	tb := newStyledTextBox(20, 20)
+	tb.InsertString("あいうeお\nかきくけこ\nijkl")
+	tb.MoveLeft()
+	tb.MoveLeft()
+	tb.SelectionStart()
+	tb.MoveUp()
+	tb.MoveUp()
+
+	ts := tb.GetSelection()
+	first, last := ts.Ordered()
+	r := model.Range{
+		StartPosition: first.StartPosition,
+		EndPosition:   last.StartPosition,
+	}
+	sg := tb.Document.Read(r)
+	assert.Equal(t, sg.GetLine(0), "うeお")
+	assert.Equal(t, sg.GetLine(1), "かきくけこ")
+	assert.Equal(t, sg.GetLine(2), "ij")
+
+	tb.RemoveSelection()
+	tb.SelectionEnd()
+	mustBytePos(t, tb, 0, len("あい"))
+	assert.Equal(t, tb.GetViewPosition(), 2)
+}
+
 func TestTextBoxFind01(t *testing.T) {
 	tb := newStyledTextBox(10, 10)
 	tb.InsertString("aa\nbb\nccc")
