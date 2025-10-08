@@ -46,7 +46,7 @@ func (tb *TextBox) Init() {
 	tb.Y = 0
 	tb.Width = 20
 	tb.Height = 6
-	tb.TextEngine = &PlainTextEngine{}
+	tb.TextEngine = &LitemarkEngine{}
 	tb.scrollX = 0
 	tb.scrollY = 0
 }
