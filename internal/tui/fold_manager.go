@@ -6,11 +6,13 @@ import (
 	"github.com/desktopgame/ckro/internal/tui/model"
 )
 
+// FoldItem is state of folded element.
 type FoldItem struct {
 	track   *model.Track
 	element model.Element
 }
 
+// FoldManager is manage list of folded elements
 type FoldManager struct {
 	items []FoldItem
 }
@@ -25,6 +27,7 @@ func (fm *FoldManager) addFold(doc model.Document, e model.Element) {
 	})
 }
 
+// ToggleFold is toggle a folding for specified element.
 func (fm *FoldManager) ToggleFold(doc model.Document, e model.Element) {
 	for i, fold := range fm.items {
 		if fold.track.Lost {
@@ -38,6 +41,7 @@ func (fm *FoldManager) ToggleFold(doc model.Document, e model.Element) {
 	fm.addFold(doc, e)
 }
 
+// Refresh is remove elements where of lost items.
 func (fm *FoldManager) Refresh(doc model.Document) {
 	newItems := []FoldItem{}
 
@@ -58,6 +62,7 @@ func (fm *FoldManager) isMatchRange(tr *model.Track, e model.Element) bool {
 	return false
 }
 
+// IsFolded returns specified element folded.
 func (fm *FoldManager) IsFolded(doc model.Document, e model.Element) bool {
 	for _, fold := range fm.items {
 		if fold.track.Lost {
@@ -70,6 +75,7 @@ func (fm *FoldManager) IsFolded(doc model.Document, e model.Element) bool {
 	return false
 }
 
+// AutoFold is fold a longer elements.
 func (fm *FoldManager) AutoFold(doc model.Document, elements []model.Element) {
 	fm.items = nil
 
