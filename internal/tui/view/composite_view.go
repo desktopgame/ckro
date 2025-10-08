@@ -14,6 +14,14 @@ func CompositeViewLengthTable(ctx Context, textLayout *TextLayout) ([]int, int) 
 	return table, total
 }
 
+func CompositeViewLengthSum(table []int, index int) int {
+	v := 0
+	for i := 0; i <= index; i++ {
+		v += table[i]
+	}
+	return v
+}
+
 func CompositeViewIndex(table []int, viewLocalPos int) (Row int, Column int) {
 	n := 0
 	index := -1
@@ -30,14 +38,6 @@ func CompositeViewIndex(table []int, viewLocalPos int) (Row int, Column int) {
 	return index, col
 }
 
-func sumTableValue(table []int, index int) int {
-	v := 0
-	for i := 0; i <= index; i++ {
-		v += table[i]
-	}
-	return v
-}
-
 func CompositeMoveUp(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
 	table, _ := CompositeViewLengthTable(ctx, textLayout)
 	index, col := CompositeViewIndex(table, viewLocalPos)
@@ -48,9 +48,9 @@ func CompositeMoveUp(ctx Context, textLayout *TextLayout, viewLocalPos int) int 
 		if index == 0 {
 			return -1
 		}
-		return sumTableValue(table, index-1) - 1
+		return CompositeViewLengthSum(table, index-1) - 1
 	}
-	return sumTableValue(table, index-1) + newCol
+	return CompositeViewLengthSum(table, index-1) + newCol
 }
 
 func CompositeMoveDown(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
@@ -63,7 +63,7 @@ func CompositeMoveDown(ctx Context, textLayout *TextLayout, viewLocalPos int) in
 		if index == len(table)-1 {
 			return -1
 		}
-		return sumTableValue(table, index)
+		return CompositeViewLengthSum(table, index)
 	}
-	return sumTableValue(table, index-1) + newCol
+	return CompositeViewLengthSum(table, index-1) + newCol
 }
