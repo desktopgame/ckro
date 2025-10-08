@@ -9,13 +9,52 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTextBox01(t *testing.T) {
+//
+// Testing Library
+//
+
+func newPlainTextBox(width int, height int) *TextBox {
 	tb := TextBox{}
 	tb.Init()
 	tb.X = 0
 	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
+	tb.Width = width
+	tb.Height = height
+	tb.ShowCursor = true
+
+	doc := model.PlainDocument{}
+	doc.Init()
+	tb.Document = &doc
+
+	engine := PlainTextEngine{}
+	tb.TextEngine = &engine
+	return &tb
+}
+
+func newStyledTextBox(width int, height int) *TextBox {
+	tb := TextBox{}
+	tb.Init()
+	tb.X = 0
+	tb.Y = 0
+	tb.Width = width
+	tb.Height = height
+	tb.ShowCursor = true
+
+	doc := litemark.StyledDocument{}
+	doc.Init()
+	tb.Document = &doc
+
+	engine := LitemarkEngine{}
+	tb.TextEngine = &engine
+	return &tb
+}
+
+//
+// Tests
+//
+
+func TestTextBox01(t *testing.T) {
+	tb := newPlainTextBox(10, 10)
 	tb.InsertString("1234あ")
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
@@ -23,12 +62,7 @@ func TestTextBox01(t *testing.T) {
 }
 
 func TestTextBox02(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
+	tb := newPlainTextBox(10, 10)
 	tb.InsertString("1234\n1234\n123あ")
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
@@ -36,12 +70,7 @@ func TestTextBox02(t *testing.T) {
 }
 
 func TestTextBox03(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
+	tb := newPlainTextBox(10, 10)
 	tb.InsertString("1234\n1234\n123あ")
 	tb.bytePos = view.CharacterReference{
 		StartPosition: model.Position{
@@ -59,12 +88,7 @@ func TestTextBox03(t *testing.T) {
 }
 
 func TestTextBox04(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
+	tb := newPlainTextBox(10, 10)
 	tb.InsertString("1234\n1234\n123あ")
 	tb.bytePos = view.CharacterReference{
 		StartPosition: model.Position{
@@ -85,12 +109,7 @@ func TestTextBox04(t *testing.T) {
 }
 
 func TestTextBox05(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
+	tb := newPlainTextBox(10, 10)
 	tb.InsertString("1234\n1234\n123あ")
 	tb.bytePos = view.CharacterReference{
 		StartPosition: model.Position{
@@ -113,15 +132,7 @@ func TestTextBox05(t *testing.T) {
 }
 
 func TestTextBox06(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("#")
 	tb.InsertString(" ")
 
@@ -134,12 +145,7 @@ func TestTextBox06(t *testing.T) {
 }
 
 func TestTextBox07(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
+	tb := newPlainTextBox(10, 10)
 	tb.InsertString("1234\n\n\n```\n123\n```")
 	tb.bytePos = view.CharacterReference{
 		StartPosition: model.Position{
@@ -156,12 +162,7 @@ func TestTextBox07(t *testing.T) {
 }
 
 func TestTextBox08(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
+	tb := newPlainTextBox(10, 10)
 	tb.InsertString("\n\n\n\n\n")
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
@@ -173,12 +174,7 @@ func TestTextBox08(t *testing.T) {
 }
 
 func TestTextBox09(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
+	tb := newPlainTextBox(10, 10)
 	tb.InsertString("\n\n\n\n\n")
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
@@ -190,12 +186,7 @@ func TestTextBox09(t *testing.T) {
 }
 
 func TestTextBox10(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
+	tb := newPlainTextBox(10, 10)
 	tb.InsertString("\n\n\n\n\n")
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
@@ -211,12 +202,7 @@ func TestTextBox10(t *testing.T) {
 }
 
 func TestTextBox11(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
+	tb := newPlainTextBox(10, 10)
 
 	tb.InsertString("a")
 	tb.InsertString("\n")
@@ -233,12 +219,7 @@ func TestTextBox11(t *testing.T) {
 }
 
 func TestTextBox12(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
+	tb := newPlainTextBox(10, 10)
 
 	tb.InsertString("a")
 	tb.InsertString("\n")
@@ -258,12 +239,7 @@ func TestTextBox12(t *testing.T) {
 }
 
 func TestTextBox13(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
+	tb := newPlainTextBox(10, 10)
 
 	tb.InsertString("a")
 	tb.InsertString("\n")
@@ -279,12 +255,7 @@ func TestTextBox13(t *testing.T) {
 }
 
 func TestTextBox14(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
+	tb := newPlainTextBox(10, 10)
 
 	tb.InsertString("a")
 	tb.InsertString("\n")
@@ -308,15 +279,7 @@ func TestTextBox14(t *testing.T) {
 }
 
 func TestTextBox15(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1234\n\n\n```\n123\n```\n\n")
 	tb.bytePos = view.CharacterReference{
 		StartPosition: model.Position{
@@ -345,15 +308,7 @@ func TestTextBox15(t *testing.T) {
 }
 
 func TestTextBox16(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1234\n\n\n```\n123\n```\n\n")
 	tb.bytePos = view.CharacterReference{
 		StartPosition: model.Position{
@@ -388,15 +343,7 @@ func TestTextBox16(t *testing.T) {
 }
 
 func TestTextBox17(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1234\n\n\n```\n123\n```\n\n")
 	tb.bytePos = view.CharacterReference{
 		StartPosition: model.Position{
@@ -435,15 +382,7 @@ func TestTextBox17(t *testing.T) {
 }
 
 func TestTextBox18(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1234")
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
@@ -455,15 +394,7 @@ func TestTextBox18(t *testing.T) {
 }
 
 func TestTextBox19(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("\n\n\n")
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 3)
@@ -475,15 +406,7 @@ func TestTextBox19(t *testing.T) {
 }
 
 func TestTextBox20(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("#")
 	tb.InsertString(" ")
 	tb.InsertString("H")
@@ -495,15 +418,7 @@ func TestTextBox20(t *testing.T) {
 }
 
 func TestTextBox21(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("#")
 	tb.InsertString(" ")
 	tb.InsertString("H")
@@ -523,15 +438,7 @@ func TestTextBox21(t *testing.T) {
 }
 
 func TestTextBox22(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("\n")
 	tb.InsertString("#")
 	tb.InsertString(" ")
@@ -550,15 +457,7 @@ func TestTextBox22(t *testing.T) {
 }
 
 func TestTextBox23(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("\n")
 	tb.InsertString("#")
 	tb.InsertString(" ")
@@ -589,15 +488,7 @@ func TestTextBox23(t *testing.T) {
 }
 
 func TestTextBox24(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 20
-	tb.Height = 20
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(20, 20)
 	tb.InsertString("\n")
 	tb.InsertString("#")
 	tb.InsertString(" ")
@@ -631,15 +522,7 @@ func TestTextBox24(t *testing.T) {
 }
 
 func TestTextBox25(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 20
-	tb.Height = 20
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(20, 20)
 	tb.InsertString("#")
 	tb.InsertString(" ")
 	tb.InsertString("H")
@@ -652,15 +535,7 @@ func TestTextBox25(t *testing.T) {
 }
 
 func TestTextBox26(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 20
-	tb.Height = 20
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(20, 20)
 	tb.InsertString("\n")
 	tb.MoveLeft()
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
@@ -678,15 +553,7 @@ func TestTextBox26(t *testing.T) {
 }
 
 func TestTextBox27(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 20
-	tb.Height = 20
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(20, 20)
 
 	tb.InsertString("##")
 	tb.InsertString(" ")
@@ -709,15 +576,7 @@ func TestTextBox27(t *testing.T) {
 }
 
 func TestTextBox28(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 20
-	tb.Height = 20
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(20, 20)
 
 	tb.InsertString("##")
 	tb.InsertString(" ")
@@ -746,15 +605,7 @@ func TestTextBox28(t *testing.T) {
 }
 
 func TestTextBox29(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1234\n\n\n```\n123\nabcd\n```\n\n")
 	tb.bytePos = view.CharacterReference{
 		StartPosition: model.Position{
@@ -803,15 +654,7 @@ func TestTextBox29(t *testing.T) {
 }
 
 func TestTextBox30(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1234\n\n\n```\n123\nabcd\n```\n\n")
 	tb.bytePos = view.CharacterReference{
 		StartPosition: model.Position{
@@ -864,15 +707,7 @@ func TestTextBox30(t *testing.T) {
 }
 
 func TestTextBox31(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1234\n\n\n```\n123\nabcd\n```\n\n")
 	tb.bytePos = view.CharacterReference{
 		StartPosition: model.Position{
@@ -901,15 +736,7 @@ func TestTextBox31(t *testing.T) {
 }
 
 func TestTextBox32(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 
 	tb.MoveRight()
 	tb.MoveRight()
@@ -919,15 +746,7 @@ func TestTextBox32(t *testing.T) {
 }
 
 func TestTextBox33(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 
 	tb.MoveRight()
 	tb.MoveRight()
@@ -943,15 +762,7 @@ func TestTextBox33(t *testing.T) {
 }
 
 func TestTextBox34(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1\n---\n")
 	tb.bytePos = view.CharacterReference{
 		StartPosition: model.Position{
@@ -980,15 +791,7 @@ func TestTextBox34(t *testing.T) {
 }
 
 func TestTextBox35(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("*")
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
@@ -1003,15 +806,7 @@ func TestTextBox35(t *testing.T) {
 }
 
 func TestTextBox36(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("**")
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
@@ -1026,15 +821,7 @@ func TestTextBox36(t *testing.T) {
 }
 
 func TestTextBox37(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("**")
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
@@ -1054,15 +841,7 @@ func TestTextBox37(t *testing.T) {
 }
 
 func TestTextBox38(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("**")
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
 	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
@@ -1083,15 +862,7 @@ func TestTextBox38(t *testing.T) {
 }
 
 func TestTextBox39(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("abc")
 	tb.InsertString(" ")
 
@@ -1110,15 +881,7 @@ func TestTextBox39(t *testing.T) {
 }
 
 func TestTextBox40(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("abc")
 	tb.InsertString(" ")
 
@@ -1141,15 +904,7 @@ func TestTextBox40(t *testing.T) {
 }
 
 func TestTextBox41(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("abc")
 	tb.InsertString(" ")
 
@@ -1180,15 +935,7 @@ func TestTextBox41(t *testing.T) {
 }
 
 func TestTextBox42(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("abc")
 	tb.InsertString(" ")
 
@@ -1215,15 +962,7 @@ func TestTextBox42(t *testing.T) {
 }
 
 func TestTextBox43(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("*")
 	tb.InsertString("abcd")
 	tb.InsertString("*")
@@ -1238,15 +977,7 @@ func TestTextBox43(t *testing.T) {
 }
 
 func TestTextBox44(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("```lang")
 	tb.InsertString("\n")
 	tb.InsertString("abcd")
@@ -1324,15 +1055,7 @@ func TestTextBox45(t *testing.T) {
 }
 
 func TestTextBox46(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 68 + 2
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(20, 20)
 	tb.InsertString("**BOLD**")
 
 	for i := 0; i < 4; i++ {
@@ -1355,15 +1078,7 @@ func TestTextBox46(t *testing.T) {
 }
 
 func TestTextBox47(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 68 + 2
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(20, 20)
 	tb.InsertString("\n# \nB")
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
@@ -1371,15 +1086,7 @@ func TestTextBox47(t *testing.T) {
 }
 
 func TestTextBox48(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 68 + 2
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(20, 20)
 	tb.InsertString("**aa** **bb**")
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
@@ -1387,15 +1094,7 @@ func TestTextBox48(t *testing.T) {
 }
 
 func TestTextBox49(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 68 + 2
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(20, 20)
 	tb.InsertString("\n**aa** **bb**")
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
@@ -1403,15 +1102,7 @@ func TestTextBox49(t *testing.T) {
 }
 
 func TestTextBox50(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 68 + 2
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(20, 20)
 	tb.InsertString("**aa** **bb**\n")
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
@@ -1419,15 +1110,7 @@ func TestTextBox50(t *testing.T) {
 }
 
 func TestTextBox51(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 68 + 2
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(20, 20)
 	tb.InsertString("\n")
 
 	tb.MoveLeft()
@@ -1440,15 +1123,7 @@ func TestTextBox51(t *testing.T) {
 }
 
 func TestTextBox52(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 68 + 2
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(20, 20)
 	tb.InsertString("\n")
 
 	tb.MoveLeft()
@@ -1461,15 +1136,7 @@ func TestTextBox52(t *testing.T) {
 }
 
 func TestTextBox53(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 68 + 2
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(20, 20)
 	tb.InsertString("abc   def")
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
@@ -1489,15 +1156,7 @@ func TestTextBox53(t *testing.T) {
 }
 
 func TestTextBox54(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 68 + 2
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(20, 20)
 	tb.InsertString("abcd")
 
 	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
@@ -1508,15 +1167,7 @@ func TestTextBox54(t *testing.T) {
 }
 
 func TestTextBoxFind01(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("aa\nbb\nccc")
 
 	tb.FindPrev("b\ncc")
@@ -1541,15 +1192,7 @@ func TestTextBoxFind01(t *testing.T) {
 }
 
 func TestTextBoxFind02(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("aa\nbb\nccc")
 
 	tb.FindPrev("cc")
@@ -1564,15 +1207,7 @@ func TestTextBoxFind02(t *testing.T) {
 }
 
 func TestTextBoxFind03(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("aa\nbb\nccc")
 
 	tb.MoveReset()
@@ -1594,15 +1229,7 @@ func TestTextBoxFind03(t *testing.T) {
 }
 
 func TestTextBoxFind04(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("あいう\nbb\nかきく")
 
 	tb.MoveReset()
@@ -1626,15 +1253,7 @@ func TestTextBoxFind04(t *testing.T) {
 }
 
 func TestTextBoxFind05(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("あいう\nbb\nかきく")
 
 	tb.FindPrev("bb\nか")
@@ -1651,15 +1270,7 @@ func TestTextBoxFind05(t *testing.T) {
 }
 
 func TestTextBoxReplace01(t *testing.T) {
-	tb := TextBox{}
-	tb.Init()
-	tb.X = 0
-	tb.Y = 0
-	tb.Width = 10
-	tb.Height = 10
-	newDoc := &litemark.StyledDocument{}
-	newDoc.Init()
-	tb.Document = newDoc
+	tb := newStyledTextBox(10, 10)
 	tb.InsertString("あいう\nbb\nかきく")
 
 	assert.True(t, tb.FindPrev("あいう"))

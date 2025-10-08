@@ -1206,6 +1206,10 @@ func (tb *TextBox) GetViewHeight() int {
 	return h
 }
 
+func (tb *TextBox) GetBytePosition() view.CharacterReference {
+	return tb.bytePos
+}
+
 func (tb *TextBox) GetViewPosition() int {
 	return tb.viewPosition
 }
