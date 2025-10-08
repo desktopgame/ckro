@@ -49,6 +49,12 @@ func newStyledTextBox(width int, height int) *TextBox {
 	return &tb
 }
 
+func mustBytePos(t *testing.T, tb *TextBox, row, column int) {
+	bPos := tb.GetBytePosition()
+	assert.Equal(t, bPos.StartPosition.Row, row)
+	assert.Equal(t, bPos.StartPosition.Column, column)
+}
+
 //
 // Tests
 //
@@ -56,17 +62,13 @@ func newStyledTextBox(width int, height int) *TextBox {
 func TestTextBox01(t *testing.T) {
 	tb := newPlainTextBox(10, 10)
 	tb.InsertString("1234あ")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, len("1234あ"))
+	mustBytePos(t, tb, 0, len("1234あ"))
 }
 
 func TestTextBox02(t *testing.T) {
 	tb := newPlainTextBox(10, 10)
 	tb.InsertString("1234\n1234\n123あ")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, len("123あ"))
+	mustBytePos(t, tb, 2, len("123あ"))
 }
 
 func TestTextBox03(t *testing.T) {
@@ -82,9 +84,7 @@ func TestTextBox03(t *testing.T) {
 	tb.viewPosition = 0
 
 	tb.MoveRight()
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, len("1"))
+	mustBytePos(t, tb, 0, len("1"))
 }
 
 func TestTextBox04(t *testing.T) {
@@ -103,9 +103,7 @@ func TestTextBox04(t *testing.T) {
 	tb.MoveRight() // 3
 	tb.MoveRight() // 4
 	tb.MoveRight() // NL
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, len("1234"))
+	mustBytePos(t, tb, 0, len("1234"))
 }
 
 func TestTextBox05(t *testing.T) {
@@ -126,9 +124,7 @@ func TestTextBox05(t *testing.T) {
 	tb.MoveRight() // NL
 
 	tb.InsertString("\n")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 1, 0)
 }
 
 func TestTextBox06(t *testing.T) {
@@ -136,12 +132,10 @@ func TestTextBox06(t *testing.T) {
 	tb.InsertString("#")
 	tb.InsertString(" ")
 
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+	mustBytePos(t, tb, 0, 2)
 
 	tb.InsertString("AAA")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 5)
+	mustBytePos(t, tb, 0, 5)
 }
 
 func TestTextBox07(t *testing.T) {
@@ -157,48 +151,37 @@ func TestTextBox07(t *testing.T) {
 	tb.viewPosition = 0
 
 	tb.InsertString("\n")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 1, 0)
 }
 
 func TestTextBox08(t *testing.T) {
 	tb := newPlainTextBox(10, 10)
 	tb.InsertString("\n\n\n\n\n")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 5, 0)
 
 	tb.MoveUp()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 4, 0)
 }
 
 func TestTextBox09(t *testing.T) {
 	tb := newPlainTextBox(10, 10)
 	tb.InsertString("\n\n\n\n\n")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 5, 0)
 
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 4, 0)
 }
 
 func TestTextBox10(t *testing.T) {
 	tb := newPlainTextBox(10, 10)
 	tb.InsertString("\n\n\n\n\n")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 5, 0)
 
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 4, 0)
 
 	tb.MoveRight()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 5, 0)
 }
 
 func TestTextBox11(t *testing.T) {
@@ -213,9 +196,7 @@ func TestTextBox11(t *testing.T) {
 	tb.InsertString("a")
 
 	tb.MoveUp()
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 1, 1)
 }
 
 func TestTextBox12(t *testing.T) {
@@ -230,12 +211,10 @@ func TestTextBox12(t *testing.T) {
 	tb.InsertString("a")
 
 	tb.MoveUp()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 1, 1)
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 2, 1)
 }
 
 func TestTextBox13(t *testing.T) {
@@ -250,8 +229,7 @@ func TestTextBox13(t *testing.T) {
 	tb.InsertString("a")
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 2, 1)
 }
 
 func TestTextBox14(t *testing.T) {
@@ -266,16 +244,13 @@ func TestTextBox14(t *testing.T) {
 	tb.InsertString("a")
 
 	tb.MoveUp()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 1, 1)
 
 	tb.MoveUp()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 0, 1)
 
 	tb.MoveUp()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 0, 1)
 }
 
 func TestTextBox15(t *testing.T) {
@@ -291,20 +266,16 @@ func TestTextBox15(t *testing.T) {
 	tb.viewPosition = 0
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 1, 0)
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 2, 0)
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 4, 0)
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 6)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 6, 0)
 }
 
 func TestTextBox16(t *testing.T) {
@@ -320,26 +291,21 @@ func TestTextBox16(t *testing.T) {
 	tb.viewPosition = 0
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 1, 0)
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 2, 0)
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 4, 0)
 
 	tb.MoveRight()
 	tb.MoveRight()
 	tb.MoveRight()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 4, 3)
 
 	tb.InsertString("\n")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 5, 0)
 }
 
 func TestTextBox17(t *testing.T) {
@@ -355,54 +321,42 @@ func TestTextBox17(t *testing.T) {
 	tb.viewPosition = 0
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 1, 0)
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 2, 0)
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 4, 0)
 
 	tb.MoveRight()
 	tb.MoveRight()
 	tb.MoveRight()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 4, 3)
 
 	tb.InsertString("\n")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 5, 0)
 
 	tb.InsertString("\n")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 6)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 6, 0)
 }
 
 func TestTextBox18(t *testing.T) {
 	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1234")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 0, 4)
 
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 0, 3)
 }
 
 func TestTextBox19(t *testing.T) {
 	tb := newStyledTextBox(10, 10)
 	tb.InsertString("\n\n\n")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 3)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 3, 0)
 
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 2, 0)
 }
 
 func TestTextBox20(t *testing.T) {
@@ -410,9 +364,7 @@ func TestTextBox20(t *testing.T) {
 	tb.InsertString("#")
 	tb.InsertString(" ")
 	tb.InsertString("H")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 0, 3)
 
 	tb.RemoveChar()
 }
@@ -422,19 +374,15 @@ func TestTextBox21(t *testing.T) {
 	tb.InsertString("#")
 	tb.InsertString(" ")
 	tb.InsertString("H")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 0, 3)
 
 	tb.MoveLeft()
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+	mustBytePos(t, tb, 0, 2)
 
 	tb.MoveRight()
 	tb.MoveRight()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 0, 3)
 }
 
 func TestTextBox22(t *testing.T) {
@@ -443,17 +391,13 @@ func TestTextBox22(t *testing.T) {
 	tb.InsertString("#")
 	tb.InsertString(" ")
 	tb.InsertString("H")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 1, 3)
 
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 1, 0)
 
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 0, 0)
 }
 
 func TestTextBox23(t *testing.T) {
@@ -467,9 +411,7 @@ func TestTextBox23(t *testing.T) {
 	tb.InsertString("#")
 	tb.InsertString(" ")
 	tb.InsertString("Heading2")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 3)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 10)
+	mustBytePos(t, tb, 3, 10)
 
 	tb.MoveLeft()
 	tb.MoveLeft()
@@ -479,12 +421,10 @@ func TestTextBox23(t *testing.T) {
 	tb.MoveLeft()
 	tb.MoveLeft()
 	tb.MoveLeft() // H
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 3)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+	mustBytePos(t, tb, 3, 2)
 
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 2, 0)
 }
 
 func TestTextBox24(t *testing.T) {
@@ -498,13 +438,10 @@ func TestTextBox24(t *testing.T) {
 	tb.InsertString("##")
 	tb.InsertString(" ")
 	tb.InsertString("Heading2")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 3)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 11)
+	mustBytePos(t, tb, 3, 11)
 
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 3)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 10)
+	mustBytePos(t, tb, 3, 10)
 
 	tb.MoveLeft()
 	tb.MoveLeft()
@@ -513,12 +450,10 @@ func TestTextBox24(t *testing.T) {
 	tb.MoveLeft()
 	tb.MoveLeft()
 	tb.MoveLeft() // H
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 3)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 3, 3)
 
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 2, 0)
 }
 
 func TestTextBox25(t *testing.T) {
@@ -526,30 +461,25 @@ func TestTextBox25(t *testing.T) {
 	tb.InsertString("#")
 	tb.InsertString(" ")
 	tb.InsertString("H")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 0, 3)
 
 	tb.InsertString("e")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 0, 4)
 }
 
 func TestTextBox26(t *testing.T) {
 	tb := newStyledTextBox(20, 20)
 	tb.InsertString("\n")
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 0, 0)
 
 	tb.InsertString("##")
 	tb.InsertString(" ")
 	tb.InsertString("H")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 0, 4)
 
 	tb.InsertString("H")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 5)
+	mustBytePos(t, tb, 0, 5)
 }
 
 func TestTextBox27(t *testing.T) {
@@ -558,19 +488,16 @@ func TestTextBox27(t *testing.T) {
 	tb.InsertString("##")
 	tb.InsertString(" ")
 	tb.InsertString("H")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 0, 4)
 
 	tb.InsertString("H")
 	tb.InsertString("H")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 6)
+	mustBytePos(t, tb, 0, 6)
 
 	tb.MoveLeft()
 	tb.MoveLeft()
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 0, 3)
 
 	tb.InsertString("\n")
 }
@@ -581,27 +508,22 @@ func TestTextBox28(t *testing.T) {
 	tb.InsertString("##")
 	tb.InsertString(" ")
 	tb.InsertString("H")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 0, 4)
 
 	tb.InsertString("H")
 	tb.InsertString("H")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 6)
+	mustBytePos(t, tb, 0, 6)
 
 	tb.MoveLeft()
 	tb.MoveLeft()
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 0, 3)
 
 	tb.InsertString("\n")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 1, 3)
 
 	tb.InsertString("\n")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 2, 3)
 }
 
 func TestTextBox29(t *testing.T) {
@@ -617,40 +539,32 @@ func TestTextBox29(t *testing.T) {
 	tb.viewPosition = 0
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 1, 0)
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 2, 0)
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 4, 0)
 
 	tb.MoveRight()
 	tb.MoveRight() // 3
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+	mustBytePos(t, tb, 4, 2)
 
 	tb.MoveRight() // NL
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 4, 3)
 
 	tb.MoveRight() // a
 	tb.MoveRight()
 	tb.MoveRight()
 	tb.MoveRight() // d
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 5, 3)
 
 	tb.MoveRight() // NL
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 5, 4)
 
 	tb.MoveRight()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 7)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 7, 0)
 }
 
 func TestTextBox30(t *testing.T) {
@@ -666,44 +580,35 @@ func TestTextBox30(t *testing.T) {
 	tb.viewPosition = 0
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 1, 0)
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 2, 0)
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 4, 0)
 
 	tb.MoveRight()
 	tb.MoveRight() // 3
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+	mustBytePos(t, tb, 4, 2)
 
 	tb.MoveRight() // NL
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 4, 3)
 
 	tb.MoveRight() // a
 	tb.MoveRight()
 	tb.MoveRight()
 	tb.MoveRight() // d
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 5, 3)
 
 	tb.MoveRight() // NL
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 5)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 5, 4)
 
 	tb.MoveRight()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 7)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 7, 0)
 
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 6)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+	mustBytePos(t, tb, 6, 2)
 }
 
 func TestTextBox31(t *testing.T) {
@@ -719,20 +624,16 @@ func TestTextBox31(t *testing.T) {
 	tb.viewPosition = 0
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 1, 0)
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 2, 0)
 
 	tb.MoveDown()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 4)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 4, 0)
 
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 3)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+	mustBytePos(t, tb, 3, 2)
 }
 
 func TestTextBox32(t *testing.T) {
@@ -741,8 +642,7 @@ func TestTextBox32(t *testing.T) {
 	tb.MoveRight()
 	tb.MoveRight()
 	tb.InsertString("Hello")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 5)
+	mustBytePos(t, tb, 2, 5)
 }
 
 func TestTextBox33(t *testing.T) {
@@ -751,14 +651,12 @@ func TestTextBox33(t *testing.T) {
 	tb.MoveRight()
 	tb.MoveRight()
 	tb.InsertString("Hello")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 5)
+	mustBytePos(t, tb, 2, 5)
 
 	tb.MoveRight()
 	tb.MoveRight()
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 5)
+	mustBytePos(t, tb, 2, 5)
 }
 
 func TestTextBox34(t *testing.T) {
@@ -774,91 +672,73 @@ func TestTextBox34(t *testing.T) {
 	tb.viewPosition = 0
 
 	tb.MoveRight()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 0, 1)
 
 	tb.MoveRight()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 1, 3)
 
 	tb.MoveRight()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 2, 0)
 
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+	mustBytePos(t, tb, 1, 2)
 }
 
 func TestTextBox35(t *testing.T) {
 	tb := newStyledTextBox(10, 10)
 	tb.InsertString("*")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 0, 1)
 
 	tb.InsertString("a")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+	mustBytePos(t, tb, 0, 2)
 
 	tb.InsertString("*")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 0, 3)
 }
 
 func TestTextBox36(t *testing.T) {
 	tb := newStyledTextBox(10, 10)
 	tb.InsertString("**")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+	mustBytePos(t, tb, 0, 2)
 
 	tb.InsertString("aa")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 0, 4)
 
 	tb.InsertString("*")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 5)
+	mustBytePos(t, tb, 0, 5)
 }
 
 func TestTextBox37(t *testing.T) {
 	tb := newStyledTextBox(10, 10)
 	tb.InsertString("**")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+	mustBytePos(t, tb, 0, 2)
 
 	tb.InsertString("aa")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 0, 4)
 
 	tb.InsertString("*")
 	tb.InsertString("*")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 6)
+	mustBytePos(t, tb, 0, 6)
 
 	tb.InsertString("\n")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 1, 0)
 }
 
 func TestTextBox38(t *testing.T) {
 	tb := newStyledTextBox(10, 10)
 	tb.InsertString("**")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+	mustBytePos(t, tb, 0, 2)
 
 	tb.InsertString("aa")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 0, 4)
 
 	tb.InsertString("*")
 	tb.InsertString("*")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 6)
+	mustBytePos(t, tb, 0, 6)
 
 	tb.RemoveChar()
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 0, 0)
 }
 
 func TestTextBox39(t *testing.T) {
@@ -867,17 +747,14 @@ func TestTextBox39(t *testing.T) {
 	tb.InsertString(" ")
 
 	tb.InsertString("**")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 6)
+	mustBytePos(t, tb, 0, 6)
 
 	tb.InsertString("xyz")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 9)
+	mustBytePos(t, tb, 0, 9)
 
 	tb.InsertString("*")
 	tb.InsertString("*")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 11)
+	mustBytePos(t, tb, 0, 11)
 }
 
 func TestTextBox40(t *testing.T) {
@@ -886,21 +763,17 @@ func TestTextBox40(t *testing.T) {
 	tb.InsertString(" ")
 
 	tb.InsertString("**")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 6)
+	mustBytePos(t, tb, 0, 6)
 
 	tb.InsertString("xyz")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 9)
+	mustBytePos(t, tb, 0, 9)
 
 	tb.InsertString("*")
 	tb.InsertString("*")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 11)
+	mustBytePos(t, tb, 0, 11)
 
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 8)
+	mustBytePos(t, tb, 0, 8)
 }
 
 func TestTextBox41(t *testing.T) {
@@ -909,29 +782,23 @@ func TestTextBox41(t *testing.T) {
 	tb.InsertString(" ")
 
 	tb.InsertString("**")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 6)
+	mustBytePos(t, tb, 0, 6)
 
 	tb.InsertString("xyz")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 9)
+	mustBytePos(t, tb, 0, 9)
 
 	tb.InsertString("*")
 	tb.InsertString("*")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 11)
+	mustBytePos(t, tb, 0, 11)
 
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 8)
+	mustBytePos(t, tb, 0, 8)
 
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 7)
+	mustBytePos(t, tb, 0, 7)
 
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 0, 4)
 }
 
 func TestTextBox42(t *testing.T) {
@@ -940,25 +807,20 @@ func TestTextBox42(t *testing.T) {
 	tb.InsertString(" ")
 
 	tb.InsertString("**")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 6)
+	mustBytePos(t, tb, 0, 6)
 
 	tb.InsertString("xyz")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 9)
+	mustBytePos(t, tb, 0, 9)
 
 	tb.InsertString("*")
 	tb.InsertString("*")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 11)
+	mustBytePos(t, tb, 0, 11)
 
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 8)
+	mustBytePos(t, tb, 0, 8)
 
 	tb.InsertString("V")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 9)
+	mustBytePos(t, tb, 0, 9)
 }
 
 func TestTextBox43(t *testing.T) {
@@ -966,13 +828,10 @@ func TestTextBox43(t *testing.T) {
 	tb.InsertString("*")
 	tb.InsertString("abcd")
 	tb.InsertString("*")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 6)
+	mustBytePos(t, tb, 0, 6)
 
 	tb.RemoveChar()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 0, 4)
 	assert.Equal(t, tb.viewPosition, 3)
 }
 
@@ -991,44 +850,34 @@ func TestTextBox44(t *testing.T) {
 		tb.MoveRight()
 	}
 
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 1, 4)
 
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 3)
+	mustBytePos(t, tb, 1, 3)
 
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+	mustBytePos(t, tb, 1, 2)
 
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 1, 1)
 
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 1, 0)
 
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 7)
+	mustBytePos(t, tb, 0, 7)
 
 	tb.RemoveChar() // g
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 6)
+	mustBytePos(t, tb, 0, 6)
 
 	tb.RemoveChar() // n
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 5)
+	mustBytePos(t, tb, 0, 5)
 
 	tb.RemoveChar() // a
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 0, 4)
 
 	tb.RemoveChar() // l
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 2)
+	mustBytePos(t, tb, 0, 2)
 }
 
 func TestTextBox45(t *testing.T) {
@@ -1080,33 +929,25 @@ func TestTextBox46(t *testing.T) {
 func TestTextBox47(t *testing.T) {
 	tb := newStyledTextBox(20, 20)
 	tb.InsertString("\n# \nB")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 2, 1)
 }
 
 func TestTextBox48(t *testing.T) {
 	tb := newStyledTextBox(20, 20)
 	tb.InsertString("**aa** **bb**")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 13)
+	mustBytePos(t, tb, 0, 13)
 }
 
 func TestTextBox49(t *testing.T) {
 	tb := newStyledTextBox(20, 20)
 	tb.InsertString("\n**aa** **bb**")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 13)
+	mustBytePos(t, tb, 1, 13)
 }
 
 func TestTextBox50(t *testing.T) {
 	tb := newStyledTextBox(20, 20)
 	tb.InsertString("**aa** **bb**\n")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 1, 0)
 }
 
 func TestTextBox51(t *testing.T) {
@@ -1114,12 +955,10 @@ func TestTextBox51(t *testing.T) {
 	tb.InsertString("\n")
 
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 0, 0)
 
 	tb.InsertString("\n**aa** **bb**")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 13)
+	mustBytePos(t, tb, 1, 13)
 }
 
 func TestTextBox52(t *testing.T) {
@@ -1127,40 +966,32 @@ func TestTextBox52(t *testing.T) {
 	tb.InsertString("\n")
 
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 0, 0)
 
 	tb.InsertString("**aa** a\nb **bb**")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 8)
+	mustBytePos(t, tb, 1, 8)
 }
 
 func TestTextBox53(t *testing.T) {
 	tb := newStyledTextBox(20, 20)
 	tb.InsertString("abc   def")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 9)
+	mustBytePos(t, tb, 0, 9)
 
 	tb.MoveLeft()
 	tb.MoveLeft()
 	tb.MoveLeft()
 	tb.MoveLeft()
 	tb.MoveLeft()
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 0, 4)
 
 	tb.InsertString("**aa**")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 10)
+	mustBytePos(t, tb, 0, 10)
 }
 
 func TestTextBox54(t *testing.T) {
 	tb := newStyledTextBox(20, 20)
 	tb.InsertString("abcd")
-
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 4)
+	mustBytePos(t, tb, 0, 4)
 
 	tb.MoveLeft()
 	tb.RemoveChar()
@@ -1171,12 +1002,10 @@ func TestTextBoxFind01(t *testing.T) {
 	tb.InsertString("aa\nbb\nccc")
 
 	tb.FindPrev("b\ncc")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 1, 1)
 
 	tb.FindPrev("a\nb")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 0, 1)
 	assert.Equal(t, tb.bytePos.Bytes, 1)
 
 	tb.MoveLineEnd()
@@ -1186,8 +1015,7 @@ func TestTextBoxFind01(t *testing.T) {
 	tb.MoveLineEnd()
 	tb.MoveDown()
 	tb.FindPrev("a\nbb\nccc")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 0, 1)
 	assert.Equal(t, tb.bytePos.Bytes, 1)
 }
 
@@ -1196,13 +1024,11 @@ func TestTextBoxFind02(t *testing.T) {
 	tb.InsertString("aa\nbb\nccc")
 
 	tb.FindPrev("cc")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 2, 1)
 	assert.Equal(t, tb.bytePos.Bytes, 1)
 
 	tb.FindPrev("bb")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 1, 0)
 	assert.Equal(t, tb.bytePos.Bytes, 1)
 }
 
@@ -1213,18 +1039,15 @@ func TestTextBoxFind03(t *testing.T) {
 	tb.MoveReset()
 
 	tb.FindNext("a\nbb")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 0, 1)
 	assert.Equal(t, tb.bytePos.Bytes, 1)
 
 	tb.FindNext("bb")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 1, 0)
 	assert.Equal(t, tb.bytePos.Bytes, 1)
 
 	tb.FindNext("b\nc")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 1)
+	mustBytePos(t, tb, 1, 1)
 	assert.Equal(t, tb.bytePos.Bytes, 1)
 }
 
@@ -1235,20 +1058,17 @@ func TestTextBoxFind04(t *testing.T) {
 	tb.MoveReset()
 
 	tb.FindNext("あいう")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 0, 0)
 	assert.Equal(t, tb.bytePos.Bytes, len("あ"))
 
 	tb.FindNext("う\nbb")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, len("あい"))
+	mustBytePos(t, tb, 0, len("あい"))
 	assert.Equal(t, tb.bytePos.Bytes, len("う"))
 
 	assert.False(t, tb.FindNext("う"))
 
 	tb.FindNext("か")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 2)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 2, 0)
 	assert.Equal(t, tb.bytePos.Bytes, len("か"))
 }
 
@@ -1257,15 +1077,13 @@ func TestTextBoxFind05(t *testing.T) {
 	tb.InsertString("あいう\nbb\nかきく")
 
 	tb.FindPrev("bb\nか")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 1)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 1, 0)
 	assert.Equal(t, tb.bytePos.Bytes, 1)
 
 	assert.False(t, tb.FindPrev("あいう\nb"))
 
 	tb.FindPrev("あいう\n")
-	assert.Equal(t, tb.bytePos.StartPosition.Row, 0)
-	assert.Equal(t, tb.bytePos.StartPosition.Column, 0)
+	mustBytePos(t, tb, 0, 0)
 	assert.Equal(t, tb.bytePos.Bytes, len("あ"))
 }
 
