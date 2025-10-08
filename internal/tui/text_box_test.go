@@ -999,7 +999,6 @@ func TestTextBox58(t *testing.T) {
 	tb := newStyledTextBox(20, 20)
 	tb.Document.ReplaceAll(strings.NewReader("{{{\n```\nabc\n```\n\n}}}"))
 	tb.MoveTextEnd()
-	tb.MoveLeft()
 	tb.RemoveChar()
 
 	mustBytePos(t, tb, 3, 2)
@@ -1012,6 +1011,15 @@ func TestTextBox59(t *testing.T) {
 	tb.RemoveChar()
 
 	mustBytePos(t, tb, 0, 2)
+}
+
+func TestTextBox60(t *testing.T) {
+	tb := newStyledTextBox(20, 20)
+	tb.Document.ReplaceAll(strings.NewReader("{{{\nabc\n}}}\n\n"))
+	tb.MoveTextEnd()
+	tb.RemoveChar()
+
+	mustBytePos(t, tb, 2, 2)
 }
 
 func TestTextBoxFind01(t *testing.T) {

@@ -362,6 +362,9 @@ func (fv *FoldBlockView) ShouldRemoveWithSpecifiedRangeColumns(ctx Context, text
 }
 
 func (fv *FoldBlockView) ShouldRemoveLastCharacter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Element, bool) {
+	if viewLocalPos == fv.MoveLength(ctx, textLayout)-1 {
+		return textLayout.Element, true
+	}
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		return nil, false
 	} else {

@@ -417,6 +417,10 @@ func (tb *TextBox) RemoveChar() {
 		return
 	}
 
+	// update elements
+	ctx := tb.context()
+	tb.renderCache.Update(ctx, tb.Width)
+
 	// get view info from viewPosition
 	_, ei, _, _ := tb.renderCache.Stats(tb.viewPosition)
 
@@ -427,10 +431,6 @@ func (tb *TextBox) RemoveChar() {
 		tb.viewPosition -= ge.Index + 1
 		return
 	}
-
-	// update elements
-	ctx := tb.context()
-	tb.renderCache.Update(ctx, tb.Width)
 
 	// get view before edit
 	elementIndex, viewStart, viewLocalPos := tb.modelToView()
@@ -896,7 +896,7 @@ func (tb *TextBox) MoveTextEnd() {
 		textView := tb.TextEngine.Resolve(element)
 		vp += textView.MoveLength(ctx, layout)
 	}
-	tb.viewPosition = vp
+	tb.viewPosition = vp - 1
 	tb.bytePos = tb.viewToModel()
 }
 
