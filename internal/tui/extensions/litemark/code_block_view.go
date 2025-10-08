@@ -102,20 +102,6 @@ func (c *CodeBlockView) MinimumSize(ctx view.Context, e model.Element, width int
 	}
 }
 
-func (c *CodeBlockView) ViewLengthTable(ctx view.Context, textLayout *view.TextLayout) ([]int, int) {
-	var table []int
-	total := 0
-	for i := 0; i < len(textLayout.Children); i++ {
-		childElement := textLayout.Children[i].Element
-		childView := ctx.Resolver.Resolve(childElement)
-
-		l := childView.MoveLength(ctx, textLayout.Children[i])
-		table = append(table, l)
-		total += l
-	}
-	return table, total
-}
-
 func (c *CodeBlockView) findTableIndex(textLayout *view.TextLayout, table []int, viewLocalPos int) (Row int, Column int) {
 	e := textLayout.Element
 	cbe := e.(*CodeBlockElement)
@@ -161,7 +147,7 @@ func (c *CodeBlockView) MoveLength(ctx view.Context, textLayout *view.TextLayout
 		additionalMoves = runewidth.StringWidth(cbe.Lang) + 1
 	}
 
-	_, ttl := c.ViewLengthTable(ctx, textLayout)
+	_, ttl := view.CompositeViewLengthTable(ctx, textLayout)
 	return ttl + additionalMoves
 }
 
@@ -173,7 +159,7 @@ func (c *CodeBlockView) MoveUp(ctx view.Context, textLayout *view.TextLayout, vi
 		additionalMoves = runewidth.StringWidth(cbe.Lang) + 1
 	}
 
-	table, _ := c.ViewLengthTable(ctx, textLayout)
+	table, _ := view.CompositeViewLengthTable(ctx, textLayout)
 	index, _ := c.findTableIndex(textLayout, table, viewLocalPos)
 	if index == -1 {
 		return -1
@@ -188,7 +174,7 @@ func (c *CodeBlockView) MoveUp(ctx view.Context, textLayout *view.TextLayout, vi
 }
 
 func (c *CodeBlockView) MoveDown(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
-	table, _ := c.ViewLengthTable(ctx, textLayout)
+	table, _ := view.CompositeViewLengthTable(ctx, textLayout)
 	index, _ := c.findTableIndex(textLayout, table, viewLocalPos)
 	if index == len(table)-1 {
 		return -1
@@ -223,7 +209,7 @@ func (c *CodeBlockView) ConvertPos(ctx view.Context, textLayout *view.TextLayout
 		additionalHeight = 2
 	}
 
-	table, _ := c.ViewLengthTable(ctx, textLayout)
+	table, _ := view.CompositeViewLengthTable(ctx, textLayout)
 	index, col := c.findTableIndex(textLayout, table, viewLocalPos)
 	if viewLocalPos == c.sumTableValue(textLayout, table, len(table)-1) {
 		child := textLayout.Children[len(textLayout.Children)-1]
@@ -261,7 +247,7 @@ func (c *CodeBlockView) ConvertModel(ctx view.Context, textLayout *view.TextLayo
 		}
 	}
 
-	table, _ := c.ViewLengthTable(ctx, textLayout)
+	table, _ := view.CompositeViewLengthTable(ctx, textLayout)
 	index, col := c.findTableIndex(textLayout, table, viewLocalPos)
 	if viewLocalPos == c.sumTableValue(textLayout, table, len(table)-1) {
 		child := textLayout.Children[len(textLayout.Children)-1]
