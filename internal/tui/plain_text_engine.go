@@ -12,6 +12,8 @@ func (p *PlainTextEngine) Resolve(e model.Element) view.TextView {
 	switch e.(type) {
 	case *model.PlainElement:
 		return &view.PlainTextView{}
+	case *model.GhostElement:
+		return &view.GhostView{}
 	}
-	return nil
+	return &view.PlainTextView{}
 }

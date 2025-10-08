@@ -23,7 +23,14 @@ func (p *PlainTextView) Draw(ctx Context, textLayout *TextLayout, renderer Rende
 
 	viewLine := 0
 	width := textLayout.Width
+	r := textLayout.Element.GetRange(0)
+	selectStyle := tcell.StyleDefault.Reverse(true)
+	at := r.StartPosition
+	sel := ctx.TextSelection
 	for _, cluster := range clusters {
+		next := at
+		next.Column += len(cluster)
+
 		runes := []rune(cluster)
 
 		if cluster == "\t" {
@@ -32,25 +39,35 @@ func (p *PlainTextView) Draw(ctx Context, textLayout *TextLayout, renderer Rende
 				viewLine++
 				x = 0
 			}
+			tabStyle := tcell.StyleDefault
+			if sel.Contain(at) {
+				tabStyle = selectStyle
+			}
 			for i := 0; i < w; i++ {
-				renderer.SetContent(x+i, viewLine, ' ', nil, tcell.StyleDefault)
+				renderer.SetContent(x+i, viewLine, ' ', nil, tabStyle)
 			}
 			x += w
 		} else if len(runes) > 0 {
 			mainRune := runes[0]
 			w := runewidth.RuneWidth(mainRune)
 
+			charStyle := tcell.StyleDefault
+			if sel.Contain(at) {
+				charStyle = selectStyle
+			}
+
 			if x+w > width {
 				viewLine++
 				x = 0
 			}
-			renderer.SetContent(x, viewLine, mainRune, runes[1:], tcell.StyleDefault)
+			renderer.SetContent(x, viewLine, mainRune, runes[1:], charStyle)
 			if w == 2 {
 				x++
-				renderer.SetContent(x, viewLine, 0, nil, tcell.StyleDefault)
+				renderer.SetContent(x, viewLine, 0, nil, charStyle)
 			}
 			x++
 		}
+		at = next
 	}
 }
 
