@@ -10,6 +10,7 @@ require (
 	github.com/openai/openai-go/v2 v2.5.0
 	github.com/rivo/uniseg v0.4.7
 	github.com/stretchr/testify v1.11.1
+	golang.org/x/net v0.34.0
 )
 
 require (
@@ -23,7 +24,6 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
-	github.com/yuin/goldmark v1.7.13 // indirect
 	golang.org/x/sys v0.35.0 // indirect
 	golang.org/x/term v0.34.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
