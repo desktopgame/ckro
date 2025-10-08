@@ -583,6 +583,67 @@ func (tb *TextBox) RemoveChar() {
 	tb.viewPosition = vs + vl
 }
 
+func (tb *TextBox) RemoveSelection() {
+	if tb.textSelection.IsZero() {
+		return
+	}
+	first, last := tb.textSelection.Ordered()
+
+	if first.StartPosition.Row == last.StartPosition.Row {
+		removeStart := first.StartPosition.Column
+		removeBytes := last.StartPosition.Column - first.StartPosition.Column
+		tb.Document.Remove(first.StartPosition.Row, removeStart, removeBytes)
+	} else {
+		if last.StartPosition.Row-first.StartPosition.Row >= 2 {
+			removeBytes := last.StartPosition.Column
+			tb.Document.Remove(last.StartPosition.Row, 0, removeBytes)
+
+			for i := last.StartPosition.Row - 1; i > first.StartPosition.Row; i-- {
+				lineLen := tb.Document.GetLineBytes(i)
+				tb.Document.Remove(i, 0, lineLen)
+				tb.Document.Remove(i, 0, 1)
+			}
+
+			removeBytes = first.StartPosition.Column
+			lineLen := tb.Document.GetLineBytes(first.StartPosition.Row)
+			tb.Document.Remove(first.StartPosition.Row, removeBytes, lineLen-removeBytes)
+
+			tb.Document.Remove(first.StartPosition.Row, removeBytes, 1)
+		} else {
+			removeBytes := last.StartPosition.Column
+			r := model.Range{
+				StartPosition: model.Position{
+					Row:    last.StartPosition.Row,
+					Column: removeBytes,
+				},
+				EndPosition: model.Position{
+					Row:    last.StartPosition.Row,
+					Column: tb.Document.GetLineBytes(last.StartPosition.Row),
+				},
+			}
+			sg := tb.Document.Read(r)
+			copy := sg.GetLine(0)
+
+			// tb.Document.Remove(last.StartPosition.Row, 0, removeBytes)
+			tb.Document.Remove(last.StartPosition.Row, 0, tb.Document.GetLineBytes(last.StartPosition.Row))
+			tb.Document.Remove(last.StartPosition.Row, 0, 1)
+
+			removeBytes = first.StartPosition.Column
+			lineLen := tb.Document.GetLineBytes(first.StartPosition.Row)
+			tb.Document.Remove(first.StartPosition.Row, removeBytes, lineLen-removeBytes)
+			tb.Document.InsertString(first.StartPosition.Row, removeBytes, copy)
+		}
+	}
+	tb.renderCache.Update(tb.context(), tb.Width)
+
+	tb.bytePos = view.CharacterReference{
+		StartPosition: first.StartPosition,
+		Bytes:         last.Bytes,
+	}
+	_, vs, vl := tb.modelToView()
+	tb.viewPosition = vs + vl
+}
+
 func (tb *TextBox) CanEdit() bool {
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
@@ -624,7 +685,7 @@ func (tb *TextBox) Submit() bool {
 }
 
 func (tb *TextBox) SelectionStart() {
-	tb.textSelection.FromPos = tb.bytePos.StartPosition
+	tb.textSelection.FromPos = tb.bytePos
 	tb.textSelectionEnabled = true
 }
 
@@ -755,7 +816,7 @@ func (tb *TextBox) move(dir int) {
 
 	// selection update
 	if tb.textSelectionEnabled {
-		tb.textSelection.ToPos = tb.bytePos.StartPosition
+		tb.textSelection.ToPos = tb.bytePos
 	}
 }
 

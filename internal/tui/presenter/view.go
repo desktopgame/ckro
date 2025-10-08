@@ -23,6 +23,7 @@ type View interface {
 	CursorUpdate()
 	InsertString(s string)
 	RemoveChar()
+	RemoveSelection()
 	Submit() bool
 	SelectionStart()
 	SelectionEnd()

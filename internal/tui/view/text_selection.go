@@ -3,21 +3,21 @@ package view
 import "github.com/desktopgame/ckro/internal/tui/model"
 
 type TextSelection struct {
-	FromPos model.Position
-	ToPos   model.Position
+	FromPos CharacterReference
+	ToPos   CharacterReference
 }
 
 func (ts TextSelection) IsZero() bool {
-	return ts.FromPos.Row == ts.ToPos.Row && ts.FromPos.Column == ts.ToPos.Column
+	return ts.FromPos.StartPosition.Row == ts.ToPos.StartPosition.Row && ts.FromPos.StartPosition.Column == ts.ToPos.StartPosition.Column
 }
 
-func (ts TextSelection) Ordered() (First model.Position, Last model.Position) {
-	if ts.FromPos.Row < ts.ToPos.Row {
+func (ts TextSelection) Ordered() (First CharacterReference, Last CharacterReference) {
+	if ts.FromPos.StartPosition.Row < ts.ToPos.StartPosition.Row {
 		return ts.FromPos, ts.ToPos
-	} else if ts.FromPos.Row > ts.ToPos.Row {
+	} else if ts.FromPos.StartPosition.Row > ts.ToPos.StartPosition.Row {
 		return ts.ToPos, ts.FromPos
 	}
-	if ts.FromPos.Column < ts.ToPos.Column {
+	if ts.FromPos.StartPosition.Column < ts.ToPos.StartPosition.Column {
 		return ts.FromPos, ts.ToPos
 	}
 	return ts.ToPos, ts.FromPos
@@ -28,16 +28,16 @@ func (ts TextSelection) Contain(at model.Position) bool {
 		return false
 	}
 	first, last := ts.Ordered()
-	if at.Row < first.Row || at.Row > last.Row {
+	if at.Row < first.StartPosition.Row || at.Row > last.StartPosition.Row {
 		return false
 	}
-	if at.Row == first.Row {
-		if at.Column < first.Column {
+	if at.Row == first.StartPosition.Row {
+		if at.Column < first.StartPosition.Column {
 			return false
 		}
 	}
-	if at.Row == last.Row {
-		if at.Column >= last.Column {
+	if at.Row == last.StartPosition.Row {
+		if at.Column >= last.StartPosition.Column {
 			return false
 		}
 	}

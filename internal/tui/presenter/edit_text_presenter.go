@@ -84,16 +84,26 @@ func (edit *EditTextPresenter) Handle(view View, ev tcell.Event) {
 			edit.selectionEnd(view)
 			view.MoveLineEnd()
 		case tcell.KeyBackspace, tcell.KeyBackspace2:
-			edit.selectionEnd(view)
-			view.RemoveChar()
+			if edit.Selection {
+				view.RemoveSelection()
+				edit.selectionEnd(view)
+			} else {
+				view.RemoveChar()
+			}
 		case tcell.KeyEnter:
-			edit.selectionEnd(view)
 			if !view.Submit() {
+				if edit.Selection {
+					view.RemoveSelection()
+					edit.selectionEnd(view)
+				}
 				view.InsertString("\n")
 			}
 			edit.modify()
 		case tcell.KeyTAB:
-			edit.selectionEnd(view)
+			if edit.Selection {
+				view.RemoveSelection()
+				edit.selectionEnd(view)
+			}
 			view.InsertString("\t")
 			edit.modify()
 		case tcell.KeyRune:
@@ -101,7 +111,10 @@ func (edit *EditTextPresenter) Handle(view View, ev tcell.Event) {
 				edit.inputBuffer = append(edit.inputBuffer, e.Rune())
 				inputString := string(edit.inputBuffer)
 				if text.GraphemeLength(inputString) == 1 {
-					edit.selectionEnd(view)
+					if edit.Selection {
+						view.RemoveSelection()
+						edit.selectionEnd(view)
+					}
 					view.InsertString(inputString)
 					edit.inputBuffer = []rune{}
 					edit.modify()
