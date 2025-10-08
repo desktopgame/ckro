@@ -1,8 +1,9 @@
-package tui
+package tui_test
 
 import (
 	"testing"
 
+	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/desktopgame/ckro/internal/tui/extensions/litemark"
 	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/stretchr/testify/assert"
@@ -12,8 +13,8 @@ import (
 // Testing Library
 //
 
-func newPlainTextBox(width int, height int) *TextBox {
-	tb := TextBox{}
+func newPlainTextBox(width int, height int) *tui.TextBox {
+	tb := tui.TextBox{}
 	tb.Init()
 	tb.X = 0
 	tb.Y = 0
@@ -25,13 +26,13 @@ func newPlainTextBox(width int, height int) *TextBox {
 	doc.Init()
 	tb.Document = &doc
 
-	engine := PlainTextEngine{}
+	engine := tui.PlainTextEngine{}
 	tb.TextEngine = &engine
 	return &tb
 }
 
-func newStyledTextBox(width int, height int) *TextBox {
-	tb := TextBox{}
+func newStyledTextBox(width int, height int) *tui.TextBox {
+	tb := tui.TextBox{}
 	tb.Init()
 	tb.X = 0
 	tb.Y = 0
@@ -43,12 +44,12 @@ func newStyledTextBox(width int, height int) *TextBox {
 	doc.Init()
 	tb.Document = &doc
 
-	engine := LitemarkEngine{}
+	engine := tui.LitemarkEngine{}
 	tb.TextEngine = &engine
 	return &tb
 }
 
-func mustBytePos(t *testing.T, tb *TextBox, row, column int) {
+func mustBytePos(t *testing.T, tb *tui.TextBox, row, column int) {
 	bPos := tb.GetBytePosition()
 	assert.Equal(t, bPos.StartPosition.Row, row)
 	assert.Equal(t, bPos.StartPosition.Column, column)
@@ -754,7 +755,7 @@ func TestTextBox43(t *testing.T) {
 
 	tb.RemoveChar()
 	mustBytePos(t, tb, 0, 4)
-	assert.Equal(t, tb.viewPosition, 3)
+	assert.Equal(t, tb.GetViewPosition(), 3)
 }
 
 func TestTextBox44(t *testing.T) {
@@ -928,7 +929,7 @@ func TestTextBoxFind01(t *testing.T) {
 
 	tb.FindPrev("a\nb")
 	mustBytePos(t, tb, 0, 1)
-	assert.Equal(t, tb.bytePos.Bytes, 1)
+	assert.Equal(t, tb.GetBytePosition().Bytes, 1)
 
 	tb.MoveLineEnd()
 	tb.MoveDown()
@@ -938,7 +939,7 @@ func TestTextBoxFind01(t *testing.T) {
 	tb.MoveDown()
 	tb.FindPrev("a\nbb\nccc")
 	mustBytePos(t, tb, 0, 1)
-	assert.Equal(t, tb.bytePos.Bytes, 1)
+	assert.Equal(t, tb.GetBytePosition().Bytes, 1)
 }
 
 func TestTextBoxFind02(t *testing.T) {
@@ -947,11 +948,11 @@ func TestTextBoxFind02(t *testing.T) {
 
 	tb.FindPrev("cc")
 	mustBytePos(t, tb, 2, 1)
-	assert.Equal(t, tb.bytePos.Bytes, 1)
+	assert.Equal(t, tb.GetBytePosition().Bytes, 1)
 
 	tb.FindPrev("bb")
 	mustBytePos(t, tb, 1, 0)
-	assert.Equal(t, tb.bytePos.Bytes, 1)
+	assert.Equal(t, tb.GetBytePosition().Bytes, 1)
 }
 
 func TestTextBoxFind03(t *testing.T) {
@@ -962,15 +963,15 @@ func TestTextBoxFind03(t *testing.T) {
 
 	tb.FindNext("a\nbb")
 	mustBytePos(t, tb, 0, 1)
-	assert.Equal(t, tb.bytePos.Bytes, 1)
+	assert.Equal(t, tb.GetBytePosition().Bytes, 1)
 
 	tb.FindNext("bb")
 	mustBytePos(t, tb, 1, 0)
-	assert.Equal(t, tb.bytePos.Bytes, 1)
+	assert.Equal(t, tb.GetBytePosition().Bytes, 1)
 
 	tb.FindNext("b\nc")
 	mustBytePos(t, tb, 1, 1)
-	assert.Equal(t, tb.bytePos.Bytes, 1)
+	assert.Equal(t, tb.GetBytePosition().Bytes, 1)
 }
 
 func TestTextBoxFind04(t *testing.T) {
@@ -981,17 +982,17 @@ func TestTextBoxFind04(t *testing.T) {
 
 	tb.FindNext("あいう")
 	mustBytePos(t, tb, 0, 0)
-	assert.Equal(t, tb.bytePos.Bytes, len("あ"))
+	assert.Equal(t, tb.GetBytePosition().Bytes, len("あ"))
 
 	tb.FindNext("う\nbb")
 	mustBytePos(t, tb, 0, len("あい"))
-	assert.Equal(t, tb.bytePos.Bytes, len("う"))
+	assert.Equal(t, tb.GetBytePosition().Bytes, len("う"))
 
 	assert.False(t, tb.FindNext("う"))
 
 	tb.FindNext("か")
 	mustBytePos(t, tb, 2, 0)
-	assert.Equal(t, tb.bytePos.Bytes, len("か"))
+	assert.Equal(t, tb.GetBytePosition().Bytes, len("か"))
 }
 
 func TestTextBoxFind05(t *testing.T) {
@@ -1000,13 +1001,13 @@ func TestTextBoxFind05(t *testing.T) {
 
 	tb.FindPrev("bb\nか")
 	mustBytePos(t, tb, 1, 0)
-	assert.Equal(t, tb.bytePos.Bytes, 1)
+	assert.Equal(t, tb.GetBytePosition().Bytes, 1)
 
 	assert.False(t, tb.FindPrev("あいう\nb"))
 
 	tb.FindPrev("あいう\n")
 	mustBytePos(t, tb, 0, 0)
-	assert.Equal(t, tb.bytePos.Bytes, len("あ"))
+	assert.Equal(t, tb.GetBytePosition().Bytes, len("あ"))
 }
 
 func TestTextBoxReplace01(t *testing.T) {
