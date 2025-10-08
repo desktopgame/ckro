@@ -18,39 +18,6 @@ func WithCenter(ctrl Control, width int, height int) *Center {
 	return &c
 }
 
-// Layout composition helpers
-func WithSeparators(orientation Orientation, controls ...Control) *Box {
-	if len(controls) == 0 {
-		return NewHBox()
-	}
-
-	var box *Box
-	var separator *Tile
-
-	if orientation == Horizontal {
-		box = NewHBox()
-		separator = NewVerticalSeparator()
-	} else {
-		box = NewVBox()
-		separator = NewHorizontalSeparator()
-	}
-
-	for i, ctrl := range controls {
-		if i > 0 {
-			// Clone separator for each use
-			sep := NewTile(separator.TextPresenter)
-			sep.MinimumWidth = separator.MinimumWidth
-			sep.MinimumHeight = separator.MinimumHeight
-			sep.FlexibleWidth = separator.FlexibleWidth
-			sep.FlexibleHeight = separator.FlexibleHeight
-			box.Controls = append(box.Controls, sep)
-		}
-		box.Controls = append(box.Controls, ctrl)
-	}
-
-	return box
-}
-
 // Tile creation utilities
 func NewTile(presenter TextPresenter) *Tile {
 	tile := &Tile{}
