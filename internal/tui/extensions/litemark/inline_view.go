@@ -209,11 +209,11 @@ func (il *InlineView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Tex
 		}
 	} else {
 		for i, cluster := range clusters {
-			if i <= inlineElement.Pad {
+			if i < inlineElement.Pad {
 				continue
 			}
 			if bytes == bytePos.Column-r.StartPosition.Column {
-				return i - inlineElement.Pad - 1
+				return i - inlineElement.Pad
 			}
 			bytes += len(cluster)
 		}
