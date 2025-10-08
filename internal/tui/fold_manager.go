@@ -76,7 +76,7 @@ func (fm *FoldManager) AutoFold(doc model.Document, elements []model.Element) {
 	for _, element := range elements {
 		if fold, ok := element.(*model.FoldBlockElement); ok {
 			r := fold.GetRange(0)
-			if r.EndPosition.Row-r.StartPosition.Row > 10 {
+			if r.EndPosition.Row-r.StartPosition.Row >= 10 {
 				fm.addFold(doc, element)
 			}
 		}
