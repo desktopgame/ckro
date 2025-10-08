@@ -42,21 +42,38 @@ func (il *InlineView) DrawWithTabStop(ctx view.Context, textLayout *view.TextLay
 		style = style.Background(bg)
 	}
 
-	clusters := text.GraphemeClusters(ctx.GetSegment(textLayout.Element, 1).GetLine(0))
+	selectStyle := tcell.StyleDefault.Reverse(true)
+
+	r := textLayout.Element.GetRange(1)
+	sg := ctx.Document.Read(r)
+	clusters := text.GraphemeClusters(sg.GetLine(0))
 	x := 0
 	y := 0
+	at := r.StartPosition
+	sel := ctx.TextSelection
 	for _, cluster := range clusters {
+		next := at
+		next.Column += len(cluster)
 
 		if cluster == "\t" {
 			spaces := text.TabWidth - (column % text.TabWidth)
+			tabStyle := tcell.StyleDefault
+			if sel.Contain(at) {
+				tabStyle = selectStyle
+			}
 			for i := 0; i < spaces; i++ {
-				renderer.SetContent(x+i, y, ' ', nil, tcell.StyleDefault)
+				renderer.SetContent(x+i, y, ' ', nil, tabStyle)
 			}
 			x += spaces
 			column += spaces
 
 		} else {
 			runes := []rune(cluster)
+
+			charStyle := style
+			if sel.Contain(at) {
+				charStyle = selectStyle
+			}
 
 			if len(runes) > 0 {
 				mainRune := runes[0]
@@ -68,17 +85,18 @@ func (il *InlineView) DrawWithTabStop(ctx view.Context, textLayout *view.TextLay
 				}
 				width := runewidth.RuneWidth(mainRune)
 
-				renderer.SetContent(x, y, mainRune, combining, style)
+				renderer.SetContent(x, y, mainRune, combining, charStyle)
 				// 全角文字の場合、次のセルを空にする
 				if width == 2 {
 					x++
 					column++
-					renderer.SetContent(x, y, 0, nil, style)
+					renderer.SetContent(x, y, 0, nil, charStyle)
 				}
 			}
 			x++
 			column++
 		}
+		at = next
 	}
 	return column
 }

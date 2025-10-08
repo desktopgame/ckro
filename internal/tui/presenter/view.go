@@ -24,6 +24,8 @@ type View interface {
 	InsertString(s string)
 	RemoveChar()
 	Submit() bool
+	SelectionStart()
+	SelectionEnd()
 	MoveLeft()
 	MoveRight()
 	MoveUp()

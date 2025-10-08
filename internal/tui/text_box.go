@@ -31,6 +31,9 @@ type TextBox struct {
 	bytePos     view.CharacterReference
 
 	foldManager FoldManager
+
+	textSelection        view.TextSelection
+	textSelectionEnabled bool
 }
 
 // Init is initialize TextBox.
@@ -50,9 +53,10 @@ func (tb *TextBox) Init() {
 
 func (tb *TextBox) context() view.Context {
 	return view.Context{
-		Resolver:    tb.TextEngine,
-		Document:    tb.Document,
-		FoldManager: &tb.foldManager,
+		Resolver:      tb.TextEngine,
+		Document:      tb.Document,
+		FoldManager:   &tb.foldManager,
+		TextSelection: tb.textSelection,
 	}
 }
 
@@ -619,6 +623,16 @@ func (tb *TextBox) Submit() bool {
 	return false
 }
 
+func (tb *TextBox) SelectionStart() {
+	tb.textSelection.FromPos = tb.bytePos.StartPosition
+	tb.textSelectionEnabled = true
+}
+
+func (tb *TextBox) SelectionEnd() {
+	tb.textSelectionEnabled = false
+	tb.textSelection = view.TextSelection{}
+}
+
 func (tb *TextBox) move(dir int) {
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
@@ -737,6 +751,11 @@ func (tb *TextBox) move(dir int) {
 		tb.viewPosition = elementStart + newLocalViewPos
 		bPos := tview.ConvertModel(ctx, tb.renderCache.GetLayout(elementIndex), newLocalViewPos)
 		tb.bytePos = bPos
+	}
+
+	// selection update
+	if tb.textSelectionEnabled {
+		tb.textSelection.ToPos = tb.bytePos.StartPosition
 	}
 }
 
