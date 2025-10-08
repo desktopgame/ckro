@@ -483,6 +483,7 @@ func (app *Application) loopMiniBuffer() {
 					}
 					tb.MoveRight()
 					tb.CursorUpdate()
+					app.window.Repaint()
 				}
 
 				if _, ok := ev.(*llm.MessageEvent); ok {
