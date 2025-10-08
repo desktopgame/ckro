@@ -67,11 +67,3 @@ func CompositeMoveDown(ctx Context, textLayout *TextLayout, viewLocalPos int) in
 	}
 	return sumTableValue(table, index-1) + newCol
 }
-
-func CompositeMoveLeft(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
-	return -1
-}
-
-func CompositeMoveRight(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
-	return -1
-}
