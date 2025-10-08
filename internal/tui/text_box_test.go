@@ -5,7 +5,6 @@ import (
 
 	"github.com/desktopgame/ckro/internal/tui/extensions/litemark"
 	"github.com/desktopgame/ckro/internal/tui/model"
-	"github.com/desktopgame/ckro/internal/tui/view"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -74,14 +73,7 @@ func TestTextBox02(t *testing.T) {
 func TestTextBox03(t *testing.T) {
 	tb := newPlainTextBox(10, 10)
 	tb.InsertString("1234\n1234\n123あ")
-	tb.bytePos = view.CharacterReference{
-		StartPosition: model.Position{
-			Row:    0,
-			Column: 0,
-		},
-		Bytes: 1,
-	}
-	tb.viewPosition = 0
+	tb.MoveTextStart()
 
 	tb.MoveRight()
 	mustBytePos(t, tb, 0, len("1"))
@@ -90,14 +82,7 @@ func TestTextBox03(t *testing.T) {
 func TestTextBox04(t *testing.T) {
 	tb := newPlainTextBox(10, 10)
 	tb.InsertString("1234\n1234\n123あ")
-	tb.bytePos = view.CharacterReference{
-		StartPosition: model.Position{
-			Row:    0,
-			Column: 0,
-		},
-		Bytes: 1,
-	}
-	tb.viewPosition = 0
+	tb.MoveTextStart()
 
 	tb.MoveRight() // 2
 	tb.MoveRight() // 3
@@ -109,14 +94,7 @@ func TestTextBox04(t *testing.T) {
 func TestTextBox05(t *testing.T) {
 	tb := newPlainTextBox(10, 10)
 	tb.InsertString("1234\n1234\n123あ")
-	tb.bytePos = view.CharacterReference{
-		StartPosition: model.Position{
-			Row:    0,
-			Column: 0,
-		},
-		Bytes: 1,
-	}
-	tb.viewPosition = 0
+	tb.MoveTextStart()
 
 	tb.MoveRight() // 2
 	tb.MoveRight() // 3
@@ -141,14 +119,7 @@ func TestTextBox06(t *testing.T) {
 func TestTextBox07(t *testing.T) {
 	tb := newPlainTextBox(10, 10)
 	tb.InsertString("1234\n\n\n```\n123\n```")
-	tb.bytePos = view.CharacterReference{
-		StartPosition: model.Position{
-			Row:    0,
-			Column: 0,
-		},
-		Bytes: 1,
-	}
-	tb.viewPosition = 0
+	tb.MoveTextStart()
 
 	tb.InsertString("\n")
 	mustBytePos(t, tb, 1, 0)
@@ -256,14 +227,7 @@ func TestTextBox14(t *testing.T) {
 func TestTextBox15(t *testing.T) {
 	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1234\n\n\n```\n123\n```\n\n")
-	tb.bytePos = view.CharacterReference{
-		StartPosition: model.Position{
-			Row:    0,
-			Column: 0,
-		},
-		Bytes: 1,
-	}
-	tb.viewPosition = 0
+	tb.MoveTextStart()
 
 	tb.MoveDown()
 	mustBytePos(t, tb, 1, 0)
@@ -281,14 +245,7 @@ func TestTextBox15(t *testing.T) {
 func TestTextBox16(t *testing.T) {
 	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1234\n\n\n```\n123\n```\n\n")
-	tb.bytePos = view.CharacterReference{
-		StartPosition: model.Position{
-			Row:    0,
-			Column: 0,
-		},
-		Bytes: 1,
-	}
-	tb.viewPosition = 0
+	tb.MoveTextStart()
 
 	tb.MoveDown()
 	mustBytePos(t, tb, 1, 0)
@@ -311,14 +268,7 @@ func TestTextBox16(t *testing.T) {
 func TestTextBox17(t *testing.T) {
 	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1234\n\n\n```\n123\n```\n\n")
-	tb.bytePos = view.CharacterReference{
-		StartPosition: model.Position{
-			Row:    0,
-			Column: 0,
-		},
-		Bytes: 1,
-	}
-	tb.viewPosition = 0
+	tb.MoveTextStart()
 
 	tb.MoveDown()
 	mustBytePos(t, tb, 1, 0)
@@ -529,14 +479,7 @@ func TestTextBox28(t *testing.T) {
 func TestTextBox29(t *testing.T) {
 	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1234\n\n\n```\n123\nabcd\n```\n\n")
-	tb.bytePos = view.CharacterReference{
-		StartPosition: model.Position{
-			Row:    0,
-			Column: 0,
-		},
-		Bytes: 1,
-	}
-	tb.viewPosition = 0
+	tb.MoveTextStart()
 
 	tb.MoveDown()
 	mustBytePos(t, tb, 1, 0)
@@ -570,14 +513,7 @@ func TestTextBox29(t *testing.T) {
 func TestTextBox30(t *testing.T) {
 	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1234\n\n\n```\n123\nabcd\n```\n\n")
-	tb.bytePos = view.CharacterReference{
-		StartPosition: model.Position{
-			Row:    0,
-			Column: 0,
-		},
-		Bytes: 1,
-	}
-	tb.viewPosition = 0
+	tb.MoveTextStart()
 
 	tb.MoveDown()
 	mustBytePos(t, tb, 1, 0)
@@ -614,14 +550,7 @@ func TestTextBox30(t *testing.T) {
 func TestTextBox31(t *testing.T) {
 	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1234\n\n\n```\n123\nabcd\n```\n\n")
-	tb.bytePos = view.CharacterReference{
-		StartPosition: model.Position{
-			Row:    0,
-			Column: 0,
-		},
-		Bytes: 1,
-	}
-	tb.viewPosition = 0
+	tb.MoveTextStart()
 
 	tb.MoveDown()
 	mustBytePos(t, tb, 1, 0)
@@ -662,14 +591,7 @@ func TestTextBox33(t *testing.T) {
 func TestTextBox34(t *testing.T) {
 	tb := newStyledTextBox(10, 10)
 	tb.InsertString("1\n---\n")
-	tb.bytePos = view.CharacterReference{
-		StartPosition: model.Position{
-			Row:    0,
-			Column: 0,
-		},
-		Bytes: 1,
-	}
-	tb.viewPosition = 0
+	tb.MoveTextStart()
 
 	tb.MoveRight()
 	mustBytePos(t, tb, 0, 1)
