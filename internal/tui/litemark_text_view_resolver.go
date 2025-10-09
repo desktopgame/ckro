@@ -6,10 +6,10 @@ import (
 	"github.com/desktopgame/ckro/internal/tui/view"
 )
 
-type LitemarkEngine struct {
+type LitemarkTextViewResolver struct {
 }
 
-func (l *LitemarkEngine) Resolve(e model.Element) view.TextView {
+func (l *LitemarkTextViewResolver) Resolve(e model.Element) view.TextView {
 	switch e.(type) {
 	case *litemark.HeadingElement:
 		return &litemark.HeadingView{}

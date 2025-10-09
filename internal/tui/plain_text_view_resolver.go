@@ -5,10 +5,10 @@ import (
 	"github.com/desktopgame/ckro/internal/tui/view"
 )
 
-type PlainTextEngine struct {
+type PlainTextViewResolver struct {
 }
 
-func (p *PlainTextEngine) Resolve(e model.Element) view.TextView {
+func (p *PlainTextViewResolver) Resolve(e model.Element) view.TextView {
 	switch e.(type) {
 	case *model.PlainElement:
 		return &view.PlainTextView{}

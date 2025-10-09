@@ -27,7 +27,7 @@ func newPlainTextBox(width int, height int) *tui.TextBox {
 	doc.Init()
 	tb.Document = &doc
 
-	engine := tui.PlainTextEngine{}
+	engine := tui.PlainTextViewResolver{}
 	tb.TextEngine = &engine
 	return &tb
 }
@@ -45,7 +45,7 @@ func newStyledTextBox(width int, height int) *tui.TextBox {
 	doc.Init()
 	tb.Document = &doc
 
-	engine := tui.LitemarkEngine{}
+	engine := tui.LitemarkTextViewResolver{}
 	tb.TextEngine = &engine
 	return &tb
 }
