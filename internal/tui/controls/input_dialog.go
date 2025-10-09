@@ -8,6 +8,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+// InputDialog is dialog with input form.
 type InputDialog struct {
 	x, y          int
 	Width, Height int
@@ -26,9 +27,10 @@ type InputDialog struct {
 	initialValue   string
 }
 
+// NewInputDialog returns InputDialog.
 func NewInputDialog(title, prompt, initialValue string, onOK func(base.Runtime, string), onCancel func(base.Runtime)) *InputDialog {
 	id := &InputDialog{
-		selectedButton: 0, // デフォルトでOKを選択
+		selectedButton: 0,
 		onOK:           onOK,
 		onCancel:       onCancel,
 		initialValue:   initialValue,
@@ -37,29 +39,25 @@ func NewInputDialog(title, prompt, initialValue string, onOK func(base.Runtime, 
 	return id
 }
 
+// Init is initialize InputDialog.
 func (id *InputDialog) Init(title, prompt string) {
-	// タイトルラベル
 	id.titleLabel = tui.NewCenteredLabelTile(title)
 	id.titleLabel.FlexibleWidth = true
 	id.titleLabel.MinimumHeight = 1
 
-	// プロンプトラベル
 	id.promptLabel = tui.NewLabelTile(prompt)
 	id.promptLabel.FlexibleWidth = true
 	id.promptLabel.MinimumHeight = 1
 
-	// 入力フィールド
 	id.inputField = tui.NewEditTile()
 	id.inputField.FlexibleWidth = true
 	id.inputField.MinimumHeight = 1
 	id.inputField.TextBox.ShowCursor = true
 
-	// 初期値を設定
 	if id.initialValue != "" {
 		id.inputField.TextBox.InsertString(id.initialValue)
 	}
 
-	// ボタン
 	id.okButton = tui.NewCenteredLabelTile("[ OK ]")
 	id.okButton.MinimumWidth = 8
 	id.okButton.MinimumHeight = 1
@@ -68,14 +66,12 @@ func (id *InputDialog) Init(title, prompt string) {
 	id.cancelButton.MinimumWidth = 12
 	id.cancelButton.MinimumHeight = 1
 
-	// ボタンを水平に配置
 	id.buttonBox = tui.NewHBox(
 		id.okButton,
 		tui.NewFixedTile(&presenter.LabelTextPresenter{Text: "  "}, 2, 1), // スペーサー
 		id.cancelButton,
 	)
 
-	// 全体を垂直に配置
 	id.dialogBox = tui.NewVBox(
 		id.titleLabel,
 		tui.NewHorizontalSeparator(),
@@ -89,10 +85,9 @@ func (id *InputDialog) Init(title, prompt string) {
 }
 
 func (id *InputDialog) updateButtonStyles() {
-	// ボタンフォーカス時のみ選択されたボタンをハイライト表示
+	// highlight selected button
 	if !id.inputField.TextBox.ShowCursor {
 		if id.selectedButton == 0 {
-			// OKボタンを選択状態に
 			if labelPresenter, ok := id.okButton.TextPresenter.(*presenter.LabelTextPresenter); ok {
 				labelPresenter.Text = "> OK <"
 			}
@@ -100,7 +95,6 @@ func (id *InputDialog) updateButtonStyles() {
 				labelPresenter.Text = "[ Cancel ]"
 			}
 		} else {
-			// Cancelボタンを選択状態に
 			if labelPresenter, ok := id.okButton.TextPresenter.(*presenter.LabelTextPresenter); ok {
 				labelPresenter.Text = "[ OK ]"
 			}
@@ -109,7 +103,7 @@ func (id *InputDialog) updateButtonStyles() {
 			}
 		}
 	} else {
-		// 入力フィールドフォーカス時は通常表示
+		// normal shown if focus on input field
 		if labelPresenter, ok := id.okButton.TextPresenter.(*presenter.LabelTextPresenter); ok {
 			labelPresenter.Text = "[ OK ]"
 		}
@@ -148,21 +142,19 @@ func (id *InputDialog) Handle(ev base.Event) {
 		switch keyEvent.Key() {
 		case tcell.KeyEnter:
 			if id.inputField.TextBox.ShowCursor {
-				// 入力フィールドフォーカス時はOKボタンと同じ動作
+				// same operation to ok button, when enter on input field
 				if id.onOK != nil {
 					inputValue := id.getInputValue()
 					id.onOK(ev.GetRuntime(), inputValue)
 				}
 			} else {
-				// ボタンフォーカス時は選択されたボタンを実行
+				// execute button
 				if id.selectedButton == 0 {
-					// OKボタン
 					if id.onOK != nil {
 						inputValue := id.getInputValue()
 						id.onOK(ev.GetRuntime(), inputValue)
 					}
 				} else {
-					// Cancelボタン
 					if id.onCancel != nil {
 						id.onCancel(ev.GetRuntime())
 					}
@@ -170,19 +162,17 @@ func (id *InputDialog) Handle(ev base.Event) {
 			}
 			return
 		case tcell.KeyEscape:
-			// Escapeキーでキャンセル
+			// cancel by escape
 			if id.onCancel != nil {
 				id.onCancel(ev.GetRuntime())
 			}
 			return
 		case tcell.KeyLeft, tcell.KeyRight:
-			// 入力フィールドフォーカス時は入力フィールドに転送
 			if id.inputField.TextBox.ShowCursor {
 				id.inputField.Handle(ev)
 				return
 			}
 		default:
-			// 入力フィールドフォーカス時は文字入力を転送
 			if id.inputField.TextBox.ShowCursor {
 				id.inputField.Handle(ev)
 			}
@@ -192,7 +182,6 @@ func (id *InputDialog) Handle(ev base.Event) {
 }
 
 func (id *InputDialog) getInputValue() string {
-	// 入力フィールドの内容を取得
 	tb := id.inputField.TextBox
 	sg := tb.Document.Read(model.Range{
 		StartPosition: model.Position{
@@ -214,7 +203,6 @@ func (id *InputDialog) Traverse(fm *tui.FocusManager) {
 }
 
 func (id *InputDialog) Focus(on bool) {
-	// フォーカス状態の管理
 	if on {
 		id.inputField.TextBox.ShowCursor = true
 	}
@@ -226,19 +214,17 @@ func (id *InputDialog) SubFocusFirst() {
 
 func (id *InputDialog) SubFocusPrev() bool {
 	if id.inputField.TextBox.ShowCursor {
-		// 入力フィールドからCancelボタンへ
+		// focus to cancel button
 		id.inputField.TextBox.ShowCursor = false
-		id.selectedButton = 1 // Cancelボタン
+		id.selectedButton = 1
 		id.updateButtonStyles()
 		return true
 	} else {
 		if id.selectedButton == 1 {
-			// CancelボタンからOKボタンへ
 			id.selectedButton = 0
 			id.updateButtonStyles()
 			return true
 		} else {
-			// OKボタンから入力フィールドへ
 			id.inputField.TextBox.ShowCursor = true
 			id.updateButtonStyles()
 			return true
@@ -248,19 +234,17 @@ func (id *InputDialog) SubFocusPrev() bool {
 
 func (id *InputDialog) SubFocusNext() bool {
 	if id.inputField.TextBox.ShowCursor {
-		// 入力フィールドからOKボタンへ
+		// focus to ok button
 		id.inputField.TextBox.ShowCursor = false
-		id.selectedButton = 0 // OKボタン
+		id.selectedButton = 0
 		id.updateButtonStyles()
 		return true
 	} else {
 		if id.selectedButton == 0 {
-			// OKボタンからCancelボタンへ
 			id.selectedButton = 1
 			id.updateButtonStyles()
 			return true
 		} else {
-			// Cancelボタンから入力フィールドへ
 			id.inputField.TextBox.ShowCursor = true
 			id.updateButtonStyles()
 			return true
@@ -270,7 +254,7 @@ func (id *InputDialog) SubFocusNext() bool {
 
 func (id *InputDialog) SubFocusLast() {
 	id.inputField.TextBox.ShowCursor = false
-	id.selectedButton = 1 // Cancelボタン
+	id.selectedButton = 1
 	id.updateButtonStyles()
 }
 
