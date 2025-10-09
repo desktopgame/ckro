@@ -593,10 +593,12 @@ func (tb *TextBox) RemoveSelection() {
 	first, last := tb.textSelection.Ordered()
 
 	if first.StartPosition.Row == last.StartPosition.Row {
+		// if selected range is single line
 		removeStart := first.StartPosition.Column
 		removeBytes := last.StartPosition.Column - first.StartPosition.Column
 		tb.Document.Remove(first.StartPosition.Row, removeStart, removeBytes)
 	} else {
+		// if selected range is multiple line
 		if last.StartPosition.Row-first.StartPosition.Row >= 2 {
 			removeBytes := last.StartPosition.Column
 			tb.Document.Remove(last.StartPosition.Row, 0, removeBytes)
