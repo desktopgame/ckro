@@ -6,9 +6,11 @@ import (
 	"github.com/desktopgame/ckro/internal/tui/view"
 )
 
+// LitemarkTextViewResolver implement TextViewResolver for litemark language.
 type LitemarkTextViewResolver struct {
 }
 
+// Resolve returns TextView, supports litemark language.
 func (l *LitemarkTextViewResolver) Resolve(e model.Element) view.TextView {
 	switch e.(type) {
 	case *litemark.HeadingElement:
