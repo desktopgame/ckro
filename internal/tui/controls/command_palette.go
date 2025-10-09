@@ -10,6 +10,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+// CommandPalette is vscode like command palette control.
 type CommandPalette struct {
 	x, y          int
 	Width, Height int
@@ -23,29 +24,28 @@ type CommandPalette struct {
 	inputFocused     bool
 }
 
+// NewCommandPalette returns CommandPalette
 func NewCommandPalette(commands []Command) *CommandPalette {
 	palette := &CommandPalette{}
 	palette.Init(commands)
 	return palette
 }
 
+// Init is initialize CommandPalette.
 func (cp *CommandPalette) Init(commands []Command) {
 	cp.allCommands = commands
 	cp.filteredCommands = make([]Command, len(commands))
 	copy(cp.filteredCommands, commands)
 	cp.inputFocused = true
 
-	// 検索入力フィールド
 	cp.searchInput = tui.NewEditTile()
 	cp.searchInput.FlexibleWidth = true
 	cp.searchInput.MinimumHeight = 1
 
-	// コマンドリスト
 	cp.commandList = tui.NewListTile(cp.GetLabels())
 	cp.commandList.FlexibleWidth = true
 	cp.commandList.FlexibleHeight = true
 
-	// 垂直レイアウトで組み合わせ
 	cp.paletteBox = tui.NewVBox(
 		cp.searchInput,
 		tui.NewHorizontalSeparator(),
@@ -82,55 +82,50 @@ func (cp *CommandPalette) Handle(ev base.Event) {
 		switch keyEvent.Key() {
 		case tcell.KeyUp:
 			if !cp.inputFocused {
-				// リストの上移動
 				if listPresenter, ok := cp.commandList.TextPresenter.(*presenter.ListTextPresenter); ok {
 					if listPresenter.SelectedIndex > 0 {
 						listPresenter.SelectedIndex--
 					}
 				}
-				return // イベントを消費
+				return
 			}
 		case tcell.KeyDown:
 			if !cp.inputFocused {
-				// リストの下移動
 				if listPresenter, ok := cp.commandList.TextPresenter.(*presenter.ListTextPresenter); ok {
 					if listPresenter.SelectedIndex < len(listPresenter.Items)-1 {
 						listPresenter.SelectedIndex++
 					}
 				}
-				return // イベントを消費
+				return
 			}
 		case tcell.KeyEnter:
 			if !cp.inputFocused {
-				// コマンド実行
+				// execute command
 				if listPresenter, ok := cp.commandList.TextPresenter.(*presenter.ListTextPresenter); ok {
 					selectedIndex := listPresenter.GetSelectedIndex()
 					if selectedIndex >= 0 {
 						cp.filteredCommands[selectedIndex].Execute(ev.GetRuntime(), cp)
 					}
 				}
-				return // イベントを消費
+				return
 			}
 		case tcell.KeyBackspace, tcell.KeyBackspace2:
 			if cp.inputFocused {
-				// 検索クエリから文字を削除
 				cp.removeLastChar()
 				cp.filterCommands()
-				return // イベントを消費
+				return
 			}
 		case tcell.KeyEscape:
 			ev.GetRuntime().Pop(-1)
 		default:
-			// 文字入力
 			if cp.inputFocused && keyEvent.Rune() != 0 {
 				cp.addChar(keyEvent.Rune())
 				cp.filterCommands()
-				return // イベントを消費
+				return
 			}
 		}
 	}
 
-	// フォーカスされているコントロールにイベントを転送
 	if cp.inputFocused {
 		cp.searchInput.Handle(ev)
 	} else {
@@ -139,17 +134,14 @@ func (cp *CommandPalette) Handle(ev base.Event) {
 }
 
 func (cp *CommandPalette) addChar(r rune) {
-	// 検索入力フィールドに文字を追加
 	cp.searchInput.TextBox.InsertString(string(r))
 }
 
 func (cp *CommandPalette) removeLastChar() {
-	// 検索入力フィールドから最後の文字を削除
 	cp.searchInput.TextBox.RemoveChar()
 }
 
 func (cp *CommandPalette) getSearchQuery() string {
-	// 検索入力フィールドの内容を取得
 	tb := cp.searchInput.TextBox
 	sg := tb.Document.Read(model.Range{
 		StartPosition: model.Position{
@@ -174,7 +166,7 @@ func (cp *CommandPalette) filterCommands() {
 		}
 	}
 
-	// リストを更新
+	// update list
 	if listPresenter, ok := cp.commandList.TextPresenter.(*presenter.ListTextPresenter); ok {
 		listPresenter.Items = cp.GetLabels()
 		listPresenter.SelectedIndex = 0
@@ -190,11 +182,9 @@ func (cp *CommandPalette) GetLabels() []string {
 }
 
 func (cp *CommandPalette) Traverse(fm *tui.FocusManager) {
-	// CommandPalette自体をFocusableとして登録
 	if cp.IsFocusable() {
 		fm.Register(cp)
 	}
-	// 子コントロールは登録しない（CommandPaletteが全てのイベントを処理）
 }
 
 func (cp *CommandPalette) Focus(on bool) {
