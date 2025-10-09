@@ -12,6 +12,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+// FolderChooser is folder choose dialog.
 type FolderChooser struct {
 	x, y          int
 	Width, Height int
@@ -33,6 +34,7 @@ type FolderEntry struct {
 	Path string
 }
 
+// NewFolderChooser returns FolderChooser.
 func NewFolderChooser(initialPath string, onFolderSelect func(base.Runtime, string), onCancel func(base.Runtime)) *FolderChooser {
 	fc := &FolderChooser{
 		currentPath:    initialPath,
@@ -43,23 +45,20 @@ func NewFolderChooser(initialPath string, onFolderSelect func(base.Runtime, stri
 	return fc
 }
 
+// Init is initialize FolderChooser.
 func (fc *FolderChooser) Init() {
-	// パス表示ラベル
 	fc.pathLabel = tui.NewLabelTile(fc.currentPath)
 	fc.pathLabel.FlexibleWidth = true
 	fc.pathLabel.MinimumHeight = 1
 
-	// フォルダリスト
 	fc.folderList = tui.NewListTile([]string{})
 	fc.folderList.FlexibleWidth = true
 	fc.folderList.FlexibleHeight = true
 
-	// ヘルプラベル
 	fc.helpLabel = tui.NewLabelTile("Enter: Select Folder | Right/Space: Expand | Left/Backspace: Up | Esc: Cancel")
 	fc.helpLabel.FlexibleWidth = true
 	fc.helpLabel.MinimumHeight = 1
 
-	// 垂直レイアウトで組み合わせ
 	fc.chooserBox = tui.NewVBox(
 		fc.pathLabel,
 		tui.NewHorizontalSeparator(),
@@ -68,7 +67,6 @@ func (fc *FolderChooser) Init() {
 		fc.helpLabel,
 	)
 
-	// 初期ディレクトリを読み込み
 	fc.loadDirectory()
 }
 
@@ -76,15 +74,14 @@ func (fc *FolderChooser) loadDirectory() {
 	fc.folders = nil
 	fc.selectedIndex = 0
 
-	// 現在のディレクトリを読み込み
+	// load directory
 	entries, err := os.ReadDir(fc.currentPath)
 	if err != nil {
-		// エラーの場合は空のリストを表示
 		fc.updateFolderList()
 		return
 	}
 
-	// 親ディレクトリへのエントリを追加（ルートディレクトリでない場合）
+	// parent directory
 	if fc.currentPath != "/" && fc.currentPath != "" {
 		fc.folders = append(fc.folders, FolderEntry{
 			Name: "..",
@@ -92,12 +89,11 @@ func (fc *FolderChooser) loadDirectory() {
 		})
 	}
 
-	// ディレクトリのみを追加
 	var dirs []FolderEntry
 
 	for _, entry := range entries {
 		if entry.IsDir() {
-			// 隠しフォルダをスキップ
+			// skip hidden folders
 			if strings.HasPrefix(entry.Name(), ".") && entry.Name() != ".." {
 				continue
 			}
@@ -110,12 +106,10 @@ func (fc *FolderChooser) loadDirectory() {
 		}
 	}
 
-	// ディレクトリをソート
 	sort.Slice(dirs, func(i, j int) bool {
 		return strings.ToLower(dirs[i].Name) < strings.ToLower(dirs[j].Name)
 	})
 
-	// ディレクトリを追加
 	fc.folders = append(fc.folders, dirs...)
 
 	fc.updateFolderList()
@@ -184,7 +178,7 @@ func (fc *FolderChooser) Handle(ev base.Event) {
 			}
 			return
 		case tcell.KeyEnter:
-			// Enterキーでフォルダを選択（決定）
+			// select folder
 			if len(fc.folders) > 0 && fc.selectedIndex < len(fc.folders) {
 				selectedFolder := fc.folders[fc.selectedIndex]
 				if fc.onFolderSelect != nil {
@@ -193,7 +187,7 @@ func (fc *FolderChooser) Handle(ev base.Event) {
 			}
 			return
 		case tcell.KeyRight:
-			// 右矢印キーでフォルダを展開（移動）
+			// move to subfolder
 			if len(fc.folders) > 0 && fc.selectedIndex < len(fc.folders) {
 				selectedFolder := fc.folders[fc.selectedIndex]
 				fc.currentPath = selectedFolder.Path
@@ -201,7 +195,7 @@ func (fc *FolderChooser) Handle(ev base.Event) {
 			}
 			return
 		case tcell.KeyLeft, tcell.KeyBackspace, tcell.KeyBackspace2:
-			// 左矢印キーまたはBackspaceで親ディレクトリに移動
+			// move parent directory
 			if fc.currentPath != "/" && fc.currentPath != "" {
 				fc.currentPath = filepath.Dir(fc.currentPath)
 				fc.loadDirectory()
@@ -214,10 +208,9 @@ func (fc *FolderChooser) Handle(ev base.Event) {
 			return
 		}
 
-		// 文字キーでの処理
 		switch keyEvent.Rune() {
 		case ' ':
-			// スペースキーでフォルダを展開（移動）
+			// move to subfolder
 			if len(fc.folders) > 0 && fc.selectedIndex < len(fc.folders) {
 				selectedFolder := fc.folders[fc.selectedIndex]
 				fc.currentPath = selectedFolder.Path
@@ -227,7 +220,6 @@ func (fc *FolderChooser) Handle(ev base.Event) {
 		}
 	}
 
-	// デフォルトのイベント処理
 	fc.folderList.Handle(ev)
 }
 
@@ -238,25 +230,20 @@ func (fc *FolderChooser) Traverse(fm *tui.FocusManager) {
 }
 
 func (fc *FolderChooser) Focus(on bool) {
-	// フォーカス状態の管理
 }
 
 func (fc *FolderChooser) SubFocusFirst() {
-	// サブフォーカスの最初の要素
 }
 
 func (fc *FolderChooser) SubFocusPrev() bool {
-	// サブフォーカスの前の要素
 	return false
 }
 
 func (fc *FolderChooser) SubFocusNext() bool {
-	// サブフォーカスの次の要素
 	return false
 }
 
 func (fc *FolderChooser) SubFocusLast() {
-	// サブフォーカスの最後の要素
 }
 
 func (fc *FolderChooser) IsFocusable() bool {
