@@ -184,6 +184,7 @@ func (buf *Buffer) RemoveString(row int, column int, length int) {
 	}
 }
 
+// ReplaceAll is replace a all content by Reader content
 func (buf *Buffer) ReplaceAll(r io.Reader) {
 	lines := []*Line{}
 	sc := bufio.NewScanner(r)
