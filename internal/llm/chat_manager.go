@@ -243,6 +243,10 @@ func (cm *ChatManager) Post(ctx context.Context, message string, output chan Eve
 	if status == Cancel {
 		return nil
 	}
+	if status == Error {
+		output <- &ErrorEvent{e: chatEvent.GetError()}
+		return chatEvent.GetError()
+	}
 
 	err := cm.turn(ctx, chatEvent.result, input, output)
 	if err != nil {
