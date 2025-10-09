@@ -7,9 +7,14 @@ go install github.com/desktopgame/ckro/cmd/app@latest
 ````
 
 ## How to use
-オプションはありません。コマンドを実行するとエディターが起動します。
+コマンドを実行するとエディターが起動します。
 ````
 ckro
+````
+
+オプションで起動ディレクトリを指定できます。
+````
+ckro -d ./project
 ````
 
 ### Shortcuts
