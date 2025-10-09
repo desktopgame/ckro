@@ -333,9 +333,9 @@ func (tb *TextBox) modelToView(bytePos view.CharacterReference) (ElementIndex in
 	return elementIndex, viewStart, viewLocalPos
 }
 
-func (tb *TextBox) viewToModel() view.CharacterReference {
+func (tb *TextBox) viewToModel(viewPosition int) view.CharacterReference {
 	ctx := tb.context()
-	_, ei, _, vl := tb.renderCache.Stats(tb.viewPosition)
+	_, ei, _, vl := tb.renderCache.Stats(viewPosition)
 	element := tb.renderCache.GetElement(ei)
 	textView := tb.ViewResolver.Resolve(element)
 	return textView.ConvertModel(ctx, tb.renderCache.GetLayout(ei), vl)
@@ -410,7 +410,7 @@ func (tb *TextBox) InsertString(s string) {
 	}
 	_, viewStart, viewLocalPos = tb.modelToView(tb.bytePos)
 	tb.viewPosition = viewStart + viewLocalPos
-	tb.bytePos = tb.viewToModel()
+	tb.bytePos = tb.viewToModel(tb.viewPosition)
 }
 
 // RemoveChar is remove character from current byte position to backwards.
@@ -870,7 +870,7 @@ func (tb *TextBox) MoveLineStart() {
 		viewLocalPos = nextLocalPos
 	}
 	tb.viewPosition = estart + viewLocalPos
-	tb.bytePos = tb.viewToModel()
+	tb.bytePos = tb.viewToModel(tb.viewPosition)
 }
 
 // MoveLineEnd is move cursor to ends of current line.
@@ -891,7 +891,7 @@ func (tb *TextBox) MoveLineEnd() {
 		viewLocalPos = nextLocalPos
 	}
 	tb.viewPosition = estart + viewLocalPos
-	tb.bytePos = tb.viewToModel()
+	tb.bytePos = tb.viewToModel(tb.viewPosition)
 }
 
 // MoveTextStart is move cursor to starts of text.
@@ -899,7 +899,7 @@ func (tb *TextBox) MoveTextStart() {
 	tb.renderCache.Update(tb.context(), tb.Width)
 
 	tb.viewPosition = 0
-	tb.bytePos = tb.viewToModel()
+	tb.bytePos = tb.viewToModel(tb.viewPosition)
 }
 
 // MoveTextEnd is move cursor to ends of text.
@@ -915,7 +915,7 @@ func (tb *TextBox) MoveTextEnd() {
 		vp += textView.MoveLength(ctx, layout)
 	}
 	tb.viewPosition = vp - 1
-	tb.bytePos = tb.viewToModel()
+	tb.bytePos = tb.viewToModel(tb.viewPosition)
 }
 
 // MoveReset is reset cursor
@@ -923,7 +923,7 @@ func (tb *TextBox) MoveReset() {
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 	tb.viewPosition = 0
-	tb.bytePos = tb.viewToModel()
+	tb.bytePos = tb.viewToModel(tb.viewPosition)
 	tb.scrollX = 0
 	tb.scrollY = 0
 }
