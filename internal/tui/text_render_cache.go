@@ -5,6 +5,7 @@ import (
 	"github.com/desktopgame/ckro/internal/tui/view"
 )
 
+// TextRenderCache is cache of render info.
 type TextRenderCache struct {
 	documentVersion uint
 	elements        []model.Element
@@ -14,10 +15,12 @@ type TextRenderCache struct {
 	textBoxWidth    int
 }
 
+// ForceUpdate is update a cache in always.
 func (trc *TextRenderCache) ForceUpdate(ctx view.Context, textBoxWidth int) {
 	trc.updateImpl(ctx, textBoxWidth, true)
 }
 
+// Update is update a cache if Document updated.
 func (trc *TextRenderCache) Update(ctx view.Context, textBoxWidth int) {
 	trc.updateImpl(ctx, textBoxWidth, false)
 }
@@ -106,6 +109,7 @@ func (trc *TextRenderCache) updateImpl(ctx view.Context, textBoxWidth int, force
 	trc.viewLenTable = viewLenTable
 }
 
+// Stats returns current state.
 func (trc *TextRenderCache) Stats(viewPosition int) (TotalViewLen int, ElementIndex int, ViewStart int, ViewLocalPosition int) {
 	totalViewLen := 0
 	elementIndex := -1
@@ -134,6 +138,7 @@ func (trc *TextRenderCache) Stats(viewPosition int) (TotalViewLen int, ElementIn
 	return totalViewLen, elementIndex, elementStart, viewLocalPosition
 }
 
+// Ghosts returns count of GhostElement from array ends.
 func (trc *TextRenderCache) Ghosts() int {
 	ghosts := 0
 	for i := len(trc.elements) - 1; i >= 0; i-- {
@@ -146,22 +151,27 @@ func (trc *TextRenderCache) Ghosts() int {
 	return ghosts
 }
 
+// Total returns length of total TextView.
 func (trc *TextRenderCache) Total() int {
 	return trc.totalViewLen
 }
 
+// GetItem returns element and layout.
 func (trc *TextRenderCache) GetItem(index int) (Element model.Element, Layout *view.TextLayout) {
 	return trc.GetElement(index), trc.GetLayout(index)
 }
 
+// GetElement returns element.
 func (trc *TextRenderCache) GetElement(index int) model.Element {
 	return trc.elements[index]
 }
 
+// GetLayout returns layout.
 func (trc *TextRenderCache) GetLayout(index int) *view.TextLayout {
 	return trc.layoutCache[index]
 }
 
+// GetItemCount returns count of items.
 func (trc *TextRenderCache) GetItemCount() int {
 	return len(trc.elements)
 }
