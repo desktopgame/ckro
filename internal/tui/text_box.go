@@ -273,7 +273,7 @@ func (tb *TextBox) Draw(g *Graphics) {
 	}
 }
 
-func (tb *TextBox) modelToView() (ElementIndex int, ViewStart int, ViewLocalPos int) {
+func (tb *TextBox) modelToView(bytePos view.CharacterReference) (ElementIndex int, ViewStart int, ViewLocalPos int) {
 	ctx := tb.context()
 	if tb.renderCache.GetItemCount() == 0 {
 		return 0, 0, 0
@@ -291,9 +291,9 @@ func (tb *TextBox) modelToView() (ElementIndex int, ViewStart int, ViewLocalPos 
 		// but, length is zero when blank line
 		// inclusive the end column in this case
 		if st.Row == ed.Row && st.Column == ed.Column {
-			if tb.bytePos.StartPosition.Row == st.Row && tb.bytePos.StartPosition.Column == st.Column {
+			if bytePos.StartPosition.Row == st.Row && bytePos.StartPosition.Column == st.Column {
 				// should be zero length when cursor at blank line
-				if tb.bytePos.Bytes > 0 {
+				if bytePos.Bytes > 0 {
 					panic("should be zero length when cursor at blank line")
 				}
 				elementIndex = i
@@ -301,16 +301,16 @@ func (tb *TextBox) modelToView() (ElementIndex int, ViewStart int, ViewLocalPos 
 			}
 		}
 
-		if tb.bytePos.StartPosition.Row >= st.Row && tb.bytePos.StartPosition.Row <= ed.Row {
-			if tb.bytePos.Bytes == 0 {
+		if bytePos.StartPosition.Row >= st.Row && bytePos.StartPosition.Row <= ed.Row {
+			if bytePos.Bytes == 0 {
 				// when cursor at line end
-				if tb.bytePos.StartPosition.Column >= st.Column && (tb.bytePos.StartPosition.Column <= ed.Column || ed.Row > st.Row) {
+				if bytePos.StartPosition.Column >= st.Column && (bytePos.StartPosition.Column <= ed.Column || ed.Row > st.Row) {
 					elementIndex = i
 					break
 				}
 			} else {
 				// otherwise, judge by Half-open section
-				if tb.bytePos.StartPosition.Column >= st.Column && (tb.bytePos.StartPosition.Column < ed.Column || ed.Row > st.Row) {
+				if bytePos.StartPosition.Column >= st.Column && (bytePos.StartPosition.Column < ed.Column || ed.Row > st.Row) {
 					elementIndex = i
 					break
 				}
@@ -328,7 +328,7 @@ func (tb *TextBox) modelToView() (ElementIndex int, ViewStart int, ViewLocalPos 
 
 	element := tb.renderCache.GetElement(elementIndex)
 	textView := tb.ViewResolver.Resolve(element)
-	viewLocalPos := textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), tb.bytePos.StartPosition)
+	viewLocalPos := textView.ConvertViewLocalPos(ctx, tb.renderCache.GetLayout(elementIndex), bytePos.StartPosition)
 
 	return elementIndex, viewStart, viewLocalPos
 }
@@ -375,7 +375,7 @@ func (tb *TextBox) InsertString(s string) {
 	}
 
 	// get view before edit
-	elementIndex, viewStart, viewLocalPos := tb.modelToView()
+	elementIndex, viewStart, viewLocalPos := tb.modelToView(tb.bytePos)
 	layout := tb.renderCache.GetLayout(elementIndex)
 	textView := tb.ViewResolver.Resolve(layout.Element)
 
@@ -408,7 +408,7 @@ func (tb *TextBox) InsertString(s string) {
 		StartPosition: insertedPos,
 		Bytes:         tb.bytePos.Bytes,
 	}
-	_, viewStart, viewLocalPos = tb.modelToView()
+	_, viewStart, viewLocalPos = tb.modelToView(tb.bytePos)
 	tb.viewPosition = viewStart + viewLocalPos
 	tb.bytePos = tb.viewToModel()
 }
@@ -435,7 +435,7 @@ func (tb *TextBox) RemoveChar() {
 	}
 
 	// get view before edit
-	elementIndex, viewStart, viewLocalPos := tb.modelToView()
+	elementIndex, viewStart, viewLocalPos := tb.modelToView(tb.bytePos)
 	layout := tb.renderCache.GetLayout(elementIndex)
 	textView := tb.ViewResolver.Resolve(layout.Element)
 
@@ -454,7 +454,7 @@ func (tb *TextBox) RemoveChar() {
 		tb.Document.Remove(bPos.StartPosition.Row, bPos.StartPosition.Column, max(bPos.Bytes, 1))
 
 		tb.bytePos.Bytes = 0
-		_, viewStart, viewLocalPos = tb.modelToView()
+		_, viewStart, viewLocalPos = tb.modelToView(tb.bytePos)
 		tb.viewPosition = viewStart + viewLocalPos
 		return
 	} else if rng, ok := textView.ShouldRemoveWithSpecifiedRangeColumns(ctx, layout, viewLocalPos); ok {
@@ -470,7 +470,7 @@ func (tb *TextBox) RemoveChar() {
 		tb.renderCache.Update(ctx, tb.Width)
 
 		tb.bytePos.Bytes = 0
-		_, vs, vl := tb.modelToView()
+		_, vs, vl := tb.modelToView(tb.bytePos)
 		tb.viewPosition = vs + vl
 		return
 	} else if pos, ok := textView.ShouldRemoveWithSpecifiedColumnAfter(ctx, layout, viewLocalPos); ok {
@@ -486,7 +486,7 @@ func (tb *TextBox) RemoveChar() {
 		tb.renderCache.Update(ctx, tb.Width)
 
 		tb.bytePos.Bytes = 0
-		_, vs, vl := tb.modelToView()
+		_, vs, vl := tb.modelToView(tb.bytePos)
 		tb.viewPosition = vs + vl
 		return
 	} else if rng, ok := textView.ShouldRemoveWithSpecifiedRangeLines(ctx, layout, viewLocalPos); ok {
@@ -504,7 +504,7 @@ func (tb *TextBox) RemoveChar() {
 
 		tb.renderCache.Update(ctx, tb.Width)
 
-		_, vs, vl := tb.modelToView()
+		_, vs, vl := tb.modelToView(tb.bytePos)
 		tb.viewPosition = vs + vl
 		return
 	}
@@ -538,7 +538,7 @@ func (tb *TextBox) RemoveChar() {
 			tb.renderCache.Update(ctx, tb.Width)
 
 			tb.bytePos.Bytes = 0
-			_, vs, vl := tb.modelToView()
+			_, vs, vl := tb.modelToView(tb.bytePos)
 			tb.viewPosition = vs + vl
 			return
 		}
@@ -565,7 +565,7 @@ func (tb *TextBox) RemoveChar() {
 			tb.renderCache.Update(ctx, tb.Width)
 
 			tb.bytePos.Bytes = 0
-			_, vs, vl := tb.modelToView()
+			_, vs, vl := tb.modelToView(tb.bytePos)
 			tb.viewPosition = vs + vl
 			return
 		}
@@ -581,7 +581,7 @@ func (tb *TextBox) RemoveChar() {
 
 	tb.renderCache.Update(ctx, tb.Width)
 
-	_, vs, vl := tb.modelToView()
+	_, vs, vl := tb.modelToView(tb.bytePos)
 	tb.viewPosition = vs + vl
 }
 
@@ -644,7 +644,7 @@ func (tb *TextBox) RemoveSelection() {
 		StartPosition: first.StartPosition,
 		Bytes:         last.Bytes,
 	}
-	_, vs, vl := tb.modelToView()
+	_, vs, vl := tb.modelToView(tb.bytePos)
 	tb.viewPosition = vs + vl
 }
 
@@ -684,7 +684,7 @@ func (tb *TextBox) Submit() bool {
 		tb.foldManager.ToggleFold(tb.Document, fold)
 		tb.renderCache.ForceUpdate(ctx, tb.Width)
 
-		_, vs, vl := tb.modelToView()
+		_, vs, vl := tb.modelToView(tb.bytePos)
 		tb.viewPosition = vs + vl
 		return true
 	}
@@ -1006,7 +1006,7 @@ func (tb *TextBox) FindPrev(s string) bool {
 		}
 	}
 	if success {
-		_, vs, vl := tb.modelToView()
+		_, vs, vl := tb.modelToView(tb.bytePos)
 		tb.viewPosition = vs + vl
 	}
 	return success
@@ -1107,7 +1107,7 @@ func (tb *TextBox) FindNext(s string) bool {
 		}
 	}
 	if success {
-		_, vs, vl := tb.modelToView()
+		_, vs, vl := tb.modelToView(tb.bytePos)
 		tb.viewPosition = vs + vl
 	}
 	return success
@@ -1156,7 +1156,7 @@ func (tb *TextBox) Replace(length int, s string) {
 		}
 	}
 	tb.renderCache.Update(tb.context(), tb.Width)
-	_, vs, vl := tb.modelToView()
+	_, vs, vl := tb.modelToView(tb.bytePos)
 	tb.viewPosition = vs + vl
 }
 
