@@ -7,6 +7,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+// ConfirmationDialog is choice a yes or no dialog.
 type ConfirmationDialog struct {
 	x, y          int
 	Width, Height int
@@ -23,9 +24,10 @@ type ConfirmationDialog struct {
 	onNo           func(base.Runtime)
 }
 
+// NewConfirmationDialog returns ConfirmationDialog
 func NewConfirmationDialog(title, message string, onYes, onNo func(base.Runtime)) *ConfirmationDialog {
 	cd := &ConfirmationDialog{
-		selectedButton: 0, // デフォルトでYesを選択
+		selectedButton: 0,
 		onYes:          onYes,
 		onNo:           onNo,
 	}
@@ -33,18 +35,16 @@ func NewConfirmationDialog(title, message string, onYes, onNo func(base.Runtime)
 	return cd
 }
 
+// Init is initialize ConfirmationDialog.
 func (cd *ConfirmationDialog) Init(title, message string) {
-	// タイトルラベル
 	cd.titleLabel = tui.NewCenteredLabelTile(title)
 	cd.titleLabel.FlexibleWidth = true
 	cd.titleLabel.MinimumHeight = 1
 
-	// メッセージラベル
 	cd.messageLabel = tui.NewCenteredLabelTile(message)
 	cd.messageLabel.FlexibleWidth = true
 	cd.messageLabel.MinimumHeight = 3
 
-	// ボタン
 	cd.yesButton = tui.NewCenteredLabelTile("[ YES ]")
 	cd.yesButton.MinimumWidth = 8
 	cd.yesButton.MinimumHeight = 3
@@ -53,14 +53,12 @@ func (cd *ConfirmationDialog) Init(title, message string) {
 	cd.noButton.MinimumWidth = 8
 	cd.noButton.MinimumHeight = 3
 
-	// ボタンを水平に配置
 	cd.buttonBox = tui.NewHBox(
 		cd.yesButton,
-		tui.NewFixedTile(&presenter.LabelTextPresenter{Text: "  "}, 2, 1), // スペーサー
+		tui.NewFixedTile(&presenter.LabelTextPresenter{Text: "  "}, 2, 1),
 		cd.noButton,
 	)
 
-	// 全体を垂直に配置
 	cd.dialogBox = tui.NewVBox(
 		cd.titleLabel,
 		tui.NewHorizontalSeparator(),
@@ -73,9 +71,8 @@ func (cd *ConfirmationDialog) Init(title, message string) {
 }
 
 func (cd *ConfirmationDialog) updateButtonStyles() {
-	// 選択されたボタンをハイライト表示
+	// highlight selected button
 	if cd.selectedButton == 0 {
-		// Yesボタンを選択状態に
 		if labelPresenter, ok := cd.yesButton.TextPresenter.(*presenter.LabelTextPresenter); ok {
 			labelPresenter.Text = "> YES <"
 		}
@@ -83,7 +80,6 @@ func (cd *ConfirmationDialog) updateButtonStyles() {
 			labelPresenter.Text = "[ NO ]"
 		}
 	} else {
-		// Noボタンを選択状態に
 		if labelPresenter, ok := cd.yesButton.TextPresenter.(*presenter.LabelTextPresenter); ok {
 			labelPresenter.Text = "[ YES ]"
 		}
@@ -121,28 +117,25 @@ func (cd *ConfirmationDialog) Handle(ev base.Event) {
 	if keyEvent, ok := ev.GetSource().(*tcell.EventKey); ok {
 		switch keyEvent.Key() {
 		case tcell.KeyEnter:
-			// 選択されたボタンを実行
+			// execute selected button
 			if cd.selectedButton == 0 {
-				// Yesボタン
 				if cd.onYes != nil {
 					cd.onYes(ev.GetRuntime())
 				}
 			} else {
-				// Noボタン
 				if cd.onNo != nil {
 					cd.onNo(ev.GetRuntime())
 				}
 			}
 			return
 		case tcell.KeyEscape:
-			// Escapeキーでキャンセル（Noと同じ動作）
+			// cancel by escape
 			if cd.onNo != nil {
 				cd.onNo(ev.GetRuntime())
 			}
 			return
 		}
 
-		// Y/Nキーでの直接選択
 		if keyEvent.Rune() == 'y' || keyEvent.Rune() == 'Y' {
 			if cd.onYes != nil {
 				cd.onYes(ev.GetRuntime())
@@ -165,7 +158,6 @@ func (cd *ConfirmationDialog) Traverse(fm *tui.FocusManager) {
 }
 
 func (cd *ConfirmationDialog) Focus(on bool) {
-	// フォーカス状態の管理
 }
 
 func (cd *ConfirmationDialog) SubFocusFirst() {
