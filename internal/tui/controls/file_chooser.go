@@ -12,6 +12,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+// FileChooser is file choose dialog.
 type FileChooser struct {
 	x, y          int
 	Width, Height int
@@ -34,6 +35,7 @@ type FileEntry struct {
 	Size  int64
 }
 
+// NewFileChooser returns FileChooser.
 func NewFileChooser(initialPath string, onFileSelect func(base.Runtime, string), onCancel func(base.Runtime)) *FileChooser {
 	fc := &FileChooser{
 		currentPath:  initialPath,
@@ -44,25 +46,22 @@ func NewFileChooser(initialPath string, onFileSelect func(base.Runtime, string),
 	return fc
 }
 
+// Init is initialize FileChooser.
 func (fc *FileChooser) Init() {
-	// パス表示ラベル
 	fc.pathLabel = tui.NewLabelTile(fc.currentPath)
 	fc.pathLabel.FlexibleWidth = true
 	fc.pathLabel.MinimumHeight = 1
 
-	// ファイルリスト
 	fc.fileList = tui.NewListTile([]string{})
 	fc.fileList.FlexibleWidth = true
 	fc.fileList.FlexibleHeight = true
 
-	// 垂直レイアウトで組み合わせ
 	fc.chooserBox = tui.NewVBox(
 		fc.pathLabel,
 		tui.NewHorizontalSeparator(),
 		fc.fileList,
 	)
 
-	// 初期ディレクトリを読み込み
 	fc.loadDirectory()
 }
 
@@ -70,15 +69,14 @@ func (fc *FileChooser) loadDirectory() {
 	fc.entries = nil
 	fc.selectedIndex = 0
 
-	// 現在のディレクトリを読み込み
+	// load directory
 	entries, err := os.ReadDir(fc.currentPath)
 	if err != nil {
-		// エラーの場合は空のリストを表示
 		fc.updateFileList()
 		return
 	}
 
-	// 親ディレクトリへのエントリを追加（ルートディレクトリでない場合）
+	// parent directory
 	if fc.currentPath != "/" && fc.currentPath != "" {
 		fc.entries = append(fc.entries, FileEntry{
 			Name:  "..",
@@ -88,7 +86,6 @@ func (fc *FileChooser) loadDirectory() {
 		})
 	}
 
-	// ディレクトリとファイルを分けて追加
 	var dirs []FileEntry
 	var files []FileEntry
 
@@ -112,7 +109,6 @@ func (fc *FileChooser) loadDirectory() {
 		}
 	}
 
-	// ディレクトリとファイルをそれぞれソート
 	sort.Slice(dirs, func(i, j int) bool {
 		return strings.ToLower(dirs[i].Name) < strings.ToLower(dirs[j].Name)
 	})
@@ -120,7 +116,6 @@ func (fc *FileChooser) loadDirectory() {
 		return strings.ToLower(files[i].Name) < strings.ToLower(files[j].Name)
 	})
 
-	// ディレクトリを先に、ファイルを後に追加
 	fc.entries = append(fc.entries, dirs...)
 	fc.entries = append(fc.entries, files...)
 
@@ -193,11 +188,11 @@ func (fc *FileChooser) Handle(ev base.Event) {
 			if len(fc.entries) > 0 && fc.selectedIndex < len(fc.entries) {
 				selectedEntry := fc.entries[fc.selectedIndex]
 				if selectedEntry.IsDir {
-					// ディレクトリの場合は移動
+					// move to directory
 					fc.currentPath = selectedEntry.Path
 					fc.loadDirectory()
 				} else {
-					// ファイルの場合は選択
+					// select file
 					if fc.onFileSelect != nil {
 						fc.onFileSelect(ev.GetRuntime(), selectedEntry.Path)
 					}
@@ -210,7 +205,7 @@ func (fc *FileChooser) Handle(ev base.Event) {
 			}
 			return
 		case tcell.KeyBackspace, tcell.KeyBackspace2:
-			// 親ディレクトリに移動
+			// move to parent directory
 			if fc.currentPath != "/" && fc.currentPath != "" {
 				fc.currentPath = filepath.Dir(fc.currentPath)
 				fc.loadDirectory()
@@ -219,7 +214,6 @@ func (fc *FileChooser) Handle(ev base.Event) {
 		}
 	}
 
-	// デフォルトのイベント処理
 	fc.fileList.Handle(ev)
 }
 
@@ -230,25 +224,20 @@ func (fc *FileChooser) Traverse(fm *tui.FocusManager) {
 }
 
 func (fc *FileChooser) Focus(on bool) {
-	// フォーカス状態の管理
 }
 
 func (fc *FileChooser) SubFocusFirst() {
-	// サブフォーカスの最初の要素
 }
 
 func (fc *FileChooser) SubFocusPrev() bool {
-	// サブフォーカスの前の要素
 	return false
 }
 
 func (fc *FileChooser) SubFocusNext() bool {
-	// サブフォーカスの次の要素
 	return false
 }
 
 func (fc *FileChooser) SubFocusLast() {
-	// サブフォーカスの最後の要素
 }
 
 func (fc *FileChooser) IsFocusable() bool {

@@ -24,7 +24,7 @@ type CommandPalette struct {
 	inputFocused     bool
 }
 
-// NewCommandPalette returns CommandPalette
+// NewCommandPalette returns CommandPalette.
 func NewCommandPalette(commands []Command) *CommandPalette {
 	palette := &CommandPalette{}
 	palette.Init(commands)

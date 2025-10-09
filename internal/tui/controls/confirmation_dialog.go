@@ -24,7 +24,7 @@ type ConfirmationDialog struct {
 	onNo           func(base.Runtime)
 }
 
-// NewConfirmationDialog returns ConfirmationDialog
+// NewConfirmationDialog returns ConfirmationDialog.
 func NewConfirmationDialog(title, message string, onYes, onNo func(base.Runtime)) *ConfirmationDialog {
 	cd := &ConfirmationDialog{
 		selectedButton: 0,
