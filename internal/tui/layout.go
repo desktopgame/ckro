@@ -18,7 +18,7 @@ func WithCenter(ctrl Control, width int, height int) *Center {
 	return &c
 }
 
-// Tile creation utilities
+// NewTile returns Tile, returned Tile is using specified TextPresenter.
 func NewTile(presenter TextPresenter) *Tile {
 	tile := &Tile{}
 	tile.Init()
@@ -26,6 +26,7 @@ func NewTile(presenter TextPresenter) *Tile {
 	return tile
 }
 
+// NewTile returns flex Tile, returned Tile is using specified TextPresenter.
 func NewFlexTile(presenter TextPresenter) *Tile {
 	tile := NewTile(presenter)
 	tile.FlexibleWidth = true
@@ -33,6 +34,7 @@ func NewFlexTile(presenter TextPresenter) *Tile {
 	return tile
 }
 
+// NewTile returns fixed Tile, returned Tile is using specified TextPresenter.
 func NewFixedTile(presenter TextPresenter, width, height int) *Tile {
 	tile := NewTile(presenter)
 	tile.MinimumWidth = width
@@ -40,22 +42,27 @@ func NewFixedTile(presenter TextPresenter, width, height int) *Tile {
 	return tile
 }
 
+// NewEditTile returns editable TextBox as Tile.
 func NewEditTile() *Tile {
 	return NewTile(&presenter.EditTextPresenter{})
 }
 
+// NewLabelTile returns label text as Tile.
 func NewLabelTile(text string) *Tile {
 	return NewTile(&presenter.LabelTextPresenter{Text: text})
 }
 
+// NewLabelTile returns label text as Tile, and aligned center.
 func NewCenteredLabelTile(text string) *Tile {
 	return NewTile(&presenter.LabelTextPresenter{Text: text, AlignCenter: true})
 }
 
+// NewListTile returns list as Tile.
 func NewListTile(items []string) *Tile {
 	return NewTile(&presenter.ListTextPresenter{Items: items})
 }
 
+// NewListTile returns list as Tile.
 func NewCustomListTile(items []string, cursorChar rune, prefix string) *Tile {
 	return NewTile(&presenter.ListTextPresenter{
 		Items:      items,
@@ -64,7 +71,7 @@ func NewCustomListTile(items []string, cursorChar rune, prefix string) *Tile {
 	})
 }
 
-// Separator utilities
+// NewVerticalSeparator returns vertical separator.
 func NewVerticalSeparator() *Tile {
 	tile := NewTile(&presenter.VerticalSeparatorTextPresenter{})
 	tile.MinimumWidth = 1
@@ -72,6 +79,7 @@ func NewVerticalSeparator() *Tile {
 	return tile
 }
 
+// NewHorizontalSeparator returns horizontal separator.
 func NewHorizontalSeparator() *Tile {
 	tile := NewTile(&presenter.HorizontalSeparatorTextPresenter{})
 	tile.MinimumHeight = 1
@@ -79,7 +87,7 @@ func NewHorizontalSeparator() *Tile {
 	return tile
 }
 
-// Box creation utilities
+// NewHBox returns horizontal box.
 func NewHBox(controls ...Control) *Box {
 	box := &Box{}
 	box.Init(Horizontal)
@@ -89,6 +97,7 @@ func NewHBox(controls ...Control) *Box {
 	return box
 }
 
+// NewVBox returns vertical box.
 func NewVBox(controls ...Control) *Box {
 	box := &Box{}
 	box.Init(Vertical)
