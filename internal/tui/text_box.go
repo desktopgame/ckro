@@ -627,7 +627,6 @@ func (tb *TextBox) RemoveSelection() {
 			sg := tb.Document.Read(r)
 			copy := sg.GetLine(0)
 
-			// tb.Document.Remove(last.StartPosition.Row, 0, removeBytes)
 			tb.Document.Remove(last.StartPosition.Row, 0, tb.Document.GetLineBytes(last.StartPosition.Row))
 			tb.Document.Remove(last.StartPosition.Row, 0, 1)
 
