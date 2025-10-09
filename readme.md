@@ -29,7 +29,6 @@ Emacsを踏襲したショートカットを搭載していますが、
 ## Configuration
 ckro が起動されるディレクトリに設定ファイルを置くことでそちらを読んで動作します。  
 
-ckro.yaml
 ```ckro.yaml
 ApiKey: lmstudio
 BaseUrl: http://localhost:1234/v1
