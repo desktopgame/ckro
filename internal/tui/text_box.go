@@ -341,6 +341,7 @@ func (tb *TextBox) viewToModel() view.CharacterReference {
 	return textView.ConvertModel(ctx, tb.renderCache.GetLayout(ei), vl)
 }
 
+// InsertString is insert string into current byte position.
 func (tb *TextBox) InsertString(s string) {
 	if !tb.CanEdit() {
 		return
@@ -412,6 +413,7 @@ func (tb *TextBox) InsertString(s string) {
 	tb.bytePos = tb.viewToModel()
 }
 
+// RemoveChar is remove character from current byte position to backwards.
 func (tb *TextBox) RemoveChar() {
 	if !tb.CanEdit() {
 		return
@@ -583,6 +585,7 @@ func (tb *TextBox) RemoveChar() {
 	tb.viewPosition = vs + vl
 }
 
+// RemoveSelection is remove selected text.
 func (tb *TextBox) RemoveSelection() {
 	if tb.textSelection.IsZero() {
 		return
@@ -644,6 +647,7 @@ func (tb *TextBox) RemoveSelection() {
 	tb.viewPosition = vs + vl
 }
 
+// CanEdit returns can editable.
 func (tb *TextBox) CanEdit() bool {
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
@@ -660,6 +664,8 @@ func (tb *TextBox) CanEdit() bool {
 	return true
 }
 
+// Submit is try submit process on current TextView.
+// returns true if execute in actual.
 func (tb *TextBox) Submit() bool {
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
@@ -684,11 +690,14 @@ func (tb *TextBox) Submit() bool {
 	return false
 }
 
+// SelectionStart is start text selection.
+// select text on every times to call MoveXxx, until call to SelectionEnd
 func (tb *TextBox) SelectionStart() {
 	tb.textSelection.FromPos = tb.bytePos
 	tb.textSelectionEnabled = true
 }
 
+// SelectionEnd is stop text selection.
 func (tb *TextBox) SelectionEnd() {
 	tb.textSelectionEnabled = false
 	tb.textSelection = view.TextSelection{}
@@ -820,22 +829,27 @@ func (tb *TextBox) move(dir int) {
 	}
 }
 
+// MoveLeft is move cursor to left.
 func (tb *TextBox) MoveLeft() {
 	tb.move(0)
 }
 
+// MoveRight is move cursor to right.
 func (tb *TextBox) MoveRight() {
 	tb.move(1)
 }
 
+// MoveUp is move cursor to up.
 func (tb *TextBox) MoveUp() {
 	tb.move(2)
 }
 
+// MoveDown is move cursor to down.
 func (tb *TextBox) MoveDown() {
 	tb.move(3)
 }
 
+// MoveLineStart is move cursor to starts of current line.
 func (tb *TextBox) MoveLineStart() {
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
@@ -858,6 +872,7 @@ func (tb *TextBox) MoveLineStart() {
 	tb.bytePos = tb.viewToModel()
 }
 
+// MoveLineEnd is move cursor to ends of current line.
 func (tb *TextBox) MoveLineEnd() {
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
@@ -878,6 +893,7 @@ func (tb *TextBox) MoveLineEnd() {
 	tb.bytePos = tb.viewToModel()
 }
 
+// MoveTextStart is move cursor to starts of text.
 func (tb *TextBox) MoveTextStart() {
 	tb.renderCache.Update(tb.context(), tb.Width)
 
@@ -885,6 +901,7 @@ func (tb *TextBox) MoveTextStart() {
 	tb.bytePos = tb.viewToModel()
 }
 
+// MoveTextEnd is move cursor to ends of text.
 func (tb *TextBox) MoveTextEnd() {
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
@@ -900,6 +917,7 @@ func (tb *TextBox) MoveTextEnd() {
 	tb.bytePos = tb.viewToModel()
 }
 
+// MoveReset is reset cursor
 func (tb *TextBox) MoveReset() {
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
@@ -909,6 +927,7 @@ func (tb *TextBox) MoveReset() {
 	tb.scrollY = 0
 }
 
+// FindPrev is finding text to backwards direction, and move to cursor it.
 func (tb *TextBox) FindPrev(s string) bool {
 	r := model.Range{
 		StartPosition: model.Position{
@@ -992,6 +1011,7 @@ func (tb *TextBox) FindPrev(s string) bool {
 	return success
 }
 
+// FindNext is finding text to forwards direction, and move to cursor it.
 func (tb *TextBox) FindNext(s string) bool {
 	r := model.Range{
 		StartPosition: model.Position{
@@ -1092,6 +1112,7 @@ func (tb *TextBox) FindNext(s string) bool {
 	return success
 }
 
+// Replace is replace string.
 func (tb *TextBox) Replace(length int, s string) {
 	tb.Document.Remove(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, length)
 	tb.Document.InsertString(tb.bytePos.StartPosition.Row, tb.bytePos.StartPosition.Column, s)
@@ -1195,6 +1216,7 @@ func (tb *TextBox) GetScrollY() int {
 	return tb.scrollY
 }
 
+// GetViewHeight returns height of total TextView.
 func (tb *TextBox) GetViewHeight() int {
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
@@ -1206,14 +1228,17 @@ func (tb *TextBox) GetViewHeight() int {
 	return h
 }
 
+// GetBytePosition returns byte position of cursor.
 func (tb *TextBox) GetBytePosition() view.CharacterReference {
 	return tb.bytePos
 }
 
+// GetViewPosition returns view position of cursor.
 func (tb *TextBox) GetViewPosition() int {
 	return tb.viewPosition
 }
 
+// GetSelection returns selected range.
 func (tb *TextBox) GetSelection() view.TextSelection {
 	return tb.textSelection
 }
