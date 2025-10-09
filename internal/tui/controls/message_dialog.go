@@ -7,6 +7,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+// MessageDialog is dialog with message label.
 type MessageDialog struct {
 	x, y          int
 	Width, Height int
@@ -19,6 +20,7 @@ type MessageDialog struct {
 	onOK func(base.Runtime)
 }
 
+// NewMessageDialog returns MessageDialog.
 func NewMessageDialog(title, message string, onOK func(base.Runtime)) *MessageDialog {
 	md := &MessageDialog{
 		onOK: onOK,
@@ -27,23 +29,20 @@ func NewMessageDialog(title, message string, onOK func(base.Runtime)) *MessageDi
 	return md
 }
 
+// Init is initialize MessageDialog.
 func (md *MessageDialog) Init(title, message string) {
-	// タイトルラベル
 	md.titleLabel = tui.NewCenteredLabelTile(title)
 	md.titleLabel.FlexibleWidth = true
 	md.titleLabel.MinimumHeight = 1
 
-	// メッセージラベル
 	md.messageLabel = tui.NewCenteredLabelTile(message)
 	md.messageLabel.FlexibleWidth = true
 	md.messageLabel.MinimumHeight = 3
 
-	// OKボタン
 	md.okButton = tui.NewCenteredLabelTile("> OK <")
 	md.okButton.FlexibleWidth = true
 	md.okButton.MinimumHeight = 3
 
-	// 全体を垂直に配置
 	md.dialogBox = tui.NewVBox(
 		md.titleLabel,
 		tui.NewHorizontalSeparator(),
@@ -81,14 +80,14 @@ func (md *MessageDialog) Handle(ev base.Event) {
 	if keyEvent, ok := ev.GetSource().(*tcell.EventKey); ok {
 		switch keyEvent.Key() {
 		case tcell.KeyEnter, tcell.KeyEscape:
-			// EnterキーまたはEscapeキーでOKボタンを実行
+			// execute ok button
 			if md.onOK != nil {
 				md.onOK(ev.GetRuntime())
 			}
 			return
 		}
 
-		// スペースキーでもOKボタンを実行
+		// execute ok button
 		if keyEvent.Rune() == ' ' {
 			if md.onOK != nil {
 				md.onOK(ev.GetRuntime())
@@ -105,25 +104,20 @@ func (md *MessageDialog) Traverse(fm *tui.FocusManager) {
 }
 
 func (md *MessageDialog) Focus(on bool) {
-	// フォーカス状態の管理
 }
 
 func (md *MessageDialog) SubFocusFirst() {
-	// OKボタンにフォーカス
 }
 
 func (md *MessageDialog) SubFocusPrev() bool {
-	// 単一ボタンなので移動なし
 	return false
 }
 
 func (md *MessageDialog) SubFocusNext() bool {
-	// 単一ボタンなので移動なし
 	return false
 }
 
 func (md *MessageDialog) SubFocusLast() {
-	// OKボタンにフォーカス
 }
 
 func (md *MessageDialog) IsFocusable() bool {
