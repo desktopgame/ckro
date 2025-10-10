@@ -31,7 +31,7 @@ func (c *Clip) SetContent(x int, y int, primary rune, combining []rune, style tc
 // SetCursor is set a character to specified cell.
 // TODO: refactor
 func (c *Clip) SetCursor(x int, y int, primary rune, combining []rune, style tcell.Style) {
-	c.Graphics.ForceDraw(c.X+x, c.Y+y, primary, combining, style)
+	c.Graphics.ForceDraw(c.offsetX+c.X+x, c.offsetY+c.Y+y, primary, combining, style)
 }
 
 func (c *Clip) Translate(offsetX int, offsetY int) view.Renderer {
