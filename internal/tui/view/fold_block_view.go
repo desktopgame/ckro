@@ -73,8 +73,25 @@ func (fv *FoldBlockView) Measure(ctx Context, e model.Element, width int, height
 		childElement := e.GetElement(0)
 		childView := ctx.Resolver.Resolve(childElement)
 		child := childView.Measure(ctx, childElement, width-4, 1)
-
-		if child.MinimumWidth+4 > width {
+		if child.MinimumHeight > 1 {
+			r := childElement.GetRange(0)
+			if r.StartPosition.Row != r.EndPosition.Row {
+				r = model.Range{
+					StartPosition: r.StartPosition,
+					EndPosition: model.Position{
+						Row:    r.StartPosition.Row,
+						Column: ctx.Document.GetLineBytes(r.StartPosition.Row),
+					},
+				}
+			}
+			childElement = &model.PlainElement{
+				Range: r,
+			}
+			childView = &PlainTextView{}
+			child = childView.Measure(ctx, childElement, width-4, 9999)
+			minimumHeight += child.MinimumHeight
+			children = append(children, child)
+		} else if child.MinimumWidth+4 > width {
 			r := childElement.GetRange(0)
 			if r.StartPosition.Row == r.EndPosition.Row {
 				childElement = &model.PlainElement{
@@ -105,24 +122,6 @@ func (fv *FoldBlockView) Measure(ctx Context, e model.Element, width int, height
 					children = append(children, child)
 				}
 			}
-		} else if child.MinimumHeight > 1 {
-			r := childElement.GetRange(0)
-			if r.StartPosition.Row != r.EndPosition.Row {
-				r = model.Range{
-					StartPosition: r.StartPosition,
-					EndPosition: model.Position{
-						Row:    r.StartPosition.Row,
-						Column: ctx.Document.GetLineBytes(r.StartPosition.Row),
-					},
-				}
-			}
-			childElement = &model.PlainElement{
-				Range: r,
-			}
-			childView = &PlainTextView{}
-			child = childView.Measure(ctx, childElement, width-4, 9999)
-			minimumHeight += child.MinimumHeight
-			children = append(children, child)
 		} else {
 			minimumHeight++
 			children = append(children, child)
