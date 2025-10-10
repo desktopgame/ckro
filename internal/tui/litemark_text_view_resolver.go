@@ -33,5 +33,5 @@ func (l *LitemarkTextViewResolver) Resolve(e model.Element) view.TextView {
 	case *model.PlainElement:
 		return &view.PlainTextView{}
 	}
-	return nil
+	return &view.PlainTextView{}
 }
