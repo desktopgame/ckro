@@ -81,7 +81,7 @@ func (p *PlainTextView) Draw(ctx Context, textLayout *TextLayout, renderer Rende
 	}
 }
 
-func (p *PlainTextView) MinimumSize(ctx Context, e model.Element, width int, height int) *TextLayout {
+func (p *PlainTextView) Measure(ctx Context, e model.Element, width int, height int) *TextLayout {
 	line := ctx.GetText(e)
 	lineWidth := text.DisplayWidth(line)
 

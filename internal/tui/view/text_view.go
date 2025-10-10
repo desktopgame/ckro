@@ -13,9 +13,9 @@ type TextView interface {
 	// Draw is rendernig content.
 	Draw(ctx Context, textLayout *TextLayout, renderer Renderer)
 
-	// MinimumSize returns TextLayout for this view and contained sub views.
+	// Measure returns TextLayout for this view and contained sub views.
 	// calculate only minimum size, at this point.
-	MinimumSize(ctx Context, e model.Element, width int, height int) *TextLayout
+	Measure(ctx Context, e model.Element, width int, height int) *TextLayout
 
 	// MoveLength returns movable count for cursor in this view.
 	// inclusive a subview move count if this view is inclusive a subview.

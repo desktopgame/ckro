@@ -64,7 +64,7 @@ func (fv *FoldBlockView) Draw(ctx Context, textLayout *TextLayout, renderer Rend
 	}
 }
 
-func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, height int) *TextLayout {
+func (fv *FoldBlockView) Measure(ctx Context, e model.Element, width int, height int) *TextLayout {
 	children := []*TextLayout{}
 
 	var minimumHeight int
@@ -73,7 +73,7 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 
 		childElement := e.GetElement(0)
 		childView := ctx.Resolver.Resolve(childElement)
-		child := childView.MinimumSize(ctx, childElement, width-4, 1)
+		child := childView.Measure(ctx, childElement, width-4, 1)
 
 		if child.MinimumWidth+4 > width {
 			r := childElement.GetRange(0)
@@ -82,7 +82,7 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 					Range: r,
 				}
 				childView = &PlainTextView{}
-				child = childView.MinimumSize(ctx, childElement, width-4, 9999)
+				child = childView.Measure(ctx, childElement, width-4, 9999)
 				minimumHeight += child.MinimumHeight
 				children = append(children, child)
 			} else {
@@ -101,7 +101,7 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 						Range: r2,
 					}
 					childView = &PlainTextView{}
-					child = childView.MinimumSize(ctx, childElement, width-4, 9999)
+					child = childView.Measure(ctx, childElement, width-4, 9999)
 					minimumHeight += child.MinimumHeight
 					children = append(children, child)
 				}
@@ -118,7 +118,7 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 			childElement := e.GetElement(i)
 			childView := ctx.Resolver.Resolve(childElement)
 
-			child := childView.MinimumSize(ctx, childElement, width-2, 9999)
+			child := childView.Measure(ctx, childElement, width-2, 9999)
 
 			if child.MinimumWidth+2 > width {
 
@@ -128,7 +128,7 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 						Range: r,
 					}
 					childView = &PlainTextView{}
-					child = childView.MinimumSize(ctx, childElement, width-2, 9999)
+					child = childView.Measure(ctx, childElement, width-2, 9999)
 					minimumHeight += child.MinimumHeight
 					children = append(children, child)
 				} else {
@@ -148,7 +148,7 @@ func (fv *FoldBlockView) MinimumSize(ctx Context, e model.Element, width int, he
 							Range: r2,
 						}
 						childView = &PlainTextView{}
-						child = childView.MinimumSize(ctx, childElement, width-2, 9999)
+						child = childView.Measure(ctx, childElement, width-2, 9999)
 						minimumHeight += child.MinimumHeight
 						children = append(children, child)
 					}

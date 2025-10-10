@@ -80,7 +80,7 @@ func (hv *HeadingView) Draw(ctx view.Context, textLayout *view.TextLayout, rende
 	}
 }
 
-func (hv *HeadingView) MinimumSize(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
+func (hv *HeadingView) Measure(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
 	return &view.TextLayout{
 		Element:       e,
 		MinimumWidth:  text.DisplayWidth(ctx.GetSegment(e, 1).GetLine(0)),

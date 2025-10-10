@@ -42,7 +42,7 @@ func (trc *TextRenderCache) updateImpl(ctx view.Context, textBoxWidth int, force
 	for i := 0; i < len(elements); i++ {
 		element := elements[i]
 		textView := ctx.Resolver.Resolve(element)
-		tl := textView.MinimumSize(ctx, element, textBoxWidth, 9999)
+		tl := textView.Measure(ctx, element, textBoxWidth, 9999)
 		textView.Layout(ctx, tl, 0, viewLine, tl.MinimumWidth, tl.MinimumHeight)
 
 		if tl.Width > textBoxWidth {
@@ -64,7 +64,7 @@ func (trc *TextRenderCache) updateImpl(ctx view.Context, textBoxWidth int, force
 					}
 
 					textView = ctx.Resolver.Resolve(pElement)
-					tl = textView.MinimumSize(ctx, pElement, textBoxWidth, 9999)
+					tl = textView.Measure(ctx, pElement, textBoxWidth, 9999)
 					textView.Layout(ctx, tl, 0, viewLine, tl.MinimumWidth, tl.MinimumHeight)
 
 					entries = append(entries, tl)
@@ -77,7 +77,7 @@ func (trc *TextRenderCache) updateImpl(ctx view.Context, textBoxWidth int, force
 				}
 
 				textView = ctx.Resolver.Resolve(pElement)
-				tl = textView.MinimumSize(ctx, pElement, textBoxWidth, 9999)
+				tl = textView.Measure(ctx, pElement, textBoxWidth, 9999)
 				textView.Layout(ctx, tl, 0, viewLine, tl.MinimumWidth, tl.MinimumHeight)
 
 				entries = append(entries, tl)

@@ -17,7 +17,7 @@ func (g *GhostView) Layout(ctx Context, textLayout *TextLayout, x, y, w, h int) 
 func (g *GhostView) Draw(ctx Context, textLayout *TextLayout, renderer Renderer) {
 }
 
-func (g *GhostView) MinimumSize(ctx Context, e model.Element, width int, height int) *TextLayout {
+func (g *GhostView) Measure(ctx Context, e model.Element, width int, height int) *TextLayout {
 	return &TextLayout{
 		Element:       e,
 		MinimumWidth:  width,

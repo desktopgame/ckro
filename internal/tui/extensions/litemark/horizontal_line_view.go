@@ -22,7 +22,7 @@ func (hl *HorizontalLineView) Draw(ctx view.Context, textLayout *view.TextLayout
 	}
 }
 
-func (hl *HorizontalLineView) MinimumSize(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
+func (hl *HorizontalLineView) Measure(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
 	return &view.TextLayout{
 		Element:       e,
 		MinimumWidth:  width,

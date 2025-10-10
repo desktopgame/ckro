@@ -38,7 +38,7 @@ func (t *TextView) Draw(ctx view.Context, textLayout *view.TextLayout, renderer 
 	}
 }
 
-func (t *TextView) MinimumSize(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
+func (t *TextView) Measure(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
 	totalWidth := 0
 	children := []*view.TextLayout{}
 	column := 0
@@ -55,7 +55,7 @@ func (t *TextView) MinimumSize(ctx view.Context, e model.Element, width int, hei
 				MinimumHeight: 1,
 			}
 		} else {
-			child = childView.MinimumSize(ctx, childElement, width, 1)
+			child = childView.Measure(ctx, childElement, width, 1)
 		}
 		children = append(children, child)
 

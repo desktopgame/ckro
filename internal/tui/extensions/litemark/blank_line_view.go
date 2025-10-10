@@ -27,7 +27,7 @@ func (b *BlankLineView) Draw(ctx view.Context, textLayout *view.TextLayout, rend
 	}
 }
 
-func (b *BlankLineView) MinimumSize(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
+func (b *BlankLineView) Measure(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
 	return &view.TextLayout{
 		Element:       e,
 		MinimumWidth:  1,
