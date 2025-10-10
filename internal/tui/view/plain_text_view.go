@@ -290,6 +290,10 @@ func (p *PlainTextView) ConvertModel(ctx Context, textLayout *TextLayout, viewLo
 	}
 }
 
+func (p *PlainTextView) FindFoldElementAt(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Element, int, bool) {
+	return nil, 0, false
+}
+
 func (p *PlainTextView) ShouldBeforeInsertionNewLineOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
 	return false
 }

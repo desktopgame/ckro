@@ -66,6 +66,10 @@ func (g *GhostView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout, byt
 	return 0
 }
 
+func (g *GhostView) FindFoldElementAt(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Element, int, bool) {
+	return nil, 0, false
+}
+
 func (g *GhostView) ShouldBeforeInsertionNewLineOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
 	return false
 }

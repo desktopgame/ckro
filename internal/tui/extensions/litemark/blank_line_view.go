@@ -72,6 +72,10 @@ func (b *BlankLineView) ConvertModel(ctx view.Context, textLayout *view.TextLayo
 	}
 }
 
+func (b *BlankLineView) FindFoldElementAt(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Element, int, bool) {
+	return nil, 0, false
+}
+
 func (b *BlankLineView) ShouldBeforeInsertionNewLineOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
 	return false
 }

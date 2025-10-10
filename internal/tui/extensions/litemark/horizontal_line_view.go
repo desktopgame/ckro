@@ -71,6 +71,10 @@ func (hl *HorizontalLineView) ConvertViewLocalPos(ctx view.Context, textLayout *
 	return 0
 }
 
+func (hl *HorizontalLineView) FindFoldElementAt(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Element, int, bool) {
+	return nil, 0, false
+}
+
 func (hl *HorizontalLineView) ShouldBeforeInsertionNewLineOnLineBegin(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) bool {
 	return false
 }

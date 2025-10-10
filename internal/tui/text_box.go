@@ -639,11 +639,12 @@ func (tb *TextBox) CanEdit() bool {
 	ctx := tb.context()
 	tb.renderCache.Update(ctx, tb.Width)
 
-	_, ei, _, _ := tb.renderCache.Stats(tb.viewPosition)
-	element := tb.renderCache.GetElement(ei)
+	_, ei, _, vl := tb.renderCache.Stats(tb.viewPosition)
+	layout := tb.renderCache.GetLayout(ei)
+	textView := tb.ViewResolver.Resolve(layout.Element)
 
-	if _, ok := element.(*model.FoldBlockElement); ok {
-		if tb.foldManager.IsFolded(tb.Document, element) {
+	if e, _, ok := textView.FindFoldElementAt(ctx, layout, vl); ok {
+		if tb.foldManager.IsFolded(tb.Document, e) {
 			return false
 		}
 		return true
@@ -659,16 +660,17 @@ func (tb *TextBox) Submit() bool {
 
 	_, ei, _, vl := tb.renderCache.Stats(tb.viewPosition)
 	bPos := tb.viewToModel(tb.viewPosition)
-	element := tb.renderCache.GetElement(ei)
+	layout := tb.renderCache.GetLayout(ei)
+	textView := tb.ViewResolver.Resolve(layout.Element)
 
-	if fold, ok := element.(*model.FoldBlockElement); ok {
+	if e, vl, ok := textView.FindFoldElementAt(ctx, layout, vl); ok {
 		if vl > 0 {
-			if tb.foldManager.IsFolded(tb.Document, element) {
+			if tb.foldManager.IsFolded(tb.Document, e) {
 				return true
 			}
 			return false
 		}
-		tb.foldManager.ToggleFold(tb.Document, fold)
+		tb.foldManager.ToggleFold(tb.Document, e)
 		tb.renderCache.ForceUpdate(ctx, tb.Width)
 
 		_, vs, vl := tb.modelToView(bPos)

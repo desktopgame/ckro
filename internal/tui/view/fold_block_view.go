@@ -301,6 +301,23 @@ func (fv *FoldBlockView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout
 	}
 }
 
+func (fv *FoldBlockView) FindFoldElementAt(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Element, int, bool) {
+	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
+		return textLayout.Element, viewLocalPos, true
+	}
+	table, _ := CompositeViewLengthTable(ctx, textLayout)
+	index, col := CompositeViewIndex(table, viewLocalPos)
+	child := textLayout.Children[index]
+	if _, ok := child.Element.(*model.FoldBlockElement); ok {
+		return child.Element, col, true
+	}
+	if viewLocalPos == 0 {
+		return textLayout.Element, 0, true
+	}
+	childView := ctx.Resolver.Resolve(child.Element)
+	return childView.FindFoldElementAt(ctx, child, col)
+}
+
 func (fv *FoldBlockView) ShouldBeforeInsertionNewLineOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		return false

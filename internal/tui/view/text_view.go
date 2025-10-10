@@ -43,6 +43,8 @@ type TextView interface {
 	// move to inward if byte position is aim to decoration.
 	ConvertViewLocalPos(ctx Context, textLayout *TextLayout, bytePos model.Position) int
 
+	FindFoldElementAt(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Element, int, bool)
+
 	ShouldBeforeInsertionNewLineOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool
 	ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, viewLocalPos int) (int, bool)
 	ShouldRemoveWithSpecifiedColumnAfter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool)
