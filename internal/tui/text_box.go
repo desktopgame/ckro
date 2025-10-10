@@ -357,9 +357,12 @@ func (tb *TextBox) InsertString(s string) {
 	// "ghost element" is locatable a cursor, but does not exist string
 	// blank line inserted when type text on this element
 	if ge, ok := tb.renderCache.GetElement(ei).(*model.GhostElement); ok {
-		lines := strings.Repeat("\n", ge.Index+1)
-		tb.viewPosition -= ge.Index + 1
-		tb.InsertString(lines)
+		for i := 0; i < ge.Index+1; i++ {
+			row := tb.Document.GetLineCount() - 1
+			bytes := tb.Document.GetLineBytes(row)
+			tb.Document.InsertString(row, bytes, "\n")
+		}
+		tb.renderCache.Update(ctx, tb.Width)
 		tb.InsertString(s)
 		return
 	}
