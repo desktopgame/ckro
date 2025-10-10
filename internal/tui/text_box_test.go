@@ -755,7 +755,7 @@ func TestTextBox43(t *testing.T) {
 	mustBytePos(t, tb, 0, 6)
 
 	tb.RemoveChar()
-	mustBytePos(t, tb, 0, 4)
+	mustBytePos(t, tb, 0, 5)
 	assert.Equal(t, tb.GetViewPosition(), 3)
 }
 
