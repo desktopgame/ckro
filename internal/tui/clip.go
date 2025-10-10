@@ -15,6 +15,8 @@ type Clip struct {
 	FirstLineY int
 	offsetX    int
 	offsetY    int
+	regionW    int
+	regionH    int
 }
 
 // SetContent is set a character to specified cell, if not already settled.
@@ -38,5 +40,14 @@ func (c *Clip) Translate(offsetX int, offsetY int) view.Renderer {
 	copy := *c
 	copy.offsetX += offsetX
 	copy.offsetY += offsetY
+	copy.regionW = 0
+	copy.regionH = 0
+	return &copy
+}
+
+func (c *Clip) Region(width int, height int) view.Renderer {
+	copy := *c
+	copy.regionW = width
+	copy.regionH = height
 	return &copy
 }
