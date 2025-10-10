@@ -376,7 +376,7 @@ func TestTextBox23(t *testing.T) {
 	mustBytePos(t, tb, 3, 2)
 
 	tb.RemoveChar()
-	mustBytePos(t, tb, 2, 0)
+	mustBytePos(t, tb, 2, 2)
 }
 
 func TestTextBox24(t *testing.T) {
