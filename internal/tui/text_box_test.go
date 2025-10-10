@@ -223,7 +223,7 @@ func TestTextBox14(t *testing.T) {
 	mustBytePos(t, tb, 0, 1)
 
 	tb.MoveUp()
-	mustBytePos(t, tb, 0, 1)
+	mustBytePos(t, tb, 0, 0)
 }
 
 func TestTextBox15(t *testing.T) {
