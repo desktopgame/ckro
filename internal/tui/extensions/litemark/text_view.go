@@ -30,9 +30,9 @@ func (t *TextView) Draw(ctx view.Context, textLayout *view.TextLayout, renderer 
 		childView := ctx.Resolver.Resolve(child.Element)
 
 		if tsv, ok := childView.(view.TabStopTextView); ok {
-			column = tsv.DrawWithTabStop(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY), column)
+			column = tsv.DrawWithTabStop(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY).Region(child.Width, child.Height), column)
 		} else {
-			childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY))
+			childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY).Region(child.Width, child.Height))
 			column += child.Width
 		}
 	}

@@ -68,7 +68,7 @@ func (c *CodeBlockView) Draw(ctx view.Context, textLayout *view.TextLayout, rend
 	renderer.SetContent(textLayout.Width-1, textLayout.Height-1-subLines, '*', nil, codeBockFrame)
 	for _, child := range textLayout.Children {
 		childView := ctx.Resolver.Resolve(child.Element)
-		childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY-subLines))
+		childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY-subLines).Region(child.Width, child.Height))
 	}
 }
 

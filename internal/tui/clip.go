@@ -22,6 +22,16 @@ type Clip struct {
 // SetContent is set a character to specified cell, if not already settled.
 // TODO: refactor
 func (c *Clip) SetContent(x int, y int, primary rune, combining []rune, style tcell.Style) {
+	if c.regionW > 0 {
+		if x >= c.regionW {
+			return
+		}
+	}
+	if c.regionH > 0 {
+		if y >= c.regionH {
+			return
+		}
+	}
 	y += c.offsetY
 	if y < c.FirstLineY || y >= c.FirstLineY+c.Height {
 		return

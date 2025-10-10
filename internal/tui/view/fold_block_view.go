@@ -14,8 +14,7 @@ func (fv *FoldBlockView) Layout(ctx Context, textLayout *TextLayout, x, y, w, h 
 		childView := ctx.Resolver.Resolve(childElement)
 
 		mw := textLayout.Children[0].MinimumWidth
-		mh := textLayout.Children[0].MinimumHeight
-		childView.Layout(ctx, textLayout.Children[0], 1+2, 1, mw, mh)
+		childView.Layout(ctx, textLayout.Children[0], 1+2, 1, mw, 1)
 	} else {
 		offsetY := 1
 		for i := 0; i < len(textLayout.Children); i++ {
@@ -54,12 +53,12 @@ func (fv *FoldBlockView) Draw(ctx Context, textLayout *TextLayout, renderer Rend
 		renderer.SetContent(1, 2, ' ', nil, tcell.StyleDefault)
 		for _, child := range textLayout.Children {
 			childView := ctx.Resolver.Resolve(child.Element)
-			childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY))
+			childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY).Region(child.Width, child.Height))
 		}
 	} else {
 		for _, child := range textLayout.Children {
 			childView := ctx.Resolver.Resolve(child.Element)
-			childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY))
+			childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY).Region(child.Width, child.Height))
 		}
 	}
 }
