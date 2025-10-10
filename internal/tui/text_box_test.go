@@ -716,10 +716,10 @@ func TestTextBox41(t *testing.T) {
 	mustBytePos(t, tb, 0, 11)
 
 	tb.RemoveChar()
-	mustBytePos(t, tb, 0, 8)
+	mustBytePos(t, tb, 0, 10)
 
 	tb.RemoveChar()
-	mustBytePos(t, tb, 0, 7)
+	mustBytePos(t, tb, 0, 9)
 
 	tb.RemoveChar()
 	mustBytePos(t, tb, 0, 4)
