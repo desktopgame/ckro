@@ -41,36 +41,14 @@ func (fv *FoldBlockView) Draw(ctx Context, textLayout *TextLayout, renderer Rend
 		foldLabel = "[-]"
 	}
 
-	// w := runewidth.StringWidth(foldLabel)
-	// renderer.SetContent(0, 0, '+', nil, foldFrameStyle)
-	// for i := 1; i < w+2; i++ {
-	// 	renderer.SetContent(i, 0, '-', nil, foldFrameStyle)
-	// 	renderer.SetContent(i, 2, '-', nil, foldFrameStyle)
-	// }
-	// renderer.SetContent(w+2, 0, '+', nil, foldFrameStyle)
-	// renderer.SetContent(w+2, 2, '+', nil, foldFrameStyle)
-
 	for i, r := range foldLabel {
 		renderer.SetContent(i, 0, r, nil, foldFrameStyle)
 	}
-	// renderer.SetContent(0, 1, '|', nil, foldFrameStyle)
-	// renderer.SetContent(w+2, 1, '|', nil, foldFrameStyle)
-
-	// renderer = renderer.Translate(0, 2)
-	// subLines := 2
-
-	// for i := 1; i < textLayout.Width-1; i++ {
-	// 	renderer.SetContent(i, 2, '-', nil, foldFrameStyle)
-	// 	renderer.SetContent(i, textLayout.Height-1, '-', nil, foldFrameStyle)
-	// }
 	for i := 2; i < textLayout.Height-1; i++ {
 		renderer.SetContent(1, i, '|', nil, foldFrameStyle)
-		// renderer.SetContent(textLayout.Width-1, i, '|', nil, foldFrameStyle)
 	}
 	renderer.SetContent(1, 1, '*', nil, foldFrameStyle)
-	// renderer.SetContent(textLayout.Width-1, 2, '+', nil, foldFrameStyle)
 	renderer.SetContent(1, textLayout.Height-1, '*', nil, foldFrameStyle)
-	// renderer.SetContent(textLayout.Width-1, textLayout.Height-1, '+', nil, foldFrameStyle)
 
 	for _, child := range textLayout.Children {
 		childView := ctx.Resolver.Resolve(child.Element)
