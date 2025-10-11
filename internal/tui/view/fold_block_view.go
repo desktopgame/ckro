@@ -16,7 +16,7 @@ func (fv *FoldBlockView) Layout(ctx Context, textLayout *TextLayout, x, y, w, h 
 		childView := ctx.Resolver.Resolve(childElement)
 
 		mw := textLayout.Children[0].MinimumWidth
-		childView.Layout(ctx, textLayout.Children[0], 1+2, 1+headerHeight, mw, 1)
+		childView.Layout(ctx, textLayout.Children[0], 1, 1+headerHeight, mw, 1)
 	} else {
 		offsetY := 1 + headerHeight
 		for i := 0; i < len(textLayout.Children); i++ {
@@ -201,19 +201,33 @@ func (fv *FoldBlockView) MoveLength(ctx Context, textLayout *TextLayout) int {
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		childElement := textLayout.Children[0].Element
 		childView := ctx.Resolver.Resolve(childElement)
-		return childView.MoveLength(ctx, textLayout.Children[0])
+		return childView.MoveLength(ctx, textLayout.Children[0]) + 1
 	} else {
 		_, ttl := CompositeViewLengthTable(ctx, textLayout)
-		return ttl
+		return ttl + 1
 	}
 }
 
 func (fv *FoldBlockView) MoveUp(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
-	return CompositeMoveUp(ctx, textLayout, viewLocalPos)
+	if viewLocalPos == 0 {
+		return -1
+	}
+	n := CompositeMoveUp(ctx, textLayout, viewLocalPos-1)
+	if n == -1 {
+		return 0
+	}
+	return n + 1
 }
 
 func (fv *FoldBlockView) MoveDown(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
-	return CompositeMoveDown(ctx, textLayout, viewLocalPos)
+	if viewLocalPos == 0 {
+		return 1
+	}
+	n := CompositeMoveDown(ctx, textLayout, viewLocalPos-1)
+	if n >= 0 {
+		n++
+	}
+	return n
 }
 
 func (fv *FoldBlockView) MoveLeft(ctx Context, textLayout *TextLayout, viewLocalPos int) int {
@@ -233,11 +247,17 @@ func (fv *FoldBlockView) MoveRight(ctx Context, textLayout *TextLayout, viewLoca
 func (fv *FoldBlockView) ConvertPos(ctx Context, textLayout *TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
 	e := textLayout.Element
 
+	// skip header
+	if viewLocalPos == 0 {
+		return 1, 1
+	}
+	viewLocalPos--
+
 	if ctx.FoldManager.IsFolded(ctx.Document, e) {
 		childElement := textLayout.Children[0].Element
 		childView := ctx.Resolver.Resolve(childElement)
 		lx, ly := childView.ConvertPos(ctx, textLayout.Children[0], viewLocalPos)
-		return 1 + lx + 2, 1 + ly
+		return 1 + lx, 1 + ly + 2
 	}
 	table, _ := CompositeViewLengthTable(ctx, textLayout)
 	index, col := CompositeViewIndex(table, viewLocalPos)
@@ -250,10 +270,24 @@ func (fv *FoldBlockView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoc
 	child := textLayout.Children[index]
 	v := ctx.Resolver.Resolve(child.Element)
 	lx, ly := v.ConvertPos(ctx, child, col)
-	return lx + 1, h + ly + 1
+	return lx + 1, h + ly + 1 + 2
 }
 
 func (fv *FoldBlockView) ConvertModel(ctx Context, textLayout *TextLayout, viewLocalPos int) CharacterReference {
+	// skip header
+	if viewLocalPos == 0 {
+		r := textLayout.Element.GetRange(0)
+		fb := textLayout.Element.(*model.FoldBlockElement)
+		return CharacterReference{
+			StartPosition: model.Position{
+				Row:    r.StartPosition.Row,
+				Column: r.StartPosition.Column + fb.Level,
+			},
+			Bytes: 0,
+		}
+	}
+	viewLocalPos--
+
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		childElement := textLayout.Children[0].Element
 		childView := ctx.Resolver.Resolve(childElement)
@@ -277,13 +311,17 @@ func (fv *FoldBlockView) ConvertModel(ctx Context, textLayout *TextLayout, viewL
 
 func (fv *FoldBlockView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout, bytePos model.Position) int {
 	e := textLayout.Element
+	r := e.GetRange(0)
+	if bytePos.Row == r.StartPosition.Row {
+		return 0
+	}
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		r := e.GetRange(0)
 		child := textLayout.Children[0]
 		childElement := textLayout.Children[0].Element
 		childView := ctx.Resolver.Resolve(childElement)
 		if bytePos.Row == r.StartPosition.Row {
-			return childView.ConvertViewLocalPos(ctx, textLayout.Children[0], bytePos)
+			return childView.ConvertViewLocalPos(ctx, textLayout.Children[0], bytePos) + 1
 		}
 		return childView.MoveLength(ctx, child) - 1
 
@@ -299,12 +337,12 @@ func (fv *FoldBlockView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout
 			if bytePos.Row >= st.Row && bytePos.Row <= ed.Row {
 				if st.Row == ed.Row && st.Column == ed.Column {
 					if bytePos.Row == st.Row && bytePos.Column == st.Column {
-						return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos)
+						return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos) + 1
 					}
 				}
 				// inclusive line end, because of FoldBlockView is only contain line orientated view
 				if bytePos.Column >= st.Column && (bytePos.Column <= ed.Column || ed.Row > st.Row) {
-					return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos)
+					return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos) + 1
 				}
 			}
 			viewOffset += childView.MoveLength(ctx, child)
@@ -318,20 +356,30 @@ func (fv *FoldBlockView) FindFoldElementAt(ctx Context, textLayout *TextLayout, 
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		return textLayout.Element, viewLocalPos, true
 	}
+
 	table, _ := CompositeViewLengthTable(ctx, textLayout)
-	index, col := CompositeViewIndex(table, viewLocalPos)
-	child := textLayout.Children[index]
-	if _, ok := child.Element.(*model.FoldBlockElement); ok {
-		return child.Element, col, true
+	index, col := CompositeViewIndex(table, viewLocalPos-1)
+	if index >= 0 {
+		child := textLayout.Children[index]
+		childView := ctx.Resolver.Resolve(child.Element)
+		e, pos, ok := childView.FindFoldElementAt(ctx, child, col)
+		if ok {
+			return e, pos, true
+		}
 	}
 	if viewLocalPos == 0 {
 		return textLayout.Element, 0, true
 	}
-	childView := ctx.Resolver.Resolve(child.Element)
-	return childView.FindFoldElementAt(ctx, child, col)
+	return nil, -1, false
 }
 
 func (fv *FoldBlockView) ShouldBeforeInsertionNewLineOnLineBegin(ctx Context, textLayout *TextLayout, viewLocalPos int) bool {
+	// skip header
+	if viewLocalPos == 0 {
+		return false
+	}
+	viewLocalPos--
+
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		return false
 	} else {
@@ -345,6 +393,12 @@ func (fv *FoldBlockView) ShouldBeforeInsertionNewLineOnLineBegin(ctx Context, te
 }
 
 func (fv *FoldBlockView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayout, viewLocalPos int) (int, bool) {
+	// skip header
+	if viewLocalPos == 0 {
+		return -1, false
+	}
+	viewLocalPos--
+
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		return -1, false
 	} else {
@@ -358,6 +412,12 @@ func (fv *FoldBlockView) ShouldRemoveWithLine(ctx Context, textLayout *TextLayou
 }
 
 func (fv *FoldBlockView) ShouldRemoveWithSpecifiedColumnAfter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Position, bool) {
+	// skip header
+	if viewLocalPos == 0 {
+		return model.Position{}, false
+	}
+	viewLocalPos--
+
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		return model.Position{}, false
 	} else {
@@ -382,6 +442,12 @@ func (fv *FoldBlockView) ShouldRemoveWithSpecifiedColumnAfter(ctx Context, textL
 }
 
 func (fv *FoldBlockView) ShouldRemoveWithSpecifiedRangeLines(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Range, bool) {
+	// skip header
+	if viewLocalPos == 0 {
+		return model.Range{}, false
+	}
+	viewLocalPos--
+
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		return model.Range{}, false
 	} else {
@@ -395,6 +461,12 @@ func (fv *FoldBlockView) ShouldRemoveWithSpecifiedRangeLines(ctx Context, textLa
 }
 
 func (fv *FoldBlockView) ShouldRemoveWithSpecifiedRangeColumns(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Range, bool) {
+	// skip header
+	if viewLocalPos == 0 {
+		return model.Range{}, false
+	}
+	viewLocalPos--
+
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		return model.Range{}, false
 	} else {
@@ -408,6 +480,12 @@ func (fv *FoldBlockView) ShouldRemoveWithSpecifiedRangeColumns(ctx Context, text
 }
 
 func (fv *FoldBlockView) ShouldRemoveLastCharacter(ctx Context, textLayout *TextLayout, viewLocalPos int) (model.Element, bool) {
+	// skip header
+	if viewLocalPos == 0 {
+		return nil, false
+	}
+	viewLocalPos--
+
 	if viewLocalPos == fv.MoveLength(ctx, textLayout)-1 {
 		return textLayout.Element, true
 	}
