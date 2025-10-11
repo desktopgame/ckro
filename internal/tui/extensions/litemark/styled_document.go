@@ -451,11 +451,39 @@ func (doc *StyledDocument) renderElement(blocks []AbstractBlock) []model.Element
 				})
 			}
 		case *Table:
+			tableRowElements := []model.Element{}
 			for _, t := range block.Rows {
+				columns := []model.Element{}
 				for _, c := range t.Columns {
-					elements = append(elements, doc.text2Element(c))
+					columns = append(columns, doc.text2Element(c))
 				}
+				tableRowElements = append(tableRowElements, &TableRowElement{
+					Range: model.Range{
+						StartPosition: model.Position{
+							Row:    t.LineIndex,
+							Column: 0,
+						},
+						EndPosition: model.Position{
+							Row:    t.LineIndex,
+							Column: doc.GetLineBytes(t.LineIndex),
+						},
+					},
+					Children: columns,
+				})
 			}
+			elements = append(elements, &TableElement{
+				Range: model.Range{
+					StartPosition: model.Position{
+						Row:    block.LineIndex,
+						Column: 0,
+					},
+					EndPosition: model.Position{
+						Row:    block.LineIndex + (block.LineCount - 1),
+						Column: doc.GetLineBytes(block.LineIndex + (block.LineCount - 1)),
+					},
+				},
+				Children: tableRowElements,
+			})
 		case *Text:
 			elements = append(elements, doc.text2Element(block))
 		case *HorizontalLine:

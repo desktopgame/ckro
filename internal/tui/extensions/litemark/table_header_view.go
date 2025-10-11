@@ -10,6 +10,16 @@ type TableHeaderView struct {
 }
 
 func (thv *TableHeaderView) Layout(ctx view.Context, textLayout *view.TextLayout, x, y, w, h int) {
+	offsetX := 0
+	for i := 0; i < len(textLayout.Children); i++ {
+		childElement := textLayout.Children[i].Element
+		childView := ctx.Resolver.Resolve(childElement)
+		// mw := textLayout.Children[i].MinimumWidth
+		mh := textLayout.Children[i].MinimumHeight
+		childView.Layout(ctx, textLayout.Children[i], offsetX, 0, textLayout.WidthTable[i], mh)
+		offsetX += textLayout.Children[i].Width + 1
+	}
+
 	textLayout.RelativeX = x
 	textLayout.RelativeY = y
 	textLayout.Width = w
@@ -17,21 +27,51 @@ func (thv *TableHeaderView) Layout(ctx view.Context, textLayout *view.TextLayout
 }
 
 func (thv *TableHeaderView) Draw(ctx view.Context, textLayout *view.TextLayout, renderer view.Renderer) {
-	r := textLayout.Element.GetRange(0)
-	at := r.StartPosition
-	sel := ctx.TextSelection
+	style := tcell.StyleDefault.Bold(true)
+	cellCount := len(textLayout.Children)
+	if cellCount == 0 {
+		return
+	}
 
-	if sel.Contain(at) {
-		selectStyle := tcell.StyleDefault.Reverse(true)
-		renderer.SetContent(0, 0, ' ', nil, selectStyle)
+	//availableWidth := textLayout.Width - (cellCount - 1)
+	//cellWidth := availableWidth / cellCount
+
+	x := 0
+	for i, child := range textLayout.Children {
+		// Draw cell separator
+		if i > 0 {
+			renderer.SetContent(x, 0, '│', nil, style)
+			x++
+		}
+
+		childElement := textLayout.Element.GetElement(i)
+		childView := ctx.Resolver.Resolve(childElement)
+
+		childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY))
+		x += textLayout.WidthTable[i]
 	}
 }
 
 func (thv *TableHeaderView) Measure(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
+	totalWidth := 0
+	maxHeight := -1
+	children := []*view.TextLayout{}
+	for i := 0; i < e.GetElementCount(); i++ {
+		childElement := e.GetElement(i)
+		childView := ctx.Resolver.Resolve(childElement)
+		child := childView.Measure(ctx, childElement, width, height)
+		children = append(children, child)
+
+		if child.MinimumHeight > maxHeight {
+			maxHeight = child.MinimumHeight
+		}
+		totalWidth += child.MinimumWidth
+	}
 	return &view.TextLayout{
 		Element:       e,
-		MinimumWidth:  1,
-		MinimumHeight: 1,
+		MinimumWidth:  totalWidth,
+		MinimumHeight: maxHeight,
+		Children:      children,
 	}
 }
 

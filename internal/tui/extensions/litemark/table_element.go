@@ -3,8 +3,8 @@ package litemark
 import "github.com/desktopgame/ckro/internal/tui/model"
 
 type TableElement struct {
-	Range model.Range
-	Level int
+	Range    model.Range
+	Children []model.Element
 }
 
 func (t *TableElement) GetRange(index int) model.Range {
@@ -16,9 +16,9 @@ func (t *TableElement) GetRangeCount() int {
 }
 
 func (t *TableElement) GetElement(index int) model.Element {
-	return nil
+	return t.Children[index]
 }
 
 func (t *TableElement) GetElementCount() int {
-	return 0
+	return len(t.Children)
 }

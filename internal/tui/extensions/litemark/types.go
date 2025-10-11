@@ -45,7 +45,8 @@ type HorizontalLine struct {
 }
 
 type TableRow struct {
-	Columns []*Text
+	LineIndex int
+	Columns   []*Text
 }
 
 type Table struct {

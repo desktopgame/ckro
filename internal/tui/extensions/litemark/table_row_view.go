@@ -10,6 +10,16 @@ type TableRowView struct {
 }
 
 func (trv *TableRowView) Layout(ctx view.Context, textLayout *view.TextLayout, x, y, w, h int) {
+	offsetX := 0
+	for i := 0; i < len(textLayout.Children); i++ {
+		childElement := textLayout.Children[i].Element
+		childView := ctx.Resolver.Resolve(childElement)
+		//mw := textLayout.Children[i].MinimumWidth
+		mh := textLayout.Children[i].MinimumHeight
+		childView.Layout(ctx, textLayout.Children[i], offsetX, 0, textLayout.WidthTable[i], mh)
+		offsetX += textLayout.WidthTable[i] + 1
+	}
+
 	textLayout.RelativeX = x
 	textLayout.RelativeY = y
 	textLayout.Width = w
@@ -17,21 +27,80 @@ func (trv *TableRowView) Layout(ctx view.Context, textLayout *view.TextLayout, x
 }
 
 func (trv *TableRowView) Draw(ctx view.Context, textLayout *view.TextLayout, renderer view.Renderer) {
-	r := textLayout.Element.GetRange(0)
-	at := r.StartPosition
-	sel := ctx.TextSelection
+	cellCount := len(textLayout.Children)
+	if cellCount == 0 {
+		return
+	}
 
-	if sel.Contain(at) {
-		selectStyle := tcell.StyleDefault.Reverse(true)
-		renderer.SetContent(0, 0, ' ', nil, selectStyle)
+	//availableWidth := textLayout.Width - (cellCount - 1)
+	//cellWidth := availableWidth / cellCount
+
+	x := 0
+	for i, child := range textLayout.Children {
+		// Draw cell separator
+		if i > 0 {
+			renderer.SetContent(x, 0, '│', nil, tcell.StyleDefault)
+			x++
+		}
+
+		childElement := textLayout.Element.GetElement(i)
+		childView := ctx.Resolver.Resolve(childElement)
+		childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY))
+		x += textLayout.WidthTable[i]
 	}
 }
 
 func (trv *TableRowView) Measure(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
+	children := []*view.TextLayout{}
+	for i := 0; i < e.GetElementCount(); i++ {
+		childElement := e.GetElement(i)
+		childView := ctx.Resolver.Resolve(childElement)
+		child := childView.Measure(ctx, childElement, width, height)
+		children = append(children, child)
+	}
+
+	var heightTable []int
+	for i := 0; i < e.GetElementCount(); i++ {
+		row := e.GetElement(i)
+		maxHeight := -1
+		for j := 0; j < row.GetElementCount(); j++ {
+			mh := children[i].Children[j].MinimumHeight
+
+			if mh > maxHeight {
+				maxHeight = mh
+			}
+		}
+		heightTable = append(heightTable, maxHeight)
+	}
+
+	var widthTable []int
+	for j := 0; j < e.GetElement(0).GetElementCount(); j++ {
+		maxWidth := -1
+		for i := 0; i < e.GetElementCount(); i++ {
+			mw := children[i].Children[j].MinimumWidth
+
+			if mw > maxWidth {
+				maxWidth = mw
+			}
+		}
+		widthTable = append(widthTable, maxWidth)
+	}
+
+	totalWidth := 0
+	for _, w := range widthTable {
+		totalWidth += w
+	}
+
+	totalHeight := 0
+	for _, h := range heightTable {
+		totalHeight += h
+	}
+
 	return &view.TextLayout{
 		Element:       e,
-		MinimumWidth:  1,
-		MinimumHeight: 1,
+		MinimumWidth:  totalWidth + (e.GetElement(0).GetElementCount() + 1),
+		MinimumHeight: totalHeight + 3,
+		Children:      children,
 	}
 }
 

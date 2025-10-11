@@ -293,7 +293,8 @@ func Parse(reader Reader) []AbstractBlock {
 								columnOffset = byteIndexOf(row, '|', columnOffset+1) + 1
 							}
 							tableRows = append(tableRows, TableRow{
-								Columns: columns,
+								LineIndex: lineIndex + 2 + len(tableRows),
+								Columns:   columns,
 							})
 						} else {
 							sc.lineIndex--
