@@ -443,6 +443,7 @@ func (app *Application) loopMiniBuffer() {
 							}
 							sb.WriteString("}}}\n")
 						} else {
+							sb.WriteString("\n")
 							sb.WriteString("{{{\n")
 							sb.WriteString("BOT:\n")
 							sb.WriteString(log.Body.OfAssistant.Content.OfString.Value)
@@ -453,6 +454,7 @@ func (app *Application) loopMiniBuffer() {
 						tb.InsertString(sb.String())
 					} else if log.Body.OfUser != nil {
 						sb = strings.Builder{}
+						sb.WriteString("\n")
 						sb.WriteString("{{{\n")
 						sb.WriteString("USER:\n")
 						sb.WriteString(log.Body.OfUser.Content.OfString.Value)
