@@ -3,20 +3,22 @@ package view
 import (
 	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/gdamore/tcell/v2"
+	"github.com/mattn/go-runewidth"
 )
 
 type FoldBlockView struct {
 }
 
 func (fv *FoldBlockView) Layout(ctx Context, textLayout *TextLayout, x, y, w, h int) {
+	headerHeight := 2
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		childElement := textLayout.Children[0].Element
 		childView := ctx.Resolver.Resolve(childElement)
 
 		mw := textLayout.Children[0].MinimumWidth
-		childView.Layout(ctx, textLayout.Children[0], 1+2, 1, mw, 1)
+		childView.Layout(ctx, textLayout.Children[0], 1+2, 1+headerHeight, mw, 1)
 	} else {
-		offsetY := 1
+		offsetY := 1 + headerHeight
 		for i := 0; i < len(textLayout.Children); i++ {
 			childElement := textLayout.Children[i].Element
 			childView := ctx.Resolver.Resolve(childElement)
@@ -35,31 +37,42 @@ func (fv *FoldBlockView) Layout(ctx Context, textLayout *TextLayout, x, y, w, h 
 
 func (fv *FoldBlockView) Draw(ctx Context, textLayout *TextLayout, renderer Renderer) {
 	foldFrameStyle := tcell.StyleDefault.Foreground(tcell.ColorYellow)
-	for i := 1; i < textLayout.Width-1; i++ {
+	foldLabel := "FOLD ON"
+	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
+		foldLabel = "FOLD OFF"
+	}
+
+	w := runewidth.StringWidth(foldLabel)
+	renderer.SetContent(0, 0, '*', nil, foldFrameStyle)
+	for i := 1; i < w+2; i++ {
 		renderer.SetContent(i, 0, '-', nil, foldFrameStyle)
+	}
+	renderer.SetContent(w+2, 0, '*', nil, foldFrameStyle)
+
+	for i, r := range foldLabel {
+		renderer.SetContent(i+1, 1, r, nil, foldFrameStyle)
+	}
+	renderer.SetContent(0, 1, '|', nil, foldFrameStyle)
+	renderer.SetContent(w+2, 1, '|', nil, foldFrameStyle)
+	// renderer = renderer.Translate(0, 2)
+	// subLines := 2
+
+	for i := 1; i < textLayout.Width-1; i++ {
+		renderer.SetContent(i, 2, '-', nil, foldFrameStyle)
 		renderer.SetContent(i, textLayout.Height-1, '-', nil, foldFrameStyle)
 	}
-	for i := 1; i < textLayout.Height-1; i++ {
+	for i := 3; i < textLayout.Height-1; i++ {
 		renderer.SetContent(0, i, '|', nil, foldFrameStyle)
 		renderer.SetContent(textLayout.Width-1, i, '|', nil, foldFrameStyle)
 	}
-	renderer.SetContent(0, 0, '+', nil, foldFrameStyle)
-	renderer.SetContent(textLayout.Width-1, 0, '+', nil, foldFrameStyle)
+	renderer.SetContent(0, 2, '+', nil, foldFrameStyle)
+	renderer.SetContent(textLayout.Width-1, 2, '+', nil, foldFrameStyle)
 	renderer.SetContent(0, textLayout.Height-1, '+', nil, foldFrameStyle)
 	renderer.SetContent(textLayout.Width-1, textLayout.Height-1, '+', nil, foldFrameStyle)
 
-	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
-		renderer.SetContent(1, 1, '>', nil, tcell.StyleDefault)
-		renderer.SetContent(1, 2, ' ', nil, tcell.StyleDefault)
-		for _, child := range textLayout.Children {
-			childView := ctx.Resolver.Resolve(child.Element)
-			childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY).Region(child.Width, child.Height))
-		}
-	} else {
-		for _, child := range textLayout.Children {
-			childView := ctx.Resolver.Resolve(child.Element)
-			childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY).Region(child.Width, child.Height))
-		}
+	for _, child := range textLayout.Children {
+		childView := ctx.Resolver.Resolve(child.Element)
+		childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY).Region(child.Width, child.Height))
 	}
 }
 
@@ -179,7 +192,7 @@ func (fv *FoldBlockView) Measure(ctx Context, e model.Element, width int, height
 	return &TextLayout{
 		Element:       e,
 		MinimumWidth:  width,
-		MinimumHeight: minimumHeight,
+		MinimumHeight: minimumHeight + 2,
 		Children:      children,
 	}
 }
