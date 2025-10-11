@@ -51,55 +51,24 @@ func (trv *TableRowView) Draw(ctx view.Context, textLayout *view.TextLayout, ren
 }
 
 func (trv *TableRowView) Measure(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
+	totalWidth := 0
+	maxHeight := -1
 	children := []*view.TextLayout{}
 	for i := 0; i < e.GetElementCount(); i++ {
 		childElement := e.GetElement(i)
 		childView := ctx.Resolver.Resolve(childElement)
 		child := childView.Measure(ctx, childElement, width, height)
 		children = append(children, child)
-	}
 
-	var heightTable []int
-	for i := 0; i < e.GetElementCount(); i++ {
-		row := e.GetElement(i)
-		maxHeight := -1
-		for j := 0; j < row.GetElementCount(); j++ {
-			mh := children[i].Children[j].MinimumHeight
-
-			if mh > maxHeight {
-				maxHeight = mh
-			}
+		if child.MinimumHeight > maxHeight {
+			maxHeight = child.MinimumHeight
 		}
-		heightTable = append(heightTable, maxHeight)
+		totalWidth += child.MinimumWidth
 	}
-
-	var widthTable []int
-	for j := 0; j < e.GetElement(0).GetElementCount(); j++ {
-		maxWidth := -1
-		for i := 0; i < e.GetElementCount(); i++ {
-			mw := children[i].Children[j].MinimumWidth
-
-			if mw > maxWidth {
-				maxWidth = mw
-			}
-		}
-		widthTable = append(widthTable, maxWidth)
-	}
-
-	totalWidth := 0
-	for _, w := range widthTable {
-		totalWidth += w
-	}
-
-	totalHeight := 0
-	for _, h := range heightTable {
-		totalHeight += h
-	}
-
 	return &view.TextLayout{
 		Element:       e,
-		MinimumWidth:  totalWidth + (e.GetElement(0).GetElementCount() + 1),
-		MinimumHeight: totalHeight + 3,
+		MinimumWidth:  totalWidth,
+		MinimumHeight: maxHeight,
 		Children:      children,
 	}
 }
