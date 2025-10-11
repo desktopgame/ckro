@@ -260,6 +260,33 @@ func Parse(reader Reader) []AbstractBlock {
 						}
 					}
 
+					tableHeaders := []*Text{}
+					tableHeaderOffset := 1
+					for i := 0; i < len(headers); i++ {
+						if len(headers[i]) == 0 {
+							continue
+						}
+						inlines := ParseInline(headers[i])
+						for _, il := range inlines {
+							bil := il.BaseInline()
+							for i := 0; i < len(bil.Spans); i++ {
+								bil.Spans[i] = Span{
+									StartColumn: bil.Spans[i].StartColumn + tableHeaderOffset,
+									EndColumn:   bil.Spans[i].EndColumn + tableHeaderOffset,
+								}
+							}
+						}
+
+						tableHeaders = append(tableHeaders, &Text{
+							Block: Block{
+								LineIndex: lineIndex,
+								LineCount: 1,
+							},
+							Inlines: inlines,
+						})
+						tableHeaderOffset = byteIndexOf(line, '|', tableHeaderOffset+1) + 1
+					}
+
 					tableRows := []TableRow{}
 					for sc.Ready() {
 						row := sc.Next()
@@ -307,7 +334,7 @@ func Parse(reader Reader) []AbstractBlock {
 								LineIndex: lineIndex,
 								LineCount: 2 + len(tableRows),
 							},
-							Headers: headers,
+							Headers: tableHeaders,
 							Aligns:  alingsParsed,
 							Rows:    tableRows,
 						}

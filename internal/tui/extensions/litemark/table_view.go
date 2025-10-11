@@ -50,6 +50,9 @@ func (tv *TableView) Layout(ctx view.Context, textLayout *view.TextLayout, x, y,
 
 		textLayout.Children[i].WidthTable = widthTable
 		rowView.Layout(ctx, textLayout.Children[i], 1, yy, w, h)
+		if i == 0 {
+			yy++
+		}
 		totalHeight += h
 		yy += h
 	}

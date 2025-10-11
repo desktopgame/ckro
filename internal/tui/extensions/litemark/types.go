@@ -51,7 +51,7 @@ type TableRow struct {
 
 type Table struct {
 	Block
-	Headers []string
+	Headers []*Text
 	Aligns  []int
 	Rows    []TableRow
 }
