@@ -450,6 +450,12 @@ func (doc *StyledDocument) renderElement(blocks []AbstractBlock) []model.Element
 					},
 				})
 			}
+		case *Table:
+			for _, t := range block.Rows {
+				for _, c := range t.Columns {
+					elements = append(elements, doc.text2Element(c))
+				}
+			}
 		case *Text:
 			elements = append(elements, doc.text2Element(block))
 		case *HorizontalLine:

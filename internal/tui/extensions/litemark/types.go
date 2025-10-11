@@ -44,6 +44,17 @@ type HorizontalLine struct {
 	Block
 }
 
+type TableRow struct {
+	Columns []*Text
+}
+
+type Table struct {
+	Block
+	Headers []string
+	Aligns  []int
+	Rows    []TableRow
+}
+
 type Inline struct {
 	Spans []Span
 }

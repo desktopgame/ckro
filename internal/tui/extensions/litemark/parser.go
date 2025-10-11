@@ -1,6 +1,13 @@
 package litemark
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+)
+
+const TABLE_ALIGN_LEFT = 0
+const TABLE_ALIGN_CENTER = 1
+const TABLE_ALIGN_RIGHT = 2
 
 func strIndexOf(s, sub string, at int) int {
 	i := strings.Index(s[at:], sub)
@@ -184,6 +191,10 @@ func Parse(reader Reader) []AbstractBlock {
 		}
 	}
 
+	table_re := regexp.MustCompile(`^(\|.+)+\|$`)
+	table_layout_re := regexp.MustCompile(`^(\|.+)+\|$`)
+	table_content_re := regexp.MustCompile(`^(\|.+)+\|$`)
+
 	sc := Scanner{Reader: reader}
 	blocks := []AbstractBlock{}
 
@@ -221,6 +232,94 @@ func Parse(reader Reader) []AbstractBlock {
 					Level: column,
 				})
 				continue
+			}
+		}
+
+		// Table
+		if table_re.MatchString(line) {
+			if sc.Ready() {
+				headers := strings.Split(line, "|")
+				for i := 0; i < len(headers); i++ {
+					headers[i] = strings.TrimSpace(headers[i])
+				}
+
+				aligns := sc.Next()
+				if table_layout_re.MatchString(aligns) {
+					alignsSplit := strings.Split(aligns, "|")
+					alingsParsed := make([]int, len(aligns))
+					for i := 0; i < len(alignsSplit); i++ {
+						lColon := strings.HasPrefix(alignsSplit[i], ":")
+						rColon := strings.HasSuffix(alignsSplit[i], ":")
+
+						if lColon && rColon {
+							alingsParsed[i] = TABLE_ALIGN_CENTER
+						} else if lColon {
+							alingsParsed[i] = TABLE_ALIGN_LEFT
+						} else if rColon {
+							alingsParsed[i] = TABLE_ALIGN_RIGHT
+						}
+					}
+
+					tableRows := []TableRow{}
+					for sc.Ready() {
+						row := sc.Next()
+						if table_content_re.MatchString(row) {
+							texts := strings.Split(row, "|")
+							columns := []*Text{}
+
+							columnOffset := 1
+							for _, tex := range texts {
+								if len(tex) == 0 {
+									continue
+								}
+								inlines := ParseInline(tex)
+								for _, il := range inlines {
+									bil := il.BaseInline()
+									for i := 0; i < len(bil.Spans); i++ {
+										bil.Spans[i] = Span{
+											StartColumn: bil.Spans[i].StartColumn + columnOffset,
+											EndColumn:   bil.Spans[i].EndColumn + columnOffset,
+										}
+									}
+								}
+
+								columns = append(columns, &Text{
+									Block: Block{
+										LineIndex: lineIndex + 2 + len(tableRows),
+										LineCount: 1,
+									},
+									Inlines: inlines,
+								})
+								columnOffset = byteIndexOf(row, '|', columnOffset+1) + 1
+							}
+							tableRows = append(tableRows, TableRow{
+								Columns: columns,
+							})
+						} else {
+							sc.lineIndex--
+							break
+						}
+					}
+					if len(tableRows) > 0 {
+						table := Table{
+							Block: Block{
+								LineIndex: lineIndex,
+								LineCount: 2 + len(tableRows),
+							},
+							Headers: headers,
+							Aligns:  alingsParsed,
+							Rows:    tableRows,
+						}
+						blocks = append(blocks, &table)
+						continue
+					} else {
+						sc.lineIndex = lineIndex + 1
+					}
+				} else {
+					sc.lineIndex = lineIndex + 1
+				}
+			} else {
+				sc.lineIndex = lineIndex + 1
 			}
 		}
 
