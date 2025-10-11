@@ -3,20 +3,19 @@ package view
 import (
 	"github.com/desktopgame/ckro/internal/tui/model"
 	"github.com/gdamore/tcell/v2"
-	"github.com/mattn/go-runewidth"
 )
 
 type FoldBlockView struct {
 }
 
 func (fv *FoldBlockView) Layout(ctx Context, textLayout *TextLayout, x, y, w, h int) {
-	headerHeight := 2
+	headerHeight := 1
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
 		childElement := textLayout.Children[0].Element
 		childView := ctx.Resolver.Resolve(childElement)
 
 		mw := textLayout.Children[0].MinimumWidth
-		childView.Layout(ctx, textLayout.Children[0], 1, 1+headerHeight, mw, 1)
+		childView.Layout(ctx, textLayout.Children[0], 2, 1+headerHeight, mw, 1)
 	} else {
 		offsetY := 1 + headerHeight
 		for i := 0; i < len(textLayout.Children); i++ {
@@ -25,7 +24,7 @@ func (fv *FoldBlockView) Layout(ctx Context, textLayout *TextLayout, x, y, w, h 
 
 			mw := textLayout.Children[i].MinimumWidth
 			mh := textLayout.Children[i].MinimumHeight
-			childView.Layout(ctx, textLayout.Children[i], 1, offsetY, mw, mh)
+			childView.Layout(ctx, textLayout.Children[i], 2, offsetY, mw, mh)
 			offsetY += textLayout.Children[i].Height
 		}
 	}
@@ -37,38 +36,41 @@ func (fv *FoldBlockView) Layout(ctx Context, textLayout *TextLayout, x, y, w, h 
 
 func (fv *FoldBlockView) Draw(ctx Context, textLayout *TextLayout, renderer Renderer) {
 	foldFrameStyle := tcell.StyleDefault.Foreground(tcell.ColorYellow)
-	foldLabel := "FOLD ON"
+	foldLabel := "[+]"
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
-		foldLabel = "FOLD OFF"
+		foldLabel = "[-]"
 	}
 
-	w := runewidth.StringWidth(foldLabel)
-	renderer.SetContent(0, 0, '*', nil, foldFrameStyle)
-	for i := 1; i < w+2; i++ {
-		renderer.SetContent(i, 0, '-', nil, foldFrameStyle)
-	}
-	renderer.SetContent(w+2, 0, '*', nil, foldFrameStyle)
+	// w := runewidth.StringWidth(foldLabel)
+	// renderer.SetContent(0, 0, '+', nil, foldFrameStyle)
+	// for i := 1; i < w+2; i++ {
+	// 	renderer.SetContent(i, 0, '-', nil, foldFrameStyle)
+	// 	renderer.SetContent(i, 2, '-', nil, foldFrameStyle)
+	// }
+	// renderer.SetContent(w+2, 0, '+', nil, foldFrameStyle)
+	// renderer.SetContent(w+2, 2, '+', nil, foldFrameStyle)
 
 	for i, r := range foldLabel {
-		renderer.SetContent(i+1, 1, r, nil, foldFrameStyle)
+		renderer.SetContent(i, 0, r, nil, foldFrameStyle)
 	}
-	renderer.SetContent(0, 1, '|', nil, foldFrameStyle)
-	renderer.SetContent(w+2, 1, '|', nil, foldFrameStyle)
+	// renderer.SetContent(0, 1, '|', nil, foldFrameStyle)
+	// renderer.SetContent(w+2, 1, '|', nil, foldFrameStyle)
+
 	// renderer = renderer.Translate(0, 2)
 	// subLines := 2
 
-	for i := 1; i < textLayout.Width-1; i++ {
-		renderer.SetContent(i, 2, '-', nil, foldFrameStyle)
-		renderer.SetContent(i, textLayout.Height-1, '-', nil, foldFrameStyle)
+	// for i := 1; i < textLayout.Width-1; i++ {
+	// 	renderer.SetContent(i, 2, '-', nil, foldFrameStyle)
+	// 	renderer.SetContent(i, textLayout.Height-1, '-', nil, foldFrameStyle)
+	// }
+	for i := 2; i < textLayout.Height-1; i++ {
+		renderer.SetContent(1, i, '|', nil, foldFrameStyle)
+		// renderer.SetContent(textLayout.Width-1, i, '|', nil, foldFrameStyle)
 	}
-	for i := 3; i < textLayout.Height-1; i++ {
-		renderer.SetContent(0, i, '|', nil, foldFrameStyle)
-		renderer.SetContent(textLayout.Width-1, i, '|', nil, foldFrameStyle)
-	}
-	renderer.SetContent(0, 2, '+', nil, foldFrameStyle)
-	renderer.SetContent(textLayout.Width-1, 2, '+', nil, foldFrameStyle)
-	renderer.SetContent(0, textLayout.Height-1, '+', nil, foldFrameStyle)
-	renderer.SetContent(textLayout.Width-1, textLayout.Height-1, '+', nil, foldFrameStyle)
+	renderer.SetContent(1, 1, '*', nil, foldFrameStyle)
+	// renderer.SetContent(textLayout.Width-1, 2, '+', nil, foldFrameStyle)
+	renderer.SetContent(1, textLayout.Height-1, '*', nil, foldFrameStyle)
+	// renderer.SetContent(textLayout.Width-1, textLayout.Height-1, '+', nil, foldFrameStyle)
 
 	for _, child := range textLayout.Children {
 		childView := ctx.Resolver.Resolve(child.Element)
@@ -85,7 +87,7 @@ func (fv *FoldBlockView) Measure(ctx Context, e model.Element, width int, height
 
 		childElement := e.GetElement(0)
 		childView := ctx.Resolver.Resolve(childElement)
-		child := childView.Measure(ctx, childElement, width-4, 1)
+		child := childView.Measure(ctx, childElement, width-2, 1)
 		if child.MinimumHeight > 1 {
 			r := childElement.GetRange(0)
 			if r.StartPosition.Row != r.EndPosition.Row {
@@ -101,17 +103,17 @@ func (fv *FoldBlockView) Measure(ctx Context, e model.Element, width int, height
 				Range: r,
 			}
 			childView = &PlainTextView{}
-			child = childView.Measure(ctx, childElement, width-4, 9999)
+			child = childView.Measure(ctx, childElement, width-2, 9999)
 			minimumHeight += child.MinimumHeight
 			children = append(children, child)
-		} else if child.MinimumWidth+4 > width {
+		} else if child.MinimumWidth+2 > width {
 			r := childElement.GetRange(0)
 			if r.StartPosition.Row == r.EndPosition.Row {
 				childElement = &model.PlainElement{
 					Range: r,
 				}
 				childView = &PlainTextView{}
-				child = childView.Measure(ctx, childElement, width-4, 9999)
+				child = childView.Measure(ctx, childElement, width-2, 9999)
 				minimumHeight += child.MinimumHeight
 				children = append(children, child)
 			} else {
@@ -130,7 +132,7 @@ func (fv *FoldBlockView) Measure(ctx Context, e model.Element, width int, height
 						Range: r2,
 					}
 					childView = &PlainTextView{}
-					child = childView.Measure(ctx, childElement, width-4, 9999)
+					child = childView.Measure(ctx, childElement, width-2, 9999)
 					minimumHeight += child.MinimumHeight
 					children = append(children, child)
 				}
@@ -192,7 +194,7 @@ func (fv *FoldBlockView) Measure(ctx Context, e model.Element, width int, height
 	return &TextLayout{
 		Element:       e,
 		MinimumWidth:  width,
-		MinimumHeight: minimumHeight + 2,
+		MinimumHeight: minimumHeight + 1,
 		Children:      children,
 	}
 }
@@ -249,7 +251,7 @@ func (fv *FoldBlockView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoc
 
 	// skip header
 	if viewLocalPos == 0 {
-		return 1, 1
+		return 1, 0
 	}
 	viewLocalPos--
 
@@ -257,7 +259,7 @@ func (fv *FoldBlockView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoc
 		childElement := textLayout.Children[0].Element
 		childView := ctx.Resolver.Resolve(childElement)
 		lx, ly := childView.ConvertPos(ctx, textLayout.Children[0], viewLocalPos)
-		return 1 + lx, 1 + ly + 2
+		return 2 + lx, 1 + ly + 1
 	}
 	table, _ := CompositeViewLengthTable(ctx, textLayout)
 	index, col := CompositeViewIndex(table, viewLocalPos)
@@ -270,7 +272,7 @@ func (fv *FoldBlockView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoc
 	child := textLayout.Children[index]
 	v := ctx.Resolver.Resolve(child.Element)
 	lx, ly := v.ConvertPos(ctx, child, col)
-	return lx + 1, h + ly + 1 + 2
+	return lx + 2, h + ly + 1 + 1
 }
 
 func (fv *FoldBlockView) ConvertModel(ctx Context, textLayout *TextLayout, viewLocalPos int) CharacterReference {
