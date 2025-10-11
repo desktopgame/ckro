@@ -94,7 +94,7 @@ func Parse(reader Reader) []AbstractBlock {
 		// CodeBlock
 		if line[0] == '`' {
 			column := 0
-			for column < len(line) && line[column] == '`' {
+			for column < len(line) {
 				column++
 			}
 
