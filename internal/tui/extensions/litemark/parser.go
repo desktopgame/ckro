@@ -98,7 +98,7 @@ func Parse(reader Reader) []AbstractBlock {
 				column++
 			}
 
-			if column >= 3 {
+			if column >= 3 && line == strings.Repeat("`", column) {
 				codeBlockScope = true
 
 				codeBlockMarkerLen = column - 1
@@ -126,7 +126,7 @@ func Parse(reader Reader) []AbstractBlock {
 				column++
 			}
 
-			if column >= 3 {
+			if column >= 3 && line == strings.Repeat("{", column) {
 				lineCount := 1
 				foldBlock := &FoldBlock{
 					Block: Block{
