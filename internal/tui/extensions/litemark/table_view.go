@@ -84,27 +84,25 @@ func (tv *TableView) Draw(ctx view.Context, textLayout *view.TextLayout, rendere
 		renderer.SetContent(tableWidth-1, y, '│', nil, tcell.StyleDefault)
 	}
 
-	/*
-		// Draw table content and header separator
-		y := 1 // Start after top border
-		for i, child := range textLayout.Children {
-			childElement := textLayout.Element.GetElement(i)
-			childView := textViewResolver.Resolve(childElement)
-			childView.Draw(textViewResolver, child, renderer.Translate(child.RelativeX, child.RelativeY)) // Offset by left border
-			y += child.Height
+	// Draw table content and header separator
+	y := 1 // Start after top border
+	for i, child := range textLayout.Children {
+		childElement := textLayout.Element.GetElement(i)
+		childView := ctx.Resolver.Resolve(childElement)
+		childView.Draw(ctx, child, renderer.Translate(child.RelativeX, child.RelativeY)) // Offset by left border
+		y += child.Height
 
-			// Draw horizontal separator after header
-			if _, isHeader := childElement.(*model.TableHeaderElement); isHeader {
-				// Draw header separator line
-				renderer.SetContent(0, y, '├', nil, tcell.StyleDefault)
-				for x := 1; x < tableWidth-1; x++ {
-					renderer.SetContent(x, y, '─', nil, tcell.StyleDefault)
-				}
-				renderer.SetContent(tableWidth-1, y, '┤', nil, tcell.StyleDefault)
-				y++ // Move to next line after separator
+		// Draw horizontal separator after header
+		if _, isHeader := childElement.(*TableHeaderElement); isHeader {
+			// Draw header separator line
+			renderer.SetContent(0, y, '├', nil, tcell.StyleDefault)
+			for x := 1; x < tableWidth-1; x++ {
+				renderer.SetContent(x, y, '─', nil, tcell.StyleDefault)
 			}
+			renderer.SetContent(tableWidth-1, y, '┤', nil, tcell.StyleDefault)
+			y++ // Move to next line after separator
 		}
-	*/
+	}
 }
 
 func (tv *TableView) Measure(ctx view.Context, e model.Element, width int, height int) *view.TextLayout {
