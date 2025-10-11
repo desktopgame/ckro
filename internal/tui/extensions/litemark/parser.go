@@ -98,7 +98,7 @@ func Parse(reader Reader) []AbstractBlock {
 				column++
 			}
 
-			if column >= 3 && line == strings.Repeat("`", column) {
+			if column >= 3 {
 				codeBlockScope = true
 
 				codeBlockMarkerLen = column - 1
