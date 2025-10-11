@@ -36,9 +36,9 @@ func (fv *FoldBlockView) Layout(ctx Context, textLayout *TextLayout, x, y, w, h 
 
 func (fv *FoldBlockView) Draw(ctx Context, textLayout *TextLayout, renderer Renderer) {
 	foldFrameStyle := tcell.StyleDefault.Foreground(tcell.ColorYellow)
-	foldLabel := "[+]"
+	foldLabel := "[-]"
 	if ctx.FoldManager.IsFolded(ctx.Document, textLayout.Element) {
-		foldLabel = "[-]"
+		foldLabel = "[+]"
 	}
 
 	for i, r := range foldLabel {
