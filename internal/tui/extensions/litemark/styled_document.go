@@ -370,6 +370,7 @@ func (doc *StyledDocument) renderElement(blocks []AbstractBlock) []model.Element
 						},
 					},
 					Children: doc.renderElement(aBlocks),
+					Level:    block.Level,
 				})
 			} else {
 				elements = append(elements, &TextElement{
