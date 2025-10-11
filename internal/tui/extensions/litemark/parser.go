@@ -75,6 +75,55 @@ func countFoldMarkers(reader Reader) (startMarkers []MarkerInfo, endMarkers []Ma
 	return
 }
 
+// countCodeBlockMarkers counts start and end markers for code blocks
+func countCodeBlockMarkers(reader Reader) (startMarkers []MarkerInfo, endMarkers []MarkerInfo, balanced bool) {
+	startMarkers = []MarkerInfo{}
+	endMarkers = []MarkerInfo{}
+	inCodeBlock := false
+	currentLevel := 0
+
+	for i := 0; i < reader.GetLineCount(); i++ {
+		line := reader.GetLineString(i)
+		if len(line) == 0 {
+			continue
+		}
+
+		if line[0] == '`' {
+			column := 0
+			for column < len(line) && line[column] == '`' {
+				column++
+			}
+
+			if column >= 3 {
+				if !inCodeBlock {
+					// Start marker
+					startMarkers = append(startMarkers, MarkerInfo{
+						LineIndex: i,
+						Level:     column,
+						IsStart:   true,
+					})
+					inCodeBlock = true
+					currentLevel = column
+				} else {
+					// Potential end marker - check if level matches
+					if column == currentLevel {
+						endMarkers = append(endMarkers, MarkerInfo{
+							LineIndex: i,
+							Level:     column,
+							IsStart:   false,
+						})
+						inCodeBlock = false
+						currentLevel = 0
+					}
+				}
+			}
+		}
+	}
+
+	balanced = len(startMarkers) == len(endMarkers)
+	return
+}
+
 // matchFoldMarkers matches start and end markers using stack
 func matchFoldMarkers(startMarkers []MarkerInfo, endMarkers []MarkerInfo) map[int]int {
 	// Returns map: startLineIndex -> endLineIndex
@@ -116,48 +165,31 @@ func matchFoldMarkers(startMarkers []MarkerInfo, endMarkers []MarkerInfo) map[in
 
 func Parse(reader Reader) []AbstractBlock {
 	// Phase 1: Count and match fold markers
-	startMarkers, endMarkers, balanced := countFoldMarkers(reader)
+	foldStartMarkers, foldEndMarkers, foldBalanced := countFoldMarkers(reader)
 	var foldPairs map[int]int
-	if balanced {
-		foldPairs = matchFoldMarkers(startMarkers, endMarkers)
+	if foldBalanced {
+		foldPairs = matchFoldMarkers(foldStartMarkers, foldEndMarkers)
 	} else {
 		foldPairs = make(map[int]int) // Empty map - no folds will be created
+	}
+
+	// Phase 2: Count code block markers
+	codeStartMarkers, codeEndMarkers, codeBalanced := countCodeBlockMarkers(reader)
+	codeBlockPairs := make(map[int]int) // startLine -> endLine
+	if codeBalanced {
+		for i := range codeStartMarkers {
+			if i < len(codeEndMarkers) {
+				codeBlockPairs[codeStartMarkers[i].LineIndex] = codeEndMarkers[i].LineIndex
+			}
+		}
 	}
 
 	sc := Scanner{Reader: reader}
 	blocks := []AbstractBlock{}
 
-	codeBlockScope := false
-	codeBlockMarkerLen := 0
-	codeBlockCurrent := &CodeBlock{}
-
 	for sc.Ready() {
 		lineIndex := sc.lineIndex
 		line := sc.Next()
-
-		// CodeBlock
-		if codeBlockScope {
-			codeBlockEnded := false
-			if len(line) > 0 && line[0] == '`' {
-				codeBlockScope = true
-
-				column := 0
-				for column < len(line) && line[column] == '`' {
-					column++
-				}
-				if codeBlockMarkerLen == column-1 {
-					codeBlockEnded = true
-				}
-			}
-			if codeBlockEnded {
-				codeBlockScope = false
-				codeBlockMarkerLen = 0
-				codeBlockCurrent.LineCount++
-			} else {
-				codeBlockCurrent.LineCount++
-			}
-			continue
-		}
 
 		// Soft break
 		if len(line) == 0 {
@@ -192,30 +224,45 @@ func Parse(reader Reader) []AbstractBlock {
 			}
 		}
 
-		// CodeBlock
-		if line[0] == '`' {
+		// CodeBlock - using pre-computed pairs
+		if endLine, exists := codeBlockPairs[lineIndex]; exists {
 			column := 0
 			for column < len(line) && line[column] == '`' {
 				column++
 			}
 
+			codeBlock := &CodeBlock{
+				Block: Block{
+					LineIndex: lineIndex,
+					LineCount: endLine - lineIndex + 1,
+				},
+				Span: Span{
+					StartColumn: column,
+					EndColumn:   len(line),
+				},
+				Level: column,
+			}
+			blocks = append(blocks, codeBlock)
+
+			// Skip to after end marker
+			sc.lineIndex = endLine + 1
+			continue
+		}
+
+		// Unmatched code block marker - treat as plain text
+		if line[0] == '`' {
+			column := 0
+			for column < len(line) && line[column] == '`' {
+				column++
+			}
 			if column >= 3 {
-				codeBlockScope = true
-
-				codeBlockMarkerLen = column - 1
-
-				codeBlockCurrent = &CodeBlock{
+				blocks = append(blocks, &Text{
 					Block: Block{
 						LineIndex: lineIndex,
 						LineCount: 1,
 					},
-					Span: Span{
-						StartColumn: column,
-						EndColumn:   len(line),
-					},
-					Level: column,
-				}
-				blocks = append(blocks, codeBlockCurrent)
+					Inlines: ParseInline(line),
+				})
 				continue
 			}
 		}
@@ -301,22 +348,6 @@ func Parse(reader Reader) []AbstractBlock {
 		})
 	}
 
-	// remaining lines
-	if codeBlockScope {
-		blocks = blocks[:len(blocks)-1]
-
-		for i := 0; i < codeBlockCurrent.LineCount; i++ {
-			lineIndex := codeBlockCurrent.LineIndex + i
-			blocks = append(blocks, &Text{
-				Block: Block{
-					LineIndex: lineIndex,
-					LineCount: 1,
-				},
-				Inlines: ParseInline(reader.GetLineString(lineIndex)),
-			})
-		}
-		codeBlockScope = false
-	}
 	return blocks
 }
 
