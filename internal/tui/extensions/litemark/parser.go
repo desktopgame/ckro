@@ -22,7 +22,108 @@ func GetText(reader Reader, lineIndex int, span Span) string {
 	return reader.GetLineString(lineIndex)[span.StartColumn:span.EndColumn]
 }
 
+// MarkerInfo represents a fold marker position
+type MarkerInfo struct {
+	LineIndex int
+	Level     int
+	IsStart   bool
+}
+
+// countFoldMarkers counts start and end markers and returns if they match
+func countFoldMarkers(reader Reader) (startMarkers []MarkerInfo, endMarkers []MarkerInfo, balanced bool) {
+	startMarkers = []MarkerInfo{}
+	endMarkers = []MarkerInfo{}
+
+	for i := 0; i < reader.GetLineCount(); i++ {
+		line := reader.GetLineString(i)
+		if len(line) == 0 {
+			continue
+		}
+
+		// Check for fold start marker
+		if line[0] == '{' {
+			column := 0
+			for column < len(line) && line[column] == '{' {
+				column++
+			}
+			if column >= 3 && line == strings.Repeat("{", column) {
+				startMarkers = append(startMarkers, MarkerInfo{
+					LineIndex: i,
+					Level:     column,
+					IsStart:   true,
+				})
+			}
+		}
+
+		// Check for fold end marker
+		if line[0] == '}' {
+			column := 0
+			for column < len(line) && line[column] == '}' {
+				column++
+			}
+			if column >= 3 && line == strings.Repeat("}", column) {
+				endMarkers = append(endMarkers, MarkerInfo{
+					LineIndex: i,
+					Level:     column,
+					IsStart:   false,
+				})
+			}
+		}
+	}
+
+	balanced = len(startMarkers) == len(endMarkers)
+	return
+}
+
+// matchFoldMarkers matches start and end markers using stack
+func matchFoldMarkers(startMarkers []MarkerInfo, endMarkers []MarkerInfo) map[int]int {
+	// Returns map: startLineIndex -> endLineIndex
+	pairs := make(map[int]int)
+	stack := []MarkerInfo{}
+
+	// Merge and sort markers by line index
+	allMarkers := make([]MarkerInfo, 0, len(startMarkers)+len(endMarkers))
+	allMarkers = append(allMarkers, startMarkers...)
+	allMarkers = append(allMarkers, endMarkers...)
+
+	// Simple sort by line index
+	for i := 0; i < len(allMarkers); i++ {
+		for j := i + 1; j < len(allMarkers); j++ {
+			if allMarkers[i].LineIndex > allMarkers[j].LineIndex {
+				allMarkers[i], allMarkers[j] = allMarkers[j], allMarkers[i]
+			}
+		}
+	}
+
+	for _, marker := range allMarkers {
+		if marker.IsStart {
+			stack = append(stack, marker)
+		} else {
+			// End marker - try to match with stack top
+			if len(stack) > 0 {
+				top := stack[len(stack)-1]
+				if top.Level == marker.Level {
+					// Match found
+					pairs[top.LineIndex] = marker.LineIndex
+					stack = stack[:len(stack)-1] // pop
+				}
+			}
+		}
+	}
+
+	return pairs
+}
+
 func Parse(reader Reader) []AbstractBlock {
+	// Phase 1: Count and match fold markers
+	startMarkers, endMarkers, balanced := countFoldMarkers(reader)
+	var foldPairs map[int]int
+	if balanced {
+		foldPairs = matchFoldMarkers(startMarkers, endMarkers)
+	} else {
+		foldPairs = make(map[int]int) // Empty map - no folds will be created
+	}
+
 	sc := Scanner{Reader: reader}
 	blocks := []AbstractBlock{}
 
@@ -119,52 +220,64 @@ func Parse(reader Reader) []AbstractBlock {
 			}
 		}
 
-		// Fold
-		if line[0] == '{' {
+		// Fold - using pre-computed pairs from count-based matching
+		if endLine, exists := foldPairs[lineIndex]; exists {
 			column := 0
 			for column < len(line) && line[column] == '{' {
 				column++
 			}
 
+			foldBlock := &FoldBlock{
+				Block: Block{
+					LineIndex: lineIndex,
+					LineCount: endLine - lineIndex + 1,
+				},
+				Span: Span{
+					StartColumn: column,
+					EndColumn:   len(line),
+				},
+				Level: column,
+			}
+			blocks = append(blocks, foldBlock)
+
+			// Skip to after end marker
+			sc.lineIndex = endLine + 1
+			continue
+		}
+
+		// Unmatched fold marker (when not balanced) - treat as plain text
+		if line[0] == '{' {
+			column := 0
+			for column < len(line) && line[column] == '{' {
+				column++
+			}
 			if column >= 3 && line == strings.Repeat("{", column) {
-				lineCount := 1
-				foldBlock := &FoldBlock{
+				// This is a fold start marker but not matched - treat as text
+				blocks = append(blocks, &Text{
 					Block: Block{
 						LineIndex: lineIndex,
+						LineCount: 1,
 					},
-					Span: Span{
-						StartColumn: column,
-						EndColumn:   len(line),
+					Inlines: ParseInline(line),
+				})
+				continue
+			}
+		}
+		if line[0] == '}' {
+			column := 0
+			for column < len(line) && line[column] == '}' {
+				column++
+			}
+			if column >= 3 && line == strings.Repeat("}", column) {
+				// This is a fold end marker but not matched - treat as text
+				blocks = append(blocks, &Text{
+					Block: Block{
+						LineIndex: lineIndex,
+						LineCount: 1,
 					},
-					Level: column,
-				}
-
-				foundClose := false
-				for sc.Ready() {
-					innerLine := sc.Next()
-
-					lineCount++
-
-					if innerLine == strings.Repeat("}", column) {
-						foundClose = true
-						break
-					}
-				}
-				if !foundClose {
-					sc.lineIndex = lineIndex + 1
-					blocks = append(blocks, &Text{
-						Block: Block{
-							LineIndex: lineIndex,
-							LineCount: 1,
-						},
-						Inlines: ParseInline(line),
-					})
-					continue
-				} else {
-					foldBlock.LineCount = lineCount
-					blocks = append(blocks, foldBlock)
-					continue
-				}
+					Inlines: ParseInline(line),
+				})
+				continue
 			}
 		}
 
