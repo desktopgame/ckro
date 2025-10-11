@@ -343,6 +343,16 @@ func (doc *StyledDocument) renderElement(blocks []AbstractBlock) []model.Element
 				sr := &StringReader{Source: lines}
 				aBlocks := Parse(sr)
 				for _, aBlock := range aBlocks {
+					if table, ok := aBlock.(*Table); ok {
+						for _, h := range table.Headers {
+							h.Block.LineIndex += block.LineIndex + 1
+						}
+						for _, r := range table.Rows {
+							for _, c := range r.Columns {
+								c.LineIndex += block.LineIndex + 1
+							}
+						}
+					}
 					aBlock.BaseBlock().LineIndex += block.LineIndex + 1
 				}
 
