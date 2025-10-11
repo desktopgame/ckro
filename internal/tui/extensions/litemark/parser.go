@@ -239,9 +239,6 @@ func Parse(reader Reader) []AbstractBlock {
 		if table_re.MatchString(line) {
 			if sc.Ready() {
 				headers := strings.Split(line, "|")
-				for i := 0; i < len(headers); i++ {
-					headers[i] = strings.TrimSpace(headers[i])
-				}
 
 				aligns := sc.Next()
 				if table_layout_re.MatchString(aligns) {
@@ -269,10 +266,10 @@ func Parse(reader Reader) []AbstractBlock {
 						inlines := ParseInline(headers[i])
 						for _, il := range inlines {
 							bil := il.BaseInline()
-							for i := 0; i < len(bil.Spans); i++ {
-								bil.Spans[i] = Span{
-									StartColumn: bil.Spans[i].StartColumn + tableHeaderOffset,
-									EndColumn:   bil.Spans[i].EndColumn + tableHeaderOffset,
+							for j := 0; j < len(bil.Spans); j++ {
+								bil.Spans[j] = Span{
+									StartColumn: bil.Spans[j].StartColumn + tableHeaderOffset,
+									EndColumn:   bil.Spans[j].EndColumn + tableHeaderOffset,
 								}
 							}
 						}
