@@ -112,6 +112,7 @@ func Parse(reader Reader) []AbstractBlock {
 						StartColumn: column,
 						EndColumn:   len(line),
 					},
+					Level: column,
 				}
 				blocks = append(blocks, codeBlockCurrent)
 				continue
@@ -135,6 +136,7 @@ func Parse(reader Reader) []AbstractBlock {
 						StartColumn: column,
 						EndColumn:   len(line),
 					},
+					Level: column,
 				}
 
 				foundClose := false

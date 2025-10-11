@@ -30,12 +30,14 @@ type BlankLine struct {
 
 type CodeBlock struct {
 	Block
-	Span Span
+	Span  Span
+	Level int
 }
 
 type FoldBlock struct {
 	Block
-	Span Span
+	Span  Span
+	Level int
 }
 
 type HorizontalLine struct {
