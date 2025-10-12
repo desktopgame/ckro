@@ -377,11 +377,7 @@ func (tv *TableView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.Tex
 
 func (tv *TableView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {
 	if viewLocalPos == 0 {
-		r := textLayout.Element.GetRange(0)
-		return model.Position{
-			Row:    r.StartPosition.Row,
-			Column: ctx.Document.GetLineBytes(r.StartPosition.Row) - 1,
-		}, true
+		return model.Position{}, false
 	}
 	table, _ := tv.moveTable(ctx, textLayout)
 	ttl := 0
@@ -409,6 +405,19 @@ func (tv *TableView) ShouldRemoveWithSpecifiedRangeLines(ctx view.Context, textL
 }
 
 func (tv *TableView) ShouldRemoveWithSpecifiedRangeColumns(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Range, bool) {
+	if viewLocalPos == 0 {
+		r := textLayout.Element.GetRange(0)
+		return model.Range{
+			StartPosition: model.Position{
+				Row:    r.StartPosition.Row,
+				Column: 0,
+			},
+			EndPosition: model.Position{
+				Row:    r.StartPosition.Row,
+				Column: 1,
+			},
+		}, true
+	}
 	return model.Range{}, false
 }
 
