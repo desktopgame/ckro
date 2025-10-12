@@ -65,7 +65,6 @@ func (tv *TableView) Layout(ctx view.Context, textLayout *view.TextLayout, x, y,
 			cellElement := tableElement.Children[i*tableElement.Columns+j]
 			cellView := ctx.Resolver.Resolve(cellElement)
 
-			textLayout.Children[i].WidthTable = widthTable
 			cellView.Layout(ctx, textLayout.Children[i*tableElement.Columns+j], offsetX, yy, widthTable[j], hh)
 			offsetX += widthTable[j] + 1
 		}

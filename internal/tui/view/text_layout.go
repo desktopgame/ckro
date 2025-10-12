@@ -14,5 +14,4 @@ type TextLayout struct {
 	Height        int
 	MinimumWidth  int
 	MinimumHeight int
-	WidthTable    []int
 }
