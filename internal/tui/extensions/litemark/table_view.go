@@ -319,16 +319,13 @@ func (tv *TableView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, v
 }
 
 func (tv *TableView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {
-	e := textLayout.Element
-	r := e.GetRange(0)
-	st := r.StartPosition
-	return view.CharacterReference{
-		StartPosition: model.Position{
-			Row:    st.Row,
-			Column: st.Column,
-		},
-		Bytes: 0,
-	}
+	tableElement := textLayout.Element.(*TableElement)
+	table, _ := tv.moveTable(ctx, textLayout)
+	row, col, offset := tv.moveGridPos(table, viewLocalPos)
+	child := textLayout.Children[row*tableElement.Columns+col]
+	childElement := child.Element
+	childView := ctx.Resolver.Resolve(childElement)
+	return childView.ConvertModel(ctx, child, offset)
 }
 
 func (tv *TableView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
