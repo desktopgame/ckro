@@ -376,6 +376,20 @@ func (tv *TableView) ShouldRemoveWithLine(ctx view.Context, textLayout *view.Tex
 }
 
 func (tv *TableView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Position, bool) {
+	if viewLocalPos == 0 {
+		return model.Position{}, false
+	}
+	table, _ := tv.moveTable(ctx, textLayout)
+	ttl := 0
+	for i, v := range table {
+		if viewLocalPos == ttl {
+			index := (i-1)*len(table[0]) + (len(table[0]) - 1)
+			return textLayout.Children[index].Element.GetRange(0).EndPosition, true
+		}
+		for _, vv := range v {
+			ttl += vv
+		}
+	}
 	return model.Position{}, false
 }
 
