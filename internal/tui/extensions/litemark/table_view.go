@@ -353,7 +353,7 @@ func (tv *TableView) ConvertViewLocalPos(ctx view.Context, textLayout *view.Text
 		childView := ctx.Resolver.Resolve(child.Element)
 
 		if bytePos.Row >= st.Row && bytePos.Row <= ed.Row {
-			if bytePos.Column >= st.Column && (bytePos.Column < ed.Column || ed.Row > st.Row) {
+			if bytePos.Column >= st.Column && (bytePos.Column <= ed.Column || ed.Row > st.Row) {
 				return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos)
 			}
 		}
