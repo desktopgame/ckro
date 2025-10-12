@@ -461,44 +461,17 @@ func (doc *StyledDocument) renderElement(blocks []AbstractBlock) []model.Element
 				})
 			}
 		case *Table:
-			tableHeaderElements := []model.Element{}
+			tableCells := []model.Element{}
+			tableColumns := 0
 			for _, h := range block.Headers {
-				tableHeaderElements = append(tableHeaderElements, doc.text2Element(h))
+				tableCells = append(tableCells, doc.text2Element(h))
+				tableColumns++
 			}
 
-			tableRowElements := []model.Element{}
-			tableRowElements = append(tableRowElements,
-				&TableHeaderElement{
-					Range: model.Range{
-						StartPosition: model.Position{
-							Row:    block.LineIndex,
-							Column: 0,
-						},
-						EndPosition: model.Position{
-							Row:    block.LineIndex,
-							Column: doc.GetLineBytes(block.LineIndex),
-						},
-					},
-					Children: tableHeaderElements,
-				})
 			for _, t := range block.Rows {
-				columns := []model.Element{}
 				for _, c := range t.Columns {
-					columns = append(columns, doc.text2Element(c))
+					tableCells = append(tableCells, doc.text2Element(c))
 				}
-				tableRowElements = append(tableRowElements, &TableRowElement{
-					Range: model.Range{
-						StartPosition: model.Position{
-							Row:    t.LineIndex,
-							Column: 0,
-						},
-						EndPosition: model.Position{
-							Row:    t.LineIndex,
-							Column: doc.GetLineBytes(t.LineIndex),
-						},
-					},
-					Children: columns,
-				})
 			}
 			elements = append(elements, &TableElement{
 				Range: model.Range{
@@ -511,7 +484,8 @@ func (doc *StyledDocument) renderElement(blocks []AbstractBlock) []model.Element
 						Column: doc.GetLineBytes(block.LineIndex + (block.LineCount - 1)),
 					},
 				},
-				Children: tableRowElements,
+				Children: tableCells,
+				Columns:  tableColumns,
 			})
 		case *Text:
 			elements = append(elements, doc.text2Element(block))
