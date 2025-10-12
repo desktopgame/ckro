@@ -27,10 +27,6 @@ func (l *LitemarkTextViewResolver) Resolve(e model.Element) view.TextView {
 		return &litemark.HorizontalLineView{}
 	case *litemark.TableElement:
 		return &litemark.TableView{}
-	case *litemark.TableHeaderElement:
-		return &litemark.TableHeaderView{}
-	case *litemark.TableRowElement:
-		return &litemark.TableRowView{}
 	// Legacy elements
 	case *model.FoldBlockElement:
 		return &view.FoldBlockView{}
