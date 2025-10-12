@@ -170,6 +170,20 @@ func matchFoldMarkers(startMarkers []MarkerInfo, endMarkers []MarkerInfo) map[in
 	return pairs
 }
 
+func trimSpaces(s string) (NewString string, LeftPad int) {
+	newString := strings.Trim(s, " 　")
+
+	leftPad := 0
+	for i := 0; i < len(newString); i++ {
+		if strings.HasPrefix(s[i:], newString) {
+			break
+		}
+		leftPad++
+	}
+
+	return newString, leftPad
+}
+
 func Parse(reader Reader) []AbstractBlock {
 	// Phase 1: Count and match fold markers
 	foldStartMarkers, foldEndMarkers, foldBalanced := countFoldMarkers(reader)
@@ -263,13 +277,14 @@ func Parse(reader Reader) []AbstractBlock {
 						if len(headers[i]) == 0 {
 							continue
 						}
-						inlines := ParseInline(headers[i])
+						newString, leftPad := trimSpaces(headers[i])
+						inlines := ParseInline(newString)
 						for _, il := range inlines {
 							bil := il.BaseInline()
 							for j := 0; j < len(bil.Spans); j++ {
 								bil.Spans[j] = Span{
-									StartColumn: bil.Spans[j].StartColumn + tableHeaderOffset,
-									EndColumn:   bil.Spans[j].EndColumn + tableHeaderOffset,
+									StartColumn: bil.Spans[j].StartColumn + tableHeaderOffset + leftPad,
+									EndColumn:   bil.Spans[j].EndColumn + tableHeaderOffset + leftPad,
 								}
 							}
 						}
@@ -296,13 +311,14 @@ func Parse(reader Reader) []AbstractBlock {
 								if len(tex) == 0 {
 									continue
 								}
-								inlines := ParseInline(tex)
+								newString, leftPad := trimSpaces(tex)
+								inlines := ParseInline(newString)
 								for _, il := range inlines {
 									bil := il.BaseInline()
 									for i := 0; i < len(bil.Spans); i++ {
 										bil.Spans[i] = Span{
-											StartColumn: bil.Spans[i].StartColumn + columnOffset,
-											EndColumn:   bil.Spans[i].EndColumn + columnOffset,
+											StartColumn: bil.Spans[i].StartColumn + columnOffset + leftPad,
+											EndColumn:   bil.Spans[i].EndColumn + columnOffset + leftPad,
 										}
 									}
 								}
