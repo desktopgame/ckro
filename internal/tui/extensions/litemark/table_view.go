@@ -387,6 +387,13 @@ func (tv *TableView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, text
 	ttl := 0
 	for i, v := range table {
 		if viewLocalPos == ttl {
+			if i == 1 {
+				endPos := textLayout.Element.GetRange(1).EndPosition
+				return model.Position{
+					Row:    endPos.Row,
+					Column: endPos.Column - 1,
+				}, true
+			}
 			index := (i-1)*len(table[0]) + (len(table[0]) - 1)
 			return textLayout.Children[index].Element.GetRange(0).EndPosition, true
 		}
