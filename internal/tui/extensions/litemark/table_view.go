@@ -226,6 +226,19 @@ func (tv *TableView) moveByGridPos(table [][]int, row int, column int) (int, int
 	return -1, -1
 }
 
+func (tv *TableView) moveOffset(table [][]int, row int, column int) int {
+	moves := 0
+	for i := 0; i < row; i++ {
+		for j := 0; j < column; j++ {
+			moves += table[i][j]
+		}
+	}
+	for j := 0; j < column; j++ {
+		moves += table[row][j]
+	}
+	return moves
+}
+
 func (tv *TableView) MoveLength(ctx view.Context, textLayout *view.TextLayout) int {
 	_, ttl := tv.moveTable(ctx, textLayout)
 	return ttl
@@ -273,13 +286,21 @@ func (tv *TableView) MoveRight(ctx view.Context, textLayout *view.TextLayout, vi
 
 func (tv *TableView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
 	tableElement := textLayout.Element.(*TableElement)
+	wt, _, _, _ := tv.calculateTable(textLayout.Element, textLayout.Children)
 	table, _ := tv.moveTable(ctx, textLayout)
 	row, col, offset := tv.moveGridPos(table, viewLocalPos)
 	child := textLayout.Children[row*tableElement.Columns+col]
 	childElement := child.Element
 	childView := ctx.Resolver.Resolve(childElement)
 	vlx, vly := childView.ConvertPos(ctx, child, offset)
-	return col + (col - 1) + vlx, row + (row - 1) + vly
+	if row >= 1 {
+		row++
+	}
+	offsetX := 1
+	for j := 0; j < col; j++ {
+		offsetX += wt[j] + 1
+	}
+	return offsetX + vlx, row + 1 + vly
 }
 
 func (tv *TableView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {
