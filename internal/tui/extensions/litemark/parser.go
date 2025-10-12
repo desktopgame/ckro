@@ -184,6 +184,127 @@ func trimSpaces(s string) (NewString string, LeftPad int) {
 	return newString, leftPad
 }
 
+func parseBlock(sc *Scanner, line string, lineIndex int, re *regexp.Regexp) *Table {
+	if !sc.Ready() {
+		sc.lineIndex = lineIndex + 1
+		return nil
+	}
+	headers := strings.Split(line, "|")
+
+	aligns := sc.Next()
+	if !re.MatchString(aligns) {
+		sc.lineIndex = lineIndex + 1
+		return nil
+	}
+
+	alignsSplit := strings.Split(aligns, "|")
+	alignsSplit = alignsSplit[1 : len(alignsSplit)-1]
+	alingsParsed := make([]int, len(alignsSplit))
+	for i := 0; i < len(alignsSplit); i++ {
+		lColon := strings.HasPrefix(alignsSplit[i], ":")
+		rColon := strings.HasSuffix(alignsSplit[i], ":")
+
+		if lColon && rColon {
+			alingsParsed[i] = TABLE_ALIGN_CENTER
+		} else if lColon {
+			alingsParsed[i] = TABLE_ALIGN_LEFT
+		} else if rColon {
+			alingsParsed[i] = TABLE_ALIGN_RIGHT
+		}
+	}
+
+	tableHeaders := []*Text{}
+	tableHeaderOffset := 1
+	for i := 0; i < len(headers); i++ {
+		if len(headers[i]) == 0 {
+			continue
+		}
+		inlines := ParseInline(headers[i])
+		for _, il := range inlines {
+			bil := il.BaseInline()
+			for j := 0; j < len(bil.Spans); j++ {
+				bil.Spans[j] = Span{
+					StartColumn: bil.Spans[j].StartColumn + tableHeaderOffset,
+					EndColumn:   bil.Spans[j].EndColumn + tableHeaderOffset,
+				}
+			}
+		}
+
+		tableHeaders = append(tableHeaders, &Text{
+			Block: Block{
+				LineIndex: lineIndex,
+				LineCount: 1,
+			},
+			Inlines: inlines,
+		})
+		tableHeaderOffset = byteIndexOf(line, '|', tableHeaderOffset+1) + 1
+	}
+
+	tableRows := []TableRow{}
+	columnCount := -1
+	columnMissmatch := false
+	for sc.Ready() {
+		row := sc.Next()
+		if re.MatchString(row) {
+			texts := strings.Split(row, "|")
+			columns := []*Text{}
+
+			columnOffset := 1
+			for _, tex := range texts {
+				if len(tex) == 0 {
+					continue
+				}
+				inlines := ParseInline(tex)
+				for _, il := range inlines {
+					bil := il.BaseInline()
+					for i := 0; i < len(bil.Spans); i++ {
+						bil.Spans[i] = Span{
+							StartColumn: bil.Spans[i].StartColumn + columnOffset,
+							EndColumn:   bil.Spans[i].EndColumn + columnOffset,
+						}
+					}
+				}
+
+				columns = append(columns, &Text{
+					Block: Block{
+						LineIndex: lineIndex + 2 + len(tableRows),
+						LineCount: 1,
+					},
+					Inlines: inlines,
+				})
+				columnOffset = byteIndexOf(row, '|', columnOffset+1) + 1
+			}
+			if columnCount == -1 {
+				columnCount = len(columns)
+			} else if !columnMissmatch {
+				columnMissmatch = (columnCount != len(columns))
+			}
+			tableRows = append(tableRows, TableRow{
+				LineIndex: lineIndex + 2 + len(tableRows),
+				Columns:   columns,
+			})
+		} else {
+			sc.lineIndex--
+			break
+		}
+	}
+	if len(tableRows) > 0 && len(tableHeaders) == len(alingsParsed) && len(tableHeaders) == len(tableRows[0].Columns) && !columnMissmatch {
+		table := Table{
+			Block: Block{
+				LineIndex: lineIndex,
+				LineCount: 2 + len(tableRows),
+			},
+			Headers: tableHeaders,
+			Aligns:  alingsParsed,
+			Rows:    tableRows,
+		}
+		return &table
+	} else {
+		sc.lineIndex = lineIndex + 1
+		return nil
+	}
+}
+
 func Parse(reader Reader) []AbstractBlock {
 	// Phase 1: Count and match fold markers
 	foldStartMarkers, foldEndMarkers, foldBalanced := countFoldMarkers(reader)
@@ -206,8 +327,6 @@ func Parse(reader Reader) []AbstractBlock {
 	}
 
 	table_re := regexp.MustCompile(`^(\|.+)+\|$`)
-	table_layout_re := regexp.MustCompile(`^(\|.+)+\|$`)
-	table_content_re := regexp.MustCompile(`^(\|.+)+\|$`)
 
 	sc := Scanner{Reader: reader}
 	blocks := []AbstractBlock{}
@@ -251,122 +370,10 @@ func Parse(reader Reader) []AbstractBlock {
 
 		// Table
 		if table_re.MatchString(line) {
-			if sc.Ready() {
-				headers := strings.Split(line, "|")
-
-				aligns := sc.Next()
-				if table_layout_re.MatchString(aligns) {
-					alignsSplit := strings.Split(aligns, "|")
-					alignsSplit = alignsSplit[1 : len(alignsSplit)-1]
-					alingsParsed := make([]int, len(alignsSplit))
-					for i := 0; i < len(alignsSplit); i++ {
-						lColon := strings.HasPrefix(alignsSplit[i], ":")
-						rColon := strings.HasSuffix(alignsSplit[i], ":")
-
-						if lColon && rColon {
-							alingsParsed[i] = TABLE_ALIGN_CENTER
-						} else if lColon {
-							alingsParsed[i] = TABLE_ALIGN_LEFT
-						} else if rColon {
-							alingsParsed[i] = TABLE_ALIGN_RIGHT
-						}
-					}
-
-					tableHeaders := []*Text{}
-					tableHeaderOffset := 1
-					for i := 0; i < len(headers); i++ {
-						if len(headers[i]) == 0 {
-							continue
-						}
-						inlines := ParseInline(headers[i])
-						for _, il := range inlines {
-							bil := il.BaseInline()
-							for j := 0; j < len(bil.Spans); j++ {
-								bil.Spans[j] = Span{
-									StartColumn: bil.Spans[j].StartColumn + tableHeaderOffset,
-									EndColumn:   bil.Spans[j].EndColumn + tableHeaderOffset,
-								}
-							}
-						}
-
-						tableHeaders = append(tableHeaders, &Text{
-							Block: Block{
-								LineIndex: lineIndex,
-								LineCount: 1,
-							},
-							Inlines: inlines,
-						})
-						tableHeaderOffset = byteIndexOf(line, '|', tableHeaderOffset+1) + 1
-					}
-
-					tableRows := []TableRow{}
-					columnCount := -1
-					columnMissmatch := false
-					for sc.Ready() {
-						row := sc.Next()
-						if table_content_re.MatchString(row) {
-							texts := strings.Split(row, "|")
-							columns := []*Text{}
-
-							columnOffset := 1
-							for _, tex := range texts {
-								if len(tex) == 0 {
-									continue
-								}
-								inlines := ParseInline(tex)
-								for _, il := range inlines {
-									bil := il.BaseInline()
-									for i := 0; i < len(bil.Spans); i++ {
-										bil.Spans[i] = Span{
-											StartColumn: bil.Spans[i].StartColumn + columnOffset,
-											EndColumn:   bil.Spans[i].EndColumn + columnOffset,
-										}
-									}
-								}
-
-								columns = append(columns, &Text{
-									Block: Block{
-										LineIndex: lineIndex + 2 + len(tableRows),
-										LineCount: 1,
-									},
-									Inlines: inlines,
-								})
-								columnOffset = byteIndexOf(row, '|', columnOffset+1) + 1
-							}
-							if columnCount == -1 {
-								columnCount = len(columns)
-							} else if !columnMissmatch {
-								columnMissmatch = (columnCount != len(columns))
-							}
-							tableRows = append(tableRows, TableRow{
-								LineIndex: lineIndex + 2 + len(tableRows),
-								Columns:   columns,
-							})
-						} else {
-							sc.lineIndex--
-							break
-						}
-					}
-					if len(tableRows) > 0 && len(tableHeaders) == len(alingsParsed) && len(tableHeaders) == len(tableRows[0].Columns) && !columnMissmatch {
-						table := Table{
-							Block: Block{
-								LineIndex: lineIndex,
-								LineCount: 2 + len(tableRows),
-							},
-							Headers: tableHeaders,
-							Aligns:  alingsParsed,
-							Rows:    tableRows,
-						}
-						blocks = append(blocks, &table)
-						continue
-					} else {
-						sc.lineIndex = lineIndex + 1
-					}
-				} else {
-					sc.lineIndex = lineIndex + 1
-				}
-			} else {
-				sc.lineIndex = lineIndex + 1
+			table := parseBlock(&sc, line, lineIndex, table_re)
+			if table != nil {
+				blocks = append(blocks, table)
+				continue
 			}
 		}
 
