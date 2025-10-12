@@ -84,15 +84,18 @@ func (doc *StyledDocument) text2Element(block *Text) model.Element {
 		})
 	}
 
+	inl1 := block.Inlines[0].BaseInline().Spans[0]
+	inl2 := block.Inlines[len(block.Inlines)-1].BaseInline().Spans[0]
+
 	return &TextElement{
 		Range: model.Range{
 			StartPosition: model.Position{
 				Row:    block.LineIndex,
-				Column: 0,
+				Column: inl1.StartColumn,
 			},
 			EndPosition: model.Position{
 				Row:    block.LineIndex,
-				Column: len(doc.GetLineString(block.LineIndex)),
+				Column: inl2.EndColumn,
 			},
 		},
 		Children: texts,
