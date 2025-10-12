@@ -119,3 +119,37 @@ this is [link](https://www.google.com/?hl=ja), this is ![image](image.png)
 	assert.Equal(t, litemark.GetText(&r, tx.LineIndex, image.Spans[1]), "image")
 	assert.Equal(t, litemark.GetText(&r, tx.LineIndex, image.Spans[2]), "image.png")
 }
+
+func Test05(t *testing.T) {
+	lines := []string{
+		"| Header 1 | Header 2 |",
+		"|----------|----------|",
+		"| Cell 1   | Cell 2   |",
+		"| Cell 3   | Cell 4   |",
+	}
+
+	r := litemark.StringReader{
+		Source: lines,
+	}
+	blocks := litemark.Parse(&r)
+
+	tbl := blocks[0].(*litemark.Table)
+	assert.Equal(t, tbl.LineIndex, 0)
+	assert.Equal(t, tbl.LineCount, 4)
+
+	h1 := tbl.Headers[0]
+	h1Span := h1.Inlines[0].BaseInline().Spans[0]
+	assert.Equal(t, h1Span.StartColumn, 1)
+	assert.Equal(t, h1Span.EndColumn, 11)
+
+	h2 := tbl.Headers[1]
+	h2Span := h2.Inlines[0].BaseInline().Spans[0]
+	assert.Equal(t, h2Span.StartColumn, 12)
+	assert.Equal(t, h2Span.EndColumn, 22)
+
+	row1 := tbl.Rows[0]
+	row1col1 := row1.Columns[0]
+	row1col1Span := row1col1.Inlines[0].BaseInline().Spans[0]
+	assert.Equal(t, row1col1Span.StartColumn, 1)
+	assert.Equal(t, row1col1Span.EndColumn, 11)
+}
