@@ -379,24 +379,6 @@ func (tv *TableView) ShouldRemoveWithSpecifiedColumnAfter(ctx view.Context, text
 	if viewLocalPos == 0 {
 		return model.Position{}, false
 	}
-	table, _ := tv.moveTable(ctx, textLayout)
-	ttl := 0
-	for i, v := range table {
-		if viewLocalPos == ttl {
-			if i == 1 {
-				endPos := textLayout.Element.GetRange(1).EndPosition
-				return model.Position{
-					Row:    endPos.Row,
-					Column: endPos.Column - 1,
-				}, true
-			}
-			index := (i-1)*len(table[0]) + (len(table[0]) - 1)
-			return textLayout.Children[index].Element.GetRange(0).EndPosition, true
-		}
-		for _, vv := range v {
-			ttl += vv
-		}
-	}
 	return model.Position{}, false
 }
 
@@ -417,6 +399,27 @@ func (tv *TableView) ShouldRemoveWithSpecifiedRangeColumns(ctx view.Context, tex
 				Column: 1,
 			},
 		}, true
+	}
+	table, _ := tv.moveTable(ctx, textLayout)
+	ttl := 0
+	for i, v := range table {
+		if viewLocalPos == ttl {
+			index := i*len(table[0]) + (len(table[0]) - 1)
+			r := textLayout.Children[index].Element.GetRange(0)
+			return model.Range{
+				StartPosition: model.Position{
+					Row:    r.StartPosition.Row,
+					Column: 0,
+				},
+				EndPosition: model.Position{
+					Row:    r.StartPosition.Row,
+					Column: 1,
+				},
+			}, true
+		}
+		for _, vv := range v {
+			ttl += vv
+		}
 	}
 	return model.Range{}, false
 }
