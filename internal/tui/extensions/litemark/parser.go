@@ -210,6 +210,11 @@ func parseBlock(sc *Scanner, line string, lineIndex int, re *regexp.Regexp) *Tab
 		}
 	}
 
+	if len(headers) != len(alignsSplit) {
+		sc.lineIndex = lineIndex + 1
+		return nil
+	}
+
 	alingsParsed := make([]int, len(alignsSplit))
 	for i := 0; i < len(alignsSplit); i++ {
 		lColon := strings.HasPrefix(alignsSplit[i], ":")
@@ -250,7 +255,6 @@ func parseBlock(sc *Scanner, line string, lineIndex int, re *regexp.Regexp) *Tab
 
 	tableRows := []TableRow{}
 	columnCount := -1
-	columnMissmatch := false
 	for sc.Ready() {
 		row := sc.Next()
 		if re.MatchString(row) && strings.HasPrefix(aligns, "|") && strings.HasSuffix(aligns, "|") {
@@ -285,8 +289,10 @@ func parseBlock(sc *Scanner, line string, lineIndex int, re *regexp.Regexp) *Tab
 			}
 			if columnCount == -1 {
 				columnCount = len(columns)
-			} else if !columnMissmatch {
-				columnMissmatch = (columnCount != len(columns))
+			}
+			if columnCount != len(columns) {
+				sc.lineIndex--
+				break
 			}
 			tableRows = append(tableRows, TableRow{
 				LineIndex: lineIndex + 2 + len(tableRows),
@@ -297,7 +303,7 @@ func parseBlock(sc *Scanner, line string, lineIndex int, re *regexp.Regexp) *Tab
 			break
 		}
 	}
-	if len(tableRows) > 0 && len(tableHeaders) == len(alingsParsed) && len(tableHeaders) == len(tableRows[0].Columns) && !columnMissmatch {
+	if len(tableRows) > 0 && len(tableHeaders) == len(tableRows[0].Columns) {
 		table := Table{
 			Block: Block{
 				LineIndex: lineIndex,
