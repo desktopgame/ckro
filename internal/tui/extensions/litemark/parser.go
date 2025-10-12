@@ -300,6 +300,8 @@ func Parse(reader Reader) []AbstractBlock {
 					}
 
 					tableRows := []TableRow{}
+					columnCount := -1
+					columnMissmatch := false
 					for sc.Ready() {
 						row := sc.Next()
 						if table_content_re.MatchString(row) {
@@ -331,6 +333,11 @@ func Parse(reader Reader) []AbstractBlock {
 								})
 								columnOffset = byteIndexOf(row, '|', columnOffset+1) + 1
 							}
+							if columnCount == -1 {
+								columnCount = len(columns)
+							} else if !columnMissmatch {
+								columnMissmatch = (columnCount != len(columns))
+							}
 							tableRows = append(tableRows, TableRow{
 								LineIndex: lineIndex + 2 + len(tableRows),
 								Columns:   columns,
@@ -340,7 +347,7 @@ func Parse(reader Reader) []AbstractBlock {
 							break
 						}
 					}
-					if len(tableRows) > 0 {
+					if len(tableRows) > 0 && len(tableHeaders) == len(alingsParsed) && len(tableHeaders) == len(tableRows[0].Columns) && !columnMissmatch {
 						table := Table{
 							Block: Block{
 								LineIndex: lineIndex,
