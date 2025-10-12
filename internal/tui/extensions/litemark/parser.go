@@ -194,6 +194,22 @@ func parseBlock(sc *Scanner, line string, lineIndex int, re *regexp.Regexp) *Tab
 
 	alignsSplit := strings.Split(aligns, "|")
 	alignsSplit = alignsSplit[1 : len(alignsSplit)-1]
+	for _, align := range alignsSplit {
+		for _, b := range align {
+			if b == ':' {
+				continue
+			}
+			if b == '-' {
+				continue
+			}
+			if b == ' ' {
+				continue
+			}
+			sc.lineIndex = lineIndex + 1
+			return nil
+		}
+	}
+
 	alingsParsed := make([]int, len(alignsSplit))
 	for i := 0; i < len(alignsSplit); i++ {
 		lColon := strings.HasPrefix(alignsSplit[i], ":")
