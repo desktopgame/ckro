@@ -57,11 +57,6 @@ func (tv *TableView) Layout(ctx view.Context, textLayout *view.TextLayout, x, y,
 	tableElement := textLayout.Element.(*TableElement)
 	widthTable, heightTable, _, _ := tv.calculateTable(textLayout.Element, textLayout.Children)
 
-	totalWidth := 0
-	for _, w := range widthTable {
-		totalWidth += w
-	}
-
 	totalHeight := 0
 	yy := 1
 	for i, hh := range heightTable {
@@ -75,7 +70,7 @@ func (tv *TableView) Layout(ctx view.Context, textLayout *view.TextLayout, x, y,
 			offsetX += widthTable[j] + 1
 		}
 		if i == 0 {
-			yy++
+			yy++ // header
 		}
 		totalHeight += hh
 		yy += hh
@@ -101,6 +96,7 @@ func (tv *TableView) Draw(ctx view.Context, textLayout *view.TextLayout, rendere
 	// Draw bottom border
 	renderer.SetContent(0, tableHeight-1, '└', nil, tcell.StyleDefault)
 	for x := 1; x < tableWidth-1; x++ {
+		renderer.SetContent(x, 2, '─', nil, tcell.StyleDefault)
 		renderer.SetContent(x, tableHeight-1, '─', nil, tcell.StyleDefault)
 	}
 	renderer.SetContent(tableWidth-1, tableHeight-1, '┘', nil, tcell.StyleDefault)
@@ -109,6 +105,24 @@ func (tv *TableView) Draw(ctx view.Context, textLayout *view.TextLayout, rendere
 	for y := 1; y < tableHeight-1; y++ {
 		renderer.SetContent(0, y, '│', nil, tcell.StyleDefault)
 		renderer.SetContent(tableWidth-1, y, '│', nil, tcell.StyleDefault)
+	}
+
+	widthTable, heightTable, _, _ := tv.calculateTable(textLayout.Element, textLayout.Children)
+	borderY := 1
+	for i, hh := range heightTable {
+		borderX := 1
+		for j, ww := range widthTable {
+			if j == len(widthTable)-1 {
+				continue
+			}
+			borderX += ww
+			renderer.SetContent(borderX, borderY, '│', nil, tcell.StyleDefault)
+			borderX++
+		}
+		if i == 0 {
+			borderY++
+		}
+		borderY += hh
 	}
 
 	// Draw table content and header separator
@@ -128,11 +142,11 @@ func (tv *TableView) Measure(ctx view.Context, e model.Element, width int, heigh
 		children = append(children, child)
 	}
 
-	_, _, totalWidth, totalHeight := tv.calculateTable(e, children)
+	widthTable, _, totalWidth, totalHeight := tv.calculateTable(e, children)
 
 	return &view.TextLayout{
 		Element:       e,
-		MinimumWidth:  totalWidth + (e.GetElement(0).GetElementCount() + 1),
+		MinimumWidth:  totalWidth + len(widthTable) + 1, // borders
 		MinimumHeight: totalHeight + 3,
 		Children:      children,
 	}
