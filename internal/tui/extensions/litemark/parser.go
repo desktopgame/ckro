@@ -171,6 +171,10 @@ func matchFoldMarkers(startMarkers []MarkerInfo, endMarkers []MarkerInfo) map[in
 }
 
 func parseBlock(sc *Scanner, line string, lineIndex int, re *regexp.Regexp) *Table {
+	if !strings.HasPrefix(line, "|") || !strings.HasSuffix(line, "|") {
+		sc.lineIndex = lineIndex + 1
+		return nil
+	}
 	if !sc.Ready() {
 		sc.lineIndex = lineIndex + 1
 		return nil
@@ -179,6 +183,10 @@ func parseBlock(sc *Scanner, line string, lineIndex int, re *regexp.Regexp) *Tab
 	headers = headers[1 : len(headers)-1]
 
 	aligns := sc.Next()
+	if !strings.HasPrefix(aligns, "|") || !strings.HasSuffix(aligns, "|") {
+		sc.lineIndex = lineIndex + 1
+		return nil
+	}
 	if !re.MatchString(aligns) {
 		sc.lineIndex = lineIndex + 1
 		return nil
@@ -229,7 +237,7 @@ func parseBlock(sc *Scanner, line string, lineIndex int, re *regexp.Regexp) *Tab
 	columnMissmatch := false
 	for sc.Ready() {
 		row := sc.Next()
-		if re.MatchString(row) {
+		if re.MatchString(row) && strings.HasPrefix(aligns, "|") && strings.HasSuffix(aligns, "|") {
 			texts := strings.Split(row, "|")
 			texts = texts[1 : len(texts)-1]
 			columns := []*Text{}
