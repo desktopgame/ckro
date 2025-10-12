@@ -181,6 +181,12 @@ func parseBlock(sc *Scanner, line string, lineIndex int, re *regexp.Regexp) *Tab
 	}
 	headers := strings.Split(line, "|")
 	headers = headers[1 : len(headers)-1]
+	for _, header := range headers {
+		if len(header) == 0 {
+			sc.lineIndex = lineIndex + 1
+			return nil
+		}
+	}
 
 	aligns := sc.Next()
 	if !strings.HasPrefix(aligns, "|") || !strings.HasSuffix(aligns, "|") {
