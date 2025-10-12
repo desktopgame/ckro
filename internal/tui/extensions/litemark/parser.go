@@ -278,14 +278,13 @@ func Parse(reader Reader) []AbstractBlock {
 						if len(headers[i]) == 0 {
 							continue
 						}
-						newString, leftPad := trimSpaces(headers[i])
-						inlines := ParseInline(newString)
+						inlines := ParseInline(headers[i])
 						for _, il := range inlines {
 							bil := il.BaseInline()
 							for j := 0; j < len(bil.Spans); j++ {
 								bil.Spans[j] = Span{
-									StartColumn: bil.Spans[j].StartColumn + tableHeaderOffset + leftPad,
-									EndColumn:   bil.Spans[j].EndColumn + tableHeaderOffset + leftPad,
+									StartColumn: bil.Spans[j].StartColumn + tableHeaderOffset,
+									EndColumn:   bil.Spans[j].EndColumn + tableHeaderOffset,
 								}
 							}
 						}
@@ -312,14 +311,13 @@ func Parse(reader Reader) []AbstractBlock {
 								if len(tex) == 0 {
 									continue
 								}
-								newString, leftPad := trimSpaces(tex)
-								inlines := ParseInline(newString)
+								inlines := ParseInline(tex)
 								for _, il := range inlines {
 									bil := il.BaseInline()
 									for i := 0; i < len(bil.Spans); i++ {
 										bil.Spans[i] = Span{
-											StartColumn: bil.Spans[i].StartColumn + columnOffset + leftPad,
-											EndColumn:   bil.Spans[i].EndColumn + columnOffset + leftPad,
+											StartColumn: bil.Spans[i].StartColumn + columnOffset,
+											EndColumn:   bil.Spans[i].EndColumn + columnOffset,
 										}
 									}
 								}
