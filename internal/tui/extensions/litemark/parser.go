@@ -176,6 +176,7 @@ func parseBlock(sc *Scanner, line string, lineIndex int, re *regexp.Regexp) *Tab
 		return nil
 	}
 	headers := strings.Split(line, "|")
+	headers = headers[1 : len(headers)-1]
 
 	aligns := sc.Next()
 	if !re.MatchString(aligns) {
@@ -202,9 +203,6 @@ func parseBlock(sc *Scanner, line string, lineIndex int, re *regexp.Regexp) *Tab
 	tableHeaders := []*Text{}
 	tableHeaderOffset := 1
 	for i := 0; i < len(headers); i++ {
-		if len(headers[i]) == 0 {
-			continue
-		}
 		inlines := ParseInline(headers[i])
 		for _, il := range inlines {
 			bil := il.BaseInline()
@@ -233,6 +231,7 @@ func parseBlock(sc *Scanner, line string, lineIndex int, re *regexp.Regexp) *Tab
 		row := sc.Next()
 		if re.MatchString(row) {
 			texts := strings.Split(row, "|")
+			texts = texts[1 : len(texts)-1]
 			columns := []*Text{}
 
 			columnOffset := 1
