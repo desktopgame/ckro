@@ -276,12 +276,20 @@ func (tv *TableView) MoveLeft(ctx view.Context, textLayout *view.TextLayout, vie
 
 func (tv *TableView) MoveRight(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
 	table, _ := tv.moveTable(ctx, textLayout)
-	row, col, _ := tv.moveGridPos(table, viewLocalPos)
-	if col == len(table[0])-1 {
-		return -1
+	row, col, offset := tv.moveGridPos(table, viewLocalPos)
+	_, l := tv.moveByGridPos(table, row, col)
+	if offset == l-1 {
+		if col == len(table[0])-1 {
+			if row == len(table)-1 {
+				return -1
+			}
+			vl, _ := tv.moveByGridPos(table, row+1, 0)
+			return vl
+		}
+		vl, _ := tv.moveByGridPos(table, row, col+1)
+		return vl
 	}
-	vl, _ := tv.moveByGridPos(table, row, col+1)
-	return vl
+	return viewLocalPos + 1
 }
 
 func (tv *TableView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
