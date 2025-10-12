@@ -62,10 +62,31 @@ func (tv *TableView) Layout(ctx view.Context, textLayout *view.TextLayout, x, y,
 	for i, hh := range heightTable {
 		offsetX := 1
 		for j := 0; j < tableElement.Columns; j++ {
+			cellChild := textLayout.Children[i*tableElement.Columns+j]
+			cellMw := cellChild.MinimumWidth
+			cellMh := cellChild.MinimumHeight
+
 			cellElement := tableElement.Children[i*tableElement.Columns+j]
 			cellView := ctx.Resolver.Resolve(cellElement)
+			cellAlign := tableElement.Aligns[j]
 
-			cellView.Layout(ctx, textLayout.Children[i*tableElement.Columns+j], offsetX, yy, widthTable[j], hh)
+			if cellAlign == TABLE_ALIGN_LEFT {
+				cellView.Layout(ctx, textLayout.Children[i*tableElement.Columns+j], offsetX, yy, cellMw, cellMh)
+			} else if cellAlign == TABLE_ALIGN_CENTER {
+				pad := widthTable[j] - cellMw
+				if pad > 0 {
+					cellView.Layout(ctx, textLayout.Children[i*tableElement.Columns+j], offsetX+(pad/2), yy, cellMw, cellMh)
+				} else {
+					cellView.Layout(ctx, textLayout.Children[i*tableElement.Columns+j], offsetX, yy, cellMw, cellMh)
+				}
+			} else if cellAlign == TABLE_ALIGN_RIGHT {
+				pad := widthTable[j] - cellMw
+				if pad > 0 {
+					cellView.Layout(ctx, textLayout.Children[i*tableElement.Columns+j], offsetX+pad, yy, cellMw, cellMh)
+				} else {
+					cellView.Layout(ctx, textLayout.Children[i*tableElement.Columns+j], offsetX, yy, cellMw, cellMh)
+				}
+			}
 			offsetX += widthTable[j] + 1
 		}
 		if i == 0 {

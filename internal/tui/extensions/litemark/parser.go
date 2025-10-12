@@ -257,7 +257,8 @@ func Parse(reader Reader) []AbstractBlock {
 				aligns := sc.Next()
 				if table_layout_re.MatchString(aligns) {
 					alignsSplit := strings.Split(aligns, "|")
-					alingsParsed := make([]int, len(aligns))
+					alignsSplit = alignsSplit[1 : len(alignsSplit)-1]
+					alingsParsed := make([]int, len(alignsSplit))
 					for i := 0; i < len(alignsSplit); i++ {
 						lColon := strings.HasPrefix(alignsSplit[i], ":")
 						rColon := strings.HasSuffix(alignsSplit[i], ":")
