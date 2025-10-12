@@ -315,6 +315,21 @@ func (tv *TableView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, v
 	for j := 0; j < col; j++ {
 		offsetX += wt[j] + 1
 	}
+
+	cw := child.Width
+	switch tableElement.Aligns[col] {
+	case TABLE_ALIGN_LEFT:
+	case TABLE_ALIGN_CENTER:
+		pad := wt[col] - cw
+		if pad > 0 {
+			offsetX += (pad / 2)
+		}
+	case TABLE_ALIGN_RIGHT:
+		pad := wt[col] - cw
+		if pad > 0 {
+			offsetX += pad
+		}
+	}
 	return offsetX + vlx, row + 1 + vly
 }
 
