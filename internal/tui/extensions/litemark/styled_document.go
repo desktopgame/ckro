@@ -486,6 +486,7 @@ func (doc *StyledDocument) renderElement(blocks []AbstractBlock) []model.Element
 				},
 				Children: tableCells,
 				Columns:  tableColumns,
+				Aligns:   block.Aligns,
 			})
 		case *Text:
 			elements = append(elements, doc.text2Element(block))

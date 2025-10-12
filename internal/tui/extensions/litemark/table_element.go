@@ -6,6 +6,7 @@ type TableElement struct {
 	Range    model.Range
 	Children []model.Element
 	Columns  int
+	Aligns   []int
 }
 
 func (t *TableElement) GetRange(index int) model.Range {
