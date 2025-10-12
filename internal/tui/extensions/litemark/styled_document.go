@@ -477,14 +477,26 @@ func (doc *StyledDocument) renderElement(blocks []AbstractBlock) []model.Element
 				}
 			}
 			elements = append(elements, &TableElement{
-				Range: model.Range{
-					StartPosition: model.Position{
-						Row:    block.LineIndex,
-						Column: 0,
+				Ranges: []model.Range{
+					{
+						StartPosition: model.Position{
+							Row:    block.LineIndex,
+							Column: 0,
+						},
+						EndPosition: model.Position{
+							Row:    block.LineIndex + (block.LineCount - 1),
+							Column: doc.GetLineBytes(block.LineIndex + (block.LineCount - 1)),
+						},
 					},
-					EndPosition: model.Position{
-						Row:    block.LineIndex + (block.LineCount - 1),
-						Column: doc.GetLineBytes(block.LineIndex + (block.LineCount - 1)),
+					{
+						StartPosition: model.Position{
+							Row:    block.LineIndex + 1,
+							Column: 0,
+						},
+						EndPosition: model.Position{
+							Row:    block.LineIndex + 1,
+							Column: doc.GetLineBytes(block.LineIndex + 1),
+						},
 					},
 				},
 				Children: tableCells,
