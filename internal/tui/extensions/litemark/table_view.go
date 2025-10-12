@@ -173,28 +173,113 @@ func (tv *TableView) Measure(ctx view.Context, e model.Element, width int, heigh
 	}
 }
 
+func (tv *TableView) moveTable(ctx view.Context, textLayout *view.TextLayout) (Table [][]int, Total int) {
+	totalMoves := 0
+	moveTable := [][]int{}
+	tableElement := textLayout.Element.(*TableElement)
+	rowCount := len(textLayout.Children) / tableElement.Columns
+
+	for i := 0; i < rowCount; i++ {
+		moveLine := []int{}
+		for j := 0; j < tableElement.Columns; j++ {
+			index := i*tableElement.Columns + j
+			child := textLayout.Children[index]
+			childElement := child.Element
+			childView := ctx.Resolver.Resolve(childElement)
+
+			moves := childView.MoveLength(ctx, child)
+			moveLine = append(moveLine, moves)
+			totalMoves += moves
+		}
+		moveTable = append(moveTable, moveLine)
+	}
+	return moveTable, totalMoves
+}
+
+func (tv *TableView) moveGridPos(table [][]int, viewLocalPos int) (int, int, int) {
+	rowCount := len(table)
+	n := 0
+	for i := 0; i < rowCount; i++ {
+		for j := 0; j < len(table[i]); j++ {
+			start := n
+			l := table[i][j]
+			if viewLocalPos >= start && viewLocalPos < start+l {
+				return i, j, viewLocalPos - start
+			}
+			n += l
+		}
+	}
+	return -1, -1, -1
+}
+
+func (tv *TableView) moveByGridPos(table [][]int, row int, column int) (int, int) {
+	total := 0
+	for i := 0; i < len(table); i++ {
+		for j := 0; j < len(table[i]); j++ {
+			l := table[i][j]
+			if i == row && j == column {
+				return total, l
+			}
+			total += l
+		}
+	}
+	return -1, -1
+}
+
 func (tv *TableView) MoveLength(ctx view.Context, textLayout *view.TextLayout) int {
-	return 1
+	_, ttl := tv.moveTable(ctx, textLayout)
+	return ttl
 }
 
 func (tv *TableView) MoveUp(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
-	return -1
+	table, _ := tv.moveTable(ctx, textLayout)
+	row, col, _ := tv.moveGridPos(table, viewLocalPos)
+	if row == 0 {
+		return -1
+	}
+	vl, _ := tv.moveByGridPos(table, row-1, col)
+	return vl
 }
 
 func (tv *TableView) MoveDown(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
-	return -1
+	table, _ := tv.moveTable(ctx, textLayout)
+	row, col, _ := tv.moveGridPos(table, viewLocalPos)
+	if row == len(table)-1 {
+		return -1
+	}
+	vl, _ := tv.moveByGridPos(table, row+1, col)
+	return vl
 }
 
 func (tv *TableView) MoveLeft(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
-	return -1
+	table, _ := tv.moveTable(ctx, textLayout)
+	row, col, _ := tv.moveGridPos(table, viewLocalPos)
+	if col == 0 {
+		return -1
+	}
+	vl, _ := tv.moveByGridPos(table, row, col-1)
+	return vl
 }
 
 func (tv *TableView) MoveRight(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) int {
-	return -1
+	table, _ := tv.moveTable(ctx, textLayout)
+	row, col, _ := tv.moveGridPos(table, viewLocalPos)
+	if col == len(table[0])-1 {
+		return -1
+	}
+	vl, _ := tv.moveByGridPos(table, row, col+1)
+	return vl
 }
 
 func (tv *TableView) ConvertPos(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (ViewLocalX int, ViewLocalY int) {
-	return 0, 0
+	tableElement := textLayout.Element.(*TableElement)
+	table, _ := tv.moveTable(ctx, textLayout)
+	row, col, offset := tv.moveGridPos(table, viewLocalPos)
+	child := textLayout.Children[row*tableElement.Columns+col]
+	childElement := child.Element
+	childView := ctx.Resolver.Resolve(childElement)
+	vlx, vly := childView.ConvertPos(ctx, child, offset)
+	return col + (col - 1) + vlx, row + (row - 1) + vly
 }
 
 func (tv *TableView) ConvertModel(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) view.CharacterReference {
@@ -208,6 +293,10 @@ func (tv *TableView) ConvertModel(ctx view.Context, textLayout *view.TextLayout,
 		},
 		Bytes: 0,
 	}
+}
+
+func (tv *TableView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
+	return 0
 }
 
 func (tv *TableView) FindFoldElementAt(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Element, int, bool) {
@@ -236,8 +325,4 @@ func (tv *TableView) ShouldRemoveWithSpecifiedRangeColumns(ctx view.Context, tex
 
 func (tv *TableView) ShouldRemoveLastCharacter(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Element, bool) {
 	return nil, false
-}
-
-func (tv *TableView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
-	return 0
 }
