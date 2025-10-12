@@ -170,20 +170,6 @@ func matchFoldMarkers(startMarkers []MarkerInfo, endMarkers []MarkerInfo) map[in
 	return pairs
 }
 
-func trimSpaces(s string) (NewString string, LeftPad int) {
-	newString := strings.Trim(s, " 　")
-
-	leftPad := 0
-	for i := 0; i < len(newString); i++ {
-		if strings.HasPrefix(s[i:], newString) {
-			break
-		}
-		leftPad++
-	}
-
-	return newString, leftPad
-}
-
 func parseBlock(sc *Scanner, line string, lineIndex int, re *regexp.Regexp) *Table {
 	if !sc.Ready() {
 		sc.lineIndex = lineIndex + 1
