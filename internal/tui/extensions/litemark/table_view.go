@@ -329,7 +329,23 @@ func (tv *TableView) ConvertModel(ctx view.Context, textLayout *view.TextLayout,
 }
 
 func (tv *TableView) ConvertViewLocalPos(ctx view.Context, textLayout *view.TextLayout, bytePos model.Position) int {
-	return 0
+	viewOffset := 0
+	for i := 0; i < len(textLayout.Children); i++ {
+		child := textLayout.Children[i]
+		r := child.Element.GetRange(0)
+		st := r.StartPosition
+		ed := r.EndPosition
+		childView := ctx.Resolver.Resolve(child.Element)
+
+		if bytePos.Row >= st.Row && bytePos.Row <= ed.Row {
+			if bytePos.Column >= st.Column && (bytePos.Column < ed.Column || ed.Row > st.Row) {
+				return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos)
+			}
+		}
+		viewOffset += childView.MoveLength(ctx, child)
+	}
+
+	return tv.MoveLength(ctx, textLayout) - 1
 }
 
 func (tv *TableView) FindFoldElementAt(ctx view.Context, textLayout *view.TextLayout, viewLocalPos int) (model.Element, int, bool) {
