@@ -1,5 +1,6 @@
 # ckro
 ckroはObsidianにインスパイアされた、日記や記事を執筆することにフォーカスしたTUIのマークダウンエディターです。
+![サンプル画像](./sample.png)
 
 ## How to install
 ````
