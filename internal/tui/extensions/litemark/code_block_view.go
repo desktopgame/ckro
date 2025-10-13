@@ -253,7 +253,8 @@ func (c *CodeBlockView) ConvertViewLocalPos(ctx view.Context, textLayout *view.T
 					return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos)
 				}
 			}
-			// inclusive line end, because of CodeBlockView is only contain line orientated view
+			// include end column in range check.
+			// because, curosor is placeable last character after on TextView
 			if bytePos.Column >= st.Column && (bytePos.Column <= ed.Column || ed.Row > st.Row) {
 				return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos)
 			}

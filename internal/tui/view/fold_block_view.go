@@ -321,7 +321,8 @@ func (fv *FoldBlockView) ConvertViewLocalPos(ctx Context, textLayout *TextLayout
 						return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos) + 1
 					}
 				}
-				// inclusive line end, because of FoldBlockView is only contain line orientated view
+				// include end column in range check.
+				// because, curosor is placeable last character after on TextView
 				if bytePos.Column >= st.Column && (bytePos.Column <= ed.Column || ed.Row > st.Row) {
 					return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos) + 1
 				}
