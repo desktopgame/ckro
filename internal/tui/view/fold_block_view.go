@@ -15,7 +15,8 @@ func (fv *FoldBlockView) Layout(ctx Context, textLayout *TextLayout, x, y, w, h 
 		childView := ctx.Resolver.Resolve(childElement)
 
 		mw := textLayout.Children[0].MinimumWidth
-		childView.Layout(ctx, textLayout.Children[0], 2, 1+headerHeight, mw, 1)
+		mh := textLayout.Children[0].MinimumHeight
+		childView.Layout(ctx, textLayout.Children[0], 2, 1+headerHeight, mw, mh)
 	} else {
 		offsetY := 1 + headerHeight
 		for i := 0; i < len(textLayout.Children); i++ {
