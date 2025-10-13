@@ -248,7 +248,6 @@ func (c *CodeBlockView) ConvertViewLocalPos(ctx view.Context, textLayout *view.T
 		childView := ctx.Resolver.Resolve(child.Element)
 
 		if bytePos.Row >= st.Row && bytePos.Row <= ed.Row {
-
 			if st.Row == ed.Row && st.Column == ed.Column {
 				if bytePos.Row == st.Row && bytePos.Column == st.Column {
 					return viewOffset + childView.ConvertViewLocalPos(ctx, child, bytePos)
