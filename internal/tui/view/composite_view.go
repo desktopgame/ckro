@@ -48,6 +48,22 @@ func CompositeMoveUp(ctx Context, textLayout *TextLayout, viewLocalPos int) int 
 		if index == 0 {
 			return -1
 		}
+		if lb1, ok := textView.(LinebaseTextView); ok {
+			child := textLayout.Children[index-1]
+			childElement := child.Element
+			childView := ctx.Resolver.Resolve(childElement)
+			relx := lb1.ConvertRelativeX(ctx, textLayout.Children[index], col)
+
+			if lb2, ok := childView.(LinebaseTextView); ok {
+				offset := lb2.MoveLastLine(ctx, child, relx)
+
+				if index == 1 {
+					return offset
+				} else {
+					return CompositeViewLengthSum(table, index-2) + offset
+				}
+			}
+		}
 		return CompositeViewLengthSum(table, index-1) - 1
 	}
 	return CompositeViewLengthSum(table, index-1) + newCol
@@ -62,6 +78,17 @@ func CompositeMoveDown(ctx Context, textLayout *TextLayout, viewLocalPos int) in
 	if newCol == -1 {
 		if index == len(table)-1 {
 			return -1
+		}
+		if lb1, ok := textView.(LinebaseTextView); ok {
+			child := textLayout.Children[index+1]
+			childElement := child.Element
+			childView := ctx.Resolver.Resolve(childElement)
+			relx := lb1.ConvertRelativeX(ctx, textLayout.Children[index], col)
+
+			if lb2, ok := childView.(LinebaseTextView); ok {
+				offset := lb2.MoveFirstLine(ctx, child, relx)
+				return CompositeViewLengthSum(table, index) + offset
+			}
 		}
 		return CompositeViewLengthSum(table, index)
 	}
