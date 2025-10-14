@@ -1,0 +1,14 @@
+%%
+10
+10
+PlainText
+%%
+TYPELN "1234"
+TYPELN "1234"
+TYPE "123あ"
+MOVE_TEXT_START
+%%
+<1>234
+1234
+123あ
+%%

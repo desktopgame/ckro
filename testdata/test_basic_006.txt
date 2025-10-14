@@ -1,0 +1,13 @@
+%%
+10
+10
+StyledText
+%%
+TYPE "#"
+TYPE " "
+BYTE_POS 0 2
+TYPE "AAA"
+BYTE_POS 0 5
+%%
+AAA< >
+%%

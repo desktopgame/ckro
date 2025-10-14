@@ -45,7 +45,7 @@ func printCharacter(a []tcell.SimCell, cluster string, s tcell.Style) ([]tcell.S
 	return a, added
 }
 
-func testScenario(t *testing.T, scenarioFile string) {
+func testScenario(t *testing.T, scenarioFile string) string {
 	file, err := os.Open(scenarioFile)
 	if err != nil {
 		assert.Error(t, err)
@@ -133,12 +133,12 @@ func testScenario(t *testing.T, scenarioFile string) {
 			bPosRow, err := strconv.Atoi(bPosStr[0])
 			if err != nil {
 				assert.Error(t, err)
-				return
+				return ""
 			}
 			bPosCol, err := strconv.Atoi(bPosStr[1])
 			if err != nil {
 				assert.Error(t, err)
-				return
+				return ""
 			}
 			actualBytePos := tb.GetBytePosition()
 			assert.Equal(t, bPosRow, actualBytePos.StartPosition.Row)
@@ -148,7 +148,7 @@ func testScenario(t *testing.T, scenarioFile string) {
 
 	expected := []tcell.SimCell{}
 	cursorRe := regexp.MustCompile(`.*(<.+>).*`)
-	rows := 0
+	writeRows := 0
 	for sc.Scan() {
 		line := sc.Text()
 		if line == "%%" {
@@ -202,7 +202,17 @@ func testScenario(t *testing.T, scenarioFile string) {
 				}
 			}
 		}
-		rows++
+		writeRows++
+	}
+	for writeRows < tb.Height {
+		for i := 0; i < tb.Width; i++ {
+			expected = append(expected, tcell.SimCell{
+				Bytes: []byte{' '},
+				Runes: []rune{' '},
+				Style: tcell.StyleDefault,
+			})
+		}
+		writeRows++
 	}
 
 	screen := tcell.NewSimulationScreen("UTF-8")
@@ -219,10 +229,15 @@ func testScenario(t *testing.T, scenarioFile string) {
 	screen.Show()
 
 	actual, _, _ := screen.GetContents()
-	for i := 0; i < rows; i++ {
+	sbuf := strings.Builder{}
+	for i := 0; i < tb.Height; i++ {
 		for j := 0; j < tb.Width; j++ {
 			a := actual[i*tb.Width+j]
 			e := expected[i*tb.Width+j]
+
+			if a.Bytes != nil {
+				sbuf.WriteString(string(a.Bytes))
+			}
 
 			assert.True(t, bytes.Equal(a.Bytes, e.Bytes), "file=%s expected=%s actual=%s row=%d col=%d", scenarioFile, string(e.Bytes), string(a.Bytes), i, j)
 
@@ -230,7 +245,9 @@ func testScenario(t *testing.T, scenarioFile string) {
 			_, _, eMask := e.Style.Decompose()
 			assert.Equal(t, (aMask&tcell.AttrReverse) > 0, (eMask&tcell.AttrReverse) > 0, "file=%s row=%d col=%d", scenarioFile, i, j)
 		}
+		sbuf.WriteString("\n")
 	}
+	return sbuf.String()
 }
 
 func TestAllScenario(t *testing.T) {
@@ -247,6 +264,15 @@ func TestAllScenario(t *testing.T) {
 			continue
 		}
 		file := filepath.Join("../../testdata/", entry.Name())
-		testScenario(t, file)
+		output := testScenario(t, file)
+
+		outFilePath := filepath.Join("../../testdist/", entry.Name())
+		outFile, err := os.OpenFile(outFilePath, os.O_CREATE|os.O_WRONLY, 0o644)
+		if err != nil {
+			assert.Error(t, err)
+			continue
+		}
+		defer outFile.Close()
+		outFile.WriteString(output)
 	}
 }
