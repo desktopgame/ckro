@@ -17,8 +17,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func printCharacter(a []tcell.SimCell, cluster string, s tcell.Style) []tcell.SimCell {
+func printCharacter(a []tcell.SimCell, cluster string, s tcell.Style) ([]tcell.SimCell, int) {
 	runes := []rune(cluster)
+	added := 1
 
 	if runewidth.RuneWidth(runes[0]) == 2 {
 		a = append(a, tcell.SimCell{
@@ -31,6 +32,7 @@ func printCharacter(a []tcell.SimCell, cluster string, s tcell.Style) []tcell.Si
 			Runes: nil,
 			Style: tcell.StyleDefault,
 		})
+		added = 2
 	} else {
 		a = append(a, tcell.SimCell{
 			Bytes: []byte(cluster),
@@ -38,7 +40,7 @@ func printCharacter(a []tcell.SimCell, cluster string, s tcell.Style) []tcell.Si
 			Style: s,
 		})
 	}
-	return a
+	return a, added
 }
 
 func testScenario(t *testing.T, scenarioFile string, width, height int) {
@@ -119,17 +121,18 @@ func testScenario(t *testing.T, scenarioFile string, width, height int) {
 
 			at := 0
 			rev := tcell.StyleDefault.Reverse(true)
+			var added int
 			for _, ltCluster := range text.GraphemeClusters(leftText) {
-				expected = printCharacter(expected, ltCluster, tcell.StyleDefault)
-				at++
+				expected, added = printCharacter(expected, ltCluster, tcell.StyleDefault)
+				at += added
 			}
 			for _, inCluster := range text.GraphemeClusters(inText) {
-				expected = printCharacter(expected, inCluster, rev)
-				at++
+				expected, added = printCharacter(expected, inCluster, rev)
+				at += added
 			}
 			for _, rtCluster := range text.GraphemeClusters(rightText) {
-				expected = printCharacter(expected, rtCluster, tcell.StyleDefault)
-				at++
+				expected, added = printCharacter(expected, rtCluster, tcell.StyleDefault)
+				at += added
 			}
 			for i := at; i < tb.Width; i++ {
 				expected = append(expected, tcell.SimCell{
@@ -140,16 +143,19 @@ func testScenario(t *testing.T, scenarioFile string, width, height int) {
 			}
 		} else {
 			clusters := text.GraphemeClusters(line)
-			for i := 0; i < tb.Width; i++ {
+			var added int
+			for i := 0; i < tb.Width; {
 				if i >= len(clusters) {
 					expected = append(expected, tcell.SimCell{
 						Bytes: []byte{' '},
 						Runes: []rune{' '},
 						Style: tcell.StyleDefault,
 					})
+					i++
 				} else {
 					cluster := clusters[i]
-					expected = printCharacter(expected, cluster, tcell.StyleDefault)
+					expected, added = printCharacter(expected, cluster, tcell.StyleDefault)
+					i += added
 				}
 			}
 		}
