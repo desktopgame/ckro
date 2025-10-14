@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/desktopgame/ckro/internal/text"
+	"github.com/desktopgame/ckro/internal/tui"
 	"github.com/desktopgame/ckro/internal/tui/base"
 	"github.com/gdamore/tcell/v2"
 	"github.com/mattn/go-runewidth"
@@ -62,7 +63,16 @@ func testScenario(t *testing.T, scenarioFile string) {
 	sc.Scan()
 	height, _ := strconv.Atoi(sc.Text())
 
-	tb := newPlainTextBox(width, height)
+	sc.Scan()
+	textEngine := sc.Text()
+
+	var tb *tui.TextBox
+	switch textEngine {
+	case "PlainText":
+		tb = newPlainTextBox(width, height)
+	case "StyledText":
+		tb = newStyledTextBox(width, height)
+	}
 	tb.ShowCursor = true
 
 	assert.True(t, sc.Scan())
@@ -118,6 +128,21 @@ func testScenario(t *testing.T, scenarioFile string) {
 			tb.MoveLineStart()
 		case "MOVE_LINE_END":
 			tb.MoveLineEnd()
+		case "BYTE_POS":
+			bPosStr := strings.Split(args, " ")
+			bPosRow, err := strconv.Atoi(bPosStr[0])
+			if err != nil {
+				assert.Error(t, err)
+				return
+			}
+			bPosCol, err := strconv.Atoi(bPosStr[1])
+			if err != nil {
+				assert.Error(t, err)
+				return
+			}
+			actualBytePos := tb.GetBytePosition()
+			assert.Equal(t, bPosRow, actualBytePos.StartPosition.Row)
+			assert.Equal(t, bPosCol, actualBytePos.StartPosition.Column)
 		}
 	}
 
