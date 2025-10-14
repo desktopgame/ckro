@@ -41,7 +41,7 @@ func printCharacter(a []tcell.SimCell, cluster string, s tcell.Style) []tcell.Si
 	return a
 }
 
-func testTB(t *testing.T, scenarioFile string, width, height int) {
+func testScenario(t *testing.T, scenarioFile string, width, height int) {
 	tb := newPlainTextBox(width, height)
 	tb.ShowCursor = true
 
@@ -184,7 +184,7 @@ func testTB(t *testing.T, scenarioFile string, width, height int) {
 	}
 }
 
-func TestTB001(t *testing.T) {
+func TestAllScenario(t *testing.T) {
 	entries, err := os.ReadDir("../../testdata/")
 	if err != nil {
 		assert.Error(t, err)
@@ -198,6 +198,6 @@ func TestTB001(t *testing.T) {
 			continue
 		}
 		file := filepath.Join("../../testdata/", entry.Name())
-		testTB(t, file, 20, 10)
+		testScenario(t, file, 20, 10)
 	}
 }
