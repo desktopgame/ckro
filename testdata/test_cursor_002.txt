@@ -1,0 +1,7 @@
+%%
+TYPE "Hello, world"
+MOVE_LEFT
+MOVE_LEFT
+%%
+Hello, wor<l>d
+%%
