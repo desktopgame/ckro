@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -43,10 +44,7 @@ func printCharacter(a []tcell.SimCell, cluster string, s tcell.Style) ([]tcell.S
 	return a, added
 }
 
-func testScenario(t *testing.T, scenarioFile string, width, height int) {
-	tb := newPlainTextBox(width, height)
-	tb.ShowCursor = true
-
+func testScenario(t *testing.T, scenarioFile string) {
 	file, err := os.Open(scenarioFile)
 	if err != nil {
 		assert.Error(t, err)
@@ -54,6 +52,18 @@ func testScenario(t *testing.T, scenarioFile string, width, height int) {
 	defer file.Close()
 
 	sc := bufio.NewScanner(file)
+
+	assert.True(t, sc.Scan())
+	assert.Equal(t, sc.Text(), "%%")
+
+	sc.Scan()
+	width, _ := strconv.Atoi(sc.Text())
+
+	sc.Scan()
+	height, _ := strconv.Atoi(sc.Text())
+
+	tb := newPlainTextBox(width, height)
+	tb.ShowCursor = true
 
 	assert.True(t, sc.Scan())
 	assert.Equal(t, sc.Text(), "%%")
@@ -204,6 +214,6 @@ func TestAllScenario(t *testing.T) {
 			continue
 		}
 		file := filepath.Join("../../testdata/", entry.Name())
-		testScenario(t, file, 20, 10)
+		testScenario(t, file)
 	}
 }

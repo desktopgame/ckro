@@ -1,4 +1,7 @@
 %%
+20
+10
+%%
 TYPE "Hello, world"
 %%
 Hello, world< >
