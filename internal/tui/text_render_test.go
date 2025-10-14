@@ -21,16 +21,6 @@ func printCharacter(a []tcell.SimCell, cluster string, s tcell.Style) []tcell.Si
 	runes := []rune(cluster)
 
 	if runewidth.RuneWidth(runes[0]) == 2 {
-		// a = append(a, tcell.SimCell{
-		// 	Bytes: []byte{byte(runes[0])},
-		// 	Runes: []rune{runes[0]},
-		// 	Style: s,
-		// })
-		// a = append(a, tcell.SimCell{
-		// 	Bytes: []byte(string(runes[1:])),
-		// 	Runes: runes[1:],
-		// 	Style: s,
-		// })
 		a = append(a, tcell.SimCell{
 			Bytes: []byte(cluster),
 			Runes: []rune(cluster),
