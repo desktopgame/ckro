@@ -110,6 +110,14 @@ func testScenario(t *testing.T, scenarioFile string) {
 			tb.MoveUp()
 		case "MOVE_DOWN":
 			tb.MoveDown()
+		case "MOVE_TEXT_START":
+			tb.MoveTextStart()
+		case "MOVE_TEXT_END":
+			tb.MoveTextEnd()
+		case "MOVE_LINE_START":
+			tb.MoveLineStart()
+		case "MOVE_LINE_END":
+			tb.MoveLineEnd()
 		}
 	}
 
