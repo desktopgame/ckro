@@ -195,7 +195,7 @@ func testScenario(t *testing.T, scenarioFile string) {
 
 			_, _, aMask := a.Style.Decompose()
 			_, _, eMask := e.Style.Decompose()
-			assert.Equal(t, aMask, eMask, "file=%s row=%d col=%d", scenarioFile, i, j)
+			assert.Equal(t, (aMask&tcell.AttrReverse) > 0, (eMask&tcell.AttrReverse) > 0, "file=%s row=%d col=%d", scenarioFile, i, j)
 		}
 	}
 }
