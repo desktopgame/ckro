@@ -1,0 +1,23 @@
+%%
+10
+10
+StyledText
+%%
+TYPELN ""
+TYPELN ""
+TYPELN ""
+TYPELN ""
+TYPELN ""
+BYTE_POS 5 0
+MOVE_LEFT
+BYTE_POS 4 0
+MOVE_RIGHT
+BYTE_POS 5 0
+%%
+
+
+
+
+
+< >
+%%

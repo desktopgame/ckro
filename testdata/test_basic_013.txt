@@ -1,0 +1,16 @@
+%%
+10
+10
+StyledText
+%%
+TYPELN "a"
+TYPELN "a"
+TYPE "a"
+MOVE_DOWN
+BYTE_POS 2 1
+%%
+a
+a
+a
+< >
+%%

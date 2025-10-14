@@ -1,0 +1,31 @@
+%%
+10
+10
+StyledText
+%%
+TYPELN "1234"
+TYPELN ""
+TYPELN ""
+TYPELN "```"
+TYPELN "123"
+TYPELN "```"
+TYPELN ""
+MOVE_TEXT_START
+MOVE_DOWN
+BYTE_POS 1 0
+MOVE_DOWN
+BYTE_POS 2 0
+MOVE_DOWN
+BYTE_POS 4 0
+MOVE_DOWN
+BYTE_POS 6 0
+%%
+1234
+
+
+*---*
+|123|
+*---*
+< >
+
+%%
