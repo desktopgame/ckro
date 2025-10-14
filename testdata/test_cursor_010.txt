@@ -1,0 +1,10 @@
+%%
+20
+10
+%%
+TYPE "あいうえお"
+REMOVE_CHAR
+MOVE_LEFT
+%%
+あいう<え>
+%%
