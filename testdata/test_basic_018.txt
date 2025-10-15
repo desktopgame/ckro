@@ -1,0 +1,12 @@
+%%
+10
+10
+StyledText
+%%
+TYPE "1234"
+BYTE_POS 0 4
+REMOVE_CHAR
+BYTE_POS 0 3
+%%
+123< >
+%%
