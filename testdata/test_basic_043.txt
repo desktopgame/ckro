@@ -1,0 +1,14 @@
+%%
+10
+10
+StyledText
+%%
+TYPE "*"
+TYPE "abcd"
+TYPE "*"
+BYTE_POS 0 6
+REMOVE_CHAR
+BYTE_POS 0 5
+%%
+abc< >
+%%

@@ -1,0 +1,18 @@
+%%
+10
+10
+StyledText
+%%
+TYPE "**"
+BYTE_POS 0 2
+TYPE "aa"
+BYTE_POS 0 4
+TYPE "*"
+TYPE "*"
+BYTE_POS 0 6
+REMOVE_CHAR
+REMOVE_CHAR
+BYTE_POS 0 0
+%%
+< >
+%%
