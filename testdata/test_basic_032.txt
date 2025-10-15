@@ -1,0 +1,14 @@
+%%
+10
+10
+StyledText
+%%
+MOVE_RIGHT
+MOVE_RIGHT
+TYPE "Hello"
+BYTE_POS 2 5
+%%
+
+
+Hello< >
+%%
