@@ -1,0 +1,12 @@
+%%
+20
+20
+StyledText
+%%
+TYPE "**aa** **bb**"
+TYPELN ""
+BYTE_POS 1 0
+%%
+aa bb
+< >
+%%

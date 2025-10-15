@@ -1,0 +1,15 @@
+%%
+10
+10
+StyledText
+%%
+TYPE "**BOLD**"
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+TYPELN ""
+%%
+
+<B>OLD
+%%

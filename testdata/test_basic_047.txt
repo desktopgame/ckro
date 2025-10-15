@@ -1,0 +1,14 @@
+%%
+10
+10
+StyledText
+%%
+TYPELN ""
+TYPELN "# "
+TYPE "B"
+BYTE_POS 2 1
+%%
+
+
+B< >
+%%
