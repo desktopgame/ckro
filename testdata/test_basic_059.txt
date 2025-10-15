@@ -1,0 +1,18 @@
+%%
+20
+20
+StyledText
+%%
+TYPELN "{{{"
+TYPELN "abc"
+TYPELN ""
+TYPE "}}}"
+MOVE_TEXT_START
+REMOVE_CHAR
+BYTE_POS 0 2
+%%
+{{< >
+abc
+
+}}}
+%%

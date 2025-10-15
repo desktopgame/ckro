@@ -1,0 +1,23 @@
+%%
+20
+20
+StyledText
+%%
+TYPELN "{{{"
+TYPELN "```"
+TYPELN "abc"
+TYPELN "```"
+TYPELN ""
+TYPE "}}}"
+MOVE_TEXT_END
+REMOVE_CHAR
+BYTE_POS 3 2
+%%
+[-]
+ *
+ |```
+ |abc
+ |``< >
+ |
+ *
+%%
