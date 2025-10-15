@@ -1,0 +1,31 @@
+%%
+10
+10
+StyledText
+%%
+TYPELN ""
+TYPE "#"
+TYPE " "
+TYPE "Heading"
+TYPELN ""
+TYPELN ""
+TYPE "#"
+TYPE " "
+TYPE "Heading2"
+BYTE_POS 3 10
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+BYTE_POS 3 2
+REMOVE_CHAR
+BYTE_POS 2 2
+%%
+
+Heading
+<H>eading2
+%%

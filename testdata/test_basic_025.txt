@@ -1,0 +1,14 @@
+%%
+20
+20
+StyledText
+%%
+TYPE "#"
+TYPE " "
+TYPE "H"
+BYTE_POS 0 3
+TYPE "e"
+BYTE_POS 0 4
+%%
+He< >
+%%

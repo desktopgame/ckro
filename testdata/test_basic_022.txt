@@ -1,0 +1,17 @@
+%%
+10
+10
+StyledText
+%%
+TYPELN ""
+TYPE "#"
+TYPE " "
+TYPE "H"
+BYTE_POS 1 3
+REMOVE_CHAR
+BYTE_POS 1 0
+REMOVE_CHAR
+BYTE_POS 0 0
+%%
+< >
+%%

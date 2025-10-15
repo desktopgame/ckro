@@ -1,0 +1,25 @@
+%%
+20
+20
+StyledText
+%%
+TYPE "##"
+TYPE " "
+TYPE "H"
+BYTE_POS 0 4
+TYPE "H"
+TYPE "H"
+BYTE_POS 0 6
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+BYTE_POS 0 3
+TYPELN ""
+BYTE_POS 1 3
+TYPELN ""
+BYTE_POS 2 3
+%%
+
+
+<H>HH
+%%

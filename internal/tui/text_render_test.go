@@ -247,12 +247,13 @@ func testScenario(t *testing.T, scenarioFile string) string {
 	actual, _, _ := screen.GetContents()
 	sbuf := strings.Builder{}
 	for i := 0; i < tb.Height; i++ {
+		lineBuf := strings.Builder{}
 		for j := 0; j < tb.Width; j++ {
 			a := actual[i*tb.Width+j]
 			e := expected[i*tb.Width+j]
 
 			if a.Bytes != nil {
-				sbuf.WriteString(string(a.Bytes))
+				lineBuf.WriteString(string(a.Bytes))
 			}
 
 			assert.True(t, bytes.Equal(a.Bytes, e.Bytes), "file=%s expected=%s actual=%s row=%d col=%d", scenarioFile, string(e.Bytes), string(a.Bytes), i, j)
@@ -261,6 +262,7 @@ func testScenario(t *testing.T, scenarioFile string) string {
 			_, _, eMask := e.Style.Decompose()
 			assert.Equal(t, (aMask&tcell.AttrReverse) > 0, (eMask&tcell.AttrReverse) > 0, "file=%s row=%d col=%d", scenarioFile, i, j)
 		}
+		sbuf.WriteString(strings.TrimRight(lineBuf.String(), " "))
 		sbuf.WriteString("\n")
 	}
 	return sbuf.String()
