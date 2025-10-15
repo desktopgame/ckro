@@ -1,0 +1,18 @@
+%%
+20
+20
+StyledText
+%%
+TYPE "abc   def"
+BYTE_POS 0 9
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+BYTE_POS 0 4
+TYPE "**aa**"
+BYTE_POS 0 10
+%%
+abc aa< > def
+%%

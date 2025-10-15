@@ -156,8 +156,8 @@ func testScenario(t *testing.T, scenarioFile string) string {
 				return ""
 			}
 			actualBytePos := tb.GetBytePosition()
-			assert.Equal(t, bPosRow, actualBytePos.StartPosition.Row)
-			assert.Equal(t, bPosCol, actualBytePos.StartPosition.Column)
+			assert.Equal(t, bPosRow, actualBytePos.StartPosition.Row, "file=%s", scenarioFile)
+			assert.Equal(t, bPosCol, actualBytePos.StartPosition.Column, "file=%s", scenarioFile)
 		case "VAR":
 			nameSt, nameEd := extractQuote(args, 0)
 			valueSt, valueEd := extractQuote(args, nameEd+1)

@@ -1,0 +1,19 @@
+%%
+20
+20
+StyledText
+%%
+TYPELN ""
+MOVE_LEFT
+BYTE_POS 0 0
+TYPE "**aa** "
+TYPE "a"
+TYPELN ""
+TYPE "b"
+TYPE " **bb**"
+BYTE_POS 1 8
+%%
+aa a
+b bb< >
+
+%%

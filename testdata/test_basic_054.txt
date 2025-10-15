@@ -1,0 +1,12 @@
+%%
+20
+20
+StyledText
+%%
+TYPE "abcd"
+BYTE_POS 0 4
+MOVE_LEFT
+REMOVE_CHAR
+%%
+ab<d>
+%%
