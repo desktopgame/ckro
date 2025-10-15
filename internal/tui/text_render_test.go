@@ -78,6 +78,7 @@ func testScenario(t *testing.T, scenarioFile string) string {
 	assert.True(t, sc.Scan())
 	assert.Equal(t, sc.Text(), "%%")
 
+	vars := map[string]string{}
 	for sc.Scan() {
 		line := sc.Text()
 		if line == "%%" {
@@ -143,6 +144,11 @@ func testScenario(t *testing.T, scenarioFile string) string {
 			actualBytePos := tb.GetBytePosition()
 			assert.Equal(t, bPosRow, actualBytePos.StartPosition.Row)
 			assert.Equal(t, bPosCol, actualBytePos.StartPosition.Column)
+		case "VAR":
+			spPos := strings.IndexByte(args, ' ')
+			name := args[:spPos]
+			value := args[spPos+1:]
+			vars[name] = value
 		}
 	}
 
@@ -153,6 +159,9 @@ func testScenario(t *testing.T, scenarioFile string) string {
 		line := sc.Text()
 		if line == "%%" {
 			break
+		}
+		for k, v := range vars {
+			line = strings.ReplaceAll(line, k, v)
 		}
 		if cursorRe.MatchString(line) {
 			leftMarker := strings.IndexByte(line, '<')

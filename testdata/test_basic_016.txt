@@ -23,13 +23,14 @@ MOVE_RIGHT
 BYTE_POS 4 3
 TYPELN ""
 BYTE_POS 5 0
+VAR ^ < >
 %%
 1234
 
 
 *---*
 |123|
-|< >  |
+|^  |
 *---*
 
 %%
