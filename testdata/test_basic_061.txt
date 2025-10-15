@@ -1,0 +1,23 @@
+%%
+20
+20
+StyledText
+%%
+TYPELN "{{{"
+TYPELN "```go"
+TYPELN "Hello, world!"
+TYPE "```"
+MOVE_DOWN
+TYPE "}}}"
+MOVE_TEXT_END
+MOVE_UP
+REMOVE_CHAR
+REMOVE_CHAR
+%%
+[-]
+ *
+ |``< >
+ |Hello, world!
+ |```
+ *
+%%
