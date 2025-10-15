@@ -25,7 +25,7 @@ TYPELN ""
 BYTE_POS 5 0
 TYPELN ""
 BYTE_POS 6 0
-VAR ^ < >
+VAR "^" "< >"
 %%
 1234
 

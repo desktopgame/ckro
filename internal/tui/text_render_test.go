@@ -45,6 +45,12 @@ func printCharacter(a []tcell.SimCell, cluster string, s tcell.Style) ([]tcell.S
 	return a, added
 }
 
+func extractQuote(s string, start int) (int, int) {
+	st := strings.IndexByte(s[start:], '"')
+	ed := strings.IndexByte(s[start+st+1:], '"')
+	return start + st + 1, start + st + ed + 1
+}
+
 func testScenario(t *testing.T, scenarioFile string) string {
 	file, err := os.Open(scenarioFile)
 	if err != nil {
@@ -145,9 +151,10 @@ func testScenario(t *testing.T, scenarioFile string) string {
 			assert.Equal(t, bPosRow, actualBytePos.StartPosition.Row)
 			assert.Equal(t, bPosCol, actualBytePos.StartPosition.Column)
 		case "VAR":
-			spPos := strings.IndexByte(args, ' ')
-			name := args[:spPos]
-			value := args[spPos+1:]
+			nameSt, nameEd := extractQuote(args, 0)
+			valueSt, valueEd := extractQuote(args, nameEd+1)
+			name := args[nameSt:nameEd]
+			value := args[valueSt:valueEd]
 			vars[name] = value
 		}
 	}
