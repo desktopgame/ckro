@@ -1,0 +1,12 @@
+%%
+12
+10
+PlainText
+%%
+TYPE "0123456789	"
+MOVE_LEFT
+REMOVE_CHAR
+REMOVE_CHAR
+%%
+01234567< >   
+%%
