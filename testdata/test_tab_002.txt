@@ -1,0 +1,18 @@
+%%
+20
+10
+PlainText
+%%
+TYPELN "	"
+TYPELN "a	"
+TYPELN "aa	"
+TYPELN "aaa	"
+TYPELN "aaaa	"
+%%
+    
+a   
+aa  
+aaa 
+aaaa    
+< >
+%%
