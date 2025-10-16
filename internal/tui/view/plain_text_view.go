@@ -174,18 +174,26 @@ func (p *PlainTextView) ConvertPos(ctx Context, textLayout *TextLayout, viewLoca
 			w := text.TabWidth - (x % text.TabWidth)
 			if x+w > width {
 				viewLine++
+				x = w
+			} else if x+w == width {
+				viewLine++
 				x = 0
+			} else {
+				x += w
 			}
-			x += w
 		} else if len(runes) > 0 {
 			mainRune := runes[0]
 			w := runewidth.RuneWidth(mainRune)
 
 			if x+w > width {
 				viewLine++
+				x = w
+			} else if x+w == width {
+				viewLine++
 				x = 0
+			} else {
+				x += w
 			}
-			x += w
 		}
 		clusterCount++
 	}
