@@ -1,0 +1,30 @@
+%%
+20
+20
+StyledText
+%%
+TYPELN "|h1|h2|h3|"
+TYPELN "|:--|:--:|--:|"
+TYPELN "|aaaaa|aaaaa|aaaaa|"
+TYPELN "|a|a|a|"
+MOVE_LEFT
+MOVE_UP
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+MOVE_LEFT
+REMOVE_CHAR
+%%
+|h1|h2|h3|
+|:--|:--:|--:|
+<a>aaaa|aaaaa|aaaaa|
+|a|a|a|
+%%

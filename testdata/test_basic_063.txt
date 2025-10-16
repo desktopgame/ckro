@@ -1,0 +1,18 @@
+%%
+20
+20
+StyledText
+%%
+TYPELN "|h1|h2|h3|"
+TYPELN "|:--|:--:|--:|"
+TYPELN "|aaaaa|aaaaa|aaaaa|"
+TYPELN "|a|a|a|"
+%%
+┌─────────────────┐
+│h1   │ h2  │   h3│
+│─────────────────│
+│aaaaa│aaaaa│aaaaa│
+│a    │  a  │    a│
+└─────────────────┘
+< >
+%%
