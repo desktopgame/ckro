@@ -1,0 +1,19 @@
+%%
+20
+20
+StyledText
+%%
+TYPELN "{{{"
+TYPELN "{{{"
+TYPELN "H"
+TYPELN "}}}"
+TYPE "}}}"
+MOVE_TEXT_END
+MOVE_LEFT
+REMOVE_CHAR
+%%
+{{{
+{{{<H>
+}}}
+}}}
+%%
