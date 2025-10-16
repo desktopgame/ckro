@@ -1,0 +1,21 @@
+%%
+30
+20
+StyledText
+%%
+TYPELN "{{{"
+TYPELN "```go"
+TYPELN "Hello, world!"
+TYPELN "```"
+TYPE "}}}"
+VAR "^" "< >"
+%%
+[-]
+ *
+ |*---*
+ ||go |
+ |*-------------*
+ ||Hello, world!^
+ |*-------------*
+ *
+%%

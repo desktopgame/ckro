@@ -1,0 +1,19 @@
+%%
+20
+20
+StyledText
+%%
+TYPELN "{{{"
+TYPELN "{{{"
+TYPELN "Hello, world!"
+TYPELN "}}}"
+TYPE "}}}"
+%%
+[-]
+ *
+ |[-]
+ | *
+ | |Hello, world!< >
+ | *
+ *
+%%
