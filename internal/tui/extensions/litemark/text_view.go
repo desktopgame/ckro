@@ -64,7 +64,7 @@ func (t *TextView) Measure(ctx view.Context, e model.Element, width int, height 
 	}
 	return &view.TextLayout{
 		Element:       e,
-		MinimumWidth:  totalWidth,
+		MinimumWidth:  totalWidth + 1, // include cursor space
 		MinimumHeight: 1,
 		Children:      children,
 	}
