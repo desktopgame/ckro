@@ -143,6 +143,8 @@ func testScenario(t *testing.T, scenarioFile string) string {
 			assert.Equal(t, args[0], byte('"'))
 			assert.Equal(t, args[len(args)-1], byte('"'))
 			assert.True(t, tb.FindNext(args[1:len(args)-1]))
+		case "SUBMIT":
+			assert.True(t, tb.Submit())
 		case "BYTE_POS":
 			bPosStr := strings.Split(args, " ")
 			bPosRow, err := strconv.Atoi(bPosStr[0])

@@ -1,0 +1,17 @@
+%%
+30
+20
+StyledText
+%%
+TYPELN "{{{"
+TYPELN "1"
+TYPE "}}}"
+MOVE_LEFT
+MOVE_LEFT
+SUBMIT
+%%
+[< >]
+ *
+ |1
+ *
+%%
