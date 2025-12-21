@@ -228,6 +228,7 @@ func (t *TreeTextPresenter) moveToSelectedItem(view View) {
 			view.MoveDown()
 		}
 		view.MoveLineStart()
+		view.CursorUpdate()
 	}
 }
 
