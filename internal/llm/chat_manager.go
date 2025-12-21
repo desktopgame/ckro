@@ -64,7 +64,9 @@ func (cm *ChatManager) background(ctx context.Context) error {
 	}
 
 	// initialize conversation
-	cm.inputList = nil
+	cm.inputList = []openai.ChatCompletionMessageParamUnion{
+		openai.SystemMessage(cm.systemPrompt),
+	}
 	cm.backgroundToken <- 0
 	return nil
 }
