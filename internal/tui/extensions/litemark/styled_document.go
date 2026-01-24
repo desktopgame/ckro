@@ -34,6 +34,12 @@ func (doc *StyledDocument) text2Element(block *Text) model.Element {
 		if _, ok := aInline.(*PlainText); ok {
 			spanIndex = 0
 		}
+		if _, ok := aInline.(*Link); ok {
+			spanIndex = 0
+		}
+		if _, ok := aInline.(*Image); ok {
+			spanIndex = 0
+		}
 
 		ranges = append(ranges,
 			model.Range{
@@ -65,6 +71,9 @@ func (doc *StyledDocument) text2Element(block *Text) model.Element {
 		case *Strike:
 			pad = 2
 		case *Link:
+			isUnderline = true
+			fg = optional.Some(tcell.ColorBlue)
+		case *Image:
 			isUnderline = true
 			fg = optional.Some(tcell.ColorBlue)
 		case *Code:
