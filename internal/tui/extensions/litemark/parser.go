@@ -660,49 +660,52 @@ func ParseInline(line string) []AbstractInline {
 					start = end
 					if start+1 < n && line[start+1] == '(' {
 						end = byteIndexOf(line, ')', start+2)
-						linkStart := start + 2
-						linkEnd := end
-						if bang {
-							inlines = append(inlines, &Image{
-								Inline: Inline{
-									Spans: []Span{
-										{
-											StartColumn: column,
-											EndColumn:   end + 1,
-										},
-										{
-											StartColumn: altStart,
-											EndColumn:   altEnd,
-										},
-										{
-											StartColumn: linkStart,
-											EndColumn:   linkEnd,
-										},
-									},
-								},
-							})
-						} else {
-							inlines = append(inlines, &Link{
-								Inline: Inline{
-									Spans: []Span{
-										{
-											StartColumn: column,
-											EndColumn:   end + 1,
-										},
-										{
-											StartColumn: altStart,
-											EndColumn:   altEnd,
-										},
-										{
-											StartColumn: linkStart,
-											EndColumn:   linkEnd,
+						// Only create Link/Image if closing parenthesis is found
+						if end != -1 {
+							linkStart := start + 2
+							linkEnd := end
+							if bang {
+								inlines = append(inlines, &Image{
+									Inline: Inline{
+										Spans: []Span{
+											{
+												StartColumn: column,
+												EndColumn:   end + 1,
+											},
+											{
+												StartColumn: altStart,
+												EndColumn:   altEnd,
+											},
+											{
+												StartColumn: linkStart,
+												EndColumn:   linkEnd,
+											},
 										},
 									},
-								},
-							})
+								})
+							} else {
+								inlines = append(inlines, &Link{
+									Inline: Inline{
+										Spans: []Span{
+											{
+												StartColumn: column,
+												EndColumn:   end + 1,
+											},
+											{
+												StartColumn: altStart,
+												EndColumn:   altEnd,
+											},
+											{
+												StartColumn: linkStart,
+												EndColumn:   linkEnd,
+											},
+										},
+									},
+								})
+							}
+							column = end + 1
+							continue
 						}
-						column = end + 1
-						continue
 					}
 				}
 			}
