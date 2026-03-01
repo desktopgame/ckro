@@ -13,7 +13,7 @@ ckroはGoで開発されたTUIマークダウンエディターで、Obsidianと
 ## ビルド・実行
 
 ```bash
-go build ./cmd/app        # ビルド
+go build ./cmd/ckro        # ビルド
 go test ./internal/tui     # テスト実行（シナリオベース、testdata/参照）
 ckro                       # エディター起動
 ckro -d ./project          # 指定ディレクトリで起動
@@ -23,8 +23,8 @@ ckro -d ./project          # 指定ディレクトリで起動
 
 ### モジュール境界
 
-- `cmd/app/` — アプリケーション固有の処理。`internal/` に依存する。
-- `internal/` — 使いまわしのきく処理。**`cmd/app/` に依存してはいけない。**
+- `cmd/ckro/` — アプリケーション固有の処理。`internal/` に依存する。
+- `internal/` — 使いまわしのきく処理。**`cmd/ckro/` に依存してはいけない。**
 
 ### MVCテキスト編集コア
 

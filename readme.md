@@ -4,7 +4,7 @@ ckroはObsidianにインスパイアされた、日記や記事を執筆する�
 
 ## How to install
 ````
-go install github.com/desktopgame/ckro/cmd/app@latest
+go install github.com/desktopgame/ckro/cmd/ckro@latest
 ````
 
 ## How to use

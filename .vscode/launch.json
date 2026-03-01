@@ -10,7 +10,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/app",
+            "program": "${workspaceFolder}/cmd/ckro",
             "console": "externalTerminal",
             "cwd": "${workspaceFolder}"
         }
