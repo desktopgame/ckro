@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./ckro.yaml)",
+      "Read(./debug.log)",
+      "Read(./test.txt)",
+      "Read(./test2.txt)",
+
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+
+      "WebFetch"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(git pull *)"
+    ],
+    "allow": [
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log -n *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
+    ]
+  },
+  "env": {
+    "EDITOR": "code --wait",
+    "VISUAL": "code --wait"
+  }
+}
